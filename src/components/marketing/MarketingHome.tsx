@@ -1,16 +1,13 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
-import { Badge } from '../ui/badge'
+import { Card, CardContent } from '../ui/card'
 import { MarketingNavigation } from './MarketingNavigation'
 import { 
   Heart, 
-  Shield, 
   Users, 
   TrendingUp, 
   Star, 
-  CheckCircle,
   ArrowRight,
   Target,
   Award,
@@ -21,7 +18,6 @@ import {
   School,
   Stethoscope,
   Building2,
-  AlertTriangle,
   Brain,
   PiggyBank
 } from 'lucide-react'
