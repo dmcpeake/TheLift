@@ -4,6 +4,7 @@ import { logger } from 'npm:hono/logger'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import * as kv from './kv_store.tsx'
 import adminRoutes from './admin.tsx'
+import authRoutes from './auth.tsx'
 
 const app = new Hono()
 
@@ -1239,7 +1240,72 @@ app.post('/server/admin/organizations', async (c) => {
   }
 })
 
+// Simple working test user creation
+app.post('/server/auth/setup-test-users', async (c) => {
+  try {
+    console.log('Setting up clean test users...')
+    
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    )
+
+    // Define simple working test users
+    const testUsers = [
+      { email: 'admin@test.com', password: 'test123', role: 'admin' },
+      { email: 'practitioner@test.com', password: 'test123', role: 'practitioner' }
+    ]
+
+    const results = []
+    
+    for (const user of testUsers) {
+      try {
+        // Delete existing user if exists
+        const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
+        const existing = existingUsers?.users?.find(u => u.email === user.email)
+        if (existing) {
+          await supabaseAdmin.auth.admin.deleteUser(existing.id)
+          console.log(`Deleted existing user: ${user.email}`)
+        }
+        
+        // Create fresh confirmed user
+        const { data, error } = await supabaseAdmin.auth.admin.createUser({
+          email: user.email,
+          password: user.password,
+          email_confirm: true,
+          user_metadata: { role: user.role }
+        })
+        
+        if (error) {
+          console.log(`Error creating ${user.email}:`, error.message)
+          results.push({ email: user.email, success: false, error: error.message })
+        } else {
+          console.log(`Successfully created user: ${user.email}`)
+          results.push({ email: user.email, success: true })
+        }
+      } catch (e) {
+        console.log(`Exception with ${user.email}:`, e)
+        results.push({ email: user.email, success: false, error: e.message })
+      }
+    }
+
+    return c.json({
+      success: true,
+      message: 'Clean test users created successfully',
+      credentials: testUsers,
+      results
+    })
+    
+  } catch (error) {
+    console.log('Setup users error:', error)
+    return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
 // Mount admin routes
 app.route('/server/admin', adminRoutes)
+
+// Mount auth routes
+app.route('/server/auth', authRoutes)
 
 Deno.serve(app.fetch)

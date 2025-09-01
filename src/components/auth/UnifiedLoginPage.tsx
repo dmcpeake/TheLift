@@ -437,6 +437,60 @@ export function UnifiedLoginPage() {
             </Card>
           </div>
 
+          <div className="mt-8 text-center">
+            <p className="text-sm text-gray-600 mb-4">Quick Test (Development Only):</p>
+            <div className="grid grid-cols-3 gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  // Skip login, go directly to admin dashboard
+                  setUser({ 
+                    id: 'test-admin-id', 
+                    email: 'admin@test.com',
+                    profile: { role: 'Account', name: 'Test Admin' }
+                  })
+                  navigate('/admin')
+                }}
+                className="text-xs"
+              >
+                Admin Demo
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  // Skip login, go directly to practitioner dashboard  
+                  setUser({
+                    id: 'test-prac-id',
+                    email: 'practitioner@test.com', 
+                    profile: { role: 'Practitioner', name: 'Test Practitioner' }
+                  })
+                  navigate('/dashboard')
+                }}
+                className="text-xs"
+              >
+                Practitioner Demo
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  // Skip login, go directly to child experience
+                  setUser({
+                    id: 'test-child-id',
+                    email: 'child@test.com',
+                    profile: { role: 'Child', name: 'Test Child' }
+                  })
+                  navigate('/child/home')
+                }}
+                className="text-xs"
+              >
+                Child Demo
+              </Button>
+            </div>
+          </div>
+
           {error && (
             <div className="mt-4">
               <Alert className="border-red-200 bg-red-50">
