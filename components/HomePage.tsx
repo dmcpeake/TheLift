@@ -1,6 +1,5 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { EnvCheck } from './debug/EnvCheck'
 
 export function HomePage() {
   return (
@@ -149,13 +148,6 @@ export function HomePage() {
           </div>
         </section>
       </main>
-
-      {/* Debug Info */}
-      <section className="py-8 bg-gray-100">
-        <div className="max-w-6xl mx-auto px-6">
-          <EnvCheck />
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="bg-gray-800 text-white py-8">
