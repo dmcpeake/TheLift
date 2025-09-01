@@ -39,9 +39,9 @@ serve(async (req) => {
       )
     }
 
-    // Initialize test children data
+    // Initialize all test users (admin, practitioners, children)
     if (pathname === '/auth/init-test-users' && req.method === 'POST') {
-      console.log('Initializing test children...')
+      console.log('Initializing all test users...')
       
       // First, add child auth columns if they don't exist
       try {
@@ -86,7 +86,106 @@ serve(async (req) => {
         org = newOrg
       }
       
-      // Create auth users and profiles first
+      const results = { admins: 0, practitioners: 0, children: 0, errors: [] }
+      
+      // Create admin users
+      const adminUsers = [
+        {
+          id: '10000000-0000-0000-0000-000000000001',
+          email: 'admin@example.com',
+          password: 'Admin123!',
+          name: 'Admin User',
+          role: 'Account'
+        }
+      ]
+      
+      for (const adminData of adminUsers) {
+        try {
+          const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+            user_id: adminData.id,
+            email: adminData.email,
+            password: adminData.password,
+            email_confirm: true,
+            user_metadata: { role: adminData.role, name: adminData.name }
+          })
+          
+          if (authError && !authError.message.includes('already exists')) {
+            throw authError
+          }
+          
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert({
+              id: adminData.id,
+              email: adminData.email,
+              name: adminData.name,
+              role: adminData.role,
+              org_id: org.id,
+              status: 'active'
+            }, { onConflict: 'id' })
+          
+          if (profileError) throw profileError
+          
+          results.admins++
+          console.log(`Created admin: ${adminData.email}`)
+        } catch (error) {
+          results.errors.push(`Admin ${adminData.email}: ${error.message}`)
+        }
+      }
+      
+      // Create practitioner users  
+      const practitionerUsers = [
+        {
+          id: '20000000-0000-0000-0000-000000000001',
+          email: 'practitioner@example.com', 
+          password: 'Practitioner123!',
+          name: 'Test Practitioner',
+          role: 'Practitioner'
+        },
+        {
+          id: '30000000-0000-0000-0000-000000000001',
+          email: 'manager@example.com',
+          password: 'Manager123!', 
+          name: 'Group Manager',
+          role: 'GroupContact'
+        }
+      ]
+      
+      for (const practitionerData of practitionerUsers) {
+        try {
+          const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+            user_id: practitionerData.id,
+            email: practitionerData.email,
+            password: practitionerData.password,
+            email_confirm: true,
+            user_metadata: { role: practitionerData.role, name: practitionerData.name }
+          })
+          
+          if (authError && !authError.message.includes('already exists')) {
+            throw authError
+          }
+          
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert({
+              id: practitionerData.id,
+              email: practitionerData.email,
+              name: practitionerData.name,
+              role: practitionerData.role,
+              org_id: org.id,
+              status: 'active'
+            }, { onConflict: 'id' })
+          
+          if (profileError) throw profileError
+          
+          results.practitioners++
+          console.log(`Created practitioner: ${practitionerData.email}`)
+        } catch (error) {
+          results.errors.push(`Practitioner ${practitionerData.email}: ${error.message}`)
+        }
+      }
+      
+      // Create child users
       const testChildrenData = [
         {
           id: '11111111-2222-3333-4444-555555555555',
@@ -106,75 +205,76 @@ serve(async (req) => {
         }
       ]
       
-      const children = []
-      
       for (const childData of testChildrenData) {
-        // Create auth user first
-        const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-          user_id: childData.id,
-          email: childData.email,
-          password: `temp-password-${childData.username}`,
-          email_confirm: true,
-          user_metadata: {
-            role: 'Child',
-            first_name: childData.first_name
-          }
-        })
-        
-        if (authError && !authError.message.includes('already exists')) {
-          console.error(`Failed to create auth user for ${childData.username}:`, authError)
-          continue
-        }
-        
-        // Create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: childData.id,
+        try {
+          // Create auth user first
+          const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+            user_id: childData.id,
             email: childData.email,
-            name: childData.first_name,
-            role: 'Child',
-            org_id: org.id,
-            status: 'active'
-          }, { onConflict: 'id' })
-        
-        if (profileError) {
-          console.error(`Failed to create profile for ${childData.username}:`, profileError)
-          continue
+            password: `Child123-${childData.username}`,
+            email_confirm: true,
+            user_metadata: {
+              role: 'Child',
+              first_name: childData.first_name
+            }
+          })
+          
+          if (authError && !authError.message.includes('already exists')) {
+            throw authError
+          }
+          
+          // Create profile
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert({
+              id: childData.id,
+              email: childData.email,
+              name: childData.first_name,
+              role: 'Child',
+              org_id: org.id,
+              status: 'active'
+            }, { onConflict: 'id' })
+          
+          if (profileError) throw profileError
+          
+          // Create child record
+          const { data: child, error: childError } = await supabase
+            .from('children')
+            .upsert({
+              id: childData.id,
+              first_name: childData.first_name,
+              age: childData.age,
+              username: childData.username,
+              pin: childData.pin,
+              consent_given: true,
+              active: true
+            }, { onConflict: 'id' })
+            .select()
+            .single()
+          
+          if (childError) throw childError
+          
+          results.children++
+          console.log(`Created child: ${childData.first_name} (${childData.username})`)
+        } catch (error) {
+          results.errors.push(`Child ${childData.username}: ${error.message}`)
         }
-        
-        // Create child record
-        const { data: child, error: childError } = await supabase
-          .from('children')
-          .upsert({
-            id: childData.id,
-            first_name: childData.first_name,
-            age: childData.age,
-            username: childData.username,
-            pin: childData.pin,
-            consent_given: true,
-            active: true
-          }, { onConflict: 'id' })
-          .select()
-          .single()
-        
-        if (childError) {
-          console.error(`Failed to create child record for ${childData.username}:`, childError)
-          continue
-        }
-        
-        children.push(child)
-        console.log(`Successfully created child: ${childData.first_name} (${childData.username})`)
       }
-      
-      console.log(`Successfully processed ${children.length} test children`)
       
       return Response.json(
         {
           success: true,
-          message: 'Test children initialized successfully',
-          children: children.length,
-          data: children
+          message: 'All test users initialized successfully',
+          results: results,
+          accounts: {
+            admin: { email: 'admin@example.com', password: 'Admin123!' },
+            practitioner: { email: 'practitioner@example.com', password: 'Practitioner123!' },
+            manager: { email: 'manager@example.com', password: 'Manager123!' },
+            children: [
+              { username: 'alice123', pin: '1234' },
+              { username: 'bobby456', pin: '5678' }
+            ]
+          }
         },
         { headers: corsHeaders }
       )
