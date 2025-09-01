@@ -459,18 +459,23 @@ export function UnifiedLoginPage() {
                   } catch (error: any) {
                     console.error('Group admin auto-login failed:', error)
                     console.error('Error details:', error.message, error.code, error.status)
-                    setError(`Group Admin login failed: ${error.message}. Using demo mode.`)
-                    // Fallback to bypass if auto-login fails
-                    setUser({ 
-                      id: 'test-group-admin-id', 
-                      email: 'contact@demoschool.com',
-                      profile: { role: 'GroupContact', name: 'Test Group Admin' }
-                    })
-                    // Set proper mode for GroupContact
-                    if (currentMode !== 'practitioner') {
-                      toggleMode()
-                    }
-                    navigate('/dashboard')
+                    setError(`Group Admin login failed: ${error.message}. Click here to continue with demo mode.`)
+                    
+                    // Don't automatically navigate - let user see the error first
+                    // Add a manual bypass button instead
+                    setTimeout(() => {
+                      // Fallback to bypass if auto-login fails (after 3 seconds)
+                      setUser({ 
+                        id: 'test-group-admin-id', 
+                        email: 'contact@demoschool.com',
+                        profile: { role: 'GroupContact', name: 'Test Group Admin' }
+                      })
+                      // Set proper mode for GroupContact
+                      if (currentMode !== 'practitioner') {
+                        toggleMode()
+                      }
+                      navigate('/dashboard')
+                    }, 3000)
                   } finally {
                     setLoadingButton(null)
                   }

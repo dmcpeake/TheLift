@@ -3,5 +3,11 @@
   "outputDirectory": "build",
   "installCommand": "npm install",
   "devCommand": "vite",
-  "framework": "vite"
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
 }
