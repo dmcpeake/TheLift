@@ -227,7 +227,7 @@ export function BulkImportChildren() {
         }
       }
     } catch (error) {
-      errors.push(`Authentication error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.error('Authentication error:', error)
     }
 
     setResults({ success, errors })

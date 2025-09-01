@@ -250,7 +250,7 @@ export function ChildProfile() {
           ]
         }
         setChild(demoChild)
-        // setError('Using demo data - server connection unavailable') // Removed for wireframe experience
+        // 
       }
     } catch (error) {
       console.error('Error fetching child profile:', error)

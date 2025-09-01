@@ -183,7 +183,6 @@ export function AddChild() {
       }
     } catch (error) {
       console.error('Error adding child:', error)
-      setError('Failed to connect to server')
     } finally {
       setLoading(false)
     }

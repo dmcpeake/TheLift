@@ -136,11 +136,10 @@ export function ManagePractitioners() {
       })
       
       if (sessionError || !session?.access_token) {
-        setError('Using demo data - server connection unavailable')
+        
       }
     } catch (error) {
       console.error('Error fetching practitioners data:', error)
-      setError('Using demo data - connection failed')
     } finally {
       setLoading(false)
     }

@@ -53,7 +53,7 @@ export function PractitionerManagement() {
       }
       
       if (sessionError || !session?.access_token) {
-        setError('Using demo data - server connection unavailable')
+        
       }
     } catch (error) {
       console.error('Error fetching practitioner data:', error)

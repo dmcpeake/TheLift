@@ -89,7 +89,7 @@ export function ArchivedChildren() {
             lastCheckIn: '2 weeks ago'
           }
         ])
-        setError('Using demo data - server connection unavailable')
+        
       }
     } catch (error) {
       console.error('Error fetching archived children:', error)
