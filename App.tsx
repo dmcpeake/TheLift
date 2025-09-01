@@ -73,11 +73,11 @@ function AppContent() {
           )
           setUser(userData)
           
-          // Only navigate if we're on a generic route (to avoid disrupting deep links)
+          // Only navigate if we're on login pages (to avoid disrupting homepage or deep links)
           const currentPath = window.location.pathname
-          const isGenericRoute = currentPath === '/' || currentPath === '/login' || currentPath === '/dashboard'
+          const isLoginRoute = currentPath === '/login' || currentPath === '/admin/login'
           
-          if (isGenericRoute && userData?.profile?.role) {
+          if (isLoginRoute && userData?.profile?.role) {
             const defaultMode = getDefaultModeForRole(userData.profile.role)
             setCurrentMode(defaultMode)
             navigate(getNavigationPathForRole(userData.profile.role))

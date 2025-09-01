@@ -1,6 +1,7 @@
 import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import { ProtectedRoute } from './ProtectedRoute'
+import { HomePage } from '../components/HomePage'
 import { UnifiedLoginPage } from '../components/auth/UnifiedLoginPage'
 import { AdminLoginPage } from '../components/auth/AdminLoginPage'
 import { AdminDashboard } from '../components/admin/AdminDashboard'
@@ -15,7 +16,7 @@ import { ChildOnboarding } from '../components/child/ChildOnboarding'
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<UnifiedLoginPage />} />
       <Route path="/admin/login" element={<AdminLoginPage />} />
       
