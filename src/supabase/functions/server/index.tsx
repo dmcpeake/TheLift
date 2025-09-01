@@ -707,14 +707,80 @@ app.get('/server/children/:id', async (c) => {
     }
 
     const childId = c.req.param('id')
-    const child = await kv.get(`child:${childId}`)
+    let child = await kv.get(`child:${childId}`)
     
+    // If no child found in KV store, return demo data for demo experience
     if (!child) {
-      return c.json({ error: 'Child not found' }, 404)
+      const childNames = {
+        'child-1': 'Emma Thompson',
+        'child-2': 'James Wilson', 
+        'child-3': 'Sophie Chen',
+        'child-4': 'Oliver Brown',
+        'child-5': 'Lily Davis',
+        'child-6': 'Max Taylor',
+        'child-7': 'Chloe Wilson',
+        'child-8': 'Ryan Clarke',
+        'child-9': 'Alice Johnson',
+        'child-10': 'Ben Williams',
+        'child-11': 'Grace Lee',
+        'child-12': 'Lucas Smith',
+        'child-13': 'Maya Patel',
+        'child-14': 'Jack Murphy',
+        'child-15': 'Zoe Garcia'
+      }
+      
+      const childName = childNames[childId] || 'Demo Child'
+      const statuses = ['fine', 'needs_attention', 'flagged']
+      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)]
+      
+      child = {
+        id: childId,
+        name: childName,
+        age: Math.floor(Math.random() * 5) + 6, // Age 6-10
+        status: randomStatus,
+        totalCheckIns: Math.floor(Math.random() * 20) + 5,
+        currentStreak: Math.floor(Math.random() * 7) + 1,
+        orgId: 'demo-school-001',
+        practitionerId: user.id,
+        createdAt: new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000).toISOString(), // Random date within 60 days
+        aboutMe: {
+          favourites: ['Reading', 'Art', 'Soccer', 'Music'],
+          notes: `${childName} is a wonderful student who enjoys learning and playing with friends.`
+        },
+        credentials: {
+          username: childName.toLowerCase().replace(' ', '') + Math.floor(Math.random() * 99),
+          pin: Math.floor(1000 + Math.random() * 9000).toString(),
+          mode: 'slip'
+        }
+      }
     }
 
-    // Get recent check-ins
-    const checkIns = await kv.getByPrefix(`checkin:${childId}:`)
+    // Get recent check-ins (try KV first, then generate demo data)
+    let checkIns = await kv.getByPrefix(`checkin:${childId}:`)
+    
+    if (checkIns.length === 0) {
+      // Generate demo check-ins
+      checkIns = []
+      for (let i = 0; i < 5; i++) {
+        checkIns.push({
+          id: `checkin-${childId}-${i + 1}`,
+          childId: childId,
+          createdAt: new Date(Date.now() - (i + 1) * 24 * 60 * 60 * 1000).toISOString(),
+          startingMood: Math.floor(Math.random() * 5) + 1,
+          wheel: {
+            happy: Math.floor(Math.random() * 5) + 1,
+            safe: Math.floor(Math.random() * 5) + 1,
+            supported: Math.floor(Math.random() * 5) + 1,
+            excited: Math.floor(Math.random() * 5) + 1,
+            confident: Math.floor(Math.random() * 5) + 1
+          },
+          wrapUpMood: Math.floor(Math.random() * 5) + 1,
+          stickerAwarded: ['star', 'heart', 'rainbow', 'flower', 'butterfly'][Math.floor(Math.random() * 5)],
+          status: ['fine', 'needs_attention', 'flagged'][Math.floor(Math.random() * 3)]
+        })
+      }
+    }
+    
     const sortedCheckIns = checkIns
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 10)
