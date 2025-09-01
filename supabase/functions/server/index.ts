@@ -43,6 +43,17 @@ serve(async (req) => {
     if (pathname === '/auth/init-test-users' && req.method === 'POST') {
       console.log('Initializing all test users...')
       
+      // Clear existing test users first
+      try {
+        await supabase.auth.admin.deleteUser('10000000-0000-0000-0000-000000000001')
+        await supabase.auth.admin.deleteUser('20000000-0000-0000-0000-000000000001') 
+        await supabase.auth.admin.deleteUser('30000000-0000-0000-0000-000000000001')
+        await supabase.auth.admin.deleteUser('11111111-2222-3333-4444-555555555555')
+        await supabase.auth.admin.deleteUser('22222222-3333-4444-5555-666666666666')
+      } catch (error) {
+        console.log('Cleanup completed')
+      }
+      
       // First, add child auth columns if they don't exist
       try {
         await supabase.rpc('exec_sql', {
@@ -93,7 +104,7 @@ serve(async (req) => {
         {
           id: '10000000-0000-0000-0000-000000000001',
           email: 'admin@example.com',
-          password: 'Admin123!',
+          password: 'password123',
           name: 'Admin User',
           role: 'Account'
         }
@@ -138,14 +149,14 @@ serve(async (req) => {
         {
           id: '20000000-0000-0000-0000-000000000001',
           email: 'practitioner@example.com', 
-          password: 'Practitioner123!',
+          password: 'password123',
           name: 'Test Practitioner',
           role: 'Practitioner'
         },
         {
           id: '30000000-0000-0000-0000-000000000001',
           email: 'manager@example.com',
-          password: 'Manager123!', 
+          password: 'password123', 
           name: 'Group Manager',
           role: 'GroupContact'
         }
@@ -267,9 +278,9 @@ serve(async (req) => {
           message: 'All test users initialized successfully',
           results: results,
           accounts: {
-            admin: { email: 'admin@example.com', password: 'Admin123!' },
-            practitioner: { email: 'practitioner@example.com', password: 'Practitioner123!' },
-            manager: { email: 'manager@example.com', password: 'Manager123!' },
+            admin: { email: 'admin@example.com', password: 'password123' },
+            practitioner: { email: 'practitioner@example.com', password: 'password123' },
+            manager: { email: 'manager@example.com', password: 'password123' },
             children: [
               { username: 'alice123', pin: '1234' },
               { username: 'bobby456', pin: '5678' }
