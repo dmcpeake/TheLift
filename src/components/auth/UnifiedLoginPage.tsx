@@ -437,17 +437,6 @@ export function UnifiedLoginPage() {
             </Card>
           </div>
 
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-600 mb-4">Test credentials:</p>
-            <div className="text-xs text-gray-500 space-y-2 bg-gray-50 p-3 rounded">
-              <div><strong>To create test users:</strong></div>
-              <div className="pl-2">1. Go to <a href="https://supabase.com/dashboard/project/jxdkwfhsicynyvhkutjm/auth/users" target="_blank" className="text-blue-600 underline">Supabase Dashboard</a></div>
-              <div className="pl-2">2. Click "Add User" → Create with email/password</div>
-              <div className="pl-2">3. Use any email/password you want</div>
-              <div className="pl-2">4. Return here and login with those credentials</div>
-              <div className="text-amber-600 text-xs mt-2">Note: No test users exist yet - create them first</div>
-            </div>
-          </div>
 
           {error && (
             <div className="mt-4">
