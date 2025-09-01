@@ -69,6 +69,70 @@ app.get('/server/debug/child-data', async (c) => {
   }
 })
 
+// Create fresh test users
+app.post('/server/auth/create-fresh-users', async (c) => {
+  try {
+    console.log('=== CREATING FRESH TEST USERS ===')
+    
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    )
+
+    // Delete existing users first
+    try {
+      const { data: users } = await supabaseAdmin.auth.admin.listUsers()
+      for (const user of users?.users || []) {
+        if (['testadmin@demo.com', 'testprac@demo.com'].includes(user.email)) {
+          await supabaseAdmin.auth.admin.deleteUser(user.id)
+          console.log(`Deleted existing user: ${user.email}`)
+        }
+      }
+    } catch (e) {
+      console.log('Error cleaning users:', e)
+    }
+
+    // Create fresh users
+    const testUsers = [
+      { email: 'testadmin@demo.com', password: 'demo123!', name: 'Test Admin' },
+      { email: 'testprac@demo.com', password: 'demo123!', name: 'Test Practitioner' }
+    ]
+
+    const results = []
+    for (const userData of testUsers) {
+      try {
+        const { data, error } = await supabaseAdmin.auth.admin.createUser({
+          email: userData.email,
+          password: userData.password,
+          user_metadata: { name: userData.name },
+          email_confirm: true
+        })
+        
+        if (error) {
+          console.log(`Error creating ${userData.email}:`, error.message)
+          results.push({ email: userData.email, success: false, error: error.message })
+        } else {
+          console.log(`Created user: ${userData.email}`)
+          results.push({ email: userData.email, success: true, id: data.user.id })
+        }
+      } catch (e) {
+        console.log(`Exception creating ${userData.email}:`, e)
+        results.push({ email: userData.email, success: false, error: e.message })
+      }
+    }
+
+    return c.json({ 
+      success: true, 
+      results,
+      credentials: testUsers.map(u => ({ email: u.email, password: u.password }))
+    })
+    
+  } catch (error) {
+    console.log('Create users error:', error)
+    return c.json({ error: error.message }, 500)
+  }
+})
+
 // Initialize test users
 app.post('/server/auth/init-test-users', async (c) => {
   try {
