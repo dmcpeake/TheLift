@@ -308,7 +308,7 @@ export function UnifiedLoginPage() {
         
         const { data, error } = await supabase.auth.signInWithPassword({
           email: testEmail,
-          password: 'TestLift2024!',
+          password: 'quicktest123',
         })
 
         if (error) throw error
@@ -438,38 +438,11 @@ export function UnifiedLoginPage() {
           </div>
 
           <div className="mt-8 text-center">
-            <p className="text-sm text-gray-600 mb-4">Quick test logins:</p>
-            <div className="grid grid-cols-3 gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => quickLogin('admin@thelift.com')}
-                disabled={loadingButton !== null}
-                className="text-xs"
-              >
-                {loadingButton === 'admin@thelift.com' ? 'Signing in...' : 'Group Admin'}
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => quickLogin('practitioner@demoschool.com')}
-                disabled={loadingButton !== null}
-                className="text-xs"
-              >
-                {loadingButton === 'practitioner@demoschool.com' ? 'Signing in...' : 'Practitioner'}
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                  console.log('Child button clicked!')
-                  quickLogin('testchild', true)
-                }}
-                disabled={loadingButton !== null}
-                className="text-xs"
-              >
-                {loadingButton === 'child' ? 'Signing in...' : 'Child'}
-              </Button>
+            <p className="text-sm text-gray-600 mb-4">Test credentials:</p>
+            <div className="text-xs text-gray-500 space-y-2 bg-gray-50 p-3 rounded">
+              <div><strong>Admin:</strong> admin@thelift.com / TestLift2024!</div>
+              <div><strong>Practitioner:</strong> practitioner@demoschool.com / TestLift2024!</div>
+              <div className="text-orange-600 text-xs mt-2">Note: Quick login temporarily disabled - enter credentials manually above</div>
             </div>
           </div>
 
