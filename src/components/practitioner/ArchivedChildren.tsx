@@ -49,7 +49,7 @@ export function ArchivedChildren() {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
       
       if (session?.access_token) {
-        const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/children/archived`, {
+        const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/children/archived`, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
@@ -126,7 +126,7 @@ export function ArchivedChildren() {
       if (session?.access_token) {
         // Restore each child individually
         const restorePromises = selectedChildren.map(async (childId) => {
-          const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/children/restore/${childId}`, {
+          const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/children/restore/${childId}`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${session.access_token}`,
@@ -168,7 +168,7 @@ export function ArchivedChildren() {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
       
       if (session?.access_token) {
-        const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/children/restore/${childId}`, {
+        const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/children/restore/${childId}`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${session.access_token}`,

@@ -48,7 +48,7 @@ export function ChildHome() {
       }
 
       // Check if child has completed today's wellbeing check
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/wellbeing/${user.id}`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/wellbeing/${user.id}`, {
         headers: {
           'Authorization': `Bearer ${publicAnonKey}`,
           'Content-Type': 'application/json',

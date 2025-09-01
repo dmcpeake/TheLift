@@ -103,7 +103,7 @@ export function ChildProfile() {
         return
       }
 
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/children/${id}`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/children/${id}`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',

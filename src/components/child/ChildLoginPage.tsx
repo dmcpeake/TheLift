@@ -30,7 +30,7 @@ export function ChildLoginPage() {
       console.log('Attempting child login with:', { username, pin })
       
       // Use child authentication endpoint
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/auth/child-login`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/auth/child-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

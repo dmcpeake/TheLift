@@ -84,7 +84,7 @@ export function EditChild() {
         return
       }
 
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/children/${id}`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/children/${id}`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
@@ -181,7 +181,7 @@ export function EditChild() {
         return
       }
 
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/children/generate-credentials`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/children/generate-credentials`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -274,7 +274,7 @@ export function EditChild() {
         credentials: credentials
       }
 
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/children/${id}`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/children/${id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,

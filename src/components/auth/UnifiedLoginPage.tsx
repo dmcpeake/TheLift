@@ -51,7 +51,7 @@ export function UnifiedLoginPage() {
       if (data.session?.access_token) {
         // Fetch user profile from server
         try {
-          const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/auth/profile`, {
+          const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/auth/profile`, {
             headers: {
               'Authorization': `Bearer ${data.session.access_token}`,
               'Content-Type': 'application/json',
@@ -173,7 +173,7 @@ export function UnifiedLoginPage() {
       console.log('Attempting child login with:', { username, pin: pinString })
       
       // Use child authentication endpoint with proper auth header
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/auth/child-login`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/auth/child-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -245,7 +245,7 @@ export function UnifiedLoginPage() {
       
       try {
         // Initialize test users first
-        const initResponse = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/auth/init-test-users`, {
+        const initResponse = await fetch(`https://${projectId}.supabase.co/functions/v1/server/auth/init-test-users`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -262,7 +262,7 @@ export function UnifiedLoginPage() {
         
         // Perform child login
         setLoading(true)
-        const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/auth/child-login`, {
+        const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/auth/child-login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -316,7 +316,7 @@ export function UnifiedLoginPage() {
         if (data.session?.access_token) {
           // Fetch user profile from server
           try {
-            const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/auth/profile`, {
+            const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/auth/profile`, {
               headers: {
                 'Authorization': `Bearer ${data.session.access_token}`,
                 'Content-Type': 'application/json',

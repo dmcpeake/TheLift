@@ -204,7 +204,7 @@ export function ClientDetails() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.access_token) return
 
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/admin/clients/${id}/email-history`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/admin/clients/${id}/email-history`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
@@ -230,7 +230,7 @@ export function ClientDetails() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.access_token) return
 
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/admin/clients/${id}/email-history`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/admin/clients/${id}/email-history`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',

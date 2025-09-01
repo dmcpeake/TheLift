@@ -184,7 +184,7 @@ export function WellbeingWheel() {
         console.log('No user session found, using public anon key')
       }
       
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/wellbeing`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/wellbeing`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,

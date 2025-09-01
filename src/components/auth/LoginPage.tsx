@@ -37,7 +37,7 @@ export function LoginPage() {
       if (data.session?.access_token) {
         // Fetch user profile from server
         try {
-          const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/auth/profile`, {
+          const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/auth/profile`, {
             headers: {
               'Authorization': `Bearer ${data.session.access_token}`,
               'Content-Type': 'application/json',

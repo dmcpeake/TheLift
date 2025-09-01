@@ -40,7 +40,7 @@ app.get('/', (c) => {
 })
 
 // Health check route
-app.get('/make-server-a1855b25/health', async (c) => {
+app.get('/server/health', async (c) => {
   return c.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
@@ -49,7 +49,7 @@ app.get('/make-server-a1855b25/health', async (c) => {
 })
 
 // Debug endpoint to check KV store data
-app.get('/make-server-a1855b25/debug/child-data', async (c) => {
+app.get('/server/debug/child-data', async (c) => {
   try {
     const credentials = await kv.get('childCredentials:testchild')
     const child = await kv.get('child:demo-school-001:test-child-1')
@@ -70,7 +70,7 @@ app.get('/make-server-a1855b25/debug/child-data', async (c) => {
 })
 
 // Initialize test users
-app.post('/make-server-a1855b25/auth/init-test-users', async (c) => {
+app.post('/server/auth/init-test-users', async (c) => {
   try {
     console.log('=== INIT TEST USERS ROUTE CALLED ===')
     
@@ -239,7 +239,7 @@ app.post('/make-server-a1855b25/auth/init-test-users', async (c) => {
 })
 
 // Child authentication endpoint
-app.post('/make-server-a1855b25/auth/child-login', async (c) => {
+app.post('/server/auth/child-login', async (c) => {
   try {
     console.log('=== CHILD LOGIN ATTEMPT ===')
     const { username, pin } = await c.req.json()
@@ -311,7 +311,7 @@ app.post('/make-server-a1855b25/auth/child-login', async (c) => {
 })
 
 // Get user profile
-app.get('/make-server-a1855b25/auth/profile', async (c) => {
+app.get('/server/auth/profile', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
     
@@ -343,7 +343,7 @@ app.get('/make-server-a1855b25/auth/profile', async (c) => {
 })
 
 // Get dashboard data
-app.get('/make-server-a1855b25/dashboard', async (c) => {
+app.get('/server/dashboard', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
     const user = await getUserFromToken(accessToken)
@@ -448,7 +448,7 @@ app.get('/make-server-a1855b25/dashboard', async (c) => {
 })
 
 // Get children list
-app.get('/make-server-a1855b25/children', async (c) => {
+app.get('/server/children', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
     const user = await getUserFromToken(accessToken)
@@ -517,7 +517,7 @@ const isUsernameUnique = async (username: string): Promise<boolean> => {
 }
 
 // Add child
-app.post('/make-server-a1855b25/children', async (c) => {
+app.post('/server/children', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
     const user = await getUserFromToken(accessToken)
@@ -590,7 +590,7 @@ app.post('/make-server-a1855b25/children', async (c) => {
 })
 
 // Get archived children - MUST be before /children/:id route
-app.get('/make-server-a1855b25/children/archived', async (c) => {
+app.get('/server/children/archived', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
     const user = await getUserFromToken(accessToken)
@@ -632,7 +632,7 @@ app.get('/make-server-a1855b25/children/archived', async (c) => {
 })
 
 // Get child details
-app.get('/make-server-a1855b25/children/:id', async (c) => {
+app.get('/server/children/:id', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
     const user = await getUserFromToken(accessToken)
@@ -667,7 +667,7 @@ app.get('/make-server-a1855b25/children/:id', async (c) => {
 })
 
 // Update child details
-app.put('/make-server-a1855b25/children/:id', async (c) => {
+app.put('/server/children/:id', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
     const user = await getUserFromToken(accessToken)
@@ -738,7 +738,7 @@ app.put('/make-server-a1855b25/children/:id', async (c) => {
 })
 
 // Bulk archive children - MUST be before /children/:id route
-app.post('/make-server-a1855b25/children/bulk-archive', async (c) => {
+app.post('/server/children/bulk-archive', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
     const user = await getUserFromToken(accessToken)
@@ -789,7 +789,7 @@ app.post('/make-server-a1855b25/children/bulk-archive', async (c) => {
 })
 
 // Bulk reassign children - MUST be before /children/:id route
-app.post('/make-server-a1855b25/children/bulk-reassign', async (c) => {
+app.post('/server/children/bulk-reassign', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
     const user = await getUserFromToken(accessToken)
@@ -839,7 +839,7 @@ app.post('/make-server-a1855b25/children/bulk-reassign', async (c) => {
 })
 
 // Generate credentials endpoint - MUST be before /children/:id route
-app.post('/make-server-a1855b25/children/generate-credentials', async (c) => {
+app.post('/server/children/generate-credentials', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
     const user = await getUserFromToken(accessToken)
@@ -860,7 +860,7 @@ app.post('/make-server-a1855b25/children/generate-credentials', async (c) => {
 })
 
 // Restore archived child - MUST be before /children/:id route
-app.post('/make-server-a1855b25/children/restore/:id', async (c) => {
+app.post('/server/children/restore/:id', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
     const user = await getUserFromToken(accessToken)
@@ -905,7 +905,7 @@ app.post('/make-server-a1855b25/children/restore/:id', async (c) => {
 })
 
 // Save wellbeing wheel data
-app.post('/make-server-a1855b25/wellbeing', async (c) => {
+app.post('/server/wellbeing', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
     const user = await getUserFromToken(accessToken)
@@ -1001,7 +1001,7 @@ app.post('/make-server-a1855b25/wellbeing', async (c) => {
 })
 
 // Create check-in (legacy - kept for backwards compatibility)
-app.post('/make-server-a1855b25/checkins', async (c) => {
+app.post('/server/checkins', async (c) => {
   try {
     const { childId, wheel, garden, wrapUpMood } = await c.req.json()
     
@@ -1054,7 +1054,7 @@ app.post('/make-server-a1855b25/checkins', async (c) => {
 })
 
 // Get wellbeing data for a child
-app.get('/make-server-a1855b25/wellbeing/:childId', async (c) => {
+app.get('/server/wellbeing/:childId', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
     const user = await getUserFromToken(accessToken)
@@ -1078,7 +1078,7 @@ app.get('/make-server-a1855b25/wellbeing/:childId', async (c) => {
 })
 
 // Get check-ins for a child (legacy - kept for backwards compatibility)
-app.get('/make-server-a1855b25/checkins/:childId', async (c) => {
+app.get('/server/checkins/:childId', async (c) => {
   try {
     const childId = c.req.param('childId')
     const checkIns = await kv.getByPrefix(`checkin:${childId}:`)
@@ -1095,7 +1095,7 @@ app.get('/make-server-a1855b25/checkins/:childId', async (c) => {
 })
 
 // Admin routes
-app.get('/make-server-a1855b25/admin/stats', async (c) => {
+app.get('/server/admin/stats', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
     const user = await getUserFromToken(accessToken)
@@ -1138,7 +1138,7 @@ app.get('/make-server-a1855b25/admin/stats', async (c) => {
 
 
 // Create organization
-app.post('/make-server-a1855b25/admin/organizations', async (c) => {
+app.post('/server/admin/organizations', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1]
     const user = await getUserFromToken(accessToken)
@@ -1176,6 +1176,6 @@ app.post('/make-server-a1855b25/admin/organizations', async (c) => {
 })
 
 // Mount admin routes
-app.route('/make-server-a1855b25/admin', adminRoutes)
+app.route('/server/admin', adminRoutes)
 
 Deno.serve(app.fetch)

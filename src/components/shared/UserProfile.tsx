@@ -70,7 +70,7 @@ export function UserProfile() {
     try {
       // Update name if changed
       if (formData.name !== user?.profile?.name) {
-        const response = await fetch(`https://thelift.supabase.co/functions/v1/make-server-a1855b25/auth/update-profile`, {
+        const response = await fetch(`https://thelift.supabase.co/functions/v1/server/auth/update-profile`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${await supabase.auth.getSession().then(s => s.data.session?.access_token)}`,

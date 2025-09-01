@@ -62,7 +62,7 @@ export function CreateClient() {
         return
       }
 
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/admin/clients`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/admin/clients`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,

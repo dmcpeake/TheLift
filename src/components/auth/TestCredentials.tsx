@@ -68,7 +68,7 @@ export function TestCredentials() {
 
     try {
       console.log('Testing server health...')
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/health`, {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/health`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${publicAnonKey}`,
@@ -102,7 +102,7 @@ export function TestCredentials() {
 
     try {
       console.log('Initializing test users...')
-      const url = `https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/auth/init-test-users`
+      const url = `https://${projectId}.supabase.co/functions/v1/server/auth/init-test-users`
       console.log('Making request to:', url)
       
       const response = await fetch(url, {
@@ -377,7 +377,7 @@ export function TestCredentials() {
             <div className="text-sm text-gray-700">
               <p className="font-medium mb-1">Debug Information:</p>
               <p>Project ID: <code className="bg-white px-1 rounded">{projectId}</code></p>
-              <p>Server URL: <code className="bg-white px-1 rounded">{`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25`}</code></p>
+              <p>Server URL: <code className="bg-white px-1 rounded">{`https://${projectId}.supabase.co/functions/v1/server`}</code></p>
             </div>
           </div>
         </CardContent>

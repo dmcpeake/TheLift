@@ -526,7 +526,7 @@ export function PractitionerDashboard() {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
       
       if (session?.access_token) {
-        const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/children/bulk-archive`, {
+        const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/children/bulk-archive`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
@@ -572,7 +572,7 @@ export function PractitionerDashboard() {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
       
       if (session?.access_token) {
-        const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/children/bulk-reassign`, {
+        const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/children/bulk-reassign`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${session.access_token}`,

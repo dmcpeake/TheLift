@@ -3,7 +3,7 @@ import { User } from './types'
 
 export const fetchUserProfile = async (accessToken: string, userId: string, userEmail: string): Promise<User> => {
   try {
-    const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/auth/profile`, {
+    const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/auth/profile`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',

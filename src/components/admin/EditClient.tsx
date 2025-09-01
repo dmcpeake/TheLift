@@ -73,7 +73,7 @@ export function EditClient() {
         }
 
         // Handle email change via API
-        const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/admin/clients/${id}/email`, {
+        const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/admin/clients/${id}/email`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
