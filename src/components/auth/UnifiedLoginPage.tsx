@@ -447,10 +447,10 @@ export function UnifiedLoginPage() {
                 onClick={async () => {
                   setLoadingButton('groupadmin')
                   try {
-                    // Auto-login to test group admin account
+                    // Auto-login to test group admin account (using existing manager user)
                     const { data, error } = await supabase.auth.signInWithPassword({
-                      email: 'contact@demoschool.com',
-                      password: 'TestLift2024!'
+                      email: 'manager@example.com',
+                      password: 'password123'
                     })
                     
                     if (error) throw error
@@ -467,7 +467,7 @@ export function UnifiedLoginPage() {
                       // Fallback to bypass if auto-login fails (after 3 seconds)
                       setUser({ 
                         id: 'test-group-admin-id', 
-                        email: 'contact@demoschool.com',
+                        email: 'manager@example.com',
                         profile: { role: 'GroupContact', name: 'Test Group Admin' }
                       })
                       // Set proper mode for GroupContact
@@ -491,10 +491,10 @@ export function UnifiedLoginPage() {
                 onClick={async () => {
                   setLoadingButton('practitioner')
                   try {
-                    // Auto-login to test practitioner account
+                    // Auto-login to test practitioner account (using existing practitioner user)
                     const { data, error } = await supabase.auth.signInWithPassword({
-                      email: 'practitioner@demoschool.com',
-                      password: 'TestLift2024!'
+                      email: 'practitioner@example.com',
+                      password: 'password123'
                     })
                     
                     if (error) throw error
@@ -507,7 +507,7 @@ export function UnifiedLoginPage() {
                     // Fallback to bypass if auto-login fails
                     setUser({
                       id: 'test-prac-id',
-                      email: 'practitioner@demoschool.com', 
+                      email: 'practitioner@example.com', 
                       profile: { role: 'Practitioner', name: 'Test Practitioner' }
                     })
                     // Practitioners should use practitioner mode

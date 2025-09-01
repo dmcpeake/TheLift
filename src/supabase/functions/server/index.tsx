@@ -134,10 +134,10 @@ app.post('/server/auth/create-fresh-users', async (c) => {
   }
 })
 
-// Simple test user setup
-app.post('/server/setup-users', async (c) => {
+// Public test user setup endpoint (no auth required for setup)
+app.post('/server/create-demo-users', async (c) => {
   try {
-    console.log('=== SETTING UP SIMPLE TEST USERS ===')
+    console.log('=== CREATING DEMO USERS ===')
     
     const users = [
       { email: 'contact@demoschool.com', password: 'TestLift2024!', role: 'GroupContact', name: 'Sarah Thompson' },
@@ -145,15 +145,29 @@ app.post('/server/setup-users', async (c) => {
       { email: 'testchild@child.local', password: '1234', role: 'Child', name: 'Emma Davis' }
     ]
 
+    const results = []
+
     for (const userData of users) {
       try {
-        // Delete existing user first
-        const { data: existingUsers } = await supabase.auth.admin.listUsers()
+        console.log(`Processing ${userData.email}...`)
+        
+        // List existing users to check if user already exists
+        const { data: existingUsers, error: listError } = await supabase.auth.admin.listUsers()
+        
+        if (listError) {
+          console.error('Error listing users:', listError)
+          results.push({ email: userData.email, status: 'error', error: listError.message })
+          continue
+        }
+        
         const existing = existingUsers.users.find(u => u.email === userData.email)
         
         if (existing) {
-          console.log(`Deleting existing user: ${userData.email}`)
-          await supabase.auth.admin.deleteUser(existing.id)
+          console.log(`User ${userData.email} already exists, deleting first...`)
+          const { error: deleteError } = await supabase.auth.admin.deleteUser(existing.id)
+          if (deleteError) {
+            console.error(`Failed to delete existing user ${userData.email}:`, deleteError)
+          }
         }
 
         // Create new user
@@ -170,15 +184,22 @@ app.post('/server/setup-users', async (c) => {
 
         if (error) {
           console.error(`Failed to create ${userData.email}:`, error.message)
+          results.push({ email: userData.email, status: 'error', error: error.message })
         } else {
           console.log(`Successfully created ${userData.email}`)
+          results.push({ email: userData.email, status: 'success', id: data.user?.id })
         }
       } catch (e) {
-        console.error(`Error with ${userData.email}:`, e)
+        console.error(`Exception with ${userData.email}:`, e)
+        results.push({ email: userData.email, status: 'error', error: e.message })
       }
     }
 
-    return c.json({ success: true, message: 'Users setup complete' })
+    return c.json({ 
+      success: true, 
+      message: 'Demo users creation complete',
+      results: results
+    })
   } catch (error) {
     console.error('Setup failed:', error)
     return c.json({ error: error.message }, 500)
