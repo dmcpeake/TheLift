@@ -46,29 +46,6 @@ export function AdminLoginPage() {
     }
   }
 
-  const quickAdminLogin = async () => {
-    setLoading(true)
-    setError('')
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: 'admin@thelift.com',
-        password: 'TestLift2024!',
-      })
-
-      if (error) {
-        setError(error.message)
-      } else if (data.user) {
-        console.log('Quick admin login successful')
-        navigate('/admin')
-      }
-    } catch (err) {
-      setError('An unexpected error occurred')
-      console.error('Quick login error:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -130,7 +107,15 @@ export function AdminLoginPage() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={quickAdminLogin}
+                onClick={() => {
+                  // Skip login, go directly to Lift Admin dashboard
+                  setUser({ 
+                    id: 'test-lift-admin-id', 
+                    email: 'admin@thelift.com',
+                    profile: { role: 'Account', name: 'Test Lift Admin' }
+                  })
+                  navigate('/admin')
+                }}
                 className="w-full text-xs"
                 disabled={loading}
               >
