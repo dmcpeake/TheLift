@@ -308,7 +308,7 @@ export function UnifiedLoginPage() {
         
         const { data, error } = await supabase.auth.signInWithPassword({
           email: testEmail,
-          password: 'TestLift2024!',
+          password: 'password123',
         })
 
         if (error) throw error
@@ -443,20 +443,20 @@ export function UnifiedLoginPage() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={() => quickLogin('contact@demoschool.com')}
+                onClick={() => quickLogin('admin@example.com')}
                 disabled={loadingButton !== null}
                 className="text-xs"
               >
-                {loadingButton === 'contact@demoschool.com' ? 'Signing in...' : 'Group Admin'}
+                {loadingButton === 'admin@example.com' ? 'Signing in...' : 'Group Admin'}
               </Button>
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={() => quickLogin('practitioner@demoschool.com')}
+                onClick={() => quickLogin('practitioner@example.com')}
                 disabled={loadingButton !== null}
                 className="text-xs"
               >
-                {loadingButton === 'practitioner@demoschool.com' ? 'Signing in...' : 'Practitioner'}
+                {loadingButton === 'practitioner@example.com' ? 'Signing in...' : 'Practitioner'}
               </Button>
               <Button 
                 variant="outline" 
