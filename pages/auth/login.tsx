@@ -3,14 +3,11 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { getSupabaseClient } from '../../utils/supabase/client'
 import { supabaseUrl, publicAnonKey } from '../../utils/supabase/info'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
-import { Button } from '../../components/ui/button'
-import { Input } from '../../components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
 
 const supabase = getSupabaseClient()
 
 export default function LoginPage() {
+  const [activeTab, setActiveTab] = useState('child')
   const [childUsername, setChildUsername] = useState('')
   const [childPin, setChildPin] = useState('')
   const [adultEmail, setAdultEmail] = useState('')
@@ -81,10 +78,10 @@ export default function LoginPage() {
         <meta name="description" content="Login to The Lift wellbeing platform" />
       </Head>
 
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
-            <h2 className="mt-6 text-3xl font-medium text-gray-900">
+            <h2 className="text-3xl font-medium text-gray-900">
               Sign in to The Lift
             </h2>
             <p className="mt-2 text-sm text-gray-600">
@@ -92,125 +89,140 @@ export default function LoginPage() {
             </p>
           </div>
           
-          <Tabs defaultValue="child" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="child">Child</TabsTrigger>
-              <TabsTrigger value="adult">Adult</TabsTrigger>
-            </TabsList>
+          {/* Tab Navigation */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex border-b border-gray-200 mb-6">
+              <button
+                onClick={() => setActiveTab('child')}
+                className={`flex-1 py-2 px-4 text-center font-medium ${
+                  activeTab === 'child' 
+                    ? 'text-gray-900 border-b-2 border-gray-900' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Child
+              </button>
+              <button
+                onClick={() => setActiveTab('adult')}
+                className={`flex-1 py-2 px-4 text-center font-medium ${
+                  activeTab === 'adult' 
+                    ? 'text-gray-900 border-b-2 border-gray-900' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Adult
+              </button>
+            </div>
             
-            <TabsContent value="child">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Child Sign In</CardTitle>
-                  <CardDescription>
-                    Enter your username and PIN to access your activities
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleChildLogin} className="space-y-4">
-                    <div>
-                      <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                        Username
-                      </label>
-                      <Input
-                        id="username"
-                        type="text"
-                        required
-                        value={childUsername}
-                        onChange={(e) => setChildUsername(e.target.value)}
-                        placeholder="Enter your username"
-                        className="mt-1"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="pin" className="block text-sm font-medium text-gray-700">
-                        PIN
-                      </label>
-                      <Input
-                        id="pin"
-                        type="password"
-                        required
-                        maxLength={4}
-                        value={childPin}
-                        onChange={(e) => setChildPin(e.target.value)}
-                        placeholder="Enter your PIN"
-                        className="mt-1"
-                      />
-                    </div>
-                    
-                    {error && (
-                      <div className="text-red-600 text-sm">{error}</div>
-                    )}
-                    
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full"
-                    >
-                      {isLoading ? 'Signing in...' : 'Sign In'}
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-            </TabsContent>
+            {/* Child Login Tab */}
+            {activeTab === 'child' && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Child Sign In</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Enter your username and PIN to access your activities
+                </p>
+                
+                <form onSubmit={handleChildLogin} className="space-y-4">
+                  <div>
+                    <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                      Username
+                    </label>
+                    <input
+                      id="username"
+                      type="text"
+                      required
+                      value={childUsername}
+                      onChange={(e) => setChildUsername(e.target.value)}
+                      placeholder="Enter your username"
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="pin" className="block text-sm font-medium text-gray-700">
+                      PIN
+                    </label>
+                    <input
+                      id="pin"
+                      type="password"
+                      required
+                      maxLength={4}
+                      value={childPin}
+                      onChange={(e) => setChildPin(e.target.value)}
+                      placeholder="Enter your PIN"
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
+                    />
+                  </div>
+                  
+                  {error && (
+                    <div className="text-red-600 text-sm">{error}</div>
+                  )}
+                  
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
+                  >
+                    {isLoading ? 'Signing in...' : 'Sign In'}
+                  </button>
+                </form>
+              </div>
+            )}
             
-            <TabsContent value="adult">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Adult Sign In</CardTitle>
-                  <CardDescription>
-                    Sign in with your email and password
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleAdultLogin} className="space-y-4">
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        Email
-                      </label>
-                      <Input
-                        id="email"
-                        type="email"
-                        required
-                        value={adultEmail}
-                        onChange={(e) => setAdultEmail(e.target.value)}
-                        placeholder="practitioner@thelift.app"
-                        className="mt-1"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                        Password
-                      </label>
-                      <Input
-                        id="password"
-                        type="password"
-                        required
-                        value={adultPassword}
-                        onChange={(e) => setAdultPassword(e.target.value)}
-                        placeholder="Enter your password"
-                        className="mt-1"
-                      />
-                    </div>
-                    
-                    {error && (
-                      <div className="text-red-600 text-sm">{error}</div>
-                    )}
-                    
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full"
-                    >
-                      {isLoading ? 'Signing in...' : 'Sign In'}
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+            {/* Adult Login Tab */}
+            {activeTab === 'adult' && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Adult Sign In</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Sign in with your email and password
+                </p>
+                
+                <form onSubmit={handleAdultLogin} className="space-y-4">
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                      Email
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      required
+                      value={adultEmail}
+                      onChange={(e) => setAdultEmail(e.target.value)}
+                      placeholder="practitioner@thelift.app"
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                      Password
+                    </label>
+                    <input
+                      id="password"
+                      type="password"
+                      required
+                      value={adultPassword}
+                      onChange={(e) => setAdultPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
+                    />
+                  </div>
+                  
+                  {error && (
+                    <div className="text-red-600 text-sm">{error}</div>
+                  )}
+                  
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50"
+                  >
+                    {isLoading ? 'Signing in...' : 'Sign In'}
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
           
           <div className="text-center">
             <p className="text-sm text-gray-600">
