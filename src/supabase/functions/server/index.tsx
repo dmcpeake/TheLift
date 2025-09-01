@@ -134,6 +134,57 @@ app.post('/server/auth/create-fresh-users', async (c) => {
   }
 })
 
+// Simple test user setup
+app.post('/server/setup-users', async (c) => {
+  try {
+    console.log('=== SETTING UP SIMPLE TEST USERS ===')
+    
+    const users = [
+      { email: 'contact@demoschool.com', password: 'TestLift2024!', role: 'GroupContact', name: 'Sarah Thompson' },
+      { email: 'practitioner@demoschool.com', password: 'TestLift2024!', role: 'Practitioner', name: 'Michael Chen' },
+      { email: 'testchild@child.local', password: '1234', role: 'Child', name: 'Emma Davis' }
+    ]
+
+    for (const userData of users) {
+      try {
+        // Delete existing user first
+        const { data: existingUsers } = await supabase.auth.admin.listUsers()
+        const existing = existingUsers.users.find(u => u.email === userData.email)
+        
+        if (existing) {
+          console.log(`Deleting existing user: ${userData.email}`)
+          await supabase.auth.admin.deleteUser(existing.id)
+        }
+
+        // Create new user
+        console.log(`Creating user: ${userData.email}`)
+        const { data, error } = await supabase.auth.admin.createUser({
+          email: userData.email,
+          password: userData.password,
+          email_confirm: true,
+          user_metadata: { 
+            name: userData.name,
+            role: userData.role
+          }
+        })
+
+        if (error) {
+          console.error(`Failed to create ${userData.email}:`, error.message)
+        } else {
+          console.log(`Successfully created ${userData.email}`)
+        }
+      } catch (e) {
+        console.error(`Error with ${userData.email}:`, e)
+      }
+    }
+
+    return c.json({ success: true, message: 'Users setup complete' })
+  } catch (error) {
+    console.error('Setup failed:', error)
+    return c.json({ error: error.message }, 500)
+  }
+})
+
 // Initialize test users
 app.post('/server/auth/init-test-users', async (c) => {
   try {

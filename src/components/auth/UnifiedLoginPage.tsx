@@ -458,6 +458,8 @@ export function UnifiedLoginPage() {
                     // The auth state change will handle navigation
                   } catch (error: any) {
                     console.error('Group admin auto-login failed:', error)
+                    console.error('Error details:', error.message, error.code, error.status)
+                    setError(`Group Admin login failed: ${error.message}. Using demo mode.`)
                     // Fallback to bypass if auto-login fails
                     setUser({ 
                       id: 'test-group-admin-id', 
@@ -495,6 +497,8 @@ export function UnifiedLoginPage() {
                     // The auth state change will handle navigation
                   } catch (error: any) {
                     console.error('Practitioner auto-login failed:', error)
+                    console.error('Error details:', error.message, error.code, error.status)
+                    setError(`Practitioner login failed: ${error.message}. Using demo mode.`)
                     // Fallback to bypass if auto-login fails
                     setUser({
                       id: 'test-prac-id',
