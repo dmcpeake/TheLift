@@ -69,7 +69,7 @@ export function SignupPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
+                  placeholder="your"
                   required
                 />
               </div>

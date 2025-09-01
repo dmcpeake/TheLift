@@ -181,7 +181,7 @@ export function InvitePractitioner() {
                         type="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        placeholder="practitioner@example.com"
+                        placeholder="practitioner"
                         required
                       />
                     </div>

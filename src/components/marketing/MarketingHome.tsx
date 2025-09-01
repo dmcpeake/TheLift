@@ -165,7 +165,7 @@ export function MarketingHome() {
                       <span className="text-white text-xl font-bold">E</span>
                     </div>
                     <div>
-                      <h3 className="font-bold text-gray-800">Hi Emma! 👋</h3>
+                      <h3 className="font-bold text-gray-800">Hi Jane! 👋</h3>
                       <p className="text-gray-600">Ready for your wellbeing check-in?</p>
                     </div>
                   </div>

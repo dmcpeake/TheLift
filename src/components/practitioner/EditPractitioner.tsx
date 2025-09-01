@@ -273,7 +273,7 @@ export function EditPractitioner() {
                   type="email"
                   value={editForm.email}
                   onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
-                  placeholder="email@example.com"
+                  placeholder="email"
                   disabled={saving}
                 />
               </div>

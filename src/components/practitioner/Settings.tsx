@@ -185,7 +185,7 @@ export function Settings() {
                         type="email"
                         value={profileData.email}
                         onChange={handleProfileChange}
-                        placeholder="your.email@example.com"
+                        placeholder="your.email"
                       />
                     </div>
                     <div className="space-y-2">

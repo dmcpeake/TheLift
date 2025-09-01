@@ -186,7 +186,7 @@ export function CreateClient() {
                     type="email"
                     value={formData.contactEmail}
                     onChange={handleInputChange}
-                    placeholder="contact@client.com"
+                    placeholder="contact"
                     required
                   />
                 </div>
