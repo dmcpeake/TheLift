@@ -1,4 +1,9 @@
-const kv = await Deno.openKv()
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+)
 
 export interface KVStore {
   get<T>(key: string): Promise<T | null>
@@ -9,26 +14,44 @@ export interface KVStore {
 
 export const kvStore: KVStore = {
   async get<T>(key: string): Promise<T | null> {
-    const result = await kv.get([key])
-    return result.value as T | null
+    const { data, error } = await supabase
+      .from('kv_store')
+      .select('value')
+      .eq('key', key)
+      .single()
+    
+    if (error || !data) return null
+    return JSON.parse(data.value) as T
   },
 
   async set<T>(key: string, value: T): Promise<void> {
-    await kv.set([key], value)
+    const { error } = await supabase
+      .from('kv_store')
+      .upsert({ key, value: JSON.stringify(value) })
+    
+    if (error) throw error
   },
 
   async delete(key: string): Promise<void> {
-    await kv.delete([key])
+    const { error } = await supabase
+      .from('kv_store')
+      .delete()
+      .eq('key', key)
+    
+    if (error) throw error
   },
 
   async list(prefix: string): Promise<Array<{ key: string; value: any }>> {
-    const results = []
-    for await (const entry of kv.list({ prefix: [prefix] })) {
-      results.push({
-        key: entry.key.join('/'),
-        value: entry.value
-      })
-    }
-    return results
+    const { data, error } = await supabase
+      .from('kv_store')
+      .select('*')
+      .like('key', `${prefix}%`)
+    
+    if (error) throw error
+    
+    return (data || []).map(item => ({
+      key: item.key,
+      value: JSON.parse(item.value)
+    }))
   }
 }

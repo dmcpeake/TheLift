@@ -1,67 +1,70 @@
 import { Hono } from 'https://deno.land/x/hono@v3.12.6/mod.ts'
-import { kvStore } from './kv_store.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const auth = new Hono()
 
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+)
+
 auth.post('/init-test-users', async (c) => {
   try {
-    console.log('Initializing test users and child data...')
+    console.log('Initializing test children data...')
     
-    const testUsers = [
-      {
-        id: 'admin-user-id',
-        email: 'admin@example.com',
-        name: 'Admin User',
-        role: 'Account'
-      },
-      {
-        id: 'practitioner-user-id',
-        email: 'practitioner@example.com',
-        name: 'Test Practitioner',
-        role: 'Practitioner'
-      },
-      {
-        id: 'groupmanager-user-id',
-        email: 'manager@example.com',
-        name: 'Group Manager',
-        role: 'GroupContact'
-      }
-    ]
+    // Get the default organisation (created in migrations)
+    const { data: org, error: orgError } = await supabase
+      .from('organisations')
+      .select('*')
+      .limit(1)
+      .single()
     
-    for (const user of testUsers) {
-      await kvStore.set(`user:${user.id}`, user)
-      console.log(`Created test user: ${user.email}`)
+    if (orgError || !org) {
+      return c.json({ 
+        success: false,
+        error: 'No organisation found in database'
+      }, 500)
     }
     
-    const testChildren = [
-      {
-        id: 'child-1',
-        username: 'alice123',
-        pin: '1234',
-        first_name: 'Alice',
-        age: 7,
-        practitioner_id: 'practitioner-user-id'
-      },
-      {
-        id: 'child-2',
-        username: 'bobby456',
-        pin: '5678',
-        first_name: 'Bobby',
-        age: 9,
-        practitioner_id: 'practitioner-user-id'
-      }
-    ]
+    // Insert test children
+    const { data: childrenData, error: childrenError } = await supabase
+      .from('children')
+      .upsert([
+        {
+          id: 'child-1',
+          first_name: 'Alice',
+          age: 7,
+          username: 'alice123',
+          pin: '1234',
+          organisation_id: org.id,
+          consent_given: true,
+          active: true
+        },
+        {
+          id: 'child-2', 
+          first_name: 'Bobby',
+          age: 9,
+          username: 'bobby456',
+          pin: '5678',
+          organisation_id: org.id,
+          consent_given: true,
+          active: true
+        }
+      ], { onConflict: 'id' })
+      .select()
     
-    for (const child of testChildren) {
-      await kvStore.set(`child:${child.username}`, child)
-      console.log(`Created test child: ${child.username}`)
+    if (childrenError) {
+      console.error('Error creating test children:', childrenError)
+      return c.json({ 
+        success: false,
+        error: childrenError.message 
+      }, 500)
     }
     
     return c.json({ 
       success: true,
-      message: 'Test users and children initialized successfully',
-      users: testUsers.length,
-      children: testChildren.length
+      message: 'Test children initialized successfully',
+      children: childrenData?.length || 0
     })
     
   } catch (error) {
@@ -84,9 +87,15 @@ auth.post('/child-login', async (c) => {
       }, 400)
     }
     
-    const child = await kvStore.get(`child:${username}`)
+    const { data: child, error } = await supabase
+      .from('children')
+      .select('*')
+      .eq('username', username)
+      .eq('pin', pin)
+      .eq('active', true)
+      .single()
     
-    if (!child || child.pin !== pin) {
+    if (error || !child) {
       return c.json({ 
         success: false, 
         error: 'Invalid username or PIN' 
@@ -114,7 +123,17 @@ auth.post('/child-login', async (c) => {
 
 auth.get('/debug/child-data', async (c) => {
   try {
-    const children = await kvStore.list('child:')
+    const { data: children, error } = await supabase
+      .from('children')
+      .select('*')
+    
+    if (error) {
+      return c.json({ 
+        success: false,
+        error: error.message 
+      }, 500)
+    }
+    
     return c.json({
       success: true,
       children: children

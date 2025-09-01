@@ -5,6 +5,7 @@ import { authRoutes } from './auth.ts'
 import { adminRoutes } from './admin.ts'
 import { userRoutes } from './users.ts'
 import { childrenRoutes } from './children.ts'
+import { setupRoutes } from './setup.ts'
 
 const app = new Hono()
 
@@ -22,5 +23,6 @@ app.route('/make-server-a1855b25/auth', authRoutes)
 app.route('/make-server-a1855b25/admin', adminRoutes)
 app.route('/make-server-a1855b25/users', userRoutes)
 app.route('/make-server-a1855b25/children', childrenRoutes)
+app.route('/make-server-a1855b25/setup', setupRoutes)
 
 serve(app.fetch)
