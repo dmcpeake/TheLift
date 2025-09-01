@@ -30,12 +30,14 @@ export const fetchUserProfile = async (accessToken: string, userId: string, user
 export const createFallbackUser = (userId: string, userEmail: string): User => {
   // Assign role based on email for test users
   let fallbackRole: User['profile']['role'] = 'Practitioner'
-  if (userEmail === 'admin@thelift.com') {
+  if (userEmail === 'admin@thelift.com' || userEmail === 'admin@example.com') {
     fallbackRole = 'Account'
-  } else if (userEmail === 'contact@demoschool.com') {
+  } else if (userEmail === 'contact@demoschool.com' || userEmail === 'manager@example.com') {
     fallbackRole = 'GroupContact'
-  } else if (userEmail === 'child@demoschool.com') {
+  } else if (userEmail === 'child@demoschool.com' || userEmail === 'testchild@child.local') {
     fallbackRole = 'Child'
+  } else if (userEmail === 'practitioner@example.com') {
+    fallbackRole = 'Practitioner'
   }
   
   return {
