@@ -450,7 +450,7 @@ export function UnifiedLoginPage() {
                     // Auto-login to test group admin account
                     const { data, error } = await supabase.auth.signInWithPassword({
                       email: 'contact@demoschool.com',
-                      password: 'password123'
+                      password: 'TestLift2024!'
                     })
                     
                     if (error) throw error
@@ -487,7 +487,7 @@ export function UnifiedLoginPage() {
                     // Auto-login to test practitioner account
                     const { data, error } = await supabase.auth.signInWithPassword({
                       email: 'practitioner@demoschool.com',
-                      password: 'password123'
+                      password: 'TestLift2024!'
                     })
                     
                     if (error) throw error
@@ -523,8 +523,8 @@ export function UnifiedLoginPage() {
                   try {
                     // Auto-login to test child account
                     const { data, error } = await supabase.auth.signInWithPassword({
-                      email: 'child@demoschool.com',
-                      password: 'password123'
+                      email: 'testchild@child.local',
+                      password: '1234'
                     })
                     
                     if (error) throw error
@@ -535,7 +535,7 @@ export function UnifiedLoginPage() {
                     // Fallback to bypass if auto-login fails
                     setUser({
                       id: 'test-child-id',
-                      email: 'child@demoschool.com',
+                      email: 'testchild@child.local',
                       profile: { role: 'Child', name: 'Test Child' }
                     })
                     navigate('/child/home')
