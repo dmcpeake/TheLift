@@ -54,5 +54,14 @@ function figmaAssetsResolver(): Plugin {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), figmaAssetsResolver(), removeVersionSpecifiers()],
+  build: {
+    rollupOptions: {
+      input: {
+        main: './index.html',
+        'admin/login': './admin/login.html',
+        'auth/login': './auth/login.html'
+      }
+    }
+  }
 })
 
