@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getSupabaseClient } from '../../utils/supabase/client'
 import { projectId, publicAnonKey } from '../../utils/supabase/info'
 import { AuthContext } from '../../utils/auth/context'
+import { getDefaultModeForRole } from '../../utils/auth/helpers'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
@@ -24,7 +25,7 @@ export function UnifiedLoginPage() {
   const [loading, setLoading] = useState(false)
   const [loadingButton, setLoadingButton] = useState<string | null>(null)
   const [error, setError] = useState('')
-  const { setUser } = useContext(AuthContext)
+  const { setUser, toggleMode, currentMode } = useContext(AuthContext)
   const navigate = useNavigate()
   
   // Refs for PIN inputs
@@ -443,50 +444,109 @@ export function UnifiedLoginPage() {
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={() => {
-                  // Skip login, go directly to group admin dashboard
-                  setUser({ 
-                    id: 'test-group-admin-id', 
-                    email: 'groupadmin@test.com',
-                    profile: { role: 'GroupContact', name: 'Test Group Admin' }
-                  })
-                  navigate('/dashboard')
+                onClick={async () => {
+                  setLoadingButton('groupadmin')
+                  try {
+                    // Auto-login to test group admin account
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                      email: 'contact@demoschool.com',
+                      password: 'password123'
+                    })
+                    
+                    if (error) throw error
+                    
+                    // The auth state change will handle navigation
+                  } catch (error: any) {
+                    console.error('Group admin auto-login failed:', error)
+                    // Fallback to bypass if auto-login fails
+                    setUser({ 
+                      id: 'test-group-admin-id', 
+                      email: 'contact@demoschool.com',
+                      profile: { role: 'GroupContact', name: 'Test Group Admin' }
+                    })
+                    // Set proper mode for GroupContact
+                    if (currentMode !== 'practitioner') {
+                      toggleMode()
+                    }
+                    navigate('/dashboard')
+                  } finally {
+                    setLoadingButton(null)
+                  }
                 }}
+                disabled={loadingButton === 'groupadmin'}
                 className="text-xs"
               >
-                Group Admin Demo
+                {loadingButton === 'groupadmin' ? 'Logging in...' : 'Group Admin Demo'}
               </Button>
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={() => {
-                  // Skip login, go directly to practitioner dashboard  
-                  setUser({
-                    id: 'test-prac-id',
-                    email: 'practitioner@test.com', 
-                    profile: { role: 'Practitioner', name: 'Test Practitioner' }
-                  })
-                  navigate('/dashboard')
+                onClick={async () => {
+                  setLoadingButton('practitioner')
+                  try {
+                    // Auto-login to test practitioner account
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                      email: 'practitioner@demoschool.com',
+                      password: 'password123'
+                    })
+                    
+                    if (error) throw error
+                    
+                    // The auth state change will handle navigation
+                  } catch (error: any) {
+                    console.error('Practitioner auto-login failed:', error)
+                    // Fallback to bypass if auto-login fails
+                    setUser({
+                      id: 'test-prac-id',
+                      email: 'practitioner@demoschool.com', 
+                      profile: { role: 'Practitioner', name: 'Test Practitioner' }
+                    })
+                    // Practitioners should use practitioner mode
+                    if (currentMode !== 'practitioner') {
+                      toggleMode()
+                    }
+                    navigate('/dashboard')
+                  } finally {
+                    setLoadingButton(null)
+                  }
                 }}
+                disabled={loadingButton === 'practitioner'}
                 className="text-xs"
               >
-                Practitioner Demo
+                {loadingButton === 'practitioner' ? 'Logging in...' : 'Practitioner Demo'}
               </Button>
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={() => {
-                  // Skip login, go directly to child experience
-                  setUser({
-                    id: 'test-child-id',
-                    email: 'child@test.com',
-                    profile: { role: 'Child', name: 'Test Child' }
-                  })
-                  navigate('/child/home')
+                onClick={async () => {
+                  setLoadingButton('child')
+                  try {
+                    // Auto-login to test child account
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                      email: 'child@demoschool.com',
+                      password: 'password123'
+                    })
+                    
+                    if (error) throw error
+                    
+                    // The auth state change will handle navigation
+                  } catch (error: any) {
+                    console.error('Child auto-login failed:', error)
+                    // Fallback to bypass if auto-login fails
+                    setUser({
+                      id: 'test-child-id',
+                      email: 'child@demoschool.com',
+                      profile: { role: 'Child', name: 'Test Child' }
+                    })
+                    navigate('/child/home')
+                  } finally {
+                    setLoadingButton(null)
+                  }
                 }}
+                disabled={loadingButton === 'child'}
                 className="text-xs"
               >
-                Child Demo
+                {loadingButton === 'child' ? 'Logging in...' : 'Child Demo'}
               </Button>
             </div>
           </div>
