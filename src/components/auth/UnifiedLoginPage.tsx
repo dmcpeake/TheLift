@@ -444,17 +444,17 @@ export function UnifiedLoginPage() {
                 variant="outline" 
                 size="sm" 
                 onClick={() => {
-                  // Skip login, go directly to admin dashboard
+                  // Skip login, go directly to group admin dashboard
                   setUser({ 
-                    id: 'test-admin-id', 
-                    email: 'admin@test.com',
-                    profile: { role: 'Account', name: 'Test Admin' }
+                    id: 'test-group-admin-id', 
+                    email: 'groupadmin@test.com',
+                    profile: { role: 'GroupContact', name: 'Test Group Admin' }
                   })
-                  navigate('/admin')
+                  navigate('/dashboard')
                 }}
                 className="text-xs"
               >
-                Admin Demo
+                Group Admin Demo
               </Button>
               <Button 
                 variant="outline" 
