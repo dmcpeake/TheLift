@@ -26,7 +26,7 @@ export function UnifiedLoginPage() {
     setError('')
     
     try {
-      const response = await fetch(`${supabaseUrl}/functions/v1/make-server-a1855b25/auth/child-login`, {
+      const response = await fetch(`${supabaseUrl}/functions/v1/server/auth/child-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

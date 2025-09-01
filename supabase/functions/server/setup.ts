@@ -7,7 +7,7 @@ setup.post('/create-kv-table', async (c) => {
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      Deno.env.get('SERVICE_ROLE_KEY') ?? '',
     )
 
     // Create kv_store table

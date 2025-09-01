@@ -25,7 +25,7 @@ function AppContent() {
     const initializeTestUsers = async () => {
       try {
         console.log('Starting test user initialization...')
-        const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/auth/init-test-users`, {
+        const response = await fetch(`https://${projectId}.supabase.co/functions/v1/server/auth/init-test-users`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -39,7 +39,7 @@ function AppContent() {
           
           // Verify child data was created
           try {
-            const debugResponse = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-a1855b25/auth/debug/child-data`, {
+            const debugResponse = await fetch(`https://${projectId}.supabase.co/functions/v1/server/auth/debug/child-data`, {
               headers: {
                 'Authorization': `Bearer ${publicAnonKey}`,
               },
