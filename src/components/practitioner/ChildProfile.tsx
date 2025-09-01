@@ -254,7 +254,62 @@ export function ChildProfile() {
       }
     } catch (error) {
       console.error('Error fetching child profile:', error)
-      // setError('Failed to connect to server') // Removed for wireframe experience
+      // Always provide fallback demo data if any error occurs
+      const demoChild: Child = {
+        id: id,
+        name: 'Emma Thompson',
+        age: 8,
+        status: 'fine',
+        totalCheckIns: 15,
+        currentStreak: 4,
+        orgId: 'demo-school-001',
+        practitionerId: user.id,
+        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        aboutMe: {
+          favourites: ['Reading', 'Art', 'Soccer', 'Music'],
+          notes: 'Emma is a creative and enthusiastic student who loves to help others.'
+        },
+        credentials: {
+          username: 'emmastar42',
+          pin: '7834',
+          mode: 'slip'
+        },
+        recentCheckIns: [
+          {
+            id: 'checkin-1',
+            childId: id,
+            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+            startingMood: 3,
+            wheel: {
+              happy: 4,
+              safe: 5,
+              supported: 4,
+              excited: 3,
+              confident: 4
+            },
+            wrapUpMood: 4,
+            stickerAwarded: 'star',
+            status: 'fine'
+          },
+          {
+            id: 'checkin-2',
+            childId: id,
+            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+            startingMood: 2,
+            wheel: {
+              happy: 3,
+              safe: 5,
+              supported: 3,
+              excited: 2,
+              confident: 3
+            },
+            wrapUpMood: 3,
+            stickerAwarded: 'heart',
+            status: 'needs_attention'
+          }
+        ]
+      }
+      setChild(demoChild)
     } finally {
       setLoading(false)
     }
