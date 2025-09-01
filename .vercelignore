@@ -1,0 +1,12 @@
+dist/
+node_modules/
+.next/
+components/
+routes/
+utils/
+styles/
+App.tsx
+main.tsx
+*.config.ts
+*.config.js
+!next.config.js
