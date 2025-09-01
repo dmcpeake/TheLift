@@ -437,7 +437,6 @@ export function UnifiedLoginPage() {
             </Card>
           </div>
 
-
           {error && (
             <div className="mt-4">
               <Alert className="border-red-200 bg-red-50">
