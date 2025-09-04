@@ -15,8 +15,8 @@ export function Header({ onSkip, onSettings, phase }: HeaderProps) {
   
   return (
     <header className="flex items-center justify-between p-4 md:p-6">
-      <h1 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
-        Breathing Circles
+      <h1 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500">
+        ✨ Breathing Circles ✨
       </h1>
       
       <div className="flex gap-2">

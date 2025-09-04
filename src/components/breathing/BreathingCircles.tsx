@@ -238,7 +238,7 @@ export function BreathingCircles(props: BreathingCirclesProps) {
         'min-h-screen grid grid-rows-[auto_1fr_auto] relative',
         settings.highContrast 
           ? 'bg-gray-900 text-white' 
-          : 'bg-gradient-to-b from-sky-100 via-indigo-100 to-purple-100'
+          : 'bg-gradient-to-br from-pink-200 via-purple-200 via-blue-200 to-cyan-200'
       )}
     >
       {/* Settings Panel */}

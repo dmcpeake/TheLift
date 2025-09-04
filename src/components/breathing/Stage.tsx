@@ -26,15 +26,15 @@ export function Stage({
   const getCircleScale = () => {
     switch (phase) {
       case 'inhale':
-        return 1.5
+        return 1.8
       case 'hold':
-        return 1.5
+        return 1.8
       case 'exhale':
         return 1.0
       case 'intro':
-        return 1.1 // Slight pulse for intro
+        return 1.2 // Slightly larger for intro
       case 'instruction':
-        return 1.0
+        return 1.1
       default:
         return 1.0
     }
@@ -58,17 +58,17 @@ export function Stage({
   const getCaptionText = () => {
     switch (phase) {
       case 'intro':
-        return 'Breathing Circles'
+        return '✨ Breathing Circles ✨'
       case 'instruction':
-        return `Breathe in for ${pace.in}, hold for ${pace.hold}, and out for ${pace.out}`
+        return `Let's take some calming breaths together!`
       case 'inhale':
-        return 'Breathe in...'
+        return '🌸 Breathe in slowly... 🌸'
       case 'hold':
-        return 'Hold...'
+        return '⭐ Hold gently... ⭐'
       case 'exhale':
-        return 'Breathe out...'
+        return '🍃 Breathe out softly... 🍃'
       case 'complete':
-        return 'Nice work! Ready to check in.'
+        return '🎉 Amazing job! You did it! 🎉'
       default:
         return ''
     }
@@ -78,8 +78,37 @@ export function Stage({
 
   return (
     <div className="flex flex-col items-center justify-center px-6 py-8">
-      {/* Main breathing circle */}
-      <div className="relative w-64 h-64 md:w-80 md:h-80">
+      {/* Main breathing circle container */}
+      <div className="relative w-80 h-80 md:w-96 md:h-96 mb-8">
+        
+        {/* Floating sparkles/stars for ambiance */}
+        {!reducedMotion && (
+          <div className="absolute inset-0 pointer-events-none">
+            {[...Array(8)].map((_, i) => (
+              <motion.div
+                key={`sparkle-${i}`}
+                className="absolute text-2xl"
+                style={{
+                  left: `${15 + (i * 10)}%`,
+                  top: `${10 + Math.sin(i) * 20}%`,
+                }}
+                animate={{
+                  y: [-10, 10, -10],
+                  opacity: [0.3, 0.8, 0.3],
+                  rotate: [0, 360]
+                }}
+                transition={{
+                  duration: 3 + i * 0.5,
+                  repeat: Infinity,
+                  ease: 'easeInOut'
+                }}
+              >
+                {i % 3 === 0 ? '✨' : i % 3 === 1 ? '🌟' : '💫'}
+              </motion.div>
+            ))}
+          </div>
+        )}
+
         {/* Outer ripple effects (exhale only) */}
         <AnimatePresence>
           {phase === 'exhale' && !reducedMotion && (
@@ -87,20 +116,19 @@ export function Stage({
               {[0, 1, 2].map((index) => (
                 <motion.div
                   key={`ripple-${index}`}
-                  className={cn(
-                    'absolute inset-0 rounded-full border-2',
-                    highContrast 
-                      ? 'border-white' 
-                      : 'border-indigo-300'
-                  )}
+                  className="absolute inset-0 rounded-full border-4 border-rainbow"
+                  style={{
+                    background: 'linear-gradient(45deg, rgba(255,182,193,0.3), rgba(221,160,221,0.3), rgba(173,216,230,0.3))',
+                    border: '3px solid rgba(147,197,253,0.6)'
+                  }}
                   initial={{ scale: 1, opacity: 0 }}
                   animate={{
-                    scale: 1.5 + index * 0.3,
-                    opacity: [0, 0.3, 0]
+                    scale: 1.5 + index * 0.4,
+                    opacity: [0, 0.6, 0]
                   }}
                   transition={{
                     duration: pace.out,
-                    delay: index * 0.3,
+                    delay: index * 0.4,
                     ease: 'easeOut'
                   }}
                 />
@@ -109,138 +137,181 @@ export function Stage({
           )}
         </AnimatePresence>
 
-        {/* Main circle */}
+        {/* Main breathing circle with rainbow gradient */}
         <motion.div
-          className={cn(
-            'absolute inset-0 rounded-full shadow-2xl',
-            highContrast
-              ? 'bg-white'
-              : phase === 'hold'
-              ? 'bg-gradient-to-br from-purple-400 via-indigo-400 to-blue-400'
-              : 'bg-gradient-to-br from-blue-400 via-indigo-400 to-purple-400'
-          )}
-          style={{ 
-            width: '100%', 
-            height: '100%',
-            minWidth: '200px',
-            minHeight: '200px'
+          className="absolute inset-0 rounded-full shadow-2xl overflow-hidden"
+          style={{
+            background: highContrast 
+              ? '#FFFFFF' 
+              : phase === 'hold' 
+              ? 'linear-gradient(135deg, #ff6b9d 0%, #c44569 25%, #f8b500 50%, #3742fa 75%, #2f3542 100%)'
+              : phase === 'inhale'
+              ? 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)'
+              : phase === 'exhale'
+              ? 'linear-gradient(135deg, #a8edea 0%, #fed6e3 25%, #ffecd2 50%, #fcb69f 75%, #ff8a80 100%)'
+              : 'linear-gradient(135deg, #74b9ff 0%, #6c5ce7 25%, #fd79a8 50%, #fdcb6e 75%, #00b894 100%)'
           }}
           animate={{
-            scale: phase === 'intro' ? [1.0, 1.1, 1.0] : getCircleScale(),
-            filter: phase === 'hold' ? 'brightness(1.2)' : 'brightness(1)'
+            scale: phase === 'intro' ? [1.0, 1.2, 1.0] : getCircleScale(),
+            rotate: phase === 'hold' ? [0, 180, 360] : 0,
+            filter: phase === 'hold' ? 'brightness(1.3) saturate(1.2)' : 'brightness(1.1) saturate(1.1)'
           }}
           transition={{
-            duration: phase === 'intro' ? 2 : (reducedMotion ? 0.3 : getPhaseDuration()),
-            ease: phase === 'inhale' ? 'easeOut' : phase === 'exhale' ? 'easeIn' : 'linear',
+            duration: phase === 'intro' ? 2.5 : (reducedMotion ? 0.4 : getPhaseDuration()),
+            ease: phase === 'inhale' ? 'easeOut' : phase === 'exhale' ? 'easeIn' : 'easeInOut',
             repeat: phase === 'intro' ? Infinity : 0
           }}
         >
-          {/* Inner glow effect */}
-          {phase === 'hold' && !reducedMotion && (
+          {/* Inner magical glow effect */}
+          {(phase === 'hold' || phase === 'intro') && !reducedMotion && (
             <motion.div
-              className="absolute inset-4 rounded-full bg-white/30"
+              className="absolute inset-8 rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 50%, transparent 100%)'
+              }}
               animate={{
-                opacity: [0.3, 0.6, 0.3]
+                opacity: [0.3, 0.8, 0.3],
+                scale: [0.9, 1.1, 0.9]
               }}
               transition={{
-                duration: pace.hold,
-                repeat: Infinity
+                duration: phase === 'hold' ? pace.hold : 2,
+                repeat: phase === 'intro' ? Infinity : Math.ceil(pace.hold)
               }}
             />
           )}
 
-          {/* Center dot */}
+          {/* Center emoji that changes with phase */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <motion.div 
+              className="text-4xl md:text-6xl"
+              animate={{
+                scale: phase === 'hold' ? [1, 1.3, 1] : [1, 1.1, 1]
+              }}
+              transition={{
+                duration: 1,
+                repeat: Infinity
+              }}
+            >
+              {phase === 'inhale' ? '🌸' : 
+               phase === 'hold' ? '⭐' : 
+               phase === 'exhale' ? '🍃' : 
+               phase === 'complete' ? '🎉' : '✨'}
+            </motion.div>
+          </div>
+
+          {/* Rainbow border effect */}
           <div 
-            className={cn(
-              'absolute inset-1/2 w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full',
-              highContrast ? 'bg-gray-900' : 'bg-white/50'
-            )}
+            className="absolute inset-0 rounded-full"
+            style={{
+              border: '4px solid transparent',
+              background: 'linear-gradient(45deg, #ff6b9d, #c44569, #f8b500, #3742fa, #2f3542, #ff6b9d) border-box',
+              WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
+              WebkitMaskComposite: 'xor'
+            }}
           />
         </motion.div>
       </div>
 
-      {/* Captions */}
+      {/* Large, colorful captions */}
       {captions && (
         <motion.div 
-          className="mt-8 text-center"
+          className="text-center max-w-md mx-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           <p 
             className={cn(
-              'text-xl md:text-2xl font-medium',
-              highContrast ? 'text-white' : 'text-gray-700'
+              'text-2xl md:text-3xl font-bold mb-4',
+              highContrast ? 'text-white' : 'text-gray-800',
+              'drop-shadow-lg'
             )}
+            style={{
+              textShadow: highContrast ? 'none' : '2px 2px 4px rgba(0,0,0,0.1)'
+            }}
             role="status"
             aria-live="polite"
           >
             {getCaptionText()}
           </p>
           {isBreathingPhase && (
-            <p 
+            <motion.p 
               className={cn(
-                'mt-2 text-sm',
-                highContrast ? 'text-gray-300' : 'text-gray-500'
+                'text-lg font-medium',
+                highContrast ? 'text-gray-300' : 'text-purple-700'
               )}
+              animate={{
+                scale: [1, 1.05, 1]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity
+              }}
             >
-              Cycle {cycle} of {totalCycles}
-            </p>
+              🔮 Breath {cycle} of {totalCycles} 🔮
+            </motion.p>
           )}
         </motion.div>
       )}
 
-      {/* Progress dots */}
+      {/* Colorful progress dots with emojis */}
       {isBreathingPhase && (
-        <div className="mt-8 flex gap-2" role="progressbar" aria-valuemin={1} aria-valuemax={totalCycles} aria-valuenow={cycle}>
+        <div className="mt-8 flex gap-3" role="progressbar" aria-valuemin={1} aria-valuemax={totalCycles} aria-valuenow={cycle}>
           {Array.from({ length: totalCycles }, (_, i) => (
             <motion.div
               key={i}
               className={cn(
-                'w-2 h-2 rounded-full transition-all',
+                'w-8 h-8 rounded-full border-2 flex items-center justify-center text-lg font-bold transition-all shadow-lg',
                 i < cycle
-                  ? highContrast ? 'bg-white' : 'bg-indigo-500'
+                  ? 'bg-green-400 border-green-500 text-white'
                   : i === cycle - 1
-                  ? highContrast ? 'bg-white w-3 h-3' : 'bg-indigo-600 w-3 h-3'
-                  : highContrast ? 'bg-gray-600' : 'bg-gray-300'
+                  ? 'bg-purple-500 border-purple-600 text-white w-10 h-10 text-xl'
+                  : 'bg-white border-purple-300 text-purple-500'
               )}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: i * 0.1 }}
-            />
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ 
+                scale: 1, 
+                rotate: 0,
+                y: i === cycle - 1 ? [-3, 3, -3] : 0
+              }}
+              transition={{ 
+                delay: i * 0.1,
+                y: { duration: 1, repeat: Infinity }
+              }}
+            >
+              {i < cycle ? '✅' : i === cycle - 1 ? '🌟' : i + 1}
+            </motion.div>
           ))}
         </div>
       )}
 
-      {/* Completion animation */}
+      {/* Magical completion animation */}
       {phase === 'complete' && !reducedMotion && (
         <motion.div
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0 pointer-events-none overflow-hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Simple confetti/sparkle effect */}
-          {Array.from({ length: 20 }, (_, i) => (
+          {/* Confetti rain */}
+          {Array.from({ length: 30 }, (_, i) => (
             <motion.div
-              key={`sparkle-${i}`}
-              className={cn(
-                'absolute w-2 h-2 rounded-full',
-                highContrast ? 'bg-white' : 'bg-yellow-400'
-              )}
+              key={`confetti-${i}`}
+              className="absolute w-3 h-3"
               style={{
                 left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`
+                backgroundColor: ['#ff6b9d', '#c44569', '#f8b500', '#3742fa', '#00b894'][i % 5],
+                borderRadius: Math.random() > 0.5 ? '50%' : '0%'
               }}
-              initial={{ scale: 0, opacity: 0 }}
+              initial={{ y: -100, rotate: 0 }}
               animate={{
-                scale: [0, 1, 0],
-                opacity: [0, 1, 0],
-                y: [0, -50]
+                y: window.innerHeight + 100,
+                rotate: 360,
+                x: [-50, 50, -50]
               }}
               transition={{
-                duration: 1.5,
-                delay: Math.random() * 0.5,
+                duration: 3 + Math.random() * 2,
+                delay: Math.random() * 1,
                 ease: 'easeOut'
               }}
             />
