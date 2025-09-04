@@ -28,10 +28,10 @@ export function Footer({
         <Button
           size="lg"
           onClick={onStart}
-          className="min-w-[240px] text-xl py-6 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 hover:from-pink-600 hover:via-purple-600 hover:to-blue-600 text-white shadow-2xl transform hover:scale-105 transition-all duration-200 font-bold rounded-full"
+          className="min-w-[200px] text-xl py-6 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg font-bold rounded-lg"
         >
-          <Play className="h-6 w-6 mr-3" />
-          🌟 Let's Start! 🌟
+          <Play className="h-5 w-5 mr-2" />
+          Start
         </Button>
       )}
 
@@ -39,10 +39,10 @@ export function Footer({
         <Button
           size="lg"
           onClick={onPause}
-          className="min-w-[200px] text-lg py-4 bg-gradient-to-r from-orange-400 to-red-400 hover:from-orange-500 hover:to-red-500 text-white shadow-xl rounded-full font-bold"
+          className="min-w-[160px] text-lg py-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg font-bold rounded-lg"
         >
           <Pause className="h-5 w-5 mr-2" />
-          ⏸️ Pause
+          Pause
         </Button>
       )}
 
@@ -50,10 +50,10 @@ export function Footer({
         <Button
           size="lg"
           onClick={onResume}
-          className="min-w-[200px] text-lg py-4 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white shadow-xl rounded-full font-bold"
+          className="min-w-[160px] text-lg py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg font-bold rounded-lg"
         >
           <Play className="h-5 w-5 mr-2" />
-          ▶️ Continue
+          Resume
         </Button>
       )}
 
@@ -61,10 +61,10 @@ export function Footer({
         <Button
           size="lg"
           onClick={onContinue}
-          className="min-w-[240px] text-xl py-6 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 hover:from-yellow-500 hover:via-orange-500 hover:to-red-500 text-white shadow-2xl transform hover:scale-105 transition-all duration-200 font-bold rounded-full"
+          className="min-w-[200px] text-xl py-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg font-bold rounded-lg"
         >
-          🎉 Amazing! Continue! 🎉
-          <ArrowRight className="h-6 w-6 ml-3" />
+          Continue
+          <ArrowRight className="h-5 w-5 ml-2" />
         </Button>
       )}
     </footer>

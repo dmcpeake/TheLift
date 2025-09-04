@@ -237,8 +237,8 @@ export function BreathingCircles(props: BreathingCirclesProps) {
       className={cn(
         'min-h-screen grid grid-rows-[auto_1fr_auto] relative',
         settings.highContrast 
-          ? 'bg-gray-900 text-white' 
-          : 'bg-gradient-to-br from-pink-200 via-purple-200 via-blue-200 to-cyan-200'
+          ? 'bg-white text-black' 
+          : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'
       )}
     >
       {/* Settings Panel */}
