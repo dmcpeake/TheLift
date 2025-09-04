@@ -1,5 +1,4 @@
 import React from 'react'
-import { Button } from '../ui/button'
 import { Play, Pause, ArrowRight } from 'lucide-react'
 import { Phase } from './types'
 
@@ -23,50 +22,48 @@ export function Footer({
   const isBreathingPhase = ['inhale', 'hold', 'exhale'].includes(phase)
   
   return (
-    <footer className="flex justify-center p-4 md:p-6">
+    <div className="breathing-footer">
       {phase === 'intro' && !running && (
-        <Button
-          size="lg"
+        <button
           onClick={onStart}
-          className="min-w-[200px] text-xl py-6 bg-white text-blue-600 hover:bg-gray-50 shadow-lg font-medium rounded-full"
+          className="breathing-button breathing-button-primary"
         >
-          <Play className="h-5 w-5 mr-2" />
+          <Play style={{ width: '20px', height: '20px' }} />
           Start
-        </Button>
+        </button>
       )}
 
       {isBreathingPhase && running && (
-        <Button
-          size="lg"
+        <button
           onClick={onPause}
-          className="min-w-[160px] text-lg py-4 bg-white/20 text-white hover:bg-white/30 shadow-lg font-medium rounded-full backdrop-blur-sm"
+          className="breathing-button breathing-button-secondary"
+          style={{ minWidth: '160px' }}
         >
-          <Pause className="h-5 w-5 mr-2" />
+          <Pause style={{ width: '20px', height: '20px' }} />
           Pause
-        </Button>
+        </button>
       )}
 
       {isBreathingPhase && !running && (
-        <Button
-          size="lg"
+        <button
           onClick={onResume}
-          className="min-w-[160px] text-lg py-4 bg-white/20 text-white hover:bg-white/30 shadow-lg font-medium rounded-full backdrop-blur-sm"
+          className="breathing-button breathing-button-secondary"
+          style={{ minWidth: '160px' }}
         >
-          <Play className="h-5 w-5 mr-2" />
+          <Play style={{ width: '20px', height: '20px' }} />
           Resume
-        </Button>
+        </button>
       )}
 
       {phase === 'complete' && (
-        <Button
-          size="lg"
+        <button
           onClick={onContinue}
-          className="min-w-[200px] text-xl py-6 bg-white text-blue-600 hover:bg-gray-50 shadow-lg font-medium rounded-full"
+          className="breathing-button breathing-button-primary"
         >
           Continue
-          <ArrowRight className="h-5 w-5 ml-2" />
-        </Button>
+          <ArrowRight style={{ width: '20px', height: '20px' }} />
+        </button>
       )}
-    </footer>
+    </div>
   )
 }

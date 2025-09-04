@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { cn } from '../ui/utils'
 import { BreathingCirclesProps, Phase, Pace, BreathingSettings } from './types'
 import { Header } from './Header'
 import { Stage } from './Stage'
@@ -8,6 +7,7 @@ import { Footer } from './Footer'
 import { Settings } from './Settings'
 import { sendTelemetry } from './telemetry'
 import { playAudioCue, preloadAudio } from './audio'
+import './breathing.css'
 
 const DEFAULT_PACE: Pace = { in: 3, hold: 1, out: 4, label: 'standard' }
 const SHORT_PACE: Pace = { in: 2, hold: 1, out: 3, label: 'short' }
@@ -233,14 +233,7 @@ export function BreathingCircles(props: BreathingCirclesProps) {
   }
 
   return (
-    <div 
-      className={cn(
-        'min-h-screen grid grid-rows-[auto_1fr_auto] relative',
-        settings.highContrast 
-          ? 'bg-white text-black' 
-          : 'bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600'
-      )}
-    >
+    <div className="breathing-container">
       {/* Settings Panel */}
       <AnimatePresence>
         {showSettings && (
