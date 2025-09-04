@@ -87,8 +87,8 @@
 
 .breathing-circle-container {
   position: relative;
-  width: 420px;
-  height: 420px;
+  width: 480px;
+  height: 480px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -121,8 +121,8 @@
 }
 
 .breathing-circle {
-  width: 350px;
-  height: 350px;
+  width: 280px;
+  height: 280px;
   background: linear-gradient(135deg, 
     rgba(255, 255, 255, 0.95) 0%, 
     rgba(255, 255, 255, 0.85) 50%, 
@@ -161,7 +161,7 @@
 }
 
 .breathing-circle.inhale {
-  transform: scale(1.4);
+  transform: scale(1.2);
   background: linear-gradient(135deg, 
     rgba(59, 130, 246, 0.1) 0%, 
     rgba(255, 255, 255, 0.95) 30%, 
@@ -170,7 +170,7 @@
 }
 
 .breathing-circle.hold {
-  transform: scale(1.4);
+  transform: scale(1.2);
   background: linear-gradient(135deg, 
     rgba(147, 51, 234, 0.15) 0%, 
     rgba(255, 255, 255, 0.9) 30%, 
@@ -179,7 +179,7 @@
 }
 
 .breathing-circle.exhale {
-  transform: scale(0.8);
+  transform: scale(0.7);
   background: linear-gradient(135deg, 
     rgba(34, 197, 94, 0.1) 0%, 
     rgba(255, 255, 255, 0.95) 30%, 
@@ -227,20 +227,20 @@
 
 .progress-ring-bg {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.15);
-  stroke-width: 6;
-  stroke-dasharray: 15 8;
+  stroke: rgba(255, 255, 255, 0.25);
+  stroke-width: 8;
+  stroke-dasharray: 12 6;
   filter: blur(0.5px);
 }
 
 .progress-ring-progress {
   fill: none;
   stroke: url(#progressGradient);
-  stroke-width: 6;
-  stroke-dasharray: 15 8;
+  stroke-width: 8;
+  stroke-dasharray: 12 6;
   stroke-linecap: round;
   transition: stroke-dashoffset 1s cubic-bezier(0.25, 0.8, 0.25, 1);
-  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5));
+  filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.7));
 }
 
 .breathing-footer {
