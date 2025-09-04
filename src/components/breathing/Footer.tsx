@@ -28,7 +28,7 @@ export function Footer({
         <Button
           size="lg"
           onClick={onStart}
-          className="min-w-[200px] text-xl py-6 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg font-bold rounded-lg"
+          className="min-w-[200px] text-xl py-6 bg-white text-blue-600 hover:bg-gray-50 shadow-lg font-medium rounded-full"
         >
           <Play className="h-5 w-5 mr-2" />
           Start
@@ -39,7 +39,7 @@ export function Footer({
         <Button
           size="lg"
           onClick={onPause}
-          className="min-w-[160px] text-lg py-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg font-bold rounded-lg"
+          className="min-w-[160px] text-lg py-4 bg-white/20 text-white hover:bg-white/30 shadow-lg font-medium rounded-full backdrop-blur-sm"
         >
           <Pause className="h-5 w-5 mr-2" />
           Pause
@@ -50,7 +50,7 @@ export function Footer({
         <Button
           size="lg"
           onClick={onResume}
-          className="min-w-[160px] text-lg py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg font-bold rounded-lg"
+          className="min-w-[160px] text-lg py-4 bg-white/20 text-white hover:bg-white/30 shadow-lg font-medium rounded-full backdrop-blur-sm"
         >
           <Play className="h-5 w-5 mr-2" />
           Resume
@@ -61,7 +61,7 @@ export function Footer({
         <Button
           size="lg"
           onClick={onContinue}
-          className="min-w-[200px] text-xl py-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg font-bold rounded-lg"
+          className="min-w-[200px] text-xl py-6 bg-white text-blue-600 hover:bg-gray-50 shadow-lg font-medium rounded-full"
         >
           Continue
           <ArrowRight className="h-5 w-5 ml-2" />

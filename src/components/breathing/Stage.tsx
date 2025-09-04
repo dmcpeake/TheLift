@@ -26,13 +26,13 @@ export function Stage({
   const getCircleScale = () => {
     switch (phase) {
       case 'inhale':
-        return 1.4
+        return 1.3
       case 'hold':
-        return 1.4
+        return 1.3
       case 'exhale':
-        return 0.6
+        return 0.7
       default:
-        return 0.8
+        return 1.0
     }
   }
 
@@ -50,53 +50,81 @@ export function Stage({
     }
   }
 
-  // Get phase color
-  const getPhaseColor = () => {
+  // Get instruction text for inside the circle
+  const getInstructionText = () => {
     switch (phase) {
+      case 'intro':
+        return 'get ready'
+      case 'instruction':
+        return 'follow the circle'
       case 'inhale':
-        return 'from-blue-400 to-blue-600'
+        return 'breathe in'
       case 'hold':
-        return 'from-purple-400 to-purple-600'
+        return 'hold'
       case 'exhale':
-        return 'from-green-400 to-green-600'
+        return 'breathe out'
       case 'complete':
-        return 'from-yellow-400 to-orange-500'
+        return 'well done!'
       default:
-        return 'from-indigo-400 to-indigo-600'
+        return 'breathe'
     }
   }
 
-  // Caption text - simple, no emojis
-  const getCaptionText = () => {
-    switch (phase) {
-      case 'intro':
-        return 'Get ready to breathe'
-      case 'instruction':
-        return 'Follow the circle as it grows and shrinks'
-      case 'inhale':
-        return 'Breathe in slowly'
-      case 'hold':
-        return 'Hold your breath'
-      case 'exhale':
-        return 'Breathe out slowly'
-      case 'complete':
-        return 'Well done! You completed all breaths'
-      default:
-        return ''
-    }
+  // Calculate progress for the outer ring
+  const getProgressAngle = () => {
+    const totalPhases = totalCycles * 3 // inhale, hold, exhale per cycle
+    const currentPhaseIndex = ((cycle - 1) * 3) + 
+      (phase === 'inhale' ? 0 : phase === 'hold' ? 1 : phase === 'exhale' ? 2 : 0)
+    return (currentPhaseIndex / totalPhases) * 360
   }
 
   const isBreathingPhase = ['inhale', 'hold', 'exhale'].includes(phase)
 
   return (
-    <div className="flex flex-col items-center justify-center px-6 py-12 min-h-[500px]">
+    <div className="flex flex-col items-center justify-center px-6 py-12 min-h-[600px]">
       
-      {/* Large breathing circle - this is the main focus */}
-      <div className="relative mb-12">
+      {/* Main breathing visualization */}
+      <div className="relative w-96 h-96 flex items-center justify-center">
+        
+        {/* Outer progress ring */}
+        {isBreathingPhase && (
+          <div className="absolute inset-0">
+            <svg width="100%" height="100%" viewBox="0 0 400 400" className="transform -rotate-90">
+              {/* Background ring */}
+              <circle
+                cx="200"
+                cy="200"
+                r="180"
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.2)"
+                strokeWidth="8"
+                strokeDasharray="20 10"
+              />
+              {/* Progress ring */}
+              <motion.circle
+                cx="200"
+                cy="200"
+                r="180"
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.8)"
+                strokeWidth="8"
+                strokeDasharray="20 10"
+                strokeLinecap="round"
+                initial={{ strokeDashoffset: 1130 }}
+                animate={{ 
+                  strokeDashoffset: 1130 - (getProgressAngle() / 360) * 1130
+                }}
+                transition={{ duration: 0.5 }}
+              />
+            </svg>
+          </div>
+        )}
+
+        {/* Inner white circle */}
         <motion.div
           className={cn(
-            'w-80 h-80 md:w-96 md:h-96 rounded-full shadow-xl bg-gradient-to-br',
-            highContrast ? 'bg-white border-4 border-black' : getPhaseColor()
+            'w-80 h-80 rounded-full flex items-center justify-center shadow-2xl',
+            highContrast ? 'bg-black text-white border-4 border-white' : 'bg-white text-gray-600'
           )}
           animate={{
             scale: getCircleScale()
@@ -105,48 +133,51 @@ export function Stage({
             duration: reducedMotion ? 0.3 : getPhaseDuration(),
             ease: phase === 'inhale' ? 'easeOut' : phase === 'exhale' ? 'easeIn' : 'linear'
           }}
-        />
+          style={{
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1), 0 8px 25px rgba(0, 0, 0, 0.08)'
+          }}
+        >
+          {/* Text inside circle */}
+          <div className="text-center">
+            <motion.h2 
+              className={cn(
+                'text-4xl md:text-5xl font-light mb-2',
+                highContrast ? 'text-white' : 'text-gray-600'
+              )}
+              animate={{
+                opacity: [0.7, 1, 0.7]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: 'easeInOut'
+              }}
+            >
+              {getInstructionText()}
+            </motion.h2>
+            {isBreathingPhase && (
+              <p className={cn(
+                'text-lg font-light',
+                highContrast ? 'text-gray-300' : 'text-gray-400'
+              )}>
+                {cycle} of {totalCycles}
+              </p>
+            )}
+          </div>
+        </motion.div>
       </div>
 
-      {/* Large, clear instructions */}
-      {captions && (
-        <div className="text-center max-w-lg mx-auto mb-8">
-          <h2 
-            className={cn(
-              'text-3xl md:text-4xl font-bold mb-4',
-              highContrast ? 'text-black' : 'text-gray-900'
-            )}
-          >
-            {getCaptionText()}
-          </h2>
-          {isBreathingPhase && (
-            <p 
-              className={cn(
-                'text-xl md:text-2xl font-medium',
-                highContrast ? 'text-gray-800' : 'text-gray-700'
-              )}
-            >
-              Breath {cycle} of {totalCycles}
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Simple progress bar */}
-      {isBreathingPhase && (
-        <div className="w-full max-w-md mx-auto">
-          <div className="bg-gray-300 rounded-full h-4 mb-2">
-            <motion.div 
-              className="bg-gradient-to-r from-blue-500 to-purple-500 h-4 rounded-full"
-              initial={{ width: '0%' }}
-              animate={{ width: `${(cycle / totalCycles) * 100}%` }}
-              transition={{ duration: 0.5 }}
-            />
-          </div>
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>Progress</span>
-            <span>{cycle}/{totalCycles}</span>
-          </div>
+      {/* Phase instruction below (if needed) */}
+      {captions && phase === 'instruction' && (
+        <div className="mt-8 text-center max-w-md">
+          <p className={cn(
+            'text-xl font-light',
+            highContrast ? 'text-white' : 'text-white/80'
+          )}>
+            Watch the circle grow as you breathe in,
+            <br />
+            and shrink as you breathe out
+          </p>
         </div>
       )}
     </div>

@@ -15,7 +15,7 @@ export function Header({ onSkip, onSettings, phase }: HeaderProps) {
   
   return (
     <header className="flex items-center justify-between p-4 md:p-6">
-      <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600">
+      <h1 className="text-3xl md:text-4xl font-light text-white">
         Breathing Exercise
       </h1>
       
@@ -24,7 +24,7 @@ export function Header({ onSkip, onSettings, phase }: HeaderProps) {
           variant="ghost"
           size="icon"
           onClick={onSettings}
-          className="text-gray-600 hover:text-gray-900"
+          className="text-white/80 hover:text-white hover:bg-white/20"
           aria-label="Settings"
         >
           <Settings className="h-5 w-5" />
@@ -35,7 +35,7 @@ export function Header({ onSkip, onSettings, phase }: HeaderProps) {
             variant="ghost"
             size="sm"
             onClick={onSkip}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-white/80 hover:text-white hover:bg-white/20"
           >
             <SkipForward className="h-4 w-4 mr-1" />
             Skip
