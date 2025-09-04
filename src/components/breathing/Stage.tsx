@@ -78,6 +78,13 @@ export function Stage({
         {/* Outer progress ring */}
         {isBreathingPhase && (
           <svg className="progress-ring" viewBox="0 0 400 400">
+            <defs>
+              <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="rgba(59, 130, 246, 0.8)" />
+                <stop offset="50%" stopColor="rgba(147, 51, 234, 0.8)" />
+                <stop offset="100%" stopColor="rgba(236, 72, 153, 0.8)" />
+              </linearGradient>
+            </defs>
             {/* Background ring */}
             <circle
               className="progress-ring-bg"
