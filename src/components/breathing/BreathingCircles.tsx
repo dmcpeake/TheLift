@@ -9,9 +9,9 @@ import { sendTelemetry } from './telemetry'
 import { playAudioCue, preloadAudio } from './audio'
 import './breathing.css'
 
-const DEFAULT_PACE: Pace = { in: 3, hold: 1, out: 4, label: 'standard' }
-const SHORT_PACE: Pace = { in: 2, hold: 1, out: 3, label: 'short' }
-const SLOW_PACE: Pace = { in: 4, hold: 1, out: 5, label: 'slow' }
+const DEFAULT_PACE: Pace = { in: 4, hold: 2, out: 4, label: 'standard' }
+const SHORT_PACE: Pace = { in: 3, hold: 1, out: 3, label: 'short' }
+const SLOW_PACE: Pace = { in: 5, hold: 3, out: 5, label: 'slow' }
 
 export function BreathingCircles(props: BreathingCirclesProps) {
   const {
