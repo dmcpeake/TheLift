@@ -99,7 +99,7 @@ export function ChildHome() {
   }
 
   const handleStartCheckIn = () => {
-    navigate('/child/check-in/wheel')
+    navigate('/child/breathing')
   }
 
 

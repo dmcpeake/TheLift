@@ -40,7 +40,7 @@ export function ClientDetails() {
   const [showEmailHistory, setShowEmailHistory] = useState(false)
 
 
-  // Sample data - in real implementation, fetch by id
+  // Complete client data - matches ClientsList.tsx
   const sampleClients = [
     {
       id: 'org-1',
@@ -137,6 +137,97 @@ export function ClientDetails() {
         { id: 'child-9', name: 'Avery T.', age: 8, status: 'active', lastCheckIn: '2024-08-22', totalCheckIns: 31, practitionerId: 'prac-4', practitionerName: 'Rachel Green' },
         { id: 'child-10', name: 'Quinn R.', age: 7, status: 'active', lastCheckIn: '2024-08-21', totalCheckIns: 24, practitionerId: 'prac-5', practitionerName: 'James Murphy' },
         { id: 'child-11', name: 'Sage H.', age: 9, status: 'needs_attention', lastCheckIn: '2024-08-19', totalCheckIns: 19, practitionerId: 'prac-5', practitionerName: 'James Murphy' }
+      ]
+    },
+    {
+      id: 'org-3',
+      name: 'Dr. Amanda Foster',
+      type: 'practitioner',
+      contactName: 'Dr. Amanda Foster',
+      contactEmail: 'amanda.foster@psychology-clinic.com',
+      phone: '01234 345678',
+      seatsAllocated: 25,
+      seatsUsed: 18,
+      status: 'active',
+      expiryDate: '2025-05-20',
+      createdDate: '2024-05-20',
+      lastActivity: '2024-08-22',
+      practitioners: [
+        {
+          id: 'prac-6',
+          name: 'Dr. Amanda Foster',
+          email: 'amanda.foster@psychology-clinic.com',
+          status: 'active',
+          joinDate: '2024-05-20',
+          childrenCount: 18,
+          lastActive: '2024-08-22',
+          orgId: 'org-3'
+        }
+      ],
+      children: [
+        { id: 'child-12', name: 'River N.', age: 8, status: 'active', lastCheckIn: '2024-08-22', totalCheckIns: 15, practitionerId: 'prac-6', practitionerName: 'Dr. Amanda Foster' },
+        { id: 'child-13', name: 'Phoenix L.', age: 6, status: 'active', lastCheckIn: '2024-08-21', totalCheckIns: 12, practitionerId: 'prac-6', practitionerName: 'Dr. Amanda Foster' },
+        { id: 'child-14', name: 'Rowan C.', age: 9, status: 'active', lastCheckIn: '2024-08-22', totalCheckIns: 18, practitionerId: 'prac-6', practitionerName: 'Dr. Amanda Foster' }
+      ]
+    },
+    {
+      id: 'org-4',
+      name: 'Emily Carter Counseling',
+      type: 'practitioner',
+      contactName: 'Emily Carter',
+      contactEmail: 'emily@cartercounseling.com',
+      phone: '01234 234567',
+      seatsAllocated: 15,
+      seatsUsed: 12,
+      status: 'expired',
+      expiryDate: '2024-07-01',
+      createdDate: '2024-07-01',
+      lastActivity: '2024-08-21',
+      practitioners: [
+        {
+          id: 'prac-7',
+          name: 'Emily Carter',
+          email: 'emily@cartercounseling.com',
+          status: 'active',
+          joinDate: '2024-07-01',
+          childrenCount: 12,
+          lastActive: '2024-08-21',
+          orgId: 'org-4'
+        }
+      ],
+      children: [
+        { id: 'child-15', name: 'Sky M.', age: 7, status: 'active', lastCheckIn: '2024-08-21', totalCheckIns: 8, practitionerId: 'prac-7', practitionerName: 'Emily Carter' },
+        { id: 'child-16', name: 'Ocean P.', age: 8, status: 'active', lastCheckIn: '2024-08-21', totalCheckIns: 6, practitionerId: 'prac-7', practitionerName: 'Emily Carter' }
+      ]
+    },
+    {
+      id: 'org-5',
+      name: 'Marcus Thompson Therapy',
+      type: 'practitioner',
+      contactName: 'Marcus Thompson',
+      contactEmail: 'marcus@thompson-therapy.co.uk',
+      phone: '01234 123456',
+      seatsAllocated: 20,
+      seatsUsed: 8,
+      status: 'deactivated',
+      expiryDate: '2025-04-15',
+      createdDate: '2024-04-15',
+      lastActivity: '2024-07-30',
+      practitioners: [
+        {
+          id: 'prac-8',
+          name: 'Marcus Thompson',
+          email: 'marcus@thompson-therapy.co.uk',
+          status: 'expired',
+          joinDate: '2024-04-15',
+          childrenCount: 8,
+          lastActive: '2024-07-30',
+          orgId: 'org-5'
+        }
+      ],
+      children: [
+        { id: 'child-17', name: 'Luna G.', age: 6, status: 'inactive', lastCheckIn: '2024-07-25', totalCheckIns: 14, practitionerId: 'prac-8', practitionerName: 'Marcus Thompson' },
+        { id: 'child-18', name: 'Atlas F.', age: 9, status: 'inactive', lastCheckIn: '2024-07-28', totalCheckIns: 11, practitionerId: 'prac-8', practitionerName: 'Marcus Thompson' }
       ]
     },
     {
@@ -297,7 +388,7 @@ export function ClientDetails() {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Client Not Found</h2>
           <p className="text-gray-600 mb-6">The requested client could not be found.</p>
-          <Link to="/admin/clients">
+          <Link to="/admin">
             <Button>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Clients

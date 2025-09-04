@@ -134,44 +134,41 @@ app.post('/server/auth/create-fresh-users', async (c) => {
   }
 })
 
-// Public test user setup endpoint (no auth required for setup)
-app.post('/server/create-demo-users', async (c) => {
+// Force create clean test users
+app.post('/server/force-create-users', async (c) => {
   try {
-    console.log('=== CREATING DEMO USERS ===')
+    console.log('=== FORCE CREATING CLEAN TEST USERS ===')
     
-    const users = [
-      { email: 'contact@demoschool.com', password: 'TestLift2024!', role: 'GroupContact', name: 'Sarah Thompson' },
-      { email: 'practitioner@demoschool.com', password: 'TestLift2024!', role: 'Practitioner', name: 'Michael Chen' },
-      { email: 'testchild@child.local', password: '1234', role: 'Child', name: 'Emma Davis' }
+    // Clear specific users first
+    const usersToCreate = [
+      { email: 'manager@example.com', password: 'password123', role: 'GroupContact', name: 'Test Manager' },
+      { email: 'practitioner@example.com', password: 'password123', role: 'Practitioner', name: 'Test Practitioner' }
     ]
 
     const results = []
 
-    for (const userData of users) {
-      try {
-        console.log(`Processing ${userData.email}...`)
-        
-        // List existing users to check if user already exists
-        const { data: existingUsers, error: listError } = await supabase.auth.admin.listUsers()
-        
-        if (listError) {
-          console.error('Error listing users:', listError)
-          results.push({ email: userData.email, status: 'error', error: listError.message })
-          continue
+    // Delete ALL users first to clean slate
+    console.log('Cleaning existing users...')
+    const { data: allUsers } = await supabase.auth.admin.listUsers()
+    if (allUsers?.users) {
+      for (const user of allUsers.users) {
+        try {
+          await supabase.auth.admin.deleteUser(user.id)
+          console.log(`Deleted user: ${user.email}`)
+        } catch (e) {
+          console.log(`Failed to delete ${user.email}:`, e)
         }
-        
-        const existing = existingUsers.users.find(u => u.email === userData.email)
-        
-        if (existing) {
-          console.log(`User ${userData.email} already exists, deleting first...`)
-          const { error: deleteError } = await supabase.auth.admin.deleteUser(existing.id)
-          if (deleteError) {
-            console.error(`Failed to delete existing user ${userData.email}:`, deleteError)
-          }
-        }
+      }
+    }
 
-        // Create new user
-        console.log(`Creating user: ${userData.email}`)
+    // Wait a moment
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    // Create fresh users
+    for (const userData of usersToCreate) {
+      try {
+        console.log(`Creating fresh user: ${userData.email}`)
+        
         const { data, error } = await supabase.auth.admin.createUser({
           email: userData.email,
           password: userData.password,
@@ -183,25 +180,30 @@ app.post('/server/create-demo-users', async (c) => {
         })
 
         if (error) {
-          console.error(`Failed to create ${userData.email}:`, error.message)
+          console.error(`Failed to create ${userData.email}:`, error)
           results.push({ email: userData.email, status: 'error', error: error.message })
         } else {
           console.log(`Successfully created ${userData.email}`)
-          results.push({ email: userData.email, status: 'success', id: data.user?.id })
+          results.push({ 
+            email: userData.email, 
+            status: 'success', 
+            id: data.user?.id,
+            password: userData.password 
+          })
         }
       } catch (e) {
-        console.error(`Exception with ${userData.email}:`, e)
+        console.error(`Exception creating ${userData.email}:`, e)
         results.push({ email: userData.email, status: 'error', error: e.message })
       }
     }
 
     return c.json({ 
       success: true, 
-      message: 'Demo users creation complete',
+      message: 'Force created clean test users',
       results: results
     })
   } catch (error) {
-    console.error('Setup failed:', error)
+    console.error('Force create failed:', error)
     return c.json({ error: error.message }, 500)
   }
 })

@@ -19,6 +19,7 @@ import { Sitemap } from '../components/marketing/Sitemap'
 // Practitioner Components
 import { PractitionerDashboard } from '../components/practitioner/PractitionerDashboard'
 import { AddChild } from '../components/practitioner/AddChild'
+import { EditChild } from '../components/practitioner/EditChild'
 import { BulkImportChildren } from '../components/practitioner/BulkImportChildren'
 import { ChildProfile } from '../components/practitioner/ChildProfile'
 import { InvitePractitioner } from '../components/practitioner/InvitePractitioner'
@@ -29,6 +30,7 @@ import { UserProfile } from '../components/shared/UserProfile'
 // Child Components
 import { ChildHome } from '../components/child/ChildHome'
 import { ChildOnboarding } from '../components/child/ChildOnboarding'
+import { BreathingRoute } from '../components/breathing/BreathingRoute'
 import { WellbeingWheel } from '../components/child/WellbeingWheel'
 import { MyGarden } from '../components/child/MyGarden'
 import { WrapUp } from '../components/child/WrapUp'
@@ -101,6 +103,12 @@ export function AppRoutes() {
           </ProtectedRoute>
         } />
         
+        <Route path="/children/:id/edit" element={
+          <ProtectedRoute allowedRoles={['Practitioner', 'GroupContact']}>
+            <EditChild />
+          </ProtectedRoute>
+        } />
+        
         {/* Admin-only routes for GroupContact */}
         <Route path="/invite/practitioner" element={
           <ProtectedRoute allowedRoles={['GroupContact']}>
@@ -136,6 +144,12 @@ export function AppRoutes() {
         <Route path="/child/home" element={
           <ProtectedRoute allowedRoles={['Child']}>
             <ChildHome />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/child/breathing" element={
+          <ProtectedRoute allowedRoles={['Child', 'Practitioner', 'GroupContact']}>
+            <BreathingRoute />
           </ProtectedRoute>
         } />
         

@@ -447,9 +447,9 @@ export function UnifiedLoginPage() {
                 onClick={async () => {
                   setLoadingButton('groupadmin')
                   try {
-                    // Auto-login to test group admin account (using existing manager user)
+                    // Auto-login to test group admin account (using demo user)
                     const { data, error } = await supabase.auth.signInWithPassword({
-                      email: 'manager@example.com',
+                      email: 'demo@groupadmin.com',
                       password: 'password123'
                     })
                     
@@ -462,20 +462,20 @@ export function UnifiedLoginPage() {
                     setError(`Group Admin login failed: ${error.message}. Click here to continue with demo mode.`)
                     
                     // Don't automatically navigate - let user see the error first
-                    // Add a manual bypass button instead
-                    setTimeout(() => {
-                      // Fallback to bypass if auto-login fails (after 3 seconds)
-                      setUser({ 
-                        id: 'test-group-admin-id', 
-                        email: 'manager@example.com',
-                        profile: { role: 'GroupContact', name: 'Test Group Admin' }
-                      })
-                      // Set proper mode for GroupContact
-                      if (currentMode !== 'practitioner') {
-                        toggleMode()
-                      }
-                      navigate('/dashboard')
-                    }, 3000)
+                    // Disable auto-fallback for debugging
+                    // setTimeout(() => {
+                    //   // Fallback to bypass if auto-login fails (after 3 seconds)
+                    //   setUser({ 
+                    //     id: 'test-group-admin-id', 
+                    //     email: 'quicktest@admin.com',
+                    //     profile: { role: 'GroupContact', name: 'Test Group Admin' }
+                    //   })
+                    //   // Set proper mode for GroupContact
+                    //   if (currentMode !== 'practitioner') {
+                    //     toggleMode()
+                    //   }
+                    //   navigate('/dashboard')
+                    // }, 3000)
                   } finally {
                     setLoadingButton(null)
                   }
@@ -491,7 +491,7 @@ export function UnifiedLoginPage() {
                 onClick={async () => {
                   setLoadingButton('practitioner')
                   try {
-                    // Auto-login to test practitioner account (using existing practitioner user)
+                    // Auto-login to test practitioner account (using verified user)
                     const { data, error } = await supabase.auth.signInWithPassword({
                       email: 'practitioner@example.com',
                       password: 'password123'
@@ -507,7 +507,7 @@ export function UnifiedLoginPage() {
                     // Fallback to bypass if auto-login fails
                     setUser({
                       id: 'test-prac-id',
-                      email: 'practitioner@example.com', 
+                      email: 'quicktest@practitioner.com', 
                       profile: { role: 'Practitioner', name: 'Test Practitioner' }
                     })
                     // Practitioners should use practitioner mode

@@ -5,7 +5,7 @@
 </head>
 <body>
     <h1>Create Demo Users in Supabase</h1>
-    <button onclick="createUsers()">Create Demo Users</button>
+    <button onclick="createUsers()">Create Demo Users (including demo@groupadmin.com)</button>
     <div id="result"></div>
 
     <script>
@@ -14,10 +14,11 @@
             resultDiv.innerHTML = 'Creating demo users...'
 
             try {
-                const response = await fetch('https://jxdkwfhsicynyvhkutjm.supabase.co/functions/v1/server/create-demo-users', {
+                const response = await fetch('https://jxdkwfhsicynyvhkutjm.supabase.co/functions/v1/server/auth/init-test-users', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4ZGt3ZmhzaWN5bnl2aGt1dGptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MjAxNTAsImV4cCI6MjA3MjI5NjE1MH0.ZuG6MjKYX2FM-WCIhzLyVRXA0x87kFgUvy-LlVM2QwY'
                     }
                 })
 
@@ -26,18 +27,13 @@
                 if (response.ok) {
                     resultDiv.innerHTML = `<div style="color: green;">
                         <h3>Success!</h3>
-                        <p><strong>Message:</strong> ${data.message}</p>
-                        <h4>Results:</h4>
-                        <ul>
-                            ${data.results.map(r => 
-                                `<li><strong>${r.email}:</strong> ${r.status} ${r.error ? '- ' + r.error : ''}</li>`
-                            ).join('')}
-                        </ul>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
                     </div>`
                 } else {
                     resultDiv.innerHTML = `<div style="color: red;">
                         <h3>Failed:</h3>
-                        <p>${data.error}</p>
+                        <p>Status: ${response.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
                     </div>`
                 }
             } catch (e) {

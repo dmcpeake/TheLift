@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-demo-mode',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
 }
 
@@ -24,6 +24,8 @@ serve(async (req) => {
   const serviceRoleKey = Deno.env.get('SERVICE_ROLE_KEY')!
   
   const supabase = createClient(supabaseUrl, serviceRoleKey)
+  
+  console.log('Request received:', req.method, pathname, 'Headers:', Object.fromEntries(req.headers.entries()))
 
   try {
     // Health check endpoint
@@ -107,6 +109,13 @@ serve(async (req) => {
           password: 'password123',
           name: 'Admin User',
           role: 'Account'
+        },
+        {
+          id: '10000000-0000-0000-0000-000000000002',
+          email: 'demo@groupadmin.com',
+          password: 'password123',
+          name: 'Demo Group Admin',
+          role: 'GroupContact'
         }
       ]
       
@@ -339,6 +348,55 @@ serve(async (req) => {
         },
         { headers: corsHeaders }
       )
+    }
+
+    // Simple test endpoint first
+    if (pathname === '/test' && req.method === 'POST') {
+      console.log('Test endpoint hit!')
+      return Response.json(
+        { success: true, message: 'Test endpoint working' },
+        { headers: corsHeaders }
+      )
+    }
+
+    // Add new child endpoint
+    if (pathname === '/children' && req.method === 'POST') {
+      console.log('Received request to add child')
+      
+      try {
+        const body = await req.json()
+        const { name, aboutMe, credentialsMode, credentials, practitionerId } = body
+        
+        console.log('Child data:', { name, aboutMe, credentials })
+        
+        if (!name) {
+          return Response.json(
+            { 
+              success: false, 
+              error: 'Child name is required' 
+            },
+            { status: 400, headers: corsHeaders }
+          )
+        }
+        
+        // For now, just return success without actually saving to database
+        console.log('Would create child:', name, 'with username:', credentials?.username)
+        
+        return Response.json(
+          {
+            success: true,
+            message: 'Child added successfully (demo mode)',
+            child: { name, credentials }
+          },
+          { headers: corsHeaders }
+        )
+      } catch (error) {
+        console.error('Error in children endpoint:', error)
+        return Response.json(
+          { success: false, error: error.message },
+          { status: 500, headers: corsHeaders }
+        )
+      }
     }
 
     // Debug endpoint to view all children
