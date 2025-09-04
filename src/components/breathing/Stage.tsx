@@ -31,6 +31,10 @@ export function Stage({
         return 1.5
       case 'exhale':
         return 1.0
+      case 'intro':
+        return 1.1 // Slight pulse for intro
+      case 'instruction':
+        return 1.0
       default:
         return 1.0
     }
@@ -115,13 +119,20 @@ export function Stage({
               ? 'bg-gradient-to-br from-purple-400 via-indigo-400 to-blue-400'
               : 'bg-gradient-to-br from-blue-400 via-indigo-400 to-purple-400'
           )}
+          style={{ 
+            width: '100%', 
+            height: '100%',
+            minWidth: '200px',
+            minHeight: '200px'
+          }}
           animate={{
-            scale: getCircleScale(),
+            scale: phase === 'intro' ? [1.0, 1.1, 1.0] : getCircleScale(),
             filter: phase === 'hold' ? 'brightness(1.2)' : 'brightness(1)'
           }}
           transition={{
-            duration: reducedMotion ? 0.3 : getPhaseDuration(),
-            ease: phase === 'inhale' ? 'easeOut' : phase === 'exhale' ? 'easeIn' : 'linear'
+            duration: phase === 'intro' ? 2 : (reducedMotion ? 0.3 : getPhaseDuration()),
+            ease: phase === 'inhale' ? 'easeOut' : phase === 'exhale' ? 'easeIn' : 'linear',
+            repeat: phase === 'intro' ? Infinity : 0
           }}
         >
           {/* Inner glow effect */}
