@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import { Phase, Pace } from './types'
+import { Phase, Pace, BreathingTechnique } from './types'
+import { SquareAnimation } from './animations/SquareAnimation'
+import { RainbowAnimation } from './animations/RainbowAnimation'
+import { FlowerAnimation } from './animations/FlowerAnimation'
 
 interface StageProps {
   phase: Phase
   cycle: number
   totalCycles: number
   pace: Pace
+  technique?: BreathingTechnique
   reducedMotion: boolean
   captions: boolean
   highContrast: boolean
@@ -16,6 +20,7 @@ export function Stage({
   cycle,
   totalCycles,
   pace,
+  technique,
   reducedMotion,
   captions,
   highContrast
@@ -75,9 +80,7 @@ export function Stage({
   const getInstructionText = () => {
     switch (phase) {
       case 'intro':
-        return 'get ready'
-      case 'instruction':
-        return 'follow the circle'
+        return 'tap start'
       case 'inhale':
         return 'breathe in'
       case 'hold':
@@ -126,96 +129,105 @@ export function Stage({
     return Math.min((totalProgress / totalDuration) * 100, 100)
   }
 
-  const isBreathingPhase = ['inhale', 'hold', 'exhale'].includes(phase)
+  const isBreathingPhase = ['inhale', 'hold', 'exhale', 'holdAfter'].includes(phase)
   const circumference = 2 * Math.PI * 180 // radius = 180
   const strokeDashoffset = circumference - (getProgressPercent() / 100) * circumference
 
+  // Render technique-specific animation
+  const renderAnimation = () => {
+    const techniqueId = technique?.id || 'balloon'
+    
+    switch (techniqueId) {
+      case 'square':
+        return (
+          <SquareAnimation
+            phase={phase}
+            pace={pace}
+            cycle={cycle}
+            totalCycles={totalCycles}
+          />
+        )
+      case 'rainbow':
+        return (
+          <RainbowAnimation
+            phase={phase}
+            pace={pace}
+            cycle={cycle}
+            totalCycles={totalCycles}
+          />
+        )
+      case 'flower':
+        return (
+          <FlowerAnimation
+            phase={phase}
+            pace={pace}
+            cycle={cycle}
+            totalCycles={totalCycles}
+          />
+        )
+      default:
+        // Balloon breathing (default circle animation)
+        return (
+          <div className="breathing-circle-container">
+            {/* Outer progress ring - always visible */}
+            <svg className="progress-ring" viewBox="0 0 400 400">
+              <defs>
+                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="rgba(59, 130, 246, 0.8)" />
+                  <stop offset="50%" stopColor="rgba(147, 51, 234, 0.8)" />
+                  <stop offset="100%" stopColor="rgba(236, 72, 153, 0.8)" />
+                </linearGradient>
+              </defs>
+              <circle className="progress-ring-bg" cx="200" cy="200" r="180" />
+              <circle
+                className="progress-ring-progress"
+                cx="200"
+                cy="200"
+                r="180"
+                style={{
+                  strokeDasharray: circumference,
+                  strokeDashoffset: strokeDashoffset,
+                  transitionDuration: `${
+                    phase === 'inhale' ? pace.in :
+                    phase === 'hold' ? pace.hold :
+                    phase === 'exhale' ? pace.out :
+                    4
+                  }s`,
+                  transitionTimingFunction: 'linear'
+                }}
+              />
+            </svg>
+
+            {/* Inner balloon circle */}
+            <div 
+              className={highContrast ? 'breathing-circle high-contrast' : circleClass}
+              style={{
+                transitionProperty: 'transform, background',
+                transitionDuration: `${
+                  phase === 'inhale' ? pace.in :
+                  phase === 'hold' ? pace.hold :
+                  phase === 'exhale' ? pace.out :
+                  4
+                }s`,
+                transitionTimingFunction: 'cubic-bezier(0.25, 0.8, 0.25, 1)',
+                borderRadius: '50%'
+              }}
+            >
+              <div className="breathing-text">
+                <h2 className="breathing-instruction">{getInstructionText()}</h2>
+                {isBreathingPhase && (
+                  <p className="breathing-counter">{cycle} of {totalCycles}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+    }
+  }
+
   return (
     <div className="breathing-stage">
-      <div className="breathing-circle-container">
-        
-        {/* Outer progress ring - always present but hidden when not breathing */}
-        <svg className="progress-ring" viewBox="0 0 400 400" style={{ opacity: isBreathingPhase ? 1 : 0 }}>
-          <defs>
-            <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="rgba(59, 130, 246, 0.8)" />
-              <stop offset="50%" stopColor="rgba(147, 51, 234, 0.8)" />
-              <stop offset="100%" stopColor="rgba(236, 72, 153, 0.8)" />
-            </linearGradient>
-          </defs>
-          {/* Background ring */}
-          <circle
-            className="progress-ring-bg"
-            cx="200"
-            cy="200"
-            r="180"
-          />
-          {/* Progress ring */}
-          <circle
-            className="progress-ring-progress"
-            cx="200"
-            cy="200"
-            r="180"
-            style={{
-              strokeDasharray: circumference,
-              strokeDashoffset: strokeDashoffset,
-              transitionDuration: `${
-                phase === 'inhale' ? pace.in :
-                phase === 'hold' ? pace.hold :
-                phase === 'exhale' ? pace.out :
-                4
-              }s`,
-              transitionTimingFunction: 'linear'
-            }}
-          />
-        </svg>
-
-        {/* Inner white circle */}
-        <div 
-          className={highContrast ? 'breathing-circle high-contrast' : circleClass}
-          style={{
-            transitionProperty: 'transform, background',
-            transitionDuration: `${
-              phase === 'inhale' ? pace.in :
-              phase === 'hold' ? pace.hold :
-              phase === 'exhale' ? pace.out :
-              4
-            }s`,
-            transitionTimingFunction: 'cubic-bezier(0.25, 0.8, 0.25, 1)',
-            borderRadius: '50%'
-          }}
-        >
-          {/* Text inside circle */}
-          <div className="breathing-text">
-            <h2 className="breathing-instruction">
-              {getInstructionText()}
-            </h2>
-            {isBreathingPhase && (
-              <p className="breathing-counter">
-                {cycle} of {totalCycles}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Phase instruction below - always present to maintain layout */}
-      {captions && (
-        <div style={{ marginTop: '2rem', textAlign: 'center', maxWidth: '28rem', minHeight: '3rem' }}>
-          {phase === 'instruction' && (
-            <p style={{ 
-              fontSize: '1.25rem', 
-              fontWeight: '300',
-              color: highContrast ? 'white' : 'rgba(255, 255, 255, 0.8)',
-              lineHeight: '1.6'
-            }}>
-              Watch the circle grow as you breathe in,
-              <br />
-              and shrink as you breathe out
-            </p>
-          )}
-        </div>
-      )}
+      {renderAnimation()}
     </div>
   )
 }

@@ -2,7 +2,21 @@ export interface Pace {
   in: number
   hold: number
   out: number
-  label?: 'short' | 'standard' | 'slow' | string
+  holdAfter?: number  // For square breathing
+  label?: string
+}
+
+export interface BreathingTechnique {
+  id: string
+  name: string
+  description: string
+  pace: Pace
+  cycles?: number
+  theme?: {
+    primaryColor: string
+    secondaryColor: string
+    icon?: string
+  }
 }
 
 export interface BreathingCirclesProps {
@@ -17,7 +31,7 @@ export interface BreathingCirclesProps {
   onExit?: (reason: 'skip' | 'close') => void
 }
 
-export type Phase = 'intro' | 'instruction' | 'inhale' | 'hold' | 'exhale' | 'complete'
+export type Phase = 'intro' | 'instruction' | 'inhale' | 'hold' | 'exhale' | 'holdAfter' | 'complete'
 
 export interface BreathingSettings {
   paceLabel: 'short' | 'standard' | 'slow'

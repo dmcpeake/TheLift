@@ -16,8 +16,8 @@ function getAudioContext(): AudioContext | null {
   return audioContext
 }
 
-// Generate a simple tone
-function createTone(frequency: number, duration: number, type: OscillatorType = 'sine'): AudioBuffer | null {
+// Generate a calming chime sound
+function createChime(frequency: number, duration: number, harmonics: number[] = [1, 2, 3]): AudioBuffer | null {
   const ctx = getAudioContext()
   if (!ctx) return null
 
@@ -28,11 +28,17 @@ function createTone(frequency: number, duration: number, type: OscillatorType = 
 
   for (let i = 0; i < length; i++) {
     const t = i / sampleRate
-    const envelope = Math.min(1, Math.min(t * 10, (duration - t) * 10)) // Fade in/out
+    // Softer attack and longer decay for calming effect
+    const envelope = Math.pow(Math.sin(Math.PI * t / duration), 0.5) * Math.exp(-t * 2)
     
-    if (type === 'sine') {
-      channel[i] = Math.sin(2 * Math.PI * frequency * t) * envelope * 0.3
-    }
+    let sample = 0
+    // Add harmonics for richer, more pleasant sound
+    harmonics.forEach((harmonic, index) => {
+      const amp = 1 / (index + 1) // Each harmonic quieter than the last
+      sample += Math.sin(2 * Math.PI * frequency * harmonic * t) * amp
+    })
+    
+    channel[i] = sample * envelope * 0.15 // Much quieter, more subtle
   }
 
   return buffer
@@ -43,11 +49,11 @@ export function preloadAudio() {
   const ctx = getAudioContext()
   if (!ctx) return
 
-  // Create different tones for each phase
-  audioBuffers.inhale = createTone(440, 0.3)! // A4
-  audioBuffers.hold = createTone(523, 0.2)! // C5
-  audioBuffers.exhale = createTone(349, 0.4)! // F4
-  audioBuffers.success = createTone(659, 0.5)! // E5
+  // Create calming chimes for each phase
+  audioBuffers.inhale = createChime(523.25, 0.8, [1, 2])! // C5 with soft harmonics
+  audioBuffers.hold = createChime(659.25, 0.6, [1])! // E5 pure tone
+  audioBuffers.exhale = createChime(392, 1.0, [1, 1.5, 2])! // G4 with warm harmonics
+  audioBuffers.success = createChime(783.99, 1.2, [1, 2, 3, 4])! // G5 with rich harmonics
 }
 
 // Play an audio cue
@@ -59,9 +65,9 @@ export function playAudioCue(cue: 'inhale' | 'hold' | 'exhale' | 'success') {
     const source = ctx.createBufferSource()
     source.buffer = audioBuffers[cue]
     
-    // Add a bit of reverb/echo for calming effect
+    // Reduced volume for gentler sound
     const gainNode = ctx.createGain()
-    gainNode.gain.value = 0.5
+    gainNode.gain.value = 0.3
     
     source.connect(gainNode)
     gainNode.connect(ctx.destination)

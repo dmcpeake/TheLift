@@ -7,18 +7,19 @@ interface HeaderProps {
   onSkip: () => void
   onSettings: () => void
   phase: Phase
+  techniqueName?: string
 }
 
-export function Header({ onSkip, onSettings, phase }: HeaderProps) {
+export function Header({ onSkip, onSettings, phase, techniqueName }: HeaderProps) {
   const showSkip = phase !== 'complete'
   
   return (
     <div className="breathing-header">
       <h1 className="breathing-title">
-        Breathing Exercise
+        {techniqueName || 'Breathing Exercise'}
       </h1>
       
-      <div style={{ display: 'flex', gap: '0.5rem' }}>
+      <div style={{ position: 'absolute', right: '2rem', display: 'flex', gap: '0.5rem' }}>
         <Button
           variant="ghost"
           size="icon"

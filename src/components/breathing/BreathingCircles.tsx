@@ -1,22 +1,20 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BreathingCirclesProps, Phase, Pace, BreathingSettings } from './types'
+import { BreathingCirclesProps, Phase, Pace, BreathingSettings, BreathingTechnique } from './types'
 import { Header } from './Header'
 import { Stage } from './Stage'
 import { Footer } from './Footer'
 import { Settings } from './Settings'
+import { TechniqueSelector } from './TechniqueSelector'
 import { sendTelemetry } from './telemetry'
 import { playAudioCue, preloadAudio } from './audio'
+import { BREATHING_TECHNIQUES, getBreathingTechnique } from './techniques'
 import './breathing.css'
-
-const DEFAULT_PACE: Pace = { in: 4, hold: 2, out: 4, label: 'standard' }
-const SHORT_PACE: Pace = { in: 3, hold: 1, out: 3, label: 'short' }
-const SLOW_PACE: Pace = { in: 5, hold: 3, out: 5, label: 'slow' }
 
 export function BreathingCircles(props: BreathingCirclesProps) {
   const {
-    cycles = 5,
-    pace = DEFAULT_PACE,
+    cycles: defaultCycles = 5,
+    pace: defaultPace,
     muted: initialMuted = true,
     captions: initialCaptions = true,
     reducedMotion: initialReducedMotion = false,
@@ -31,9 +29,16 @@ export function BreathingCircles(props: BreathingCirclesProps) {
   const [cycle, setCycle] = useState(1)
   const [running, setRunning] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [showTechniqueSelector, setShowTechniqueSelector] = useState(false)
+  const [selectedTechniqueId, setSelectedTechniqueId] = useState('balloon')
   const [sessionId] = useState(() => crypto.randomUUID())
   const startTimeRef = useRef<number>(Date.now())
   const phaseTimerRef = useRef<NodeJS.Timeout>()
+
+  // Get current technique
+  const currentTechnique = getBreathingTechnique(selectedTechniqueId) || BREATHING_TECHNIQUES[0]
+  const cycles = currentTechnique.cycles || defaultCycles
+  const pace = currentTechnique.pace
 
   // Settings
   const [settings, setSettings] = useState<BreathingSettings>(() => {
@@ -44,7 +49,7 @@ export function BreathingCircles(props: BreathingCirclesProps) {
       } catch {}
     }
     return {
-      paceLabel: pace.label as 'standard' || 'standard',
+      paceLabel: 'standard',
       captions: initialCaptions,
       reducedMotion: initialReducedMotion,
       muted: initialMuted,
@@ -52,9 +57,6 @@ export function BreathingCircles(props: BreathingCirclesProps) {
     }
   })
 
-  // Get current pace based on settings
-  const currentPace = settings.paceLabel === 'short' ? SHORT_PACE : 
-                      settings.paceLabel === 'slow' ? SLOW_PACE : DEFAULT_PACE
 
   // Preload audio on mount
   useEffect(() => {
@@ -88,15 +90,21 @@ export function BreathingCircles(props: BreathingCirclesProps) {
   const nextPhase = useCallback(() => {
     setPhase((currentPhase) => {
       switch (currentPhase) {
-        case 'intro':
-          return 'instruction'
-        case 'instruction':
-          return 'inhale'
         case 'inhale':
           return 'hold'
         case 'hold':
           return 'exhale'
         case 'exhale':
+          // Check if this technique has holdAfter (square breathing)
+          if (pace.holdAfter && pace.holdAfter > 0) {
+            return 'holdAfter'
+          } else if (cycle < cycles) {
+            setCycle(prev => prev + 1)
+            return 'inhale'
+          } else {
+            return 'complete'
+          }
+        case 'holdAfter':
           if (cycle < cycles) {
             setCycle(prev => prev + 1)
             return 'inhale'
@@ -107,7 +115,7 @@ export function BreathingCircles(props: BreathingCirclesProps) {
           return 'complete'
       }
     })
-  }, [cycle, cycles])
+  }, [cycle, cycles, pace])
 
   // Phase timing and effects
   useEffect(() => {
@@ -120,52 +128,63 @@ export function BreathingCircles(props: BreathingCirclesProps) {
 
     let duration = 0
     
+    // Send telemetry on first inhale
+    if (phase === 'inhale' && cycle === 1 && !running) {
+      sendTelemetry({
+        sessionId,
+        event: 'breathing_started',
+        pace: pace,
+        muted: settings.muted,
+        reducedMotion: settings.reducedMotion,
+        ts: new Date().toISOString()
+      })
+    }
+    
     switch (phase) {
-      case 'intro':
-        sendTelemetry({
-          sessionId,
-          event: 'breathing_started',
-          pace: currentPace,
-          muted: settings.muted,
-          reducedMotion: settings.reducedMotion,
-          ts: new Date().toISOString()
-        })
-        duration = 3000
-        break
-      
-      case 'instruction':
-        duration = 5000
-        break
-      
       case 'inhale':
         if (!settings.muted) playAudioCue('inhale')
         onProgress?.(cycle, 'inhale', 0)
-        duration = currentPace.in * 1000
+        duration = pace.in * 1000
         break
       
       case 'hold':
         if (!settings.muted) playAudioCue('hold')
         onProgress?.(cycle, 'hold', 0)
-        duration = currentPace.hold * 1000
+        duration = pace.hold * 1000
         break
       
       case 'exhale':
         if (!settings.muted) playAudioCue('exhale')
         onProgress?.(cycle, 'exhale', 0)
-        duration = currentPace.out * 1000
+        duration = pace.out * 1000
         
-        // Log cycle completion
+        // Only log cycle completion if no holdAfter phase
+        if (!pace.holdAfter || pace.holdAfter === 0) {
+          sendTelemetry({
+            sessionId,
+            event: 'breathing_cycle_completed',
+            cycle,
+            pace: pace,
+            ts: new Date().toISOString()
+          })
+        }
+        break
+      
+      case 'holdAfter':
+        if (!settings.muted) playAudioCue('hold')
+        duration = (pace.holdAfter || 0) * 1000
+        
+        // Log cycle completion after final hold
         sendTelemetry({
           sessionId,
           event: 'breathing_cycle_completed',
           cycle,
-          pace: currentPace,
+          pace: pace,
           ts: new Date().toISOString()
         })
         break
       
       case 'complete':
-        if (!settings.muted) playAudioCue('success')
         const elapsedMs = Date.now() - startTimeRef.current
         sendTelemetry({
           sessionId,
@@ -190,7 +209,7 @@ export function BreathingCircles(props: BreathingCirclesProps) {
     phase,
     cycle,
     cycles,
-    currentPace,
+    pace,
     settings.muted,
     settings.reducedMotion,
     sessionId,
@@ -202,6 +221,7 @@ export function BreathingCircles(props: BreathingCirclesProps) {
   // Handlers
   const handleStart = () => {
     startTimeRef.current = Date.now()
+    setPhase('inhale')
     setRunning(true)
   }
 
@@ -245,11 +265,28 @@ export function BreathingCircles(props: BreathingCirclesProps) {
         )}
       </AnimatePresence>
 
+      {/* Technique Selector */}
+      <TechniqueSelector
+        selectedId={selectedTechniqueId}
+        onSelect={(id) => {
+          setSelectedTechniqueId(id)
+          // Reset when changing technique
+          if (running) {
+            setRunning(false)
+            setPhase('intro')
+            setCycle(1)
+          }
+        }}
+        isOpen={showTechniqueSelector}
+        onToggle={() => setShowTechniqueSelector(!showTechniqueSelector)}
+      />
+
       {/* Header */}
       <Header 
         onSkip={handleSkip}
         onSettings={() => setShowSettings(true)}
         phase={phase}
+        techniqueName={currentTechnique.name}
       />
 
       {/* Main Stage */}
@@ -257,7 +294,8 @@ export function BreathingCircles(props: BreathingCirclesProps) {
         phase={phase}
         cycle={cycle}
         totalCycles={cycles}
-        pace={currentPace}
+        pace={pace}
+        technique={currentTechnique}
         reducedMotion={settings.reducedMotion}
         captions={settings.captions}
         highContrast={settings.highContrast}

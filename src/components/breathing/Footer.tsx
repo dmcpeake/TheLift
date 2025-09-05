@@ -19,7 +19,7 @@ export function Footer({
   onResume,
   onContinue
 }: FooterProps) {
-  const isBreathingPhase = ['inhale', 'hold', 'exhale'].includes(phase)
+  const isBreathingPhase = ['inhale', 'hold', 'exhale', 'holdAfter'].includes(phase)
   
   return (
     <div className="breathing-footer">
