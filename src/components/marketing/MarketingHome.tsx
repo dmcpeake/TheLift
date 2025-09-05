@@ -131,14 +131,14 @@ export function MarketingHome() {
               </h1>
               
               <p className="text-xl text-gray-600 mb-8 max-w-xl">
-                The Lift gives kids a safe space to reflect and have conversations so problems don't take root
+                Coming soon: The revolutionary platform that gives kids a safe space to reflect and have conversations so problems don't take root
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/contact">
+                <Link to="/waitlist">
                   <Button className="bg-gray-900 hover:bg-gray-800 text-lg px-8 py-4 rounded-full">
-                    <Calendar className="h-5 w-5 mr-2" />
-                    Request Demo
+                    <Heart className="h-5 w-5 mr-2" />
+                    Join Waitlist
                   </Button>
                 </Link>
                 <Link to="/how-it-works">
@@ -314,25 +314,25 @@ export function MarketingHome() {
         </div>
       </section>
 
-      {/* Demo Request CTA Section */}
+      {/* Waitlist CTA Section */}
       <section className="py-20 bg-gray-900 text-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold mb-6">Ready to see The Lift in action?</h2>
+          <h2 className="text-4xl font-bold mb-6">Be first to access The Lift</h2>
           <p className="text-xl mb-8 text-gray-300">
-            Schedule a personalized demo and discover how The Lift can transform your approach to child wellbeing.
+            Join our waitlist and be among the first to transform your approach to child wellbeing when we launch.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/contact">
+            <Link to="/waitlist">
               <Button className="bg-white text-gray-900 hover:bg-gray-100 text-lg px-8 py-4 rounded-full">
-                <Calendar className="h-5 w-5 mr-2" />
-                Schedule Demo
+                <Heart className="h-5 w-5 mr-2" />
+                Join Waitlist
               </Button>
             </Link>
-            <Link to="/pricing">
+            <Link to="/how-it-works">
               <Button variant="outline" className="border-gray-300 bg-transparent text-white hover:bg-gray-800 text-lg px-8 py-4 rounded-full">
-                <Award className="h-5 w-5 mr-2" />
-                View Pricing
+                <BookOpen className="h-5 w-5 mr-2" />
+                Learn More
               </Button>
             </Link>
           </div>
