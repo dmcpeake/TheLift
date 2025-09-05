@@ -143,10 +143,10 @@ export function About() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/contact">
+            <Link to="/waitlist">
               <Button className="bg-gray-900 hover:bg-gray-800 text-lg px-8 py-4 rounded-full">
-                <Calendar className="h-5 w-5 mr-2" />
-                Schedule Demo
+                <Heart className="h-5 w-5 mr-2" />
+                Join Waitlist
               </Button>
             </Link>
             <Link to="/how-it-works">
@@ -348,10 +348,10 @@ export function About() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/contact">
+            <Link to="/waitlist">
               <Button className="bg-white text-gray-900 hover:bg-gray-100 text-lg px-8 py-4 rounded-full">
-                <Calendar className="h-5 w-5 mr-2" />
-                Schedule Demo
+                <Heart className="h-5 w-5 mr-2" />
+                Join Waitlist
               </Button>
             </Link>
             <Link to="/how-it-works">
@@ -400,7 +400,7 @@ export function About() {
             <div>
               <h4 className="mb-4">Support</h4>
               <div className="space-y-2 text-gray-400">
-                <Link to="/contact" className="block hover:text-white transition-colors">Contact Us</Link>
+                <Link to="/waitlist" className="block hover:text-white transition-colors">Join Waitlist</Link>
                 <Link to="/legal" className="block hover:text-white transition-colors">Help Center</Link>
                 <Link to="/legal" className="block hover:text-white transition-colors">Training</Link>
               </div>

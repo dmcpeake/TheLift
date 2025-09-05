@@ -375,7 +375,7 @@ export function MarketingHome() {
             <div>
               <h4 className="font-bold mb-4">Support</h4>
               <div className="space-y-2 text-gray-400">
-                <Link to="/contact" className="block hover:text-white transition-colors">Contact Us</Link>
+                <Link to="/waitlist" className="block hover:text-white transition-colors">Join Waitlist</Link>
                 <Link to="/legal" className="block hover:text-white transition-colors">Help Center</Link>
                 <Link to="/legal" className="block hover:text-white transition-colors">Training</Link>
               </div>

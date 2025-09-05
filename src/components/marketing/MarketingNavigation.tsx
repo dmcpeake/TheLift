@@ -53,14 +53,14 @@ export function MarketingNavigation() {
               Pricing
             </Link>
             <Link 
-              to="/contact" 
+              to="/waitlist" 
               className={`transition-colors ${
-                isActive('/contact') 
+                isActive('/waitlist') 
                   ? 'text-gray-900 font-medium' 
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Contact
+              Waitlist
             </Link>
           </div>
           
@@ -68,9 +68,9 @@ export function MarketingNavigation() {
             <Link to="/login">
               <Button variant="outline">Sign In</Button>
             </Link>
-            <Link to="/contact">
+            <Link to="/waitlist">
               <Button className="bg-gray-900 hover:bg-gray-800">
-                Request Demo
+                Join Waitlist
               </Button>
             </Link>
           </div>

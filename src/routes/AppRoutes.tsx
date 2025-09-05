@@ -13,6 +13,7 @@ import { About } from '../components/marketing/About'
 import { HowItWorks } from '../components/marketing/HowItWorks'
 import { Pricing } from '../components/marketing/Pricing'
 import { Contact } from '../components/marketing/Contact'
+import { Waitlist } from '../components/marketing/Waitlist'
 import { Legal } from '../components/marketing/Legal'
 import { Sitemap } from '../components/marketing/Sitemap'
 
@@ -50,7 +51,7 @@ export function AppRoutes() {
   
   // Determine if we're in a child-specific route (more specific matching)
   const isChildApp = location.pathname.startsWith('/child/') || location.pathname === '/child/onboarding'
-  const isMarketingApp = ['/', '/about', '/how-it-works', '/pricing', '/contact', '/legal', '/sitemap'].some(path => 
+  const isMarketingApp = ['/', '/about', '/how-it-works', '/pricing', '/contact', '/waitlist', '/legal', '/sitemap'].some(path => 
     location.pathname === path || location.pathname.startsWith('/legal')
   )
   const isAuthApp = ['/login', '/admin/login'].includes(location.pathname)
@@ -69,6 +70,7 @@ export function AppRoutes() {
         <Route path="/how-it-works" element={<HowItWorks />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/waitlist" element={<Waitlist />} />
         <Route path="/legal" element={<Legal />} />
         <Route path="/legal/terms" element={<Legal section="terms" />} />
         <Route path="/legal/privacy" element={<Legal section="privacy" />} />

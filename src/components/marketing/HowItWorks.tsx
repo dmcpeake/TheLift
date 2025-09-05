@@ -267,10 +267,10 @@ export function HowItWorks() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/contact">
+            <Link to="/waitlist">
               <Button className="bg-gray-900 hover:bg-gray-800 text-lg px-8 py-4 rounded-full">
-                <Calendar className="h-5 w-5 mr-2" />
-                Schedule Demo
+                <Heart className="h-5 w-5 mr-2" />
+                Join Waitlist
               </Button>
             </Link>
             <Button variant="outline" className="text-lg px-8 py-4 rounded-full">
@@ -496,14 +496,14 @@ export function HowItWorks() {
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-4xl mb-6">Ready to get started?</h2>
           <p className="text-xl mb-8 text-gray-300">
-            Book a personalized demo to see how The Lift can transform your approach to child wellbeing.
+            Join our waitlist to be first to access The Lift when we launch and transform your approach to child wellbeing.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/contact">
+            <Link to="/waitlist">
               <Button className="bg-white text-gray-900 hover:bg-gray-100 text-lg px-8 py-4 rounded-full">
-                <Calendar className="h-5 w-5 mr-2" />
-                Schedule Demo
+                <Heart className="h-5 w-5 mr-2" />
+                Join Waitlist
               </Button>
             </Link>
             <Link to="/pricing">
@@ -552,7 +552,7 @@ export function HowItWorks() {
             <div>
               <h4 className="mb-4">Support</h4>
               <div className="space-y-2 text-gray-400">
-                <Link to="/contact" className="block hover:text-white transition-colors">Contact Us</Link>
+                <Link to="/waitlist" className="block hover:text-white transition-colors">Join Waitlist</Link>
                 <Link to="/legal" className="block hover:text-white transition-colors">Help Center</Link>
                 <Link to="/legal" className="block hover:text-white transition-colors">Training</Link>
               </div>
