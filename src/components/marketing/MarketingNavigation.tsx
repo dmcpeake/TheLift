@@ -11,68 +11,22 @@ export function MarketingNavigation() {
   }
 
   return (
-    <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 py-4">
+    <nav className="bg-white/80 backdrop-blur-sm sticky top-0 z-50" style={{ borderBottom: '1px solid #e5e5e5' }}>
+      <div className="max-w-7xl mx-auto px-6 py-5">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
-              <Heart className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-gray-900">The Lift</span>
+            <img src="/TheLiftLogo.svg" alt="The Lift" className="h-10" style={{ imageRendering: 'auto', shapeRendering: 'geometricPrecision' }} />
           </Link>
           
-          <div className="hidden md:flex items-center gap-8">
-            <Link 
-              to="/about" 
-              className={`transition-colors ${
-                isActive('/about') 
-                  ? 'text-gray-900 font-medium' 
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              About
-            </Link>
-            <Link 
-              to="/how-it-works" 
-              className={`transition-colors ${
-                isActive('/how-it-works') 
-                  ? 'text-gray-900 font-medium' 
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              How It Works
-            </Link>
-            <Link 
-              to="/pricing" 
-              className={`transition-colors ${
-                isActive('/pricing') 
-                  ? 'text-gray-900 font-medium' 
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Pricing
-            </Link>
-            <Link 
-              to="/waitlist" 
-              className={`transition-colors ${
-                isActive('/waitlist') 
-                  ? 'text-gray-900 font-medium' 
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Waitlist
-            </Link>
-          </div>
-          
-          <div className="flex items-center gap-4">
+          <div className="flex items-center" style={{ gap: '20px' }}>
             <Link to="/login">
-              <Button variant="outline">Sign In</Button>
+              <Button variant="outline" className="h-10 rounded flex items-center justify-center pt-2.5 pb-2" style={{ color: '#3F7A9A', borderColor: '#3F7A9A' }}>SIGN IN</Button>
             </Link>
-            <Link to="/waitlist">
-              <Button className="bg-gray-900 hover:bg-gray-800">
-                Join Waitlist
+            <a href="#waitlist-form">
+              <Button className="h-10 rounded flex items-center justify-center pt-2.5 pb-2" style={{ backgroundColor: '#3F7A9A', color: 'white' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2F5A7A'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3F7A9A'}>
+                JOIN WAITLIST
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </div>
