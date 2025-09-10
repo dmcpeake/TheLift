@@ -68,6 +68,26 @@ export function Navigation() {
             <div className="h-4 w-px bg-gray-300 mx-3"></div>
           )}
 
+          {/* Admin Links */}
+          {isAdmin && (
+            <>
+              <Link
+                to="/admin"
+                className="px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:text-gray-700"
+              >
+                Dashboard
+              </Link>
+              <div className="h-4 w-px bg-gray-300 mx-3"></div>
+              <Link
+                to="/admin/waitlist"
+                className="px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:text-gray-700"
+              >
+                Waitlist
+              </Link>
+              <div className="h-4 w-px bg-gray-300 mx-3"></div>
+            </>
+          )}
+
           {/* Account Menu for all users */}
           <div className="flex items-center">
             <DropdownMenu open={isProfileOpen} onOpenChange={setIsProfileOpen}>

@@ -44,6 +44,7 @@ import { AdminLoginPage } from '../components/admin/AdminLoginPage'
 import { CreateClient } from '../components/admin/CreateClient'
 import { ClientDetails } from '../components/admin/ClientDetails'
 import { EditClient } from '../components/admin/EditClient'
+import { WaitlistManagement } from '../components/admin/WaitlistManagement'
 
 export function AppRoutes() {
   const { user } = React.useContext(AuthContext)
@@ -209,6 +210,12 @@ export function AppRoutes() {
         <Route path="/admin/clients/:id/edit" element={
           <ProtectedRoute allowedRoles={['Account']}>
             <EditClient />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/waitlist" element={
+          <ProtectedRoute allowedRoles={['Account']}>
+            <WaitlistManagement />
           </ProtectedRoute>
         } />
         
