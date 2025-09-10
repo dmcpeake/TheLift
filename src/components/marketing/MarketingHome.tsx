@@ -37,7 +37,7 @@ export function MarketingHome() {
   const [submitted, setSubmitted] = useState(false)
   const [rocketAnimation, setRocketAnimation] = useState(null)
   const [thinkingAnimation, setThinkingAnimation] = useState(null)
-  const [speechAnimation, setSpeechAnimation] = useState(null)
+  const [thumbUpAnimation, setThumbUpAnimation] = useState(null)
   const [puzzleAnimation, setPuzzleAnimation] = useState(null)
 
   // Load the Lottie animations
@@ -52,10 +52,10 @@ export function MarketingHome() {
       .then(data => setThinkingAnimation(data))
       .catch(error => console.error('Error loading thinking animation:', error))
       
-    fetch('/theo-speech.json')
+    fetch('/theo-thumb-up.json')
       .then(response => response.json())
-      .then(data => setSpeechAnimation(data))
-      .catch(error => console.error('Error loading speech animation:', error))
+      .then(data => setThumbUpAnimation(data))
+      .catch(error => console.error('Error loading thumb-up animation:', error))
       
     fetch('/theo-puzzle.json')
       .then(response => response.json())
@@ -123,7 +123,7 @@ export function MarketingHome() {
       icon: Users,
       borderColor: 'bg-cyan-400',
       animationType: 'lottie',
-      animationFile: '/theo-speech.json'
+      animationFile: '/theo-thumb-up.json'
     },
     {
       from: 'Early signs',
@@ -307,8 +307,8 @@ export function MarketingHome() {
                       let animationData = null;
                       if (transformation.animationFile === '/theo-thinking.json') {
                         animationData = thinkingAnimation;
-                      } else if (transformation.animationFile === '/theo-speech.json') {
-                        animationData = speechAnimation;
+                      } else if (transformation.animationFile === '/theo-thumb-up.json') {
+                        animationData = thumbUpAnimation;
                       } else if (transformation.animationFile === '/theo-puzzle.json') {
                         animationData = puzzleAnimation;
                       }
