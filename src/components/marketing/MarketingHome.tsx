@@ -202,7 +202,7 @@ export function MarketingHome() {
       </section>
 
       {/* Mental Health Seeding Issues Section */}
-      <section className="py-20 bg-gray-100">
+      <section className="py-20" style={{ backgroundColor: '#f7f7f7' }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -240,7 +240,7 @@ export function MarketingHome() {
       </section>
 
       {/* Support Where It Matters Section */}
-      <section className="py-20 px-6">
+      <section className="py-20 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Support where it matters</h2>
@@ -271,13 +271,13 @@ export function MarketingHome() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
               {testimonials.slice(0, 2).map((testimonial, index) => (
                 <div key={index} className="p-8">
-                  <div className="flex gap-4 items-start">
-                    <div className="flex-shrink-0">
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0" style={{ marginTop: '6px' }}>
                       <img 
                         src={testimonial.profilePic} 
                         alt={testimonial.name}
-                        className="w-16 h-16 object-cover"
-                        style={{ borderRadius: '8px' }}
+                        className="w-20 h-20 object-cover"
+                        style={{ borderRadius: '4px' }}
                       />
                     </div>
                     <div className="flex-1">
@@ -289,13 +289,13 @@ export function MarketingHome() {
                           fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', 
                           lineHeight: '30px',
                           color: '#DD7C7A',
-                          marginBottom: '-30px'
+                          marginBottom: '-10px'
                         }}>"</div>
                         <p className="text-gray-700 leading-relaxed" style={{ fontSize: '16px' }}>{testimonial.quote}</p>
                       </div>
                       <div className="flex items-center gap-1">
                         {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star key={i} className="h-4 w-4 fill-current" style={{ color: '#DD7C7A' }} />
+                          <Star key={i} className="w-4 h-4 fill-current" style={{ color: '#DD7C7A', width: '16px', height: '16px' }} />
                         ))}
                         <span className="text-sm ml-2 font-medium" style={{ color: '#DD7C7A' }}>4.9 / 5</span>
                       </div>
@@ -317,13 +317,13 @@ export function MarketingHome() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {testimonials.slice(2, 4).map((testimonial, index) => (
                 <div key={index + 2} className="p-8">
-                  <div className="flex gap-4 items-start">
-                    <div className="flex-shrink-0">
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0" style={{ marginTop: '6px' }}>
                       <img 
                         src={testimonial.profilePic} 
                         alt={testimonial.name}
-                        className="w-16 h-16 object-cover"
-                        style={{ borderRadius: '8px' }}
+                        className="w-20 h-20 object-cover"
+                        style={{ borderRadius: '4px' }}
                       />
                     </div>
                     <div className="flex-1">
@@ -335,13 +335,13 @@ export function MarketingHome() {
                           fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', 
                           lineHeight: '30px',
                           color: '#DD7C7A',
-                          marginBottom: '-30px'
+                          marginBottom: '-10px'
                         }}>"</div>
                         <p className="text-gray-700 leading-relaxed" style={{ fontSize: '16px' }}>{testimonial.quote}</p>
                       </div>
                       <div className="flex items-center gap-1">
                         {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star key={i} className="h-4 w-4 fill-current" style={{ color: '#DD7C7A' }} />
+                          <Star key={i} className="w-4 h-4 fill-current" style={{ color: '#DD7C7A', width: '16px', height: '16px' }} />
                         ))}
                         <span className="text-sm ml-2 font-medium" style={{ color: '#DD7C7A' }}>4.9 / 5</span>
                       </div>
@@ -355,7 +355,7 @@ export function MarketingHome() {
       </section>
 
       {/* Social Impact Section */}
-      <section className="py-20 px-6">
+      <section className="py-20 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Patient, purpose-led social impact</h2>
@@ -386,7 +386,7 @@ export function MarketingHome() {
       </section>
 
       {/* Security and Compliance Section */}
-      <section className="py-20 px-6 bg-white">
+      <section className="py-20 px-6" style={{ backgroundColor: '#f7f7f7' }}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Security and Compliance</h2>
