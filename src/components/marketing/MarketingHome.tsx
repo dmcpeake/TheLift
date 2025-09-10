@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import Lottie from 'lottie-react'
 import { Link } from 'react-router-dom'
 import { Button } from '../ui/button'
 import { Card, CardContent } from '../ui/card'
@@ -21,7 +22,10 @@ import {
   Building2,
   Brain,
   PiggyBank,
-  CheckCircle
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Play
 } from 'lucide-react'
 
 export function MarketingHome() {
@@ -31,6 +35,33 @@ export function MarketingHome() {
   const [role, setRole] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [rocketAnimation, setRocketAnimation] = useState(null)
+  const [thinkingAnimation, setThinkingAnimation] = useState(null)
+  const [speechAnimation, setSpeechAnimation] = useState(null)
+  const [puzzleAnimation, setPuzzleAnimation] = useState(null)
+
+  // Load the Lottie animations
+  React.useEffect(() => {
+    fetch('/theo-rocket.json')
+      .then(response => response.json())
+      .then(data => setRocketAnimation(data))
+      .catch(error => console.error('Error loading rocket animation:', error))
+      
+    fetch('/theo-thinking.json')
+      .then(response => response.json())
+      .then(data => setThinkingAnimation(data))
+      .catch(error => console.error('Error loading thinking animation:', error))
+      
+    fetch('/theo-speech.json')
+      .then(response => response.json())
+      .then(data => setSpeechAnimation(data))
+      .catch(error => console.error('Error loading speech animation:', error))
+      
+    fetch('/theo-puzzle.json')
+      .then(response => response.json())
+      .then(data => setPuzzleAnimation(data))
+      .catch(error => console.error('Error loading puzzle animation:', error))
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -67,24 +98,41 @@ export function MarketingHome() {
       setIsSubmitting(false)
     }
   }
+
+  const handleJoinWaitlistClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const waitlistForm = document.getElementById('waitlist-form')
+    if (waitlistForm) {
+      waitlistForm.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
   const transformations = [
     {
       from: 'Confusion',
       to: 'Clarity',
       description: 'AI-powered analytics identify learning gaps and provide personalized recommendations.',
-      icon: Brain
+      icon: Brain,
+      borderColor: 'bg-blue-400',
+      animationType: 'lottie',
+      animationFile: '/theo-thinking.json'
     },
     {
       from: 'Silence',
       to: 'Support', 
-      description: 'Enable every student voice through intelligent communication tools and feedback systems.',
-      icon: Users
+      description: 'Enable every student voice through intelligent tools and feedback systems.',
+      icon: Users,
+      borderColor: 'bg-cyan-400',
+      animationType: 'lottie',
+      animationFile: '/theo-speech.json'
     },
     {
       from: 'Early signs',
       to: 'Early action',
       description: 'Predictive insights help educators intervene before challenges become barriers.',
-      icon: Target
+      icon: Target,
+      borderColor: 'bg-orange-400',
+      animationType: 'lottie',
+      animationFile: '/theo-puzzle.json'
     }
   ]
 
@@ -172,37 +220,76 @@ export function MarketingHome() {
       <MarketingNavigation />
 
       {/* Hero Section */}
-      <section className="px-6 bg-white" style={{ height: '600px', display: 'flex', alignItems: 'center' }}>
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-center">
+      <section className="bg-white" style={{ minHeight: '600px', position: 'relative', display: 'flex', alignItems: 'center', paddingTop: '2rem', paddingBottom: '2rem' }}>
+        <div className="max-w-7xl mx-auto px-6 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            {/* Text content */}
             <div>
-
-              
-              <h1 className="text-6xl font-bold mb-6 max-w-xl" style={{ color: '#3F7A9A' }}>
+              <h1 className="text-6xl font-bold mb-6" style={{ color: '#3F7A9A' }}>
                 Education. Data. Connection.
               </h1>
               
-              <p className="text-xl mb-8 max-w-xl font-normal" style={{ color: '#3F7A9A', fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', fontSize: '20px' }}>
+              <p className="text-xl mb-4 font-normal" style={{ color: '#3F7A9A', fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', fontSize: '20px' }}>
                 The Lift gives kids a safe space to reflect and have conversations so problems don't take root.
               </p>
               
+              <p className="text-xl mb-8 font-semibold" style={{ color: '#3F7A9A', fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', fontSize: '20px' }}>
+                Launching soon.
+              </p>
+              
               <div className="flex flex-col sm:flex-row gap-4">
-                <a href="#waitlist-form">
-                  <Button className="h-10 rounded flex items-center justify-center pt-2.5 pb-2" style={{ backgroundColor: '#3F7A9A', color: 'white' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2F5A7A'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3F7A9A'}>
-                    JOIN WAITLIST
-                  </Button>
-                </a>
+                <Button 
+                  onClick={handleJoinWaitlistClick}
+                  className="h-10 rounded flex items-center justify-center pt-2.5 pb-2" 
+                  style={{ backgroundColor: '#3F7A9A', color: 'white' }} 
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2F5A7A'} 
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3F7A9A'}
+                >
+                  JOIN WAITLIST
+                </Button>
               </div>
-
-              {/* Quick Access Section */}
-
+            </div>
+            
+            {/* Animation column */}
+            <div className="flex justify-center lg:justify-end">
+              {rocketAnimation && (
+                <div className="relative">
+                  <Lottie 
+                    animationData={rocketAnimation} 
+                    style={{ 
+                      width: '500px', 
+                      height: '500px',
+                      margin: 0,
+                      padding: 0,
+                      border: 'none',
+                      outline: 'none'
+                    }}
+                    loop={true}
+                    autoplay={true}
+                  />
+                  {/* Gradient fade overlay at bottom */}
+                  <div 
+                    className="absolute left-0"
+                    style={{
+                      bottom: '32px',
+                      width: '500px',
+                      height: '200px',
+                      backgroundColor: 'white',
+                      WebkitMask: 'linear-gradient(to bottom, transparent, black)',
+                      mask: 'linear-gradient(to bottom, transparent, black)'
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
+          
+          {/* Quick Access Section */}
       </section>
 
       {/* Mental Health Seeding Issues Section */}
-      <section className="py-20" style={{ backgroundColor: '#f7f7f7' }}>
+      <section style={{ backgroundColor: '#f7f7f7', paddingTop: '80px', paddingBottom: '80px' }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -212,21 +299,61 @@ export function MarketingHome() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {transformations.map((transformation, index) => (
-              <div key={index} className="bg-white rounded-lg border border-black/10 shadow-[0_2px_8px_rgba(0,0,0,0.1)] overflow-hidden">
+              <div key={index} className="bg-white rounded-lg border border-black/10 shadow-[0_2px_8px_rgba(0,0,0,0.1)] overflow-hidden" style={{ borderRadius: '8px', height: '300px' }}>
+                {/* Image/Animation container - half height */}
+                <div className="relative overflow-hidden" style={{ height: '150px' }}>
+                  {transformation.animationType === 'lottie' ? (
+                    (() => {
+                      let animationData = null;
+                      if (transformation.animationFile === '/theo-thinking.json') {
+                        animationData = thinkingAnimation;
+                      } else if (transformation.animationFile === '/theo-speech.json') {
+                        animationData = speechAnimation;
+                      } else if (transformation.animationFile === '/theo-puzzle.json') {
+                        animationData = puzzleAnimation;
+                      }
+                      
+                      return animationData && (
+                        <Lottie 
+                          animationData={animationData} 
+                          style={{ 
+                            width: '100%', 
+                            height: '100%',
+                            margin: 0,
+                            padding: 0,
+                            border: 'none',
+                            outline: 'none'
+                          }}
+                          loop={true}
+                          autoplay={true}
+                        />
+                      );
+                    })()
+                  ) : (
+                    <img 
+                      src={transformation.image} 
+                      alt={`${transformation.from} to ${transformation.to}`}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                  {/* Colored bottom border */}
+                  <div className="absolute bottom-0 left-0 right-0" style={{ height: '4px', backgroundColor: '#DD7C7A' }}></div>
+                </div>
+                
+                {/* Content - your original content */}
                 <div className="p-6">
-                  <div className="w-14 h-14 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <transformation.icon className="h-7 w-7 text-white" />
-                  </div>
-                  
                   <div className="text-center mb-6">
                     <div className="flex items-center justify-center gap-4 mb-4">
                       <span className="text-gray-500 font-medium">{transformation.from}</span>
                       <ArrowRight className="h-4 w-4 text-gray-400" />
-                      <span className="text-gray-900 font-bold">{transformation.to}</span>
+                      <span className="font-bold" style={{ color: '#DD7C7A' }}>{transformation.to}</span>
                     </div>
-                    <div className="w-full bg-gray-200 h-2 rounded-full">
-                      <div className="bg-gray-700 h-2 rounded-full w-3/4"></div>
-                    </div>
+                    {/* Dashed Divider */}
+                    <div style={{ 
+                      width: '100%', 
+                      height: '1px',
+                      backgroundImage: 'repeating-linear-gradient(to right, #cccccc 0, #cccccc 4px, transparent 4px, transparent 8px)'
+                    }}></div>
                   </div>
                   
                   <p className="text-gray-600 text-center text-base">
@@ -240,8 +367,8 @@ export function MarketingHome() {
       </section>
 
       {/* Support Where It Matters Section */}
-      <section className="py-20 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
+      <section className="bg-white" style={{ paddingTop: '80px', paddingBottom: '80px' }}>
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Support where it matters</h2>
           </div>
@@ -261,102 +388,100 @@ export function MarketingHome() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20" style={{ backgroundColor: '#F7F7F7' }}>
+      <section style={{ backgroundColor: '#F7F7F7', paddingTop: '80px', paddingBottom: '80px' }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">What our users say</h2>
           </div>
           
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-              {testimonials.slice(0, 2).map((testimonial, index) => (
-                <div key={index} className="p-8">
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0" style={{ marginTop: '6px' }}>
-                      <img 
-                        src={testimonial.profilePic} 
-                        alt={testimonial.name}
-                        className="w-20 h-20 object-cover"
-                        style={{ borderRadius: '4px' }}
-                      />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            {testimonials.slice(0, 2).map((testimonial, index) => (
+              <div key={index} className="p-8">
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0" style={{ marginTop: '6px' }}>
+                    <img 
+                      src={testimonial.profilePic} 
+                      alt={testimonial.name}
+                      className="w-20 h-20 object-cover"
+                      style={{ borderRadius: '4px' }}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 text-lg mb-4">{testimonial.name}</h3>
+                    <div className="mb-4">
+                      <div style={{ 
+                        fontSize: '60px', 
+                        fontWeight: '600', 
+                        fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', 
+                        lineHeight: '30px',
+                        color: '#DD7C7A',
+                        marginBottom: '-10px'
+                      }}>"</div>
+                      <p className="text-gray-700 leading-relaxed" style={{ fontSize: '16px' }}>{testimonial.quote}</p>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 text-lg mb-4">{testimonial.name}</h3>
-                      <div className="mb-4">
-                        <div style={{ 
-                          fontSize: '60px', 
-                          fontWeight: '600', 
-                          fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', 
-                          lineHeight: '30px',
-                          color: '#DD7C7A',
-                          marginBottom: '-10px'
-                        }}>"</div>
-                        <p className="text-gray-700 leading-relaxed" style={{ fontSize: '16px' }}>{testimonial.quote}</p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-current" style={{ color: '#DD7C7A', width: '16px', height: '16px' }} />
-                        ))}
-                        <span className="text-sm ml-2 font-medium" style={{ color: '#DD7C7A' }}>4.9 / 5</span>
-                      </div>
+                    <div className="flex items-center gap-1">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-current" style={{ color: '#DD7C7A', width: '16px', height: '16px' }} />
+                      ))}
+                      <span className="text-sm ml-2 font-medium" style={{ color: '#DD7C7A' }}>4.9 / 5</span>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-            
-            {/* Dashed Divider */}
-            <div className="mb-12 max-w-6xl mx-auto">
-              <div style={{ 
-                width: '100%', 
-                height: '1px',
-                backgroundImage: 'repeating-linear-gradient(to right, #cccccc 0, #cccccc 4px, transparent 4px, transparent 8px)'
-              }}></div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {testimonials.slice(2, 4).map((testimonial, index) => (
-                <div key={index + 2} className="p-8">
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0" style={{ marginTop: '6px' }}>
-                      <img 
-                        src={testimonial.profilePic} 
-                        alt={testimonial.name}
-                        className="w-20 h-20 object-cover"
-                        style={{ borderRadius: '4px' }}
-                      />
+              </div>
+            ))}
+          </div>
+          
+          {/* Dashed Divider */}
+          <div className="mb-12">
+            <div style={{ 
+              width: '100%', 
+              height: '1px',
+              backgroundImage: 'repeating-linear-gradient(to right, #cccccc 0, #cccccc 4px, transparent 4px, transparent 8px)'
+            }}></div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {testimonials.slice(2, 4).map((testimonial, index) => (
+              <div key={index + 2} className="p-8">
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0" style={{ marginTop: '6px' }}>
+                    <img 
+                      src={testimonial.profilePic} 
+                      alt={testimonial.name}
+                      className="w-20 h-20 object-cover"
+                      style={{ borderRadius: '4px' }}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 text-lg mb-4">{testimonial.name}</h3>
+                    <div className="mb-4">
+                      <div style={{ 
+                        fontSize: '60px', 
+                        fontWeight: '600', 
+                        fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', 
+                        lineHeight: '30px',
+                        color: '#DD7C7A',
+                        marginBottom: '-10px'
+                      }}>"</div>
+                      <p className="text-gray-700 leading-relaxed" style={{ fontSize: '16px' }}>{testimonial.quote}</p>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 text-lg mb-4">{testimonial.name}</h3>
-                      <div className="mb-4">
-                        <div style={{ 
-                          fontSize: '60px', 
-                          fontWeight: '600', 
-                          fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', 
-                          lineHeight: '30px',
-                          color: '#DD7C7A',
-                          marginBottom: '-10px'
-                        }}>"</div>
-                        <p className="text-gray-700 leading-relaxed" style={{ fontSize: '16px' }}>{testimonial.quote}</p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-current" style={{ color: '#DD7C7A', width: '16px', height: '16px' }} />
-                        ))}
-                        <span className="text-sm ml-2 font-medium" style={{ color: '#DD7C7A' }}>4.9 / 5</span>
-                      </div>
+                    <div className="flex items-center gap-1">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-current" style={{ color: '#DD7C7A', width: '16px', height: '16px' }} />
+                      ))}
+                      <span className="text-sm ml-2 font-medium" style={{ color: '#DD7C7A' }}>4.9 / 5</span>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Social Impact Section */}
-      <section className="py-20 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
+      <section className="bg-white" style={{ paddingTop: '80px', paddingBottom: '80px' }}>
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Patient, purpose-led social impact</h2>
           </div>
@@ -386,8 +511,8 @@ export function MarketingHome() {
       </section>
 
       {/* Security and Compliance Section */}
-      <section className="py-20 px-6" style={{ backgroundColor: '#f7f7f7' }}>
-        <div className="max-w-6xl mx-auto">
+      <section style={{ backgroundColor: '#f7f7f7', paddingTop: '80px', paddingBottom: '80px' }}>
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Security and Compliance</h2>
           </div>
@@ -446,7 +571,7 @@ export function MarketingHome() {
       </section>
 
       {/* Footer with Waitlist Form */}
-      <footer id="waitlist-form" className="bg-gray-900 text-white py-16">
+      <footer id="waitlist-form" className="text-white" style={{ backgroundColor: '#3F7A9A', paddingTop: '80px', paddingBottom: '80px' }}>
         <div className="max-w-7xl mx-auto px-6">
           {submitted ? (
             <div className="max-w-md mx-auto text-center">
@@ -464,124 +589,171 @@ export function MarketingHome() {
             </div>
           ) : (
             <div className="max-w-2xl mx-auto">
-              <Card className="bg-white text-gray-900">
-                <CardContent className="p-8">
-                  <div className="text-center mb-8">
-                    <Mail className="h-12 w-12 text-gray-700 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                      Join the Waitlist
-                    </h2>
-                    <p className="text-gray-600">
-                      Be amongst the first to access The Lift when we launch. Get early access, exclusive updates, and help shape the future of child wellbeing support.
-                    </p>
-                  </div>
+              <div className="text-center mb-8">
+                <h2 className="font-bold text-white" style={{ fontSize: '30px', marginBottom: '8px' }}>
+                  Join the Waitlist
+                </h2>
+                <p className="text-gray-200" style={{ fontSize: '20px' }}>
+                  Be amongst the first to access The Lift when we launch, and help shape the future of child wellbeing support.
+                </p>
+              </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                        Full Name *
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        required
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                        placeholder="Your full name"
-                      />
-                    </div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-white mb-2">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-4 bg-transparent border border-gray-300 rounded text-white placeholder-gray-300 focus:ring-2 focus:ring-white focus:border-transparent"
+                    style={{ height: '40px' }}
+                    placeholder="Your full name"
+                  />
+                </div>
 
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                        Email Address *
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                        placeholder="your@email.com"
-                      />
-                    </div>
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
+                    Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 bg-transparent border border-gray-300 rounded text-white placeholder-gray-300 focus:ring-2 focus:ring-white focus:border-transparent"
+                    style={{ height: '40px' }}
+                    placeholder="your@email.com"
+                  />
+                </div>
 
-                    <div>
-                      <label htmlFor="organization" className="block text-sm font-medium text-gray-700 mb-2">
-                        Organisation
-                      </label>
-                      <input
-                        type="text"
-                        id="organization"
-                        value={organization}
-                        onChange={(e) => setOrganization(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                        placeholder="School, clinic, or organisation name"
-                      />
-                    </div>
+                <div>
+                  <label htmlFor="organization" className="block text-sm font-medium text-white mb-2">
+                    Organisation
+                  </label>
+                  <input
+                    type="text"
+                    id="organization"
+                    value={organization}
+                    onChange={(e) => setOrganization(e.target.value)}
+                    className="w-full px-4 bg-transparent border border-gray-300 rounded text-white placeholder-gray-300 focus:ring-2 focus:ring-white focus:border-transparent"
+                    style={{ height: '40px' }}
+                    placeholder="School, clinic, or organisation name"
+                  />
+                </div>
 
-                    <div>
-                      <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-                        Your Role
-                      </label>
-                      <select
-                        id="role"
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-                      >
-                        <option value="">Select your role</option>
-                        <option value="teacher">Teacher</option>
-                        <option value="headteacher">Headteacher</option>
-                        <option value="counselor">School Counsellor</option>
-                        <option value="psychologist">Psychologist</option>
-                        <option value="therapist">Therapist</option>
-                        <option value="social-worker">Social Worker</option>
-                        <option value="parent">Parent</option>
-                        <option value="administrator">Administrator</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-
-                    <Button 
-                      type="submit" 
-                      disabled={isSubmitting}
-                      className="w-full bg-gray-900 hover:bg-gray-800 py-4 text-lg"
+                <div>
+                  <label htmlFor="role" className="block text-sm font-medium text-white mb-2">
+                    Your Role
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="role"
+                      value={role}
+                      onChange={(e) => setRole(e.target.value)}
+                      className="w-full bg-transparent border border-gray-300 rounded focus:ring-2 focus:ring-white focus:border-transparent"
+                      style={{ 
+                        height: '40px', 
+                        paddingLeft: '16px', 
+                        paddingRight: '60px',
+                        appearance: 'none',
+                        WebkitAppearance: 'none',
+                        MozAppearance: 'none',
+                        backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 4 5\'><path fill=\'white\' d=\'M2 0L0 2h4zm0 5L0 3h4z\'/></svg>")',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 20px center',
+                        backgroundSize: '12px 12px',
+                        color: role === '' ? 'transparent' : 'white'
+                      }}
                     >
-                      {isSubmitting ? 'Joining...' : 'Join the Waitlist'}
-                    </Button>
-                  </form>
+                      <option value="" disabled></option>
+                      <option value="teacher" style={{ color: '#333' }}>Teacher</option>
+                      <option value="headteacher" style={{ color: '#333' }}>Headteacher</option>
+                      <option value="counselor" style={{ color: '#333' }}>School Counsellor</option>
+                      <option value="psychologist" style={{ color: '#333' }}>Psychologist</option>
+                      <option value="therapist" style={{ color: '#333' }}>Therapist</option>
+                      <option value="social-worker" style={{ color: '#333' }}>Social Worker</option>
+                      <option value="parent" style={{ color: '#333' }}>Parent</option>
+                      <option value="administrator" style={{ color: '#333' }}>Administrator</option>
+                      <option value="other" style={{ color: '#333' }}>Other</option>
+                    </select>
+                    {role === '' && (
+                      <div 
+                        className="absolute inset-0 pointer-events-none flex items-center"
+                        style={{ paddingLeft: '16px', color: 'rgba(255, 255, 255, 0.6)' }}
+                      >
+                        Select your role
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-                  <p className="text-xs text-gray-500 mt-6 text-center">
-                    We respect your privacy. Unsubscribe at any time.
-                  </p>
-                </CardContent>
-              </Card>
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full rounded text-lg"
+                  style={{ 
+                    height: '40px',
+                    borderRadius: '4px',
+                    backgroundColor: 'white',
+                    color: '#3F7A9A',
+                    marginTop: '25px'
+                  }}
+                >
+                  {isSubmitting ? 'Joining...' : 'Join the Waitlist'}
+                </Button>
+              </form>
+
+              <p className="text-xs text-gray-300 mt-6 text-center">
+                We respect your privacy. Unsubscribe at any time.
+              </p>
             </div>
           )}
           
-          <div className="mt-12 pt-8 border-t border-gray-800 text-center">
+          <div className="mt-12 text-center">
+            <div style={{ 
+              width: '100%', 
+              height: '1px',
+              backgroundImage: 'repeating-linear-gradient(to right, white 0, white 4px, transparent 4px, transparent 8px)',
+              marginBottom: '32px'
+            }}></div>
             <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center">
-                <Heart className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-xl font-bold">The Lift</span>
+              <svg height="25" viewBox="0 0 621 157" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g clipPath="url(#clip0_1_2)">
+                  <path d="M25.6 73.2H0V50H25.6V26.2L50.2 12.4V50H104.2V73.2H50.2V155H25.6V73.2Z" fill="white"/>
+                  <path d="M92.6 7H117.2V62.8C123.6 54 134.4 48 148.2 48C170.2 48 189.8 60.2 189.8 90.4V155H165.2V95.4C165.2 79.6 155.6 71.6 142.4 71.6C128 71.6 117.2 81.4 117.2 98.2V155H92.6V7Z" fill="white"/>
+                  <path d="M209 102.6C209 74 231.6 48 261.2 48C292.6 48 310.2 72.6 310.2 98.6C310.2 105.6 310 109 309.4 112.4H234.8C238.6 125.4 250 134.2 268.2 134.2C281.6 134.2 293 131.2 302 125.4V148.6C294.8 153.4 281.6 157 267.2 157C229.2 157 209 133.2 209 102.6ZM287 92.4C285 78.8 276.6 70.2 261.8 70.2C247.8 70.2 237.8 78.8 234.6 92.4H287Z" fill="white"/>
+                  <path d="M375.6 7H400.2V155H375.6V7Z" fill="white"/>
+                  <path d="M440.19 0C448.39 0 455.39 6.6 455.39 15.4C455.39 24.2 448.39 31 440.19 31C431.39 31 424.59 24.4 424.59 15.4C424.59 6.4 431.39 0 440.19 0ZM427.79 50H452.39V155H427.79V50Z" fill="white"/>
+                  <path d="M594.39 73.2H620.39V50H594.39V26.4L569.79 12.2V50H513.19V41.8C513.19 32 518.39 28 525.99 28C529.59 28 533.59 28.8 536.39 30.2V6.2C531.19 4.8 526.99 4.4 522.79 4.4C501.79 4.4 488.59 18 488.59 41.4V50H471.79V73.2H488.59V155H513.19V73.2H569.79V155H594.39V73.2Z" fill="white"/>
+                </g>
+                <defs>
+                  <clipPath id="clip0_1_2">
+                    <rect width="620.39" height="157" fill="white"/>
+                  </clipPath>
+                </defs>
+              </svg>
             </div>
             
-            <p className="text-gray-400 mb-4">&copy; 2025 The Lift Up Ltd. All rights reserved.</p>
+            <p className="mb-4" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>&copy; 2025 The Lift Up Ltd. All rights reserved.</p>
             
             {/* Temporary development links */}
             <div className="space-x-4">
               <Link 
                 to="/admin/login" 
-                className="text-xs text-gray-600 hover:text-gray-400 underline"
+                className="text-xs underline hover:opacity-70"
+                style={{ color: 'rgba(255, 255, 255, 0.8)' }}
               >
                 [Dev] Admin Login
               </Link>
               <Link 
                 to="/login" 
-                className="text-xs text-gray-600 hover:text-gray-400 underline"
+                className="text-xs underline hover:opacity-70"
+                style={{ color: 'rgba(255, 255, 255, 0.8)' }}
               >
                 [Dev] Unified Login
               </Link>
