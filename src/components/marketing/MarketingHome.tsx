@@ -77,13 +77,22 @@ const useSectionNavigation = () => {
     const timer = setTimeout(() => {
       observer = new IntersectionObserver(
         (entries) => {
+          // Find the section with the highest intersection ratio
+          let maxRatio = 0
+          let activeSection = ''
+          
           entries.forEach((entry) => {
-            if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
-              setCurrentSection(entry.target.id)
+            if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+              maxRatio = entry.intersectionRatio
+              activeSection = entry.target.id
             }
           })
+          
+          if (activeSection) {
+            setCurrentSection(activeSection)
+          }
         },
-        { threshold: [0.3, 0.7], rootMargin: '-20% 0px -20% 0px' }
+        { threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], rootMargin: '-10% 0px -10% 0px' }
       )
 
       const sections = document.querySelectorAll('[data-section]')
@@ -1183,7 +1192,7 @@ export function MarketingHome() {
                     borderRadius: '20px',
                     backgroundColor: 'white',
                     color: '#147fe3',
-                    marginTop: '25px',
+                    marginTop: '55px',
                     fontSize: '16px',
                     fontWeight: 'bold',
                     paddingLeft: '30px',
