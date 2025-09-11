@@ -1156,13 +1156,17 @@ export function MarketingHome() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full rounded text-lg"
+                  className="w-full flex items-center justify-center"
                   style={{ 
-                    height: '40px',
-                    borderRadius: '4px',
+                    height: '60px',
+                    borderRadius: '30px',
                     backgroundColor: 'white',
                     color: '#147fe3',
-                    marginTop: '25px'
+                    marginTop: '25px',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    paddingLeft: '30px',
+                    paddingRight: '30px'
                   }}
                 >
                   {isSubmitting ? 'Joining...' : 'Join the Waitlist'}
