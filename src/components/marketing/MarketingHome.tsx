@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Lottie from 'lottie-react'
 import { Link } from 'react-router-dom'
 import { Button } from '../ui/button'
@@ -26,8 +26,60 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   Play
 } from 'lucide-react'
+
+// Custom hook for scroll animations
+const useScrollAnimation = () => {
+  const [visibleElements, setVisibleElements] = useState(new Set())
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisibleElements(prev => new Set([...prev, entry.target.id]))
+          }
+        })
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    )
+
+    const elements = document.querySelectorAll('[data-scroll-animate]')
+    elements.forEach((el) => observer.observe(el))
+
+    return () => observer.disconnect()
+  }, [])
+
+  return visibleElements
+}
+
+// Custom hook for section navigation
+const useSectionNavigation = () => {
+  const [currentSection, setCurrentSection] = useState('')
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+            setCurrentSection(entry.target.id)
+          }
+        })
+      },
+      { threshold: [0.3, 0.7], rootMargin: '-20% 0px -20% 0px' }
+    )
+
+    const sections = document.querySelectorAll('[data-section]')
+    sections.forEach((section) => observer.observe(section))
+
+    return () => observer.disconnect()
+  }, [])
+
+  return currentSection
+}
 
 export function MarketingHome() {
   const [name, setName] = useState('')
@@ -41,6 +93,33 @@ export function MarketingHome() {
   const [thumbUpAnimation, setThumbUpAnimation] = useState(null)
   const [puzzleAnimation, setPuzzleAnimation] = useState(null)
   const [documentAnimation, setDocumentAnimation] = useState(null)
+  const visibleElements = useScrollAnimation()
+  const currentSection = useSectionNavigation()
+
+  const sections = [
+    'hero-section',
+    'mental-health-section', 
+    'support-section',
+    'testimonials-section',
+    'security-section',
+    'footer-section'
+  ]
+
+  const navigateToSection = (direction: 'up' | 'down') => {
+    const currentIndex = sections.indexOf(currentSection)
+    let targetIndex
+    
+    if (direction === 'up') {
+      targetIndex = currentIndex > 0 ? currentIndex - 1 : 0
+    } else {
+      targetIndex = currentIndex < sections.length - 1 ? currentIndex + 1 : sections.length - 1
+    }
+    
+    const targetSection = document.getElementById(sections[targetIndex])
+    if (targetSection) {
+      targetSection.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }
 
   // Load the Lottie animations
   React.useEffect(() => {
@@ -226,8 +305,102 @@ export function MarketingHome() {
     <div className="min-h-screen bg-gray-50">
       <MarketingNavigation />
 
+      {/* Section Navigation Dots */}
+      <div 
+        className="section-navigation"
+        style={{
+          position: 'fixed',
+          right: '60px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '12px',
+          opacity: 0.5
+        }}
+      >
+        {/* Up Chevron */}
+        <div
+          onClick={() => navigateToSection('up')}
+          style={{
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            opacity: sections.indexOf(currentSection) === 0 ? 0.3 : 1
+          }}
+        >
+          <ChevronUp 
+            size={32} 
+            color={currentSection === 'footer-section' ? 'white' : '#e87e67'} 
+          />
+        </div>
+
+        {/* Section Dots */}
+        {[
+          { id: 'hero-section', label: 'Hero' },
+          { id: 'mental-health-section', label: 'Mental Health' },
+          { id: 'support-section', label: 'Support' },
+          { id: 'testimonials-section', label: 'Testimonials' },
+          { id: 'security-section', label: 'Security' },
+          { id: 'footer-section', label: 'Join Waitlist' }
+        ].map((section) => (
+          <div
+            key={section.id}
+            style={{
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              border: currentSection === 'footer-section' ? '2px solid white' : '2px solid #e87e67',
+              backgroundColor: currentSection === section.id 
+                ? (currentSection === 'footer-section' ? 'white' : '#e87e67') 
+                : 'transparent',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+            onClick={() => {
+              const element = document.getElementById(section.id)
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              }
+            }}
+            title={section.label}
+          />
+        ))}
+
+        {/* Down Chevron */}
+        <div
+          onClick={() => navigateToSection('down')}
+          style={{
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            opacity: sections.indexOf(currentSection) === sections.length - 1 ? 0.3 : 1
+          }}
+        >
+          <ChevronDown 
+            size={32} 
+            color={currentSection === 'footer-section' ? 'white' : '#e87e67'} 
+          />
+        </div>
+      </div>
+
       {/* Hero Section */}
-      <section className="bg-white" style={{ minHeight: '600px', position: 'relative', display: 'flex', alignItems: 'center', paddingTop: '92px', paddingBottom: '160px' }}>
+      <section 
+        id="hero-section"
+        data-section
+        className="bg-white" 
+        style={{ minHeight: '600px', position: 'relative', display: 'flex', alignItems: 'center', paddingTop: '92px', paddingBottom: '160px' }}
+      >
         <div className="max-w-7xl mx-auto px-6 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             {/* Text content */}
@@ -237,7 +410,7 @@ export function MarketingHome() {
                 <p 
                   className="absolute text-xl font-semibold text-center sm:text-left" 
                   style={{ 
-                    color: '#3c64c4', 
+                    color: '#147fe3', 
                     fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', 
                     fontSize: '20px',
                     animation: 'fadeUpIn1 9s infinite',
@@ -249,7 +422,7 @@ export function MarketingHome() {
                 <p 
                   className="absolute text-xl font-semibold text-center sm:text-left" 
                   style={{ 
-                    color: '#3c64c4', 
+                    color: '#147fe3', 
                     fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', 
                     fontSize: '20px',
                     animation: 'fadeUpIn2 9s infinite',
@@ -261,7 +434,7 @@ export function MarketingHome() {
                 <p 
                   className="absolute text-xl font-semibold text-center sm:text-left" 
                   style={{ 
-                    color: '#3c64c4', 
+                    color: '#147fe3', 
                     fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', 
                     fontSize: '20px',
                     animation: 'fadeUpIn3 9s infinite',
@@ -272,7 +445,7 @@ export function MarketingHome() {
                 </p>
               </div>
 
-              <h1 className="text-6xl font-bold mb-6" style={{ color: '#3c64c4' }}>
+              <h1 className="text-6xl font-bold mb-6" style={{ color: '#147fe3' }}>
                 Education. Data. Connection.
               </h1>
               
@@ -280,17 +453,26 @@ export function MarketingHome() {
                 The Lift gives kids a safe space to reflect and have conversations so problems don't take root.
               </p>
               
-              <p className="text-xl mb-8 font-semibold text-gray-900" style={{ fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', fontSize: '20px' }}>
+              <p className="text-xl mb-8 font-semibold" style={{ fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', fontSize: '20px', color: '#147fe3' }}>
                 Launching soon.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   onClick={handleJoinWaitlistClick}
-                  className="h-10 rounded flex items-center justify-center pt-2.5 pb-2" 
-                  style={{ backgroundColor: '#3c64c4', color: 'white' }} 
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2D55E5'} 
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3c64c4'}
+                  className="flex items-center justify-center" 
+                  style={{ 
+                    backgroundColor: '#e87e67', 
+                    color: 'white',
+                    height: '60px',
+                    borderRadius: '30px',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    paddingLeft: '30px',
+                    paddingRight: '30px'
+                  }} 
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'} 
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
                 >
                   JOIN WAITLIST
                 </Button>
@@ -321,7 +503,7 @@ export function MarketingHome() {
                           width: '100%',
                           height: '100%',
                           borderRadius: '50%',
-                          border: '3px dashed #3c64c4',
+                          border: '3px dashed #e6b6b6',
                           animation: 'spin 120s linear infinite'
                         }}
                       ></div>
@@ -417,29 +599,49 @@ export function MarketingHome() {
       </section>
 
       {/* Mental Health Seeding Issues Section */}
-      <section style={{ backgroundColor: '#f7d145', paddingTop: '100px', paddingBottom: '160px', position: 'relative' }}>
-        {/* Top wave */}
+      <section 
+        id="mental-health-section"
+        data-section
+        style={{ backgroundColor: '#f7d145', paddingTop: '100px', paddingBottom: '160px', position: 'relative' }}
+      >
+        {/* Top wave with depth effect */}
         <svg style={{
           position: 'absolute',
           top: '-80px',
           left: 0,
           width: '100%',
           height: '80px'
-        }} viewBox="0 0 1440 80" preserveAspectRatio="none">
-          <path d="M0,40 C480,80 960,0 1440,40 L1440,80 L0,80 Z" fill="#f7d145"/>
+        }} viewBox="0 0 1440 400" preserveAspectRatio="none">
+          {/* Main wave fill */}
+          <path d="M0,200 C480,400 960,0 1440,200 L1440,400 L0,400 Z" fill="#f7d145"/>
+          {/* Border with varied bottom edge only */}
+          <path d="M0,200 C480,400 960,0 1440,200 L1440,400 C1020,-120 400,480 0,360 Z" fill="#fae568" opacity="0.6"/>
         </svg>
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="font-bold text-gray-900 mb-4" style={{ fontSize: '40px' }}>
+          <div 
+            className={`text-center mb-16 ${visibleElements.has('mental-health-title') ? 'animate-fadeInUp' : ''}`}
+            data-scroll-animate 
+            id="mental-health-title"
+          >
+            <h2 
+              className="font-bold text-gray-900 mb-4" 
+              style={{ fontSize: '40px' }}
+            >
               Mental health seeding issues start early
             </h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {transformations.map((transformation, index) => (
-              <div key={index} className="bg-white rounded-lg overflow-hidden" style={{ borderRadius: '8px', height: 'auto' }}>
+              <div 
+                key={index} 
+                className={`bg-white rounded-lg overflow-hidden ${visibleElements.has(`mental-card-${index}`) ? 'animate-fadeInUp' : ''}`}
+                style={{ borderRadius: '8px', height: 'auto' }}
+                data-scroll-animate
+                id={`mental-card-${index}`}
+              >
                 {/* Image/Animation container - now 300px height */}
-                <div className="relative overflow-hidden" style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fafafa' }}>
+                <div className="relative overflow-hidden" style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'white' }}>
                   {transformation.animationType === 'lottie' ? (
                     (() => {
                       let animationData = null;
@@ -460,7 +662,8 @@ export function MarketingHome() {
                             margin: 0,
                             padding: 0,
                             border: 'none',
-                            outline: 'none'
+                            outline: 'none',
+                            marginTop: transformation.animationFile === '/theo-thinking.json' ? '16px' : transformation.animationFile === '/theo-thumb-up.json' ? '43px' : '0px'
                           }}
                           loop={true}
                           autoplay={true}
@@ -474,13 +677,11 @@ export function MarketingHome() {
                       className="w-full h-full object-cover"
                     />
                   )}
-                  {/* Colored bottom border */}
-                  <div className="absolute bottom-0 left-0 right-0" style={{ height: '4px', backgroundColor: '#e87e67' }}></div>
                 </div>
                 
                 {/* Content - your original content */}
                 <div className="p-6">
-                  <div className="text-center mb-6">
+                  <div className="text-center mb-6" style={{ marginTop: '-20px' }}>
                     <div className="flex items-center justify-center gap-4 mb-4">
                       <span className="text-gray-900 font-bold" style={{ fontSize: '18px' }}>{transformation.from}</span>
                       <ArrowRight className="h-4 w-4 text-gray-400" />
@@ -505,25 +706,48 @@ export function MarketingHome() {
       </section>
 
       {/* Support Where It Matters Section */}
-      <section className="bg-white" style={{ paddingTop: '100px', paddingBottom: '160px', position: 'relative' }}>
-        {/* Top wave */}
+      <section 
+        id="support-section"
+        data-section
+        className="bg-white" 
+        style={{ paddingTop: '100px', paddingBottom: '160px', position: 'relative' }}
+      >
+        {/* Top wave with depth effect */}
         <svg style={{
           position: 'absolute',
           top: '-80px',
           left: 0,
           width: '100%',
           height: '80px'
-        }} viewBox="0 0 1440 80" preserveAspectRatio="none">
-          <path d="M0,40 C480,0 960,80 1440,40 L1440,80 L0,80 Z" fill="white"/>
+        }} viewBox="0 0 1440 400" preserveAspectRatio="none">
+          {/* Main wave fill */}
+          <path d="M0,200 C480,0 960,400 1440,200 L1440,400 L0,400 Z" fill="white"/>
+          {/* Border with varied bottom edge only */}
+          <path d="M0,200 C480,0 960,400 1440,200 L1440,400 C900,560 520,-120 0,440 Z" fill="#f8f8f8" opacity="0.5"/>
         </svg>
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="font-bold text-gray-900 mb-4" style={{ fontSize: '40px' }}>Support where it matters</h2>
+          <div 
+            className={`text-center mb-16 ${visibleElements.has('support-title') ? 'animate-fadeInUp' : ''}`}
+            data-scroll-animate 
+            id="support-title"
+          >
+            <h2 
+              className="font-bold text-gray-900 mb-4" 
+              style={{ fontSize: '40px' }}
+            >
+              Support where it matters
+            </h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {supportAreas.map((area, index) => (
-              <div key={index} className="bg-white rounded-lg border border-black/10 shadow-[0_2px_8px_rgba(0,0,0,0.1)] overflow-hidden" style={{ borderRadius: '8px' }}>
+              <div 
+                key={index} 
+                className={`bg-white rounded-lg border border-black/10 shadow-[0_2px_8px_rgba(0,0,0,0.1)] overflow-hidden ${visibleElements.has(`support-card-${index}`) ? 'animate-fadeInUp' : ''}`}
+                style={{ borderRadius: '8px' }}
+                data-scroll-animate
+                id={`support-card-${index}`}
+              >
                 {/* Image container */}
                 <div className="relative overflow-hidden" style={{ height: '200px', backgroundColor: 'white' }}>
                   <img 
@@ -531,14 +755,6 @@ export function MarketingHome() {
                     alt={area.title}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
                   />
-                  {/* Orange bottom border */}
-                  <div 
-                    className="absolute bottom-0 left-0 right-0" 
-                    style={{ 
-                      height: '4px', 
-                      backgroundColor: '#e87e67'
-                    }}
-                  ></div>
                 </div>
                 
                 {/* Content */}
@@ -562,25 +778,46 @@ export function MarketingHome() {
       </section>
 
       {/* Testimonials Section */}
-      <section style={{ backgroundColor: '#f9f7f2', paddingTop: '100px', paddingBottom: '160px', position: 'relative' }}>
-        {/* Top wave */}
+      <section 
+        id="testimonials-section"
+        data-section
+        style={{ backgroundColor: '#f9f7f2', paddingTop: '100px', paddingBottom: '160px', position: 'relative' }}
+      >
+        {/* Top wave with depth effect */}
         <svg style={{
           position: 'absolute',
           top: '-80px',
           left: 0,
           width: '100%',
           height: '80px'
-        }} viewBox="0 0 1440 80" preserveAspectRatio="none">
-          <path d="M0,40 C480,80 960,0 1440,40 L1440,80 L0,80 Z" fill="#f9f7f2"/>
+        }} viewBox="0 0 1440 400" preserveAspectRatio="none">
+          {/* Main wave fill */}
+          <path d="M0,200 C480,400 960,0 1440,200 L1440,400 L0,400 Z" fill="#f9f7f2"/>
+          {/* Border with varied bottom edge only */}
+          <path d="M0,200 C480,400 960,0 1440,200 L1440,400 C1050,-160 440,560 0,420 Z" fill="#fcfbf8" opacity="0.7"/>
         </svg>
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="font-bold mb-4" style={{ fontSize: '40px', color: 'black' }}>What our pilot users say</h2>
+          <div 
+            className={`text-center mb-16 ${visibleElements.has('testimonials-title') ? 'animate-fadeInUp' : ''}`}
+            data-scroll-animate 
+            id="testimonials-title"
+          >
+            <h2 
+              className="font-bold mb-4" 
+              style={{ fontSize: '40px', color: 'black' }}
+            >
+              What our pilot users say
+            </h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             {testimonials.slice(0, 2).map((testimonial, index) => (
-              <div key={index} className="p-8">
+              <div 
+                key={index} 
+                className={`p-8 ${visibleElements.has(`testimonial-${index}`) ? 'animate-fadeInUp' : ''}`}
+                data-scroll-animate
+                id={`testimonial-${index}`}
+              >
                 <div className="flex gap-4">
                   <div className="flex-shrink-0" style={{ marginTop: '6px' }}>
                     <img 
@@ -617,7 +854,12 @@ export function MarketingHome() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {testimonials.slice(2, 4).map((testimonial, index) => (
-              <div key={index + 2} className="p-8">
+              <div 
+                key={index + 2} 
+                className={`p-8 ${visibleElements.has(`testimonial-${index + 2}`) ? 'animate-fadeInUp' : ''}`}
+                data-scroll-animate
+                id={`testimonial-${index + 2}`}
+              >
                 <div className="flex gap-4">
                   <div className="flex-shrink-0" style={{ marginTop: '6px' }}>
                     <img 
@@ -655,23 +897,44 @@ export function MarketingHome() {
       </section>
 
       {/* Security and Compliance Section */}
-      <section className="bg-white" style={{ paddingTop: '100px', paddingBottom: '160px', position: 'relative' }}>
-        {/* Top wave */}
+      <section 
+        id="security-section"
+        data-section
+        className="bg-white" 
+        style={{ paddingTop: '100px', paddingBottom: '160px', position: 'relative' }}
+      >
+        {/* Top wave with depth effect */}
         <svg style={{
           position: 'absolute',
           top: '-80px',
           left: 0,
           width: '100%',
           height: '80px'
-        }} viewBox="0 0 1440 80" preserveAspectRatio="none">
-          <path d="M0,40 C480,80 960,0 1440,40 L1440,80 L0,80 Z" fill="white"/>
+        }} viewBox="0 0 1440 400" preserveAspectRatio="none">
+          {/* Main wave fill */}
+          <path d="M0,200 C480,400 960,0 1440,200 L1440,400 L0,400 Z" fill="white"/>
+          {/* Border with varied bottom edge only */}
+          <path d="M0,200 C480,400 960,0 1440,200 L1440,400 C980,-140 500,600 0,480 Z" fill="#f5f5f5" opacity="0.6"/>
         </svg>
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="font-bold text-gray-900 mb-4" style={{ fontSize: '40px' }}>Security and Compliance</h2>
+          <div 
+            className={`text-center mb-16 ${visibleElements.has('security-title') ? 'animate-fadeInUp' : ''}`}
+            data-scroll-animate 
+            id="security-title"
+          >
+            <h2 
+              className="font-bold text-gray-900 mb-4" 
+              style={{ fontSize: '40px' }}
+            >
+              Security and Compliance
+            </h2>
           </div>
           
-          <div className="bg-white rounded-lg border border-black/10 shadow-[0_2px_8px_rgba(0,0,0,0.1)] p-8">
+          <div 
+            className={`bg-white rounded-lg border border-black/10 shadow-[0_2px_8px_rgba(0,0,0,0.1)] p-8 ${visibleElements.has('security-card') ? 'animate-fadeInUp' : ''}`}
+            data-scroll-animate
+            id="security-card"
+          >
             <div className="grid lg:grid-cols-2 gap-8 items-center">
               <div>
                 <h3 className="text-2xl mb-4 text-gray-900 font-bold">Enterprise-Grade Security</h3>
@@ -751,16 +1014,24 @@ export function MarketingHome() {
       </section>
 
       {/* Footer with Waitlist Form */}
-      <footer id="waitlist-form" className="text-white" style={{ backgroundColor: '#3c64c4', paddingTop: '100px', paddingBottom: '80px', position: 'relative' }}>
-        {/* Top wave */}
+      <footer 
+        id="footer-section"
+        data-section
+        className="text-white" 
+        style={{ backgroundColor: '#147fe3', paddingTop: '100px', paddingBottom: '80px', position: 'relative' }}
+      >
+        {/* Top wave with depth effect */}
         <svg style={{
           position: 'absolute',
           top: '-80px',
           left: 0,
           width: '100%',
           height: '80px'
-        }} viewBox="0 0 1440 80" preserveAspectRatio="none">
-          <path d="M0,40 C480,0 960,80 1440,40 L1440,80 L0,80 Z" fill="#3c64c4"/>
+        }} viewBox="0 0 1440 400" preserveAspectRatio="none">
+          {/* Main wave fill */}
+          <path d="M0,200 C480,0 960,400 1440,200 L1440,400 L0,400 Z" fill="#147fe3"/>
+          {/* Border with varied bottom edge only */}
+          <path d="M0,200 C480,0 960,400 1440,200 L1440,400 C1010,520 420,-160 0,380 Z" fill="#4695ea" opacity="0.5"/>
         </svg>
         <div className="max-w-7xl mx-auto px-6">
           {submitted ? (
@@ -890,7 +1161,7 @@ export function MarketingHome() {
                     height: '40px',
                     borderRadius: '4px',
                     backgroundColor: 'white',
-                    color: '#3c64c4',
+                    color: '#147fe3',
                     marginTop: '25px'
                   }}
                 >
@@ -909,7 +1180,9 @@ export function MarketingHome() {
               width: '100%', 
               height: '1px',
               backgroundImage: 'repeating-linear-gradient(to right, white 0, white 4px, transparent 4px, transparent 8px)',
-              marginBottom: '32px'
+              marginBottom: '32px',
+              marginTop: '120px',
+              opacity: 0.5
             }}></div>
             <div className="flex items-center justify-center gap-3 mb-4">
               <svg height="20" viewBox="0 0 621 157" fill="none" xmlns="http://www.w3.org/2000/svg">
