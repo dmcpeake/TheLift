@@ -1159,8 +1159,8 @@ export function MarketingHome() {
                   className="flex items-center justify-center mx-auto"
                   style={{ 
                     width: '50%',
-                    height: '60px',
-                    borderRadius: '30px',
+                    height: '40px',
+                    borderRadius: '20px',
                     backgroundColor: 'white',
                     color: '#147fe3',
                     marginTop: '25px',
