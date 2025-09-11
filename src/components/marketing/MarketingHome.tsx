@@ -71,21 +71,31 @@ const useSectionNavigation = () => {
   const [currentSection, setCurrentSection] = useState('')
   
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
-            setCurrentSection(entry.target.id)
-          }
-        })
-      },
-      { threshold: [0.3, 0.7], rootMargin: '-20% 0px -20% 0px' }
-    )
+    let observer: IntersectionObserver | null = null
+    
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+              setCurrentSection(entry.target.id)
+            }
+          })
+        },
+        { threshold: [0.3, 0.7], rootMargin: '-20% 0px -20% 0px' }
+      )
 
-    const sections = document.querySelectorAll('[data-section]')
-    sections.forEach((section) => observer.observe(section))
+      const sections = document.querySelectorAll('[data-section]')
+      sections.forEach((section) => observer?.observe(section))
+    }, 100)
 
-    return () => observer.disconnect()
+    return () => {
+      clearTimeout(timer)
+      if (observer) {
+        observer.disconnect()
+      }
+    }
   }, [])
 
   return currentSection
