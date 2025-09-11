@@ -1156,8 +1156,9 @@ export function MarketingHome() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full flex items-center justify-center"
+                  className="flex items-center justify-center mx-auto"
                   style={{ 
+                    width: '50%',
                     height: '60px',
                     borderRadius: '30px',
                     backgroundColor: 'white',
