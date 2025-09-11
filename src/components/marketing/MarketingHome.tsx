@@ -439,7 +439,7 @@ export function MarketingHome() {
                     />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 text-lg mb-4">{testimonial.name}</h3>
+                    <h3 className="font-semibold text-gray-900 mb-4" style={{ fontSize: '20px' }}>{testimonial.name}</h3>
                     <div className="mb-4">
                       <div style={{ 
                         fontSize: '60px', 
@@ -485,7 +485,7 @@ export function MarketingHome() {
                     />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 text-lg mb-4">{testimonial.name}</h3>
+                    <h3 className="font-semibold text-gray-900 mb-4" style={{ fontSize: '20px' }}>{testimonial.name}</h3>
                     <div className="mb-4">
                       <div style={{ 
                         fontSize: '60px', 
@@ -527,31 +527,31 @@ export function MarketingHome() {
                     <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
                       <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
-                    <span className="text-gray-700" style={{ fontSize: '16px' }}>ISO 27001 certified infrastructure</span>
+                    <span className="text-gray-700" style={{ fontSize: '20px' }}>ISO 27001 certified infrastructure</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
                       <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
-                    <span className="text-gray-700" style={{ fontSize: '16px' }}>GDPR compliant data processing</span>
+                    <span className="text-gray-700" style={{ fontSize: '20px' }}>GDPR compliant data processing</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
                       <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
-                    <span className="text-gray-700" style={{ fontSize: '16px' }}>End-to-end encryption</span>
+                    <span className="text-gray-700" style={{ fontSize: '20px' }}>End-to-end encryption</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
                       <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
-                    <span className="text-gray-700" style={{ fontSize: '16px' }}>Regular security audits</span>
+                    <span className="text-gray-700" style={{ fontSize: '20px' }}>Regular security audits</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
                       <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
-                    <span className="text-gray-700" style={{ fontSize: '16px' }}>Child safeguarding protocols</span>
+                    <span className="text-gray-700" style={{ fontSize: '20px' }}>Child safeguarding protocols</span>
                   </div>
                 </div>
               </div>
