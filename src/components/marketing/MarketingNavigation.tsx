@@ -43,9 +43,9 @@ export function MarketingNavigation() {
     >
       <div className="w-full py-5" style={{ paddingLeft: '60px', paddingRight: '60px' }}>
         <div className="flex items-center justify-between">
-          <button onClick={handleLogoClick} className="flex items-baseline gap-3 cursor-pointer">
-            <Triangle className="h-10 w-10 fill-current" style={{ color: '#3c64c4', marginTop: '3px' }} />
-            <img src="/TheLiftLogo.svg" alt="The Lift" className="h-10" style={{ imageRendering: 'auto', shapeRendering: 'geometricPrecision' }} />
+          <button onClick={handleLogoClick} className="flex items-center gap-3 cursor-pointer">
+            <Triangle className="h-10 w-10 fill-current" style={{ color: '#3c64c4' }} />
+            <img src="/TheLiftLogo.svg" alt="The Lift" className="h-5" style={{ imageRendering: 'auto', shapeRendering: 'geometricPrecision', filter: 'brightness(0) saturate(100%) invert(11%) sepia(0%) saturate(7465%) hue-rotate(189deg) brightness(105%) contrast(86%)' }} />
           </button>
           
           <div className="flex items-center" style={{ gap: '20px' }}>

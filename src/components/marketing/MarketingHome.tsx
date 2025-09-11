@@ -146,18 +146,18 @@ export function MarketingHome() {
   const supportAreas = [
     {
       title: 'For Schools',
-      description: 'Helping teachers keep ahead of potential issues in classes.',
-      icon: School
+      description: 'Helping teachers keep ahead of potential issues in classes so they don\'t take root.',
+      image: '/school.jpg'
     },
     {
       title: 'For Clinics', 
-      description: 'Helping counselors and psychologists give kids the language they need to make progress and track issues.',
-      icon: Stethoscope
+      description: 'Helping counselors and psychologists give kids the language they need to make progress.',
+      image: '/clinic.jpg'
     },
     {
       title: 'For Hospitals',
       description: 'Helping the NHS deliver front line care for kids and understanding behavioral patterns at scale.',
-      icon: Building2
+      image: '/hospital.jpg'
     }
   ]
 
@@ -227,16 +227,56 @@ export function MarketingHome() {
       <MarketingNavigation />
 
       {/* Hero Section */}
-      <section className="bg-white" style={{ minHeight: '600px', position: 'relative', display: 'flex', alignItems: 'center', paddingTop: '2rem', paddingBottom: '2rem' }}>
+      <section className="bg-white" style={{ minHeight: '600px', position: 'relative', display: 'flex', alignItems: 'center', paddingTop: '92px', paddingBottom: '160px' }}>
         <div className="max-w-7xl mx-auto px-6 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             {/* Text content */}
-            <div>
+            <div className="text-center sm:text-left">
+              {/* Animated text cycling */}
+              <div className="relative mb-4" style={{ height: '30px' }}>
+                <p 
+                  className="absolute text-xl font-semibold text-center sm:text-left" 
+                  style={{ 
+                    color: '#3c64c4', 
+                    fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', 
+                    fontSize: '20px',
+                    animation: 'fadeUpIn1 9s infinite',
+                    width: '100%'
+                  }}
+                >
+                  For Schools
+                </p>
+                <p 
+                  className="absolute text-xl font-semibold text-center sm:text-left" 
+                  style={{ 
+                    color: '#3c64c4', 
+                    fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', 
+                    fontSize: '20px',
+                    animation: 'fadeUpIn2 9s infinite',
+                    width: '100%'
+                  }}
+                >
+                  For Clinics
+                </p>
+                <p 
+                  className="absolute text-xl font-semibold text-center sm:text-left" 
+                  style={{ 
+                    color: '#3c64c4', 
+                    fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', 
+                    fontSize: '20px',
+                    animation: 'fadeUpIn3 9s infinite',
+                    width: '100%'
+                  }}
+                >
+                  For Hospitals
+                </p>
+              </div>
+
               <h1 className="text-6xl font-bold mb-6" style={{ color: '#3c64c4' }}>
                 Education. Data. Connection.
               </h1>
               
-              <p className="text-xl mb-4 font-normal text-gray-600" style={{ fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', fontSize: '20px' }}>
+              <p className="text-xl mb-4 font-normal text-gray-900" style={{ fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', fontSize: '20px' }}>
                 The Lift gives kids a safe space to reflect and have conversations so problems don't take root.
               </p>
               
@@ -281,11 +321,28 @@ export function MarketingHome() {
                           width: '100%',
                           height: '100%',
                           borderRadius: '50%',
-                          border: '4px dashed #e0d5bf',
+                          border: '3px dashed #3c64c4',
                           animation: 'spin 120s linear infinite'
                         }}
                       ></div>
                     </div>
+
+                    {/* Child image overlay - bottom left */}
+                    <div 
+                      className="absolute"
+                      style={{
+                        width: '160px',
+                        height: '160px',
+                        borderRadius: '50%',
+                        bottom: 'calc(10% - 30px)',
+                        left: '20px',
+                        zIndex: 6,
+                        backgroundImage: 'url(/heroCircle.png)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+                      }}
+                    ></div>
                   </div>
                   
                   <Lottie 
@@ -309,9 +366,11 @@ export function MarketingHome() {
                     className="absolute flex flex-col items-start"
                     style={{
                       top: 'calc(10% - 40px)',
-                      right: 'calc(-5% - 40px)',
+                      right: '20px',
                       zIndex: 5
                     }}
+                    data-mobile-right="20px"
+                    data-desktop-right="calc(-5% - 40px)"
                   >
                     <span 
                       className="text-sm font-medium mb-2"
@@ -329,7 +388,7 @@ export function MarketingHome() {
                         <span style={{ color: '#ee7b30', fontSize: '16px', fontWeight: 'bold' }}>4.9/5</span>
                         <div className="flex">
                           {[...Array(5)].map((_, i) => (
-                            <span key={i} className="text-yellow-400 text-sm">★</span>
+                            <span key={i} className="text-sm" style={{ color: '#e87e67' }}>★</span>
                           ))}
                         </div>
                       </div>
@@ -358,7 +417,17 @@ export function MarketingHome() {
       </section>
 
       {/* Mental Health Seeding Issues Section */}
-      <section style={{ backgroundColor: '#f1cc67', paddingTop: '80px', paddingBottom: '80px' }}>
+      <section style={{ backgroundColor: '#f7d145', paddingTop: '100px', paddingBottom: '160px', position: 'relative' }}>
+        {/* Top wave */}
+        <svg style={{
+          position: 'absolute',
+          top: '-80px',
+          left: 0,
+          width: '100%',
+          height: '80px'
+        }} viewBox="0 0 1440 80" preserveAspectRatio="none">
+          <path d="M0,40 C480,80 960,0 1440,40 L1440,80 L0,80 Z" fill="#f7d145"/>
+        </svg>
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="font-bold text-gray-900 mb-4" style={{ fontSize: '40px' }}>
@@ -436,7 +505,17 @@ export function MarketingHome() {
       </section>
 
       {/* Support Where It Matters Section */}
-      <section className="bg-white" style={{ paddingTop: '80px', paddingBottom: '80px' }}>
+      <section className="bg-white" style={{ paddingTop: '100px', paddingBottom: '160px', position: 'relative' }}>
+        {/* Top wave */}
+        <svg style={{
+          position: 'absolute',
+          top: '-80px',
+          left: 0,
+          width: '100%',
+          height: '80px'
+        }} viewBox="0 0 1440 80" preserveAspectRatio="none">
+          <path d="M0,40 C480,0 960,80 1440,40 L1440,80 L0,80 Z" fill="white"/>
+        </svg>
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="font-bold text-gray-900 mb-4" style={{ fontSize: '40px' }}>Support where it matters</h2>
@@ -444,33 +523,34 @@ export function MarketingHome() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {supportAreas.map((area, index) => (
-              <div key={index} className="bg-white rounded-lg border border-black/10 shadow-[0_2px_8px_rgba(0,0,0,0.1)] overflow-hidden" style={{ borderRadius: '8px', height: '340px' }}>
-                {/* Icon container - half height */}
-                <div className="relative overflow-hidden" style={{ height: '150px', backgroundColor: 'white' }}>
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div 
-                      className="w-20 h-20 flex items-center justify-center"
-                      style={{ 
-                        backgroundColor: '#3c64c4',
-                        borderRadius: '4px'
-                      }}
-                    >
-                      <area.icon className="h-10 w-10 text-white" />
-                    </div>
-                  </div>
-                  {/* Colored bottom border */}
+              <div key={index} className="bg-white rounded-lg border border-black/10 shadow-[0_2px_8px_rgba(0,0,0,0.1)] overflow-hidden" style={{ borderRadius: '8px' }}>
+                {/* Image container */}
+                <div className="relative overflow-hidden" style={{ height: '200px', backgroundColor: 'white' }}>
+                  <img 
+                    src={area.image} 
+                    alt={area.title}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+                  />
+                  {/* Orange bottom border */}
                   <div 
                     className="absolute bottom-0 left-0 right-0" 
                     style={{ 
                       height: '4px', 
-                      backgroundColor: '#3c64c4'
+                      backgroundColor: '#e87e67'
                     }}
                   ></div>
                 </div>
                 
                 {/* Content */}
-                <div className="p-6">
-                  <h3 className="font-bold text-gray-900 mb-3 text-center" style={{ fontSize: '18px' }}>{area.title}</h3>
+                <div style={{ padding: '20px 24px 20px 24px' }}>
+                  <h3 className="font-bold text-gray-900 text-center" style={{ fontSize: '18px', marginBottom: '20px' }}>{area.title}</h3>
+                  {/* Dashed Divider */}
+                  <div style={{ 
+                    width: '100%', 
+                    height: '1px',
+                    backgroundImage: 'repeating-linear-gradient(to right, #cccccc 0, #cccccc 4px, transparent 4px, transparent 8px)',
+                    marginBottom: '20px'
+                  }}></div>
                   <p className="text-gray-600 text-center" style={{ fontSize: '18px' }}>
                     {area.description}
                   </p>
@@ -482,10 +562,20 @@ export function MarketingHome() {
       </section>
 
       {/* Testimonials Section */}
-      <section style={{ backgroundColor: '#f6f4ef', paddingTop: '80px', paddingBottom: '80px' }}>
+      <section style={{ backgroundColor: '#f9f7f2', paddingTop: '100px', paddingBottom: '160px', position: 'relative' }}>
+        {/* Top wave */}
+        <svg style={{
+          position: 'absolute',
+          top: '-80px',
+          left: 0,
+          width: '100%',
+          height: '80px'
+        }} viewBox="0 0 1440 80" preserveAspectRatio="none">
+          <path d="M0,40 C480,80 960,0 1440,40 L1440,80 L0,80 Z" fill="#f9f7f2"/>
+        </svg>
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="font-bold text-gray-900 mb-4" style={{ fontSize: '40px' }}>What our pilot users say</h2>
+            <h2 className="font-bold mb-4" style={{ fontSize: '40px', color: 'black' }}>What our pilot users say</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
@@ -501,7 +591,7 @@ export function MarketingHome() {
                     />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 mb-4" style={{ fontSize: '20px' }}>{testimonial.name}</h3>
+                    <h3 className="font-semibold mb-4" style={{ fontSize: '20px', color: 'black' }}>{testimonial.name}</h3>
                     <div className="mb-4">
                       <div style={{ 
                         fontSize: '60px', 
@@ -511,7 +601,7 @@ export function MarketingHome() {
                         color: '#e87e67',
                         marginBottom: '-10px'
                       }}>"</div>
-                      <p className="text-gray-700 leading-relaxed" style={{ fontSize: '16px' }}>{testimonial.quote}</p>
+                      <p className="leading-relaxed" style={{ fontSize: '16px', color: 'black' }}>{testimonial.quote}</p>
                     </div>
                     <div className="flex items-center gap-1">
                       {[...Array(testimonial.rating)].map((_, i) => (
@@ -523,15 +613,6 @@ export function MarketingHome() {
                 </div>
               </div>
             ))}
-          </div>
-          
-          {/* Dashed Divider */}
-          <div className="mb-12">
-            <div style={{ 
-              width: '100%', 
-              height: '1px',
-              backgroundImage: 'repeating-linear-gradient(to right, #cccccc 0, #cccccc 4px, transparent 4px, transparent 8px)'
-            }}></div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -547,7 +628,7 @@ export function MarketingHome() {
                     />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 mb-4" style={{ fontSize: '20px' }}>{testimonial.name}</h3>
+                    <h3 className="font-semibold mb-4" style={{ fontSize: '20px', color: 'black' }}>{testimonial.name}</h3>
                     <div className="mb-4">
                       <div style={{ 
                         fontSize: '60px', 
@@ -557,7 +638,7 @@ export function MarketingHome() {
                         color: '#e87e67',
                         marginBottom: '-10px'
                       }}>"</div>
-                      <p className="text-gray-700 leading-relaxed" style={{ fontSize: '16px' }}>{testimonial.quote}</p>
+                      <p className="leading-relaxed" style={{ fontSize: '16px', color: 'black' }}>{testimonial.quote}</p>
                     </div>
                     <div className="flex items-center gap-1">
                       {[...Array(testimonial.rating)].map((_, i) => (
@@ -574,7 +655,17 @@ export function MarketingHome() {
       </section>
 
       {/* Security and Compliance Section */}
-      <section className="bg-white" style={{ paddingTop: '80px', paddingBottom: '80px' }}>
+      <section className="bg-white" style={{ paddingTop: '100px', paddingBottom: '160px', position: 'relative' }}>
+        {/* Top wave */}
+        <svg style={{
+          position: 'absolute',
+          top: '-80px',
+          left: 0,
+          width: '100%',
+          height: '80px'
+        }} viewBox="0 0 1440 80" preserveAspectRatio="none">
+          <path d="M0,40 C480,80 960,0 1440,40 L1440,80 L0,80 Z" fill="white"/>
+        </svg>
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="font-bold text-gray-900 mb-4" style={{ fontSize: '40px' }}>Security and Compliance</h2>
@@ -591,24 +682,48 @@ export function MarketingHome() {
                     </div>
                     <span className="text-gray-700" style={{ fontSize: '20px' }}>ISO 27001 certified infrastructure</span>
                   </div>
+                  {/* Dashed Divider */}
+                  <div style={{ 
+                    width: '100%', 
+                    height: '1px',
+                    backgroundImage: 'repeating-linear-gradient(to right, #cccccc 0, #cccccc 4px, transparent 4px, transparent 8px)'
+                  }}></div>
                   <div className="flex items-center gap-3">
                     <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
                       <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
                     <span className="text-gray-700" style={{ fontSize: '20px' }}>GDPR compliant data processing</span>
                   </div>
+                  {/* Dashed Divider */}
+                  <div style={{ 
+                    width: '100%', 
+                    height: '1px',
+                    backgroundImage: 'repeating-linear-gradient(to right, #cccccc 0, #cccccc 4px, transparent 4px, transparent 8px)'
+                  }}></div>
                   <div className="flex items-center gap-3">
                     <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
                       <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
                     <span className="text-gray-700" style={{ fontSize: '20px' }}>End-to-end encryption</span>
                   </div>
+                  {/* Dashed Divider */}
+                  <div style={{ 
+                    width: '100%', 
+                    height: '1px',
+                    backgroundImage: 'repeating-linear-gradient(to right, #cccccc 0, #cccccc 4px, transparent 4px, transparent 8px)'
+                  }}></div>
                   <div className="flex items-center gap-3">
                     <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
                       <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
                     <span className="text-gray-700" style={{ fontSize: '20px' }}>Regular security audits</span>
                   </div>
+                  {/* Dashed Divider */}
+                  <div style={{ 
+                    width: '100%', 
+                    height: '1px',
+                    backgroundImage: 'repeating-linear-gradient(to right, #cccccc 0, #cccccc 4px, transparent 4px, transparent 8px)'
+                  }}></div>
                   <div className="flex items-center gap-3">
                     <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
                       <Check className="h-3 w-3 text-white" strokeWidth={3} />
@@ -636,7 +751,17 @@ export function MarketingHome() {
       </section>
 
       {/* Footer with Waitlist Form */}
-      <footer id="waitlist-form" className="text-white" style={{ backgroundColor: '#3c64c4', paddingTop: '80px', paddingBottom: '80px' }}>
+      <footer id="waitlist-form" className="text-white" style={{ backgroundColor: '#3c64c4', paddingTop: '100px', paddingBottom: '80px', position: 'relative' }}>
+        {/* Top wave */}
+        <svg style={{
+          position: 'absolute',
+          top: '-80px',
+          left: 0,
+          width: '100%',
+          height: '80px'
+        }} viewBox="0 0 1440 80" preserveAspectRatio="none">
+          <path d="M0,40 C480,0 960,80 1440,40 L1440,80 L0,80 Z" fill="#3c64c4"/>
+        </svg>
         <div className="max-w-7xl mx-auto px-6">
           {submitted ? (
             <div className="max-w-md mx-auto text-center">
@@ -787,7 +912,7 @@ export function MarketingHome() {
               marginBottom: '32px'
             }}></div>
             <div className="flex items-center justify-center gap-3 mb-4">
-              <svg height="25" viewBox="0 0 621 157" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg height="20" viewBox="0 0 621 157" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g clipPath="url(#clip0_1_2)">
                   <path d="M25.6 73.2H0V50H25.6V26.2L50.2 12.4V50H104.2V73.2H50.2V155H25.6V73.2Z" fill="white"/>
                   <path d="M92.6 7H117.2V62.8C123.6 54 134.4 48 148.2 48C170.2 48 189.8 60.2 189.8 90.4V155H165.2V95.4C165.2 79.6 155.6 71.6 142.4 71.6C128 71.6 117.2 81.4 117.2 98.2V155H92.6V7Z" fill="white"/>
