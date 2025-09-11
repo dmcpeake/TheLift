@@ -23,6 +23,7 @@ import {
   Brain,
   PiggyBank,
   CheckCircle,
+  Check,
   ChevronLeft,
   ChevronRight,
   Play
@@ -39,6 +40,7 @@ export function MarketingHome() {
   const [thinkingAnimation, setThinkingAnimation] = useState(null)
   const [thumbUpAnimation, setThumbUpAnimation] = useState(null)
   const [puzzleAnimation, setPuzzleAnimation] = useState(null)
+  const [documentAnimation, setDocumentAnimation] = useState(null)
 
   // Load the Lottie animations
   React.useEffect(() => {
@@ -61,6 +63,11 @@ export function MarketingHome() {
       .then(response => response.json())
       .then(data => setPuzzleAnimation(data))
       .catch(error => console.error('Error loading puzzle animation:', error))
+      
+    fetch('/theo-document.json')
+      .then(response => response.json())
+      .then(data => setDocumentAnimation(data))
+      .catch(error => console.error('Error loading document animation:', error))
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -149,7 +156,7 @@ export function MarketingHome() {
     },
     {
       title: 'For Hospitals',
-      description: 'Helping the NHS deliver front line care for kids and understanding behavioral patterns and outcomes at scale.',
+      description: 'Helping the NHS deliver front line care for kids and understanding behavioral patterns at scale.',
       icon: Building2
     }
   ]
@@ -225,15 +232,15 @@ export function MarketingHome() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             {/* Text content */}
             <div>
-              <h1 className="text-6xl font-bold mb-6" style={{ color: '#3F7A9A' }}>
+              <h1 className="text-6xl font-bold mb-6" style={{ color: '#3c64c4' }}>
                 Education. Data. Connection.
               </h1>
               
-              <p className="text-xl mb-4 font-normal" style={{ color: '#3F7A9A', fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', fontSize: '20px' }}>
+              <p className="text-xl mb-4 font-normal text-gray-600" style={{ fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', fontSize: '20px' }}>
                 The Lift gives kids a safe space to reflect and have conversations so problems don't take root.
               </p>
               
-              <p className="text-xl mb-8 font-semibold" style={{ color: '#3F7A9A', fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', fontSize: '20px' }}>
+              <p className="text-xl mb-8 font-semibold text-gray-900" style={{ fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', fontSize: '20px' }}>
                 Launching soon.
               </p>
               
@@ -241,9 +248,9 @@ export function MarketingHome() {
                 <Button 
                   onClick={handleJoinWaitlistClick}
                   className="h-10 rounded flex items-center justify-center pt-2.5 pb-2" 
-                  style={{ backgroundColor: '#3F7A9A', color: 'white' }} 
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2F5A7A'} 
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3F7A9A'}
+                  style={{ backgroundColor: '#3c64c4', color: 'white' }} 
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2D55E5'} 
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3c64c4'}
                 >
                   JOIN WAITLIST
                 </Button>
@@ -289,19 +296,19 @@ export function MarketingHome() {
       </section>
 
       {/* Mental Health Seeding Issues Section */}
-      <section style={{ backgroundColor: '#f7f7f7', paddingTop: '80px', paddingBottom: '80px' }}>
+      <section style={{ backgroundColor: '#f1cc67', paddingTop: '80px', paddingBottom: '80px' }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="font-bold text-gray-900 mb-4" style={{ fontSize: '40px' }}>
               Mental health seeding issues start early
             </h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {transformations.map((transformation, index) => (
-              <div key={index} className="bg-white rounded-lg border border-black/10 shadow-[0_2px_8px_rgba(0,0,0,0.1)] overflow-hidden" style={{ borderRadius: '8px', height: '300px' }}>
-                {/* Image/Animation container - half height */}
-                <div className="relative overflow-hidden" style={{ height: '150px' }}>
+              <div key={index} className="bg-white rounded-lg border border-black/10 shadow-[0_2px_8px_rgba(0,0,0,0.1)] overflow-hidden" style={{ borderRadius: '8px', height: 'auto' }}>
+                {/* Image/Animation container - now 300px height */}
+                <div className="relative overflow-hidden" style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fafafa' }}>
                   {transformation.animationType === 'lottie' ? (
                     (() => {
                       let animationData = null;
@@ -317,8 +324,8 @@ export function MarketingHome() {
                         <Lottie 
                           animationData={animationData} 
                           style={{ 
-                            width: '100%', 
-                            height: '100%',
+                            width: '260px', 
+                            height: '260px',
                             margin: 0,
                             padding: 0,
                             border: 'none',
@@ -337,16 +344,16 @@ export function MarketingHome() {
                     />
                   )}
                   {/* Colored bottom border */}
-                  <div className="absolute bottom-0 left-0 right-0" style={{ height: '4px', backgroundColor: '#DD7C7A' }}></div>
+                  <div className="absolute bottom-0 left-0 right-0" style={{ height: '4px', backgroundColor: '#e87e67' }}></div>
                 </div>
                 
                 {/* Content - your original content */}
                 <div className="p-6">
                   <div className="text-center mb-6">
                     <div className="flex items-center justify-center gap-4 mb-4">
-                      <span className="text-gray-500 font-medium">{transformation.from}</span>
+                      <span className="text-gray-900 font-bold" style={{ fontSize: '18px' }}>{transformation.from}</span>
                       <ArrowRight className="h-4 w-4 text-gray-400" />
-                      <span className="font-bold" style={{ color: '#DD7C7A' }}>{transformation.to}</span>
+                      <span className="font-bold" style={{ color: '#e87e67', fontSize: '18px' }}>{transformation.to}</span>
                     </div>
                     {/* Dashed Divider */}
                     <div style={{ 
@@ -356,7 +363,7 @@ export function MarketingHome() {
                     }}></div>
                   </div>
                   
-                  <p className="text-gray-600 text-center text-base">
+                  <p className="text-gray-600 text-center" style={{ fontSize: '18px' }}>
                     {transformation.description}
                   </p>
                 </div>
@@ -370,17 +377,42 @@ export function MarketingHome() {
       <section className="bg-white" style={{ paddingTop: '80px', paddingBottom: '80px' }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Support where it matters</h2>
+            <h2 className="font-bold text-gray-900 mb-4" style={{ fontSize: '40px' }}>Support where it matters</h2>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {supportAreas.map((area, index) => (
-              <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-gray-900 rounded-xl flex items-center justify-center mx-auto mb-6">
-                  <area.icon className="h-8 w-8 text-white" />
+              <div key={index} className="bg-white rounded-lg border border-black/10 shadow-[0_2px_8px_rgba(0,0,0,0.1)] overflow-hidden" style={{ borderRadius: '8px', height: '340px' }}>
+                {/* Icon container - half height */}
+                <div className="relative overflow-hidden" style={{ height: '150px', backgroundColor: 'white' }}>
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div 
+                      className="w-20 h-20 flex items-center justify-center"
+                      style={{ 
+                        backgroundColor: '#3c64c4',
+                        borderRadius: '4px'
+                      }}
+                    >
+                      <area.icon className="h-10 w-10 text-white" />
+                    </div>
+                  </div>
+                  {/* Colored bottom border */}
+                  <div 
+                    className="absolute bottom-0 left-0 right-0" 
+                    style={{ 
+                      height: '4px', 
+                      backgroundColor: '#3c64c4'
+                    }}
+                  ></div>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">{area.title}</h3>
-                <p className="text-lg text-gray-600 leading-relaxed">{area.description}</p>
+                
+                {/* Content */}
+                <div className="p-6">
+                  <h3 className="font-bold text-gray-900 mb-3 text-center" style={{ fontSize: '18px' }}>{area.title}</h3>
+                  <p className="text-gray-600 text-center" style={{ fontSize: '18px' }}>
+                    {area.description}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -388,10 +420,10 @@ export function MarketingHome() {
       </section>
 
       {/* Testimonials Section */}
-      <section style={{ backgroundColor: '#F7F7F7', paddingTop: '80px', paddingBottom: '80px' }}>
+      <section style={{ backgroundColor: '#f6f4ef', paddingTop: '80px', paddingBottom: '80px' }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">What our users say</h2>
+            <h2 className="font-bold text-gray-900 mb-4" style={{ fontSize: '40px' }}>What our pilot users say</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
@@ -414,16 +446,16 @@ export function MarketingHome() {
                         fontWeight: '600', 
                         fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', 
                         lineHeight: '30px',
-                        color: '#DD7C7A',
+                        color: '#e87e67',
                         marginBottom: '-10px'
                       }}>"</div>
                       <p className="text-gray-700 leading-relaxed" style={{ fontSize: '16px' }}>{testimonial.quote}</p>
                     </div>
                     <div className="flex items-center gap-1">
                       {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-current" style={{ color: '#DD7C7A', width: '16px', height: '16px' }} />
+                        <Star key={i} className="w-4 h-4 fill-current" style={{ color: '#e87e67', width: '16px', height: '16px' }} />
                       ))}
-                      <span className="text-sm ml-2 font-medium" style={{ color: '#DD7C7A' }}>4.9 / 5</span>
+                      <span className="text-sm ml-2 font-medium" style={{ color: '#e87e67' }}>4.9 / 5</span>
                     </div>
                   </div>
                 </div>
@@ -460,50 +492,19 @@ export function MarketingHome() {
                         fontWeight: '600', 
                         fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', 
                         lineHeight: '30px',
-                        color: '#DD7C7A',
+                        color: '#e87e67',
                         marginBottom: '-10px'
                       }}>"</div>
                       <p className="text-gray-700 leading-relaxed" style={{ fontSize: '16px' }}>{testimonial.quote}</p>
                     </div>
                     <div className="flex items-center gap-1">
                       {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-current" style={{ color: '#DD7C7A', width: '16px', height: '16px' }} />
+                        <Star key={i} className="w-4 h-4 fill-current" style={{ color: '#e87e67', width: '16px', height: '16px' }} />
                       ))}
-                      <span className="text-sm ml-2 font-medium" style={{ color: '#DD7C7A' }}>4.9 / 5</span>
+                      <span className="text-sm ml-2 font-medium" style={{ color: '#e87e67' }}>4.9 / 5</span>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Social Impact Section */}
-      <section className="bg-white" style={{ paddingTop: '80px', paddingBottom: '80px' }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Patient, purpose-led social impact</h2>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-12">
-            {impactStats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-gray-900 rounded-xl flex items-center justify-center mx-auto mb-6">
-                  <stat.icon className={`h-8 w-8 text-white`} />
-                </div>
-                
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">{stat.title}</h3>
-                
-                <div className="space-y-4 mb-6">
-                  <p className="text-lg font-semibold text-gray-900 leading-relaxed">
-                    {stat.stat}
-                  </p>
-                  {stat.detail && <p className="text-base text-gray-700">{stat.detail}</p>}
-                  <p className="text-base text-gray-700 leading-relaxed">{stat.additional}</p>
-                </div>
-                
-                <p className="text-sm text-gray-500 italic">{stat.source}</p>
               </div>
             ))}
           </div>
@@ -511,59 +512,61 @@ export function MarketingHome() {
       </section>
 
       {/* Security and Compliance Section */}
-      <section style={{ backgroundColor: '#f7f7f7', paddingTop: '80px', paddingBottom: '80px' }}>
+      <section className="bg-white" style={{ paddingTop: '80px', paddingBottom: '80px' }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Security and Compliance</h2>
+            <h2 className="font-bold text-gray-900 mb-4" style={{ fontSize: '40px' }}>Security and Compliance</h2>
           </div>
           
           <div className="bg-white rounded-lg border border-black/10 shadow-[0_2px_8px_rgba(0,0,0,0.1)] p-8">
             <div className="grid lg:grid-cols-2 gap-8 items-center">
               <div>
-                <h3 className="text-2xl mb-4 text-gray-900">Enterprise-Grade Security</h3>
+                <h3 className="text-2xl mb-4 text-gray-900 font-bold">Enterprise-Grade Security</h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-gray-600" />
-                    <span className="text-gray-700">ISO 27001 certified infrastructure</span>
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
+                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                    </div>
+                    <span className="text-gray-700" style={{ fontSize: '16px' }}>ISO 27001 certified infrastructure</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-gray-600" />
-                    <span className="text-gray-700">GDPR compliant data processing</span>
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
+                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                    </div>
+                    <span className="text-gray-700" style={{ fontSize: '16px' }}>GDPR compliant data processing</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-gray-600" />
-                    <span className="text-gray-700">End-to-end encryption</span>
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
+                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                    </div>
+                    <span className="text-gray-700" style={{ fontSize: '16px' }}>End-to-end encryption</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-gray-600" />
-                    <span className="text-gray-700">Regular security audits</span>
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
+                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                    </div>
+                    <span className="text-gray-700" style={{ fontSize: '16px' }}>Regular security audits</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-gray-600" />
-                    <span className="text-gray-700">Child safeguarding protocols</span>
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
+                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
+                    </div>
+                    <span className="text-gray-700" style={{ fontSize: '16px' }}>Child safeguarding protocols</span>
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 rounded-xl p-6">
-                <h4 className="text-lg mb-4 text-gray-900">Compliance Standards</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-white rounded-lg">
-                    <div className="text-2xl mb-1">🔒</div>
-                    <div className="text-sm text-gray-600">GDPR</div>
-                  </div>
-                  <div className="text-center p-3 bg-white rounded-lg">
-                    <div className="text-2xl mb-1">🛡️</div>
-                    <div className="text-sm text-gray-600">ISO 27001</div>
-                  </div>
-                  <div className="text-center p-3 bg-white rounded-lg">
-                    <div className="text-2xl mb-1">👶</div>
-                    <div className="text-sm text-gray-600">Child Protection</div>
-                  </div>
-                  <div className="text-center p-3 bg-white rounded-lg">
-                    <div className="text-2xl mb-1">🏥</div>
-                    <div className="text-sm text-gray-600">NHS IG Toolkit</div>
-                  </div>
-                </div>
+              <div className="flex items-center justify-center">
+                {documentAnimation && (
+                  <Lottie 
+                    animationData={documentAnimation} 
+                    style={{ 
+                      width: '260px', 
+                      height: '260px'
+                    }}
+                    loop={true}
+                    autoplay={true}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -571,7 +574,7 @@ export function MarketingHome() {
       </section>
 
       {/* Footer with Waitlist Form */}
-      <footer id="waitlist-form" className="text-white" style={{ backgroundColor: '#3F7A9A', paddingTop: '80px', paddingBottom: '80px' }}>
+      <footer id="waitlist-form" className="text-white" style={{ backgroundColor: '#3c64c4', paddingTop: '80px', paddingBottom: '80px' }}>
         <div className="max-w-7xl mx-auto px-6">
           {submitted ? (
             <div className="max-w-md mx-auto text-center">
@@ -590,10 +593,10 @@ export function MarketingHome() {
           ) : (
             <div className="max-w-2xl mx-auto">
               <div className="text-center mb-8">
-                <h2 className="font-bold text-white" style={{ fontSize: '30px', marginBottom: '8px' }}>
+                <h2 className="font-bold text-white" style={{ fontSize: '40px', marginBottom: '8px' }}>
                   Join the Waitlist
                 </h2>
-                <p className="text-gray-200" style={{ fontSize: '20px' }}>
+                <p className="text-white" style={{ fontSize: '20px' }}>
                   Be amongst the first to access The Lift when we launch, and help shape the future of child wellbeing support.
                 </p>
               </div>
@@ -700,7 +703,7 @@ export function MarketingHome() {
                     height: '40px',
                     borderRadius: '4px',
                     backgroundColor: 'white',
-                    color: '#3F7A9A',
+                    color: '#3c64c4',
                     marginTop: '25px'
                   }}
                 >
@@ -708,7 +711,7 @@ export function MarketingHome() {
                 </Button>
               </form>
 
-              <p className="text-xs text-gray-300 mt-6 text-center">
+              <p className="text-xs text-white mt-6 text-center">
                 We respect your privacy. Unsubscribe at any time.
               </p>
             </div>

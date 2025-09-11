@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Setup Waitlist Table</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        button { background: #4F46E5; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 10px 0; }
+        button:hover { background: #4338CA; }
+        button:disabled { background: #9CA3AF; cursor: not-allowed; }
+        .output { background: #F3F4F6; padding: 15px; border-radius: 5px; margin: 10px 0; white-space: pre-wrap; font-family: monospace; }
+        .success { color: #059669; }
+        .error { color: #DC2626; }
+    </style>
+</head>
+<body>
+    <h1>Setup Waitlist Table & Test Data</h1>
+    <p>This will create the waitlist table and populate it with test data.</p>
+    
+    <button id="setupBtn" onclick="setupWaitlist()">Create Table & Add Test Data</button>
+    <button id="testFormBtn" onclick="testForm()">Test Form Submission</button>
+    
+    <div id="output" class="output"></div>
+
+    <script>
+        const supabaseUrl = 'https://jxdkwfhsicynyvhkutjm.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4ZGt3ZmhzaWN5bnl2aGt1dGptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MjAxNTAsImV4cCI6MjA3MjI5NjE1MH0.ZuG6MjKYX2FM-WCIhzLyVRXA0x87kFgUvy-LlVM2QwY'
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+        
+        function log(message, type = 'info') {
+            const output = document.getElementById('output')
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : ''
+            output.innerHTML += `<div class="${className}">[${new Date().toLocaleTimeString()}] ${message}</div>`
+            output.scrollTop = output.scrollHeight
+        }
+        
+        async function setupWaitlist() {
+            const btn = document.getElementById('setupBtn')
+            btn.disabled = true
+            btn.textContent = 'Setting up...'
+            
+            try {
+                log('Creating waitlist table and test data...')
+                
+                // Test data
+                const testData = [
+                    {
+                        name: 'Sarah Johnson',
+                        email: 'sarah.johnson@primaryschool.edu',
+                        organization: 'Meadowbrook Primary School',
+                        role: 'teacher',
+                        created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+                    },
+                    {
+                        name: 'Dr. Michael Chen',
+                        email: 'michael.chen@childpsychology.uk',
+                        organization: 'London Child Psychology Centre',
+                        role: 'psychologist',
+                        created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString()
+                    },
+                    {
+                        name: 'Emma Thompson',
+                        email: 'emma.thompson@gmail.com',
+                        organization: null,
+                        role: 'parent',
+                        created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+                    },
+                    {
+                        name: 'James Wilson',
+                        email: 'j.wilson@stmarys-academy.org',
+                        organization: 'St. Mary\'s Academy',
+                        role: 'headteacher',
+                        created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+                    },
+                    {
+                        name: 'Dr. Rachel Green',
+                        email: 'r.green@nhs.uk',
+                        organization: 'NHS Greater Manchester Mental Health Trust',
+                        role: 'therapist',
+                        created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+                    },
+                    {
+                        name: 'Lisa Parker',
+                        email: 'lisa.parker@counselling.co.uk',
+                        organization: 'Parker Counselling Services',
+                        role: 'counselor',
+                        created_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
+                    },
+                    {
+                        name: 'David Mitchell',
+                        email: 'dmitchell@yahoo.com',
+                        organization: null,
+                        role: 'parent',
+                        created_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+                    },
+                    {
+                        name: 'Anna Roberts',
+                        email: 'a.roberts@riverside-school.edu',
+                        organization: 'Riverside Community School',
+                        role: 'social-worker',
+                        created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
+                    }
+                ]
+                
+                // Try to insert data (this will fail if table doesn't exist)
+                const { data, error } = await supabase
+                    .from('waitlist')
+                    .insert(testData)
+                    .select()
+                
+                if (error) {
+                    log(`❌ Error: ${error.message}`, 'error')
+                    if (error.message.includes('table') || error.message.includes('relation')) {
+                        log('❗ The waitlist table does not exist. Please create it manually in Supabase Dashboard:', 'error')
+                        log(`
+CREATE TABLE public.waitlist (
+  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  organization TEXT,
+  role TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::TEXT, NOW()) NOT NULL
+);
+
+CREATE INDEX waitlist_email_idx ON public.waitlist(email);
+CREATE INDEX waitlist_created_at_idx ON public.waitlist(created_at DESC);
+
+ALTER TABLE public.waitlist ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Enable all operations for all users" ON public.waitlist FOR ALL USING (true);
+
+GRANT ALL ON public.waitlist TO anon;
+GRANT ALL ON public.waitlist TO authenticated;
+GRANT ALL ON public.waitlist TO service_role;`, 'info')
+                    }
+                } else {
+                    log(`✅ Successfully inserted ${data.length} waitlist entries!`, 'success')
+                    log(`Entries: ${data.map(d => d.name).join(', ')}`, 'success')
+                }
+                
+            } catch (err) {
+                log(`❌ Unexpected error: ${err.message}`, 'error')
+            } finally {
+                btn.disabled = false
+                btn.textContent = 'Create Table & Add Test Data'
+            }
+        }
+        
+        async function testForm() {
+            const btn = document.getElementById('testFormBtn')
+            btn.disabled = true
+            btn.textContent = 'Testing...'
+            
+            try {
+                log('Testing form submission...')
+                
+                const testEntry = {
+                    name: 'Test User',
+                    email: `test.${Date.now()}@example.com`,
+                    organization: 'Test Organisation',
+                    role: 'parent',
+                    created_at: new Date().toISOString()
+                }
+                
+                const { data, error } = await supabase
+                    .from('waitlist')
+                    .insert([testEntry])
+                    .select()
+                
+                if (error) {
+                    log(`❌ Form test failed: ${error.message}`, 'error')
+                } else {
+                    log(`✅ Form test successful! Added: ${data[0].name}`, 'success')
+                }
+                
+            } catch (err) {
+                log(`❌ Test error: ${err.message}`, 'error')
+            } finally {
+                btn.disabled = false
+                btn.textContent = 'Test Form Submission'
+            }
+        }
+        
+        // Auto-run setup on page load
+        log('Ready to setup waitlist table. Click the button above to begin.')
+    </script>
+</body>
+</html>
