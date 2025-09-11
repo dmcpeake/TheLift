@@ -36,21 +36,31 @@ const useScrollAnimation = () => {
   const [visibleElements, setVisibleElements] = useState(new Set())
   
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisibleElements(prev => new Set([...prev, entry.target.id]))
-          }
-        })
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
-    )
+    let observer: IntersectionObserver | null = null
+    
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setVisibleElements(prev => new Set([...prev, entry.target.id]))
+            }
+          })
+        },
+        { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+      )
 
-    const elements = document.querySelectorAll('[data-scroll-animate]')
-    elements.forEach((el) => observer.observe(el))
+      const elements = document.querySelectorAll('[data-scroll-animate]')
+      elements.forEach((el) => observer?.observe(el))
+    }, 100)
 
-    return () => observer.disconnect()
+    return () => {
+      clearTimeout(timer)
+      if (observer) {
+        observer.disconnect()
+      }
+    }
   }, [])
 
   return visibleElements
