@@ -454,7 +454,7 @@ export function MarketingHome() {
               </p>
               
               <p className="text-xl mb-8 font-semibold" style={{ fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', fontSize: '20px', color: '#147fe3' }}>
-                Launching soon.
+                Launching soon...
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">
