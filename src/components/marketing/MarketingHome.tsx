@@ -1059,7 +1059,7 @@ export function MarketingHome() {
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form id="waitlist-form" onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-white mb-2">
                     Full Name *
