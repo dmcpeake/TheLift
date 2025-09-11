@@ -261,6 +261,33 @@ export function MarketingHome() {
             <div className="flex justify-center lg:justify-end">
               {rocketAnimation && (
                 <div className="relative">
+                  {/* Background floating circles */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    {/* Dashed outer circle */}
+                    <div 
+                      className="absolute"
+                      style={{
+                        width: '460px',
+                        height: '460px',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 4
+                      }}
+                    >
+                      <div 
+                        className="opacity-20"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: '50%',
+                          border: '4px dashed #e0d5bf',
+                          animation: 'spin 120s linear infinite'
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                  
                   <Lottie 
                     animationData={rocketAnimation} 
                     style={{ 
@@ -269,11 +296,45 @@ export function MarketingHome() {
                       margin: 0,
                       padding: 0,
                       border: 'none',
-                      outline: 'none'
+                      outline: 'none',
+                      position: 'relative',
+                      zIndex: 2
                     }}
                     loop={true}
                     autoplay={true}
                   />
+                  
+                  {/* Rating badge overlay */}
+                  <div 
+                    className="absolute flex flex-col items-start"
+                    style={{
+                      top: 'calc(10% - 40px)',
+                      right: 'calc(-5% - 40px)',
+                      zIndex: 5
+                    }}
+                  >
+                    <span 
+                      className="text-sm font-medium mb-2"
+                      style={{ color: '#6b7280' }}
+                    >
+                      Avg user rating
+                    </span>
+                    <div 
+                      className="bg-white rounded-full shadow-lg border-2 px-4 py-2 flex items-center gap-2"
+                      style={{
+                        borderColor: '#ee7b30'
+                      }}
+                    >
+                      <div className="flex items-center gap-1">
+                        <span style={{ color: '#ee7b30', fontSize: '16px', fontWeight: 'bold' }}>4.9/5</span>
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <span key={i} className="text-yellow-400 text-sm">★</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   {/* Gradient fade overlay at bottom */}
                   <div 
                     className="absolute left-0"
@@ -283,7 +344,8 @@ export function MarketingHome() {
                       height: '200px',
                       backgroundColor: 'white',
                       WebkitMask: 'linear-gradient(to bottom, transparent, black)',
-                      mask: 'linear-gradient(to bottom, transparent, black)'
+                      mask: 'linear-gradient(to bottom, transparent, black)',
+                      zIndex: 3
                     }}
                   />
                 </div>
@@ -306,7 +368,7 @@ export function MarketingHome() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {transformations.map((transformation, index) => (
-              <div key={index} className="bg-white rounded-lg border border-black/10 shadow-[0_2px_8px_rgba(0,0,0,0.1)] overflow-hidden" style={{ borderRadius: '8px', height: 'auto' }}>
+              <div key={index} className="bg-white rounded-lg overflow-hidden" style={{ borderRadius: '8px', height: 'auto' }}>
                 {/* Image/Animation container - now 300px height */}
                 <div className="relative overflow-hidden" style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#fafafa' }}>
                   {transformation.animationType === 'lottie' ? (
