@@ -107,7 +107,7 @@ const useSectionNavigation = () => {
     }
   }, [])
 
-  return currentSection
+  return { currentSection, setCurrentSection }
 }
 
 export function MarketingHome() {
@@ -123,7 +123,7 @@ export function MarketingHome() {
   const [puzzleAnimation, setPuzzleAnimation] = useState(null)
   const [documentAnimation, setDocumentAnimation] = useState(null)
   const visibleElements = useScrollAnimation()
-  const currentSection = useSectionNavigation()
+  const { currentSection, setCurrentSection } = useSectionNavigation()
 
   const sections = [
     'hero-section',
@@ -146,7 +146,9 @@ export function MarketingHome() {
     
     const targetSection = document.getElementById(sections[targetIndex])
     if (targetSection) {
-      targetSection.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      // Update current section immediately for better UX
+      setCurrentSection(sections[targetIndex])
     }
   }
 
@@ -395,7 +397,9 @@ export function MarketingHome() {
             onClick={() => {
               const element = document.getElementById(section.id)
               if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                // Update current section immediately for better UX
+                setCurrentSection(section.id)
               }
             }}
             title={section.label}
