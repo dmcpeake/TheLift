@@ -578,7 +578,7 @@ export function MarketingHome() {
                         height: '160px',
                         borderRadius: '50%',
                         top: '50%',
-                        left: '-20px',
+                        left: '-80px',
                         transform: 'translateY(-230px)',
                         zIndex: 6,
                         overflow: 'hidden',
