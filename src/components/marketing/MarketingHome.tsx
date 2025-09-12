@@ -574,11 +574,12 @@ export function MarketingHome() {
                     <div 
                       className="absolute"
                       style={{
-                        width: '200px',
-                        height: '200px',
+                        width: '160px',
+                        height: '160px',
                         borderRadius: '50%',
-                        top: 'calc(10% - 30px)',
-                        left: '20px',
+                        top: '50%',
+                        left: '-20px',
+                        transform: 'translateY(-230px)',
                         zIndex: 6,
                         overflow: 'hidden',
                         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
@@ -592,7 +593,7 @@ export function MarketingHome() {
                           style={{ 
                             width: '100%', 
                             height: '100%',
-                            transform: 'scale(1.2)'
+                            transform: 'scale(0.9)'
                           }}
                           loop={true}
                           autoplay={true}
