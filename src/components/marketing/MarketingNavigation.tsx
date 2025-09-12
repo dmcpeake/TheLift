@@ -41,23 +41,23 @@ export function MarketingNavigation() {
         boxShadow: isScrolled ? '0 4px 8px rgba(0, 0, 0, 0.1)' : 'none'
       }}
     >
-      <div className="w-full py-5" style={{ paddingLeft: '60px', paddingRight: '60px' }}>
+      <div className="w-full py-5 px-5 md:px-[60px]">
         <div className="flex items-center justify-between">
           <button onClick={handleLogoClick} className="flex items-center gap-3 cursor-pointer">
-            <Triangle className="h-10 w-10 fill-current" style={{ color: '#3c64c4' }} />
+            <Triangle className="h-10 w-10 fill-current" style={{ color: '#147fe3' }} />
             <img src="/TheLiftLogo.svg" alt="The Lift" className="h-5" style={{ imageRendering: 'auto', shapeRendering: 'geometricPrecision', filter: 'brightness(0) saturate(100%) invert(11%) sepia(0%) saturate(7465%) hue-rotate(189deg) brightness(105%) contrast(86%)' }} />
           </button>
           
           <div className="flex items-center" style={{ gap: '20px' }}>
             <Link to="/login">
-              <Button variant="outline" className="h-10 rounded flex items-center justify-center pt-2.5 pb-2" style={{ color: '#3c64c4', borderColor: '#3c64c4' }}>SIGN IN</Button>
+              <Button variant="outline" className="h-10 rounded flex items-center justify-center pt-2.5 pb-2" style={{ color: '#147fe3', borderColor: '#147fe3' }}>SIGN IN</Button>
             </Link>
             <Button 
               onClick={handleJoinWaitlistClick}
               className="h-10 rounded flex items-center justify-center pt-2.5 pb-2" 
-              style={{ backgroundColor: '#3c64c4', color: 'white' }} 
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2D55E5'} 
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3c64c4'}
+              style={{ backgroundColor: '#147fe3', color: 'white' }} 
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1171CD'} 
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#147fe3'}
             >
               JOIN WAITLIST
             </Button>
