@@ -608,7 +608,7 @@ export function MarketingHome() {
                       position: 'relative',
                       zIndex: 2,
                       borderRadius: '50%',
-                      backgroundImage: 'url(/heroCircle.png)',
+                      backgroundImage: 'url(/HeroLG.png)',
                       backgroundSize: 'cover',
                       backgroundPosition: 'center'
                     }}
