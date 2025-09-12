@@ -620,7 +620,8 @@ export function MarketingHome() {
                   <div 
                     className="absolute flex flex-col items-start"
                     style={{
-                      top: 'calc(10% - 40px)',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
                       right: '-40px',
                       zIndex: 5
                     }}
