@@ -603,8 +603,8 @@ export function MarketingHome() {
                   {/* Hero image in main position */}
                   <div 
                     style={{
-                      width: '500px',
-                      height: '500px',
+                      width: '420px',
+                      height: '420px',
                       position: 'relative',
                       zIndex: 2,
                       borderRadius: '50%',
