@@ -77,7 +77,18 @@ const useSectionNavigation = () => {
     const timer = setTimeout(() => {
       observer = new IntersectionObserver(
         (entries) => {
-          // Find the section with the highest intersection ratio
+          // Check if we're at the bottom of the page
+          const scrollPosition = window.scrollY + window.innerHeight
+          const documentHeight = document.documentElement.scrollHeight
+          const isAtBottom = scrollPosition >= documentHeight - 100 // Within 100px of bottom
+          
+          if (isAtBottom) {
+            // If at bottom, always show footer section
+            setCurrentSection('footer-section')
+            return
+          }
+          
+          // Otherwise find the section with the highest intersection ratio
           let maxRatio = 0
           let activeSection = ''
           
@@ -97,6 +108,23 @@ const useSectionNavigation = () => {
 
       const sections = document.querySelectorAll('[data-section]')
       sections.forEach((section) => observer?.observe(section))
+      
+      // Also listen to scroll events to detect bottom of page
+      const handleScroll = () => {
+        const scrollPosition = window.scrollY + window.innerHeight
+        const documentHeight = document.documentElement.scrollHeight
+        const isAtBottom = scrollPosition >= documentHeight - 100
+        
+        if (isAtBottom) {
+          setCurrentSection('footer-section')
+        }
+      }
+      
+      window.addEventListener('scroll', handleScroll)
+      
+      return () => {
+        window.removeEventListener('scroll', handleScroll)
+      }
     }, 100)
 
     return () => {
