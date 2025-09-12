@@ -964,7 +964,7 @@ export function MarketingHome() {
           </div>
           
           <div 
-            className={`bg-white rounded-lg border border-black/10 shadow-[0_2px_8px_rgba(0,0,0,0.1)] p-8 ${visibleElements.has('security-card') ? 'animate-fadeInUp' : ''}`}
+            className={`${visibleElements.has('security-card') ? 'animate-fadeInUp' : ''}`}
             data-scroll-animate
             id="security-card"
           >
