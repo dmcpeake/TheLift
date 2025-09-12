@@ -150,6 +150,7 @@ export function MarketingHome() {
   const [thumbUpAnimation, setThumbUpAnimation] = useState(null)
   const [puzzleAnimation, setPuzzleAnimation] = useState(null)
   const [documentAnimation, setDocumentAnimation] = useState(null)
+  const [chartsAnimation, setChartsAnimation] = useState(null)
   const visibleElements = useScrollAnimation()
   const { currentSection, setCurrentSection } = useSectionNavigation()
 
@@ -206,6 +207,11 @@ export function MarketingHome() {
       .then(response => response.json())
       .then(data => setDocumentAnimation(data))
       .catch(error => console.error('Error loading document animation:', error))
+      
+    fetch('/theo-charts.json')
+      .then(response => response.json())
+      .then(data => setChartsAnimation(data))
+      .catch(error => console.error('Error loading charts animation:', error))
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -618,6 +624,18 @@ export function MarketingHome() {
                         border: '2px solid #e87e67'
                       }}
                     >
+                      {chartsAnimation && (
+                        <Lottie 
+                          animationData={chartsAnimation} 
+                          style={{ 
+                            width: '100%', 
+                            height: '100%',
+                            transform: 'scale(0.9)'
+                          }}
+                          loop={true}
+                          autoplay={true}
+                        />
+                      )}
                     </div>
                   </div>
                   
