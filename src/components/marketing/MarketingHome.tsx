@@ -570,7 +570,7 @@ export function MarketingHome() {
                       ></div>
                     </div>
 
-                    {/* Child image overlay - bottom left */}
+                    {/* Rocket animation overlay - bottom left */}
                     <div 
                       className="absolute"
                       style={{
@@ -580,28 +580,38 @@ export function MarketingHome() {
                         bottom: 'calc(10% - 30px)',
                         left: '20px',
                         zIndex: 6,
-                        backgroundImage: 'url(/heroCircle.png)',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+                        overflow: 'hidden',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+                        backgroundColor: 'white'
                       }}
-                    ></div>
+                    >
+                      {rocketAnimation && (
+                        <Lottie 
+                          animationData={rocketAnimation} 
+                          style={{ 
+                            width: '100%', 
+                            height: '100%',
+                            transform: 'scale(1.5)'
+                          }}
+                          loop={true}
+                          autoplay={true}
+                        />
+                      )}
+                    </div>
                   </div>
                   
-                  <Lottie 
-                    animationData={rocketAnimation} 
-                    style={{ 
-                      width: '500px', 
+                  {/* Hero image in main position */}
+                  <div 
+                    style={{
+                      width: '500px',
                       height: '500px',
-                      margin: 0,
-                      padding: 0,
-                      border: 'none',
-                      outline: 'none',
                       position: 'relative',
-                      zIndex: 2
+                      zIndex: 2,
+                      borderRadius: '50%',
+                      backgroundImage: 'url(/heroCircle.png)',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center'
                     }}
-                    loop={true}
-                    autoplay={true}
                   />
                   
                   {/* Rating badge overlay */}
