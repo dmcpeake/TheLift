@@ -71,7 +71,7 @@ export function MarketingNavigation() {
           </button>
           
           <div className="flex items-center" style={{ gap: '20px' }}>
-            <Link to="/login" style={{ display: 'none' }}>
+            <Link to="/login">
               <Button variant="outline" className="h-10 rounded flex items-center justify-center pt-2.5 pb-2" style={{ color: '#147fe3', borderColor: '#147fe3' }}>SIGN IN</Button>
             </Link>
             <Button 
