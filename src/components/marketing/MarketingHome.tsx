@@ -600,6 +600,25 @@ export function MarketingHome() {
                         />
                       )}
                     </div>
+
+                    {/* Bottom circle - centered at bottom of dashed line */}
+                    <div 
+                      className="absolute"
+                      style={{
+                        width: '160px',
+                        height: '160px',
+                        borderRadius: '50%',
+                        bottom: 'calc(50% - 230px)',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        zIndex: 6,
+                        overflow: 'hidden',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+                        backgroundColor: 'white',
+                        border: '2px solid #e87e67'
+                      }}
+                    >
+                    </div>
                   </div>
                   
                   {/* Hero image in main position */}
