@@ -610,7 +610,8 @@ export function MarketingHome() {
                       borderRadius: '50%',
                       backgroundImage: 'url(/heroCircle.png)',
                       backgroundSize: 'cover',
-                      backgroundPosition: 'center'
+                      backgroundPosition: 'center',
+                      transform: 'scaleY(-1)'
                     }}
                   />
                   
