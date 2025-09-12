@@ -621,7 +621,7 @@ export function MarketingHome() {
                     className="absolute flex flex-col items-start"
                     style={{
                       top: 'calc(10% - 40px)',
-                      right: '20px',
+                      right: '-40px',
                       zIndex: 5
                     }}
                     data-mobile-right="20px"
