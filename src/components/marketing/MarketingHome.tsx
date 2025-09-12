@@ -630,7 +630,7 @@ export function MarketingHome() {
                           style={{ 
                             width: '100%', 
                             height: '100%',
-                            transform: 'scale(0.9) translateY(5px)'
+                            transform: 'scale(0.9) translateY(5px) translateX(-5px)'
                           }}
                           loop={true}
                           autoplay={true}
