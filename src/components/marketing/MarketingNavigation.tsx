@@ -6,14 +6,26 @@ import { Heart, Triangle } from 'lucide-react'
 export function MarketingNavigation() {
   const location = useLocation()
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0)
     }
     
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    // Set initial value
+    handleResize()
+    
     window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleResize)
+    }
   }, [])
 
   const isActive = (path: string) => {
@@ -41,7 +53,13 @@ export function MarketingNavigation() {
         boxShadow: isScrolled ? '0 4px 8px rgba(0, 0, 0, 0.1)' : 'none'
       }}
     >
-      <div className="w-full py-5 px-5 md:px-[60px]">
+      <div 
+        className="w-full py-5" 
+        style={{ 
+          paddingLeft: isMobile ? '20px' : '60px', 
+          paddingRight: isMobile ? '20px' : '60px' 
+        }}
+      >
         <div className="flex items-center justify-between">
           <button onClick={handleLogoClick} className="flex items-center gap-3 cursor-pointer">
             <Triangle className="h-10 w-10 fill-current" style={{ color: '#147fe3' }} />
