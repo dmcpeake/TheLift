@@ -622,7 +622,7 @@ export function MarketingHome() {
                     style={{
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      right: '-60px',
+                      right: '-80px',
                       zIndex: 5
                     }}
                     data-mobile-right="20px"
