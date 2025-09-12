@@ -647,19 +647,6 @@ export function MarketingHome() {
                       </div>
                     </div>
                   </div>
-                  {/* Gradient fade overlay at bottom */}
-                  <div 
-                    className="absolute left-0"
-                    style={{
-                      bottom: '32px',
-                      width: '500px',
-                      height: '200px',
-                      backgroundColor: 'white',
-                      WebkitMask: 'linear-gradient(to bottom, transparent, black)',
-                      mask: 'linear-gradient(to bottom, transparent, black)',
-                      zIndex: 3
-                    }}
-                  />
                 </div>
               )}
             </div>
