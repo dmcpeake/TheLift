@@ -628,12 +628,6 @@ export function MarketingHome() {
                     data-mobile-right="20px"
                     data-desktop-right="calc(-5% - 40px)"
                   >
-                    <span 
-                      className="text-sm font-medium mb-2"
-                      style={{ color: '#6b7280' }}
-                    >
-                      Avg user rating
-                    </span>
                     <div 
                       className="bg-white rounded-full shadow-lg border-2 px-4 py-2 flex items-center gap-2"
                       style={{
