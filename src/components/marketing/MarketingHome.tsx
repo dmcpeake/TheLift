@@ -261,47 +261,52 @@ export function MarketingHome() {
     {
       from: 'Confusion',
       to: 'Clarity',
-      description: 'AI-powered analytics identify learning gaps and provide personalized recommendations.',
+      description: 'Giving children tools to understand, manage and discuss their own experiences and mental health.',
       icon: Brain,
       borderColor: 'bg-blue-400',
       animationType: 'lottie',
       animationFile: '/theo-thinking.json'
     },
     {
-      from: 'Silence',
-      to: 'Support', 
-      description: 'Enable every student voice through intelligent tools and feedback systems.',
-      icon: Users,
-      borderColor: 'bg-cyan-400',
-      animationType: 'lottie',
-      animationFile: '/theo-thumb-up.json'
-    },
-    {
       from: 'Early signs',
       to: 'Early action',
-      description: 'Predictive insights help educators intervene before challenges become barriers.',
+      description: 'Giving adults, teachers parents and clinicians real time and over time insights to track seeding issues.',
       icon: Target,
       borderColor: 'bg-orange-400',
       animationType: 'lottie',
       animationFile: '/theo-puzzle.json'
+    },
+    {
+      from: 'Silence',
+      to: 'Support', 
+      description: 'Nurturing self and social connection to build a thriving childhood and lifelong foundation of mental wellness for the next generation.',
+      icon: Users,
+      borderColor: 'bg-cyan-400',
+      animationType: 'lottie',
+      animationFile: '/theo-thumb-up.json'
     }
   ]
 
   const supportAreas = [
     {
-      title: 'For Schools',
-      description: 'Helping teachers keep ahead of potential issues in classes so they don\'t take root.',
-      image: '/school.jpg'
+      title: 'In Schools',
+      description: 'Regular reports will give valuable class & student levels insights when time and resources are constrained - flagging issues, improving results and addressing seed issues before they take root.',
+      image: '/01atSchool.jpg'
     },
     {
-      title: 'For Clinics', 
-      description: 'Helping counselors and psychologists give kids the language they need to make progress.',
-      image: '/clinic.jpg'
+      title: 'In Clinics', 
+      description: 'Providing important colour and depth to children\'s clinical assessments - helping trained professionals get a deeper understanding of triggers and track and monitor progress over time.',
+      image: '/01atClinic.jpg'
     },
     {
-      title: 'For Hospitals',
-      description: 'Helping the NHS deliver front line care for kids and understanding behavioral patterns at scale.',
-      image: '/hospital.jpg'
+      title: 'In Hospitals',
+      description: 'Helping children receiving treatment maintain a connection and document their thoughts and feelings whilst giving busy practitioners and parents an easy way to monitor their progress.',
+      image: '/01atHospital.jpg'
+    },
+    {
+      title: 'At Home',
+      description: 'Help your children talk about their mental health simply through engaging with fun tools and activities. By taking part together you can surface problems and talk through issues that may otherwise not come up.',
+      image: '/01atHome.jpg'
     }
   ]
 
@@ -480,7 +485,7 @@ export function MarketingHome() {
                     color: '#147fe3', 
                     fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', 
                     fontSize: '20px',
-                    animation: 'fadeUpIn1 9s infinite',
+                    animation: 'fadeUpIn1 12s infinite',
                     width: '100%'
                   }}
                 >
@@ -492,7 +497,7 @@ export function MarketingHome() {
                     color: '#147fe3', 
                     fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', 
                     fontSize: '20px',
-                    animation: 'fadeUpIn2 9s infinite',
+                    animation: 'fadeUpIn2 12s infinite',
                     width: '100%'
                   }}
                 >
@@ -504,11 +509,23 @@ export function MarketingHome() {
                     color: '#147fe3', 
                     fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', 
                     fontSize: '20px',
-                    animation: 'fadeUpIn3 9s infinite',
+                    animation: 'fadeUpIn3 12s infinite',
                     width: '100%'
                   }}
                 >
                   For Hospitals
+                </p>
+                <p 
+                  className="absolute text-xl font-semibold text-center sm:text-left" 
+                  style={{ 
+                    color: '#147fe3', 
+                    fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', 
+                    fontSize: '20px',
+                    animation: 'fadeUpIn4 12s infinite',
+                    width: '100%'
+                  }}
+                >
+                  For Home
                 </p>
               </div>
 
@@ -517,7 +534,7 @@ export function MarketingHome() {
               </h1>
               
               <p className="text-xl mb-4 font-normal text-gray-900" style={{ fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', fontSize: '20px' }}>
-                The Lift gives kids a safe space to reflect and have conversations so problems don't take root.
+                The Lift gives kids space and tools to reflect — and adults real-time insights to support seeding issues.
               </p>
               
               <p className="text-xl mb-8 font-semibold" style={{ fontFamily: 'SF Pro Text, -apple-system, BlinkMacSystemFont, system-ui, sans-serif', fontSize: '20px', color: '#147fe3' }}>
@@ -831,7 +848,7 @@ export function MarketingHome() {
             </h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {supportAreas.map((area, index) => (
               <div 
                 key={index} 
@@ -841,11 +858,11 @@ export function MarketingHome() {
                 id={`support-card-${index}`}
               >
                 {/* Image container */}
-                <div className="relative overflow-hidden" style={{ height: '200px', backgroundColor: 'white' }}>
+                <div className="relative overflow-hidden" style={{ backgroundColor: 'white' }}>
                   <img 
                     src={area.image} 
                     alt={area.title}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+                    style={{ width: '100%', height: 'auto', display: 'block' }}
                   />
                 </div>
                 

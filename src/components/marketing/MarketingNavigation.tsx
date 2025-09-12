@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Button } from '../ui/button'
-import { Heart, Triangle } from 'lucide-react'
+import { Heart } from 'lucide-react'
 
 export function MarketingNavigation() {
   const location = useLocation()
@@ -62,7 +62,11 @@ export function MarketingNavigation() {
       >
         <div className="flex items-center justify-between">
           <button onClick={handleLogoClick} className="flex items-center gap-3 cursor-pointer">
-            <Triangle className="h-10 w-10 fill-current" style={{ color: '#147fe3' }} />
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="7" cy="23" r="4" fill="#147fe3"/>
+              <circle cx="15" cy="15" r="4" fill="#147fe3"/>
+              <circle cx="23" cy="7" r="4" fill="#147fe3"/>
+            </svg>
             <img src="/TheLiftLogo.svg" alt="The Lift" className="h-5" style={{ imageRendering: 'auto', shapeRendering: 'geometricPrecision', filter: 'brightness(0) saturate(100%) invert(11%) sepia(0%) saturate(7465%) hue-rotate(189deg) brightness(105%) contrast(86%)' }} />
           </button>
           
