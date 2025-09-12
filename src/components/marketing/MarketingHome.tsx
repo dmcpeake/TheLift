@@ -608,7 +608,7 @@ export function MarketingHome() {
                         width: '160px',
                         height: '160px',
                         borderRadius: '50%',
-                        bottom: 'calc(50% - 230px)',
+                        bottom: 'calc(50% - 310px)',
                         left: '50%',
                         transform: 'translateX(-50%)',
                         zIndex: 6,
