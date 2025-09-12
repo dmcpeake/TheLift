@@ -570,19 +570,20 @@ export function MarketingHome() {
                       ></div>
                     </div>
 
-                    {/* Rocket animation overlay - bottom left */}
+                    {/* Rocket animation overlay - top left */}
                     <div 
                       className="absolute"
                       style={{
-                        width: '160px',
-                        height: '160px',
+                        width: '200px',
+                        height: '200px',
                         borderRadius: '50%',
-                        bottom: 'calc(10% - 30px)',
+                        top: 'calc(10% - 30px)',
                         left: '20px',
                         zIndex: 6,
                         overflow: 'hidden',
                         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
-                        backgroundColor: 'white'
+                        backgroundColor: 'white',
+                        border: '2px solid #e87e67'
                       }}
                     >
                       {rocketAnimation && (
@@ -591,7 +592,7 @@ export function MarketingHome() {
                           style={{ 
                             width: '100%', 
                             height: '100%',
-                            transform: 'scale(1.5)'
+                            transform: 'scale(1.2)'
                           }}
                           loop={true}
                           autoplay={true}
