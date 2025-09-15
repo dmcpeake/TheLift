@@ -46,6 +46,9 @@ import { ClientDetails } from '../components/admin/ClientDetails'
 import { EditClient } from '../components/admin/EditClient'
 import { WaitlistManagement } from '../components/admin/WaitlistManagement'
 
+// Test Components (for designer testing)
+import { WellbeingTestPage } from '../components/wellbeing-test/WellbeingTestPage'
+
 export function AppRoutes() {
   const { user } = React.useContext(AuthContext)
   const location = useLocation()
@@ -218,7 +221,10 @@ export function AppRoutes() {
             <WaitlistManagement />
           </ProtectedRoute>
         } />
-        
+
+        {/* Test Routes for Designer */}
+        <Route path="/test/wellbeing" element={<WellbeingTestPage />} />
+
         {/* Unauthorized route */}
         <Route path="/unauthorized" element={
           <div className="min-h-screen flex items-center justify-center bg-gray-50">
