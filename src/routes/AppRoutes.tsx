@@ -48,6 +48,7 @@ import { WaitlistManagement } from '../components/admin/WaitlistManagement'
 
 // Test Components (for designer testing)
 import { WellbeingTestPage } from '../components/wellbeing-test/WellbeingTestPage'
+import { PrototypesPage } from '../components/prototypes/PrototypesPage'
 
 export function AppRoutes() {
   const { user } = React.useContext(AuthContext)
@@ -228,6 +229,9 @@ export function AppRoutes() {
             <WellbeingTestPage />
           </ProtectedRoute>
         } />
+
+        {/* Prototypes Route - No authentication required */}
+        <Route path="/prototypes" element={<PrototypesPage />} />
 
         {/* Unauthorized route */}
         <Route path="/unauthorized" element={
