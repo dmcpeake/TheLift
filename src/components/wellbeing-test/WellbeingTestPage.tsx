@@ -49,7 +49,7 @@ export function WellbeingTestPage() {
               <div>
                 <CardTitle className="text-3xl flex items-center gap-2">
                   <TestTube className="w-8 h-8" />
-                  Wellbeing Tools Test Suite
+                  Wellbeing Tools Test Suite v2
                 </CardTitle>
                 <CardDescription className="mt-2">
                   Test and preview all wellbeing tools with database integration
