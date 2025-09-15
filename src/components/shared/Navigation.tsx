@@ -2,10 +2,11 @@ import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthContext } from '../../utils/auth/context'
 import { Button } from '../ui/button'
-import { 
-  User, 
-  LogOut, 
-  ChevronDown
+import {
+  User,
+  LogOut,
+  ChevronDown,
+  TestTube
 } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu'
 
@@ -102,6 +103,12 @@ export function Navigation() {
                   <Link to="/profile" className="flex items-center space-x-2">
                     <User className="w-4 h-4" />
                     <span>Profile Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/test/wellbeing" className="flex items-center space-x-2">
+                    <TestTube className="w-4 h-4" />
+                    <span>Wellbeing Tools Test</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

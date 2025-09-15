@@ -138,7 +138,7 @@ export async function getBreathingToolHistory(childId: string, limit = 20) {
 // Score Calculations
 export function calculateAverageMood(moodData: MoodMeterUsage[]): number {
   if (moodData.length === 0) return 0
-  const sum = moodData.reduce((acc, curr) => acc + curr.mood_value, 0)
+  const sum = moodData.reduce((acc, curr) => acc + curr.mood_numeric, 0)
   return sum / moodData.length
 }
 
@@ -199,7 +199,7 @@ export async function getChildWellbeingSnapshot(childId: string) {
   return {
     recentSessions: sessions,
     averageMood: calculateAverageMood(moodData),
-    moodTrend: moodData.map(m => m.mood_value),
+    moodTrend: moodData.map(m => m.mood_numeric),
     emotionFrequency: getEmotionFrequency(emotionData),
     wellbeingTrends: calculateWellbeingTrends(wheelData),
     breathingMinutes: breathingData.reduce((acc, b) => acc + (b.duration_seconds / 60), 0),

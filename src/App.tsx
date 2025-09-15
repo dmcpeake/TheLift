@@ -36,21 +36,6 @@ function AppContent() {
         if (response.ok) {
           const result = await response.json()
           console.log('Test users initialized successfully:', result)
-          
-          // Verify child data was created
-          try {
-            const debugResponse = await fetch(`https://${projectId}.supabase.co/functions/v1/server/debug/child-data`, {
-              headers: {
-                'Authorization': `Bearer ${publicAnonKey}`,
-              },
-            })
-            if (debugResponse.ok) {
-              const debugData = await debugResponse.json()
-              console.log('Child test data verification:', debugData)
-            }
-          } catch (debugError) {
-            console.log('Could not verify child data:', debugError)
-          }
         } else {
           const error = await response.json()
           console.log('Failed to initialize test users:', error)

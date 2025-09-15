@@ -221,8 +221,8 @@ export function WellbeingWheelEnhanced({
         wellbeing_wheel_id: wheelData.id,
         child_id: childId,
         section_name: section.name,
-        mood_level: sectionScores[section.name].label,
-        mood_numeric: sectionScores[section.name].score,
+        score_level: sectionScores[section.name].label,  // Changed from mood_level
+        score_value: sectionScores[section.name].score,  // Changed from mood_numeric
         text_response: sectionScores[section.name].note || null,
         text_response_length: sectionScores[section.name].note?.length || 0
       }))

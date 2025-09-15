@@ -493,8 +493,8 @@ export function UnifiedLoginPage() {
                   try {
                     // Auto-login to test practitioner account (using verified user)
                     const { data, error } = await supabase.auth.signInWithPassword({
-                      email: 'practitioner@example.com',
-                      password: 'password123'
+                      email: 'practitioner@demoschool.com',
+                      password: 'TestLift2024!'
                     })
                     
                     if (error) throw error
@@ -503,18 +503,8 @@ export function UnifiedLoginPage() {
                   } catch (error: any) {
                     console.error('Practitioner auto-login failed:', error)
                     console.error('Error details:', error.message, error.code, error.status)
-                    setError(`Practitioner login failed: ${error.message}. Using demo mode.`)
-                    // Fallback to bypass if auto-login fails
-                    setUser({
-                      id: 'test-prac-id',
-                      email: 'quicktest@practitioner.com', 
-                      profile: { role: 'Practitioner', name: 'Test Practitioner' }
-                    })
-                    // Practitioners should use practitioner mode
-                    if (currentMode !== 'practitioner') {
-                      toggleMode()
-                    }
-                    navigate('/dashboard')
+                    setError(`Login failed: ${error.message}. Please use the manual login form above with practitioner@demoschool.com / TestLift2024!`)
+                    // Don't use mock user - require real authentication
                   } finally {
                     setLoadingButton(null)
                   }
@@ -541,13 +531,8 @@ export function UnifiedLoginPage() {
                     // The auth state change will handle navigation
                   } catch (error: any) {
                     console.error('Child auto-login failed:', error)
-                    // Fallback to bypass if auto-login fails
-                    setUser({
-                      id: 'test-child-id',
-                      email: 'testchild@child.local',
-                      profile: { role: 'Child', name: 'Test Child' }
-                    })
-                    navigate('/child/home')
+                    setError(`Login failed: ${error.message}. The test child account may not be initialized.`)
+                    // Don't use mock user - require real authentication
                   } finally {
                     setLoadingButton(null)
                   }

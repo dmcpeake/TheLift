@@ -222,8 +222,12 @@ export function AppRoutes() {
           </ProtectedRoute>
         } />
 
-        {/* Test Routes for Designer */}
-        <Route path="/test/wellbeing" element={<WellbeingTestPage />} />
+        {/* Test Routes for Designer - Protected for authenticated users */}
+        <Route path="/test/wellbeing" element={
+          <ProtectedRoute allowedRoles={['Practitioner', 'GroupContact', 'Child', 'Account']}>
+            <WellbeingTestPage />
+          </ProtectedRoute>
+        } />
 
         {/* Unauthorized route */}
         <Route path="/unauthorized" element={

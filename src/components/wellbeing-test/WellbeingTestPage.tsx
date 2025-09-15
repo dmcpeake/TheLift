@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
+import { AuthContext } from '../../utils/auth/context'
 import { MoodMeter } from '../child/mood-meter'
 import { EmotionGrid } from '../child/emotion-grid'
 import { WellbeingWheelEnhanced } from '../child/wellbeing-wheel/WellbeingWheelEnhanced'
 import { CheckInFlow } from '../child/check-in-flow/CheckInFlow'
 import { WellbeingDebugPanel } from '../admin/wellbeing-debug/WellbeingDebugPanel'
+import { DatabaseDebugPanel } from './DatabaseDebugPanel'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
@@ -23,8 +25,19 @@ import {
   User
 } from 'lucide-react'
 
+// Simple UUID v4 generator
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0
+    const v = c === 'x' ? r : (r & 0x3 | 0x8)
+    return v.toString(16)
+  })
+}
+
 export function WellbeingTestPage() {
-  const [testChildId, setTestChildId] = useState('test-child-001')
+  const { user } = useContext(AuthContext)
+  // Use the authenticated user's ID as the child ID for testing
+  const [testChildId, setTestChildId] = useState(() => user?.id || generateUUID())
   const [activeTab, setActiveTab] = useState('overview')
   const [testResults, setTestResults] = useState<any>({})
 
@@ -61,19 +74,29 @@ export function WellbeingTestPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4 items-end">
-              <div className="flex-1">
-                <Label htmlFor="testChildId">Test Child ID</Label>
-                <Input
-                  id="testChildId"
-                  value={testChildId}
-                  onChange={(e) => setTestChildId(e.target.value)}
-                  placeholder="Enter test child ID"
-                />
+            <div className="space-y-4">
+              <div className="flex gap-4 items-end">
+                <div className="flex-1">
+                  <Label htmlFor="testChildId">Test Child ID</Label>
+                  <Input
+                    id="testChildId"
+                    value={testChildId}
+                    onChange={(e) => setTestChildId(e.target.value)}
+                    placeholder="Enter test child ID"
+                  />
+                </div>
+                <Button variant="outline" onClick={() => setTestChildId(generateUUID())}>
+                  Generate New ID
+                </Button>
               </div>
-              <Button variant="outline" onClick={() => setTestChildId(`test-child-${Date.now()}`)}>
-                Generate New ID
-              </Button>
+              {user && (
+                <Alert>
+                  <User className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Logged in as:</strong> {user.email} ({user.profile?.role || 'Unknown Role'})
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -113,6 +136,9 @@ export function WellbeingTestPage() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="mt-6 space-y-6">
+            {/* Database Debug Panel - Always show first */}
+            <DatabaseDebugPanel />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
