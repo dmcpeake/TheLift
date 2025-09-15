@@ -112,7 +112,7 @@ export function WellbeingTestPage() {
           </TabsList>
 
           {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
+          <TabsContent value="overview" className="mt-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -218,7 +218,7 @@ export function WellbeingTestPage() {
           </TabsContent>
 
           {/* Mood Meter Tab */}
-          <TabsContent value="mood" className="space-y-6">
+          <TabsContent value="mood" className="mt-6 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Mood Meter Test</CardTitle>
@@ -236,7 +236,7 @@ export function WellbeingTestPage() {
           </TabsContent>
 
           {/* Emotion Grid Tab */}
-          <TabsContent value="emotions" className="space-y-6">
+          <TabsContent value="emotions" className="mt-6 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Emotion Grid Test</CardTitle>
@@ -254,7 +254,7 @@ export function WellbeingTestPage() {
           </TabsContent>
 
           {/* Wellbeing Wheel Tab */}
-          <TabsContent value="wheel" className="space-y-6">
+          <TabsContent value="wheel" className="mt-6 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Wellbeing Wheel Test</CardTitle>
@@ -272,7 +272,7 @@ export function WellbeingTestPage() {
           </TabsContent>
 
           {/* Breathing Tool Tab */}
-          <TabsContent value="breathing" className="space-y-6">
+          <TabsContent value="breathing" className="mt-6 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Breathing Tool Test</CardTitle>
@@ -296,7 +296,7 @@ export function WellbeingTestPage() {
           </TabsContent>
 
           {/* Check-in Flow Tab */}
-          <TabsContent value="flow" className="space-y-6">
+          <TabsContent value="flow" className="mt-6 space-y-6">
             <CheckInFlow
               childId={testChildId}
               allowSkip={true}
@@ -306,7 +306,7 @@ export function WellbeingTestPage() {
           </TabsContent>
 
           {/* Debug Tab */}
-          <TabsContent value="debug">
+          <TabsContent value="debug" className="mt-6">
             <WellbeingDebugPanel childId={testChildId} />
           </TabsContent>
         </Tabs>
