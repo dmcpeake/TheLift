@@ -188,17 +188,28 @@ export function WellbeingWheelEnhanced({
     setError(null)
 
     try {
-      const completionTime = Date.now() - startTime
       const overallScore = calculateOverallScore()
+
+      // Get org_id and ensure we have a session
+      const { ensureSessionContext } = await import('../../../utils/wellbeing/helpers')
+      const context = await ensureSessionContext(childId, sessionId)
+
+      if (!context) {
+        throw new Error('Failed to get session context')
+      }
 
       // Save wellbeing wheel usage
       const { data: wheelData, error: wheelError } = await supabase
         .from('wellbeing_wheel_usage')
         .insert({
+          session_id: context.sessionId,
           child_id: childId,
-          session_id: sessionId,
+          org_id: context.orgId,
           overall_score: overallScore,
-          completion_time_ms: completionTime
+          sections_completed: sections.map(s => s.name),
+          total_sections_completed: sections.length,
+          completion_status: 'completed',
+          completed_at: new Date().toISOString()
         })
         .select()
         .single()
@@ -208,10 +219,12 @@ export function WellbeingWheelEnhanced({
       // Save section scores
       const sectionInserts = sections.map(section => ({
         wellbeing_wheel_id: wheelData.id,
+        child_id: childId,
         section_name: section.name,
-        score_value: sectionScores[section.name].score,
-        score_label: sectionScores[section.name].label,
-        text_note: sectionScores[section.name].note || null
+        mood_level: sectionScores[section.name].label,
+        mood_numeric: sectionScores[section.name].score,
+        text_response: sectionScores[section.name].note || null,
+        text_response_length: sectionScores[section.name].note?.length || 0
       }))
 
       const { error: sectionsError } = await supabase
