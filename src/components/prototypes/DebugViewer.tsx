@@ -13,12 +13,12 @@ export function DebugViewer() {
   useEffect(() => {
     // Listen to console.log messages
     const originalLog = console.log
-    console.log = function(...args) {
+    const logInterceptor = function(...args: any[]) {
       originalLog.apply(console, args)
 
       // Capture wellbeing tool data
       const message = args[0]
-      if (typeof message === 'string' && message.includes('DATA:')) {
+      if (typeof message === 'string' && message.includes('DATA')) {
         const tool = message.includes('MOOD') ? 'Mood Meter' :
                      message.includes('EMOTION') ? 'Emotion Grid' :
                      message.includes('WHEEL') ? 'Wellbeing Wheel' :
@@ -30,9 +30,11 @@ export function DebugViewer() {
           data: args[1] || {}
         }
 
-        setCapturedData(prev => [...prev, newData])
+        setCapturedData((prev: CapturedData[]) => [...prev, newData])
       }
     }
+
+    console.log = logInterceptor
 
     return () => {
       console.log = originalLog
@@ -100,35 +102,38 @@ export function DebugViewer() {
           <div>
             <h3 className="font-semibold mb-2">Captured Events ({capturedData.length})</h3>
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {capturedData.map((item, index) => (
-                <div
-                  key={index}
-                  onClick={() => setSelectedData(item)}
-                  className={`p-3 border rounded-lg cursor-pointer transition-all ${
-                    selectedData === item
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium">{item.tool}</p>
-                      <p className="text-xs text-gray-500">
-                        {new Date(item.timestamp).toLocaleTimeString()}
-                      </p>
+              {capturedData.map((item, index) => {
+                const isSelected = selectedData?.timestamp === item.timestamp && selectedData?.tool === item.tool
+                return (
+                  <div
+                    key={`${item.timestamp}-${index}`}
+                    onClick={() => setSelectedData(item)}
+                    className={`p-3 border rounded-lg cursor-pointer transition-all ${
+                      isSelected
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium">{item.tool}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(item.timestamp).toLocaleTimeString()}
+                        </p>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          mockApiCall(item)
+                        }}
+                        className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
+                      >
+                        Mock API Call
+                      </button>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        mockApiCall(item)
-                      }}
-                      className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
-                    >
-                      Mock API Call
-                    </button>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
