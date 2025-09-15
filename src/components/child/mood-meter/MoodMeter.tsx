@@ -68,14 +68,24 @@ export function MoodMeter({
     setError(null)
 
     try {
+      // Get org_id and ensure we have a session
+      const { ensureSessionContext } = await import('../../../utils/wellbeing/helpers')
+      const context = await ensureSessionContext(childId, sessionId)
+
+      if (!context) {
+        throw new Error('Failed to get session context')
+      }
+
       const { data, error: saveError } = await supabase
         .from('mood_meter_usage')
         .insert({
+          session_id: context.sessionId,
           child_id: childId,
-          session_id: sessionId,
-          mood_value: mood.value,
-          mood_label: mood.label,
-          selection_time_ms: timeTaken
+          org_id: context.orgId,
+          mood_level: mood.label,  // Changed from mood_label to mood_level
+          mood_numeric: mood.value,  // Changed from mood_value to mood_numeric
+          time_to_select_seconds: Math.round(timeTaken / 1000),  // Changed from selection_time_ms and convert to seconds
+          was_skipped: false
         })
         .select()
         .single()

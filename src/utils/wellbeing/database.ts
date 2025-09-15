@@ -13,18 +13,21 @@ import {
 const supabase = getSupabaseClient()
 
 // Session Management
-export async function createCheckinSession(childId: string) {
+export async function createCheckinSession(childId: string, orgId?: string) {
+  // Get org_id if not provided
+  let finalOrgId = orgId
+  if (!finalOrgId) {
+    const { getChildOrgId, TEST_ORG_ID } = await import('./helpers')
+    finalOrgId = await getChildOrgId(childId) || TEST_ORG_ID
+  }
+
   const { data, error } = await supabase
     .from('checkin_sessions')
     .insert({
       child_id: childId,
-      session_date: new Date().toISOString().split('T')[0],
-      session_time: new Date().toTimeString().split(' ')[0],
-      tools_completed: [],
-      mood_meter_completed: false,
-      emotion_grid_completed: false,
-      wellbeing_wheel_completed: false,
-      breathing_tool_completed: false
+      org_id: finalOrgId,
+      status: 'in_progress',
+      tools_completed: []
     })
     .select()
     .single()

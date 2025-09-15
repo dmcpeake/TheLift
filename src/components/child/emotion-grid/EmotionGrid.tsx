@@ -65,17 +65,28 @@ export function EmotionGrid({
     setError(null)
 
     try {
-      const completionTime = Date.now() - startTime
+      // Get org_id and ensure we have a session
+      const { ensureSessionContext } = await import('../../../utils/wellbeing/helpers')
+      const context = await ensureSessionContext(childId, sessionId)
+
+      if (!context) {
+        throw new Error('Failed to get session context')
+      }
 
       // Save emotion grid usage
       const { data: gridData, error: gridError } = await supabase
         .from('emotion_grid_usage')
         .insert({
+          session_id: context.sessionId,
           child_id: childId,
-          session_id: sessionId,
-          story_text: storyText || null,
-          story_audio_url: null, // TODO: Implement audio recording
-          completion_time_ms: completionTime
+          org_id: context.orgId,
+          explanation_text: storyText || null,  // Changed from story_text
+          explanation_length: storyText?.length || 0,
+          input_method: 'typing',
+          step_completed: 3,  // All 3 steps completed
+          completion_status: 'completed',
+          completed_at: new Date().toISOString(),
+          was_skipped: false
         })
         .select()
         .single()
@@ -85,8 +96,11 @@ export function EmotionGrid({
       // Save selected emotions
       const emotionInserts = selectedEmotions.map((emotion, index) => ({
         emotion_grid_id: gridData.id,
+        child_id: childId,
         feeling_name: emotion.name,
-        category: emotion.category,
+        feeling_category: emotion.category,  // Changed from category
+        feeling_emoji: emotion.emoji || '',
+        feeling_description: `${emotion.name} - ${emotion.category}`,
         selection_order: index + 1
       }))
 
