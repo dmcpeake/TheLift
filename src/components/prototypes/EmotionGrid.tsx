@@ -13,6 +13,7 @@ export function EmotionGrid() {
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([])
   const [emotionStory, setEmotionStory] = useState('')
   const [finalData, setFinalData] = useState<EmotionData | null>(null)
+  const [stepData, setStepData] = useState<any>(null)
   const [startTime] = useState(Date.now())
 
   const emotions = {
@@ -25,21 +26,52 @@ export function EmotionGrid() {
   const allEmotions = Object.values(emotions).flat()
 
   const toggleEmotion = (emotion: string) => {
+    let newEmotions: string[]
     if (selectedEmotions.includes(emotion)) {
-      setSelectedEmotions(selectedEmotions.filter(e => e !== emotion))
+      newEmotions = selectedEmotions.filter(e => e !== emotion)
     } else if (selectedEmotions.length < 3) {
-      setSelectedEmotions([...selectedEmotions, emotion])
+      newEmotions = [...selectedEmotions, emotion]
+    } else {
+      return
     }
+    setSelectedEmotions(newEmotions)
+
+    // Update step data for display
+    const data = {
+      step: 1,
+      selected_emotions: newEmotions,
+      timestamp: new Date().toISOString()
+    }
+    setStepData(data)
+    console.log('🎯 EMOTION GRID STEP 1 DATA:', data)
   }
 
   const handleNext = () => {
-    const stepData = {
-      step: currentStep,
-      data: currentStep === 1 ? selectedEmotions : emotionStory,
+    setCurrentStep(currentStep + 1)
+
+    // Set step data for step 2
+    if (currentStep === 1) {
+      const data = {
+        step: 2,
+        selected_emotions: selectedEmotions,
+        emotion_story: '',
+        timestamp: new Date().toISOString()
+      }
+      setStepData(data)
+      console.log('🎯 EMOTION GRID STEP 2 DATA:', data)
+    }
+  }
+
+  const updateStory = (story: string) => {
+    setEmotionStory(story)
+    const data = {
+      step: 2,
+      selected_emotions: selectedEmotions,
+      emotion_story: story,
       timestamp: new Date().toISOString()
     }
-    console.log(`📝 EMOTION GRID - Step ${currentStep}:`, stepData)
-    setCurrentStep(currentStep + 1)
+    setStepData(data)
+    console.log('🎯 EMOTION GRID STEP 2 DATA:', data)
   }
 
   const handleComplete = () => {
@@ -63,6 +95,7 @@ export function EmotionGrid() {
     setSelectedEmotions([])
     setEmotionStory('')
     setFinalData(null)
+    setStepData(null)
   }
 
   return (
@@ -115,6 +148,16 @@ export function EmotionGrid() {
           >
             Next →
           </button>
+
+          {/* Data Captured for Step 1 */}
+          {stepData && stepData.step === 1 && (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold mb-2">📊 Data Captured:</h3>
+              <pre className="bg-gray-900 text-white p-3 rounded-lg overflow-x-auto text-xs">
+                {JSON.stringify(stepData, null, 2)}
+              </pre>
+            </div>
+          )}
         </div>
       )}
 
@@ -128,7 +171,7 @@ export function EmotionGrid() {
 
           <textarea
             value={emotionStory}
-            onChange={(e) => setEmotionStory(e.target.value.slice(0, 500))}
+            onChange={(e) => updateStory(e.target.value.slice(0, 500))}
             placeholder="What made you feel this way? (optional)"
             className="w-full p-3 border rounded-lg h-32 resize-none"
             maxLength={500}
@@ -145,12 +188,22 @@ export function EmotionGrid() {
               ← Back
             </button>
             <button
-              onClick={handleNext}
+              onClick={() => setCurrentStep(3)}
               className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
             >
               Next →
             </button>
           </div>
+
+          {/* Data Captured for Step 2 */}
+          {stepData && stepData.step === 2 && (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold mb-2">📊 Data Captured:</h3>
+              <pre className="bg-gray-900 text-white p-3 rounded-lg overflow-x-auto text-xs">
+                {JSON.stringify(stepData, null, 2)}
+              </pre>
+            </div>
+          )}
         </div>
       )}
 

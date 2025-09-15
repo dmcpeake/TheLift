@@ -19,6 +19,7 @@ export function WellbeingWheel() {
   const [sections, setSections] = useState<Record<string, SectionData>>({})
   const [currentSection, setCurrentSection] = useState<string | null>(null)
   const [tempNotes, setTempNotes] = useState('')
+  const [tempMood, setTempMood] = useState<typeof moods[0] | null>(null)
   const [finalData, setFinalData] = useState<WheelData | null>(null)
   const [startTime] = useState(Date.now())
 
@@ -40,18 +41,25 @@ export function WellbeingWheel() {
     { emoji: '😄', level: 'very_happy', numeric: 5, color: 'bg-blue-500' }
   ]
 
-  const selectMood = (sectionId: string, mood: typeof moods[0]) => {
+  const selectMood = (mood: typeof moods[0]) => {
+    setTempMood(mood)
+  }
+
+  const saveSection = (sectionId: string) => {
+    if (!tempMood) return
+
     const section = wheelSections.find(s => s.id === sectionId)!
     const data: SectionData = {
       name: section.name,
-      mood_level: mood.level,
-      mood_numeric: mood.numeric,
+      mood_level: tempMood.level,
+      mood_numeric: tempMood.numeric,
       notes: tempNotes
     }
 
     setSections(prev => ({ ...prev, [sectionId]: data }))
     setCurrentSection(null)
     setTempNotes('')
+    setTempMood(null)
 
     console.log(`🎯 WELLBEING WHEEL SECTION DATA - ${section.name}:`, data)
   }
@@ -130,35 +138,58 @@ export function WellbeingWheel() {
                       {moods.map((mood) => (
                         <button
                           key={mood.level}
-                          onClick={() => selectMood(section.id, mood)}
-                          className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-all hover:scale-110"
+                          onClick={() => selectMood(mood)}
+                          className={`p-2 rounded-lg transition-all hover:scale-110 ${
+                            tempMood?.level === mood.level
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-gray-100 hover:bg-gray-200'
+                          }`}
                         >
                           <span className="text-xl">{mood.emoji}</span>
                         </button>
                       ))}
                     </div>
-                    <textarea
-                      value={tempNotes}
-                      onChange={(e) => setTempNotes(e.target.value.slice(0, 200))}
-                      placeholder="Why are you feeling like this?"
-                      className="w-full p-2 border rounded text-sm h-20 resize-none"
-                      maxLength={200}
-                    />
-                    <button
-                      onClick={() => {
-                        setCurrentSection(null)
-                        setTempNotes('')
-                      }}
-                      className="text-sm text-gray-500 hover:text-gray-700"
-                    >
-                      Cancel
-                    </button>
+
+                    {tempMood && (
+                      <>
+                        <textarea
+                          value={tempNotes}
+                          onChange={(e) => setTempNotes(e.target.value.slice(0, 200))}
+                          placeholder="Why are you feeling like this?"
+                          className="w-full p-2 border rounded text-sm h-20 resize-none"
+                          maxLength={200}
+                        />
+                        <p className="text-xs text-gray-500">{tempNotes.length}/200 characters</p>
+                      </>
+                    )}
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setCurrentSection(null)
+                          setTempNotes('')
+                          setTempMood(null)
+                        }}
+                        className="flex-1 py-2 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                      {tempMood && (
+                        <button
+                          onClick={() => saveSection(section.id)}
+                          className="flex-1 py-2 text-sm bg-green-500 text-white rounded hover:bg-green-600"
+                        >
+                          Save
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <button
                     onClick={() => {
                       setCurrentSection(section.id)
                       setTempNotes(sections[section.id]?.notes || '')
+                      setTempMood(null)
                     }}
                     className="w-full py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-all"
                   >
