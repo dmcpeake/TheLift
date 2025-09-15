@@ -79,8 +79,8 @@ export function WellbeingTestPage() {
         </Card>
 
         {/* Main Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-7 w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-7 w-full mb-6">
             <TabsTrigger value="overview">
               <LayoutGrid className="mr-2 h-4 w-4" />
               Overview
