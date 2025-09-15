@@ -53,7 +53,7 @@ export function WellbeingWheel() {
     setCurrentSection(null)
     setTempNotes('')
 
-    console.log(`📊 WHEEL SECTION "${section.name}":`, data)
+    console.log(`🎯 WELLBEING WHEEL SECTION DATA - ${section.name}:`, data)
   }
 
   const completeWheel = () => {
@@ -125,6 +125,7 @@ export function WellbeingWheel() {
 
                 {currentSection === section.id ? (
                   <div className="space-y-3">
+                    <p className="text-sm text-gray-600 text-center">How do you feel about this area?</p>
                     <div className="flex gap-2 justify-center">
                       {moods.map((mood) => (
                         <button
@@ -139,7 +140,7 @@ export function WellbeingWheel() {
                     <textarea
                       value={tempNotes}
                       onChange={(e) => setTempNotes(e.target.value.slice(0, 200))}
-                      placeholder="Add notes (optional)"
+                      placeholder="Why are you feeling like this?"
                       className="w-full p-2 border rounded text-sm h-20 resize-none"
                       maxLength={200}
                     />
@@ -164,6 +165,16 @@ export function WellbeingWheel() {
                     {sections[section.id] ? 'Edit' : 'Rate this area'}
                   </button>
                 )}
+
+                {/* Show data captured for this section if completed */}
+                {sections[section.id] && (
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-xs font-semibold mb-1">Data Captured:</p>
+                    <pre className="bg-gray-900 text-white p-2 rounded text-xs overflow-x-auto">
+                      {JSON.stringify(sections[section.id], null, 2)}
+                    </pre>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -186,7 +197,7 @@ export function WellbeingWheel() {
             </p>
           </div>
           <h4 className="font-medium mb-2">📊 Data Captured:</h4>
-          <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm mb-4">
+          <pre className="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto text-sm mb-4">
             {JSON.stringify(finalData, null, 2)}
           </pre>
           <p className="text-xs text-gray-500 mb-4">

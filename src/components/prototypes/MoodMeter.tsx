@@ -63,7 +63,7 @@ export function MoodMeter() {
       {selectedMood && (
         <div className="mt-6">
           <h3 className="text-lg font-semibold mb-2">📊 Data Captured:</h3>
-          <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm">
+          <pre className="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto text-sm">
             {JSON.stringify(selectedMood, null, 2)}
           </pre>
           <p className="text-xs text-gray-500 mt-2">

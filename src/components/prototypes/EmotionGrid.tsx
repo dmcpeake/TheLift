@@ -199,7 +199,7 @@ export function EmotionGrid() {
         <div>
           <h3 className="text-lg font-semibold mb-2">✅ Complete!</h3>
           <h4 className="font-medium mb-2">📊 Data Captured:</h4>
-          <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm mb-4">
+          <pre className="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto text-sm mb-4">
             {JSON.stringify(finalData, null, 2)}
           </pre>
           <p className="text-xs text-gray-500 mb-4">

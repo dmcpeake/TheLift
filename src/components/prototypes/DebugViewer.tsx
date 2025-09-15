@@ -141,7 +141,7 @@ export function DebugViewer() {
                   <p className="text-sm"><strong>Tool:</strong> {selectedData.tool}</p>
                   <p className="text-sm"><strong>Time:</strong> {new Date(selectedData.timestamp).toLocaleString()}</p>
                 </div>
-                <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-xs max-h-80">
+                <pre className="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto text-xs max-h-80">
                   {JSON.stringify(selectedData.data, null, 2)}
                 </pre>
               </div>
@@ -150,24 +150,6 @@ export function DebugViewer() {
                 <p className="text-gray-400 text-sm">Select an event to view details</p>
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* Summary Stats */}
-      {capturedData.length > 0 && (
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h3 className="font-semibold mb-2">📊 Session Summary</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            {['Mood Meter', 'Emotion Grid', 'Wellbeing Wheel', 'Breathing Tool'].map((tool) => {
-              const count = capturedData.filter(d => d.tool === tool).length
-              return (
-                <div key={tool}>
-                  <p className="text-2xl font-bold">{count}</p>
-                  <p className="text-xs text-gray-500">{tool}</p>
-                </div>
-              )
-            })}
           </div>
         </div>
       )}
