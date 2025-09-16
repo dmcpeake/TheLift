@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { Button } from '../ui/button'
-import { Heart } from 'lucide-react'
 
 export function MarketingNavigation() {
   const location = useLocation()
@@ -71,14 +70,11 @@ export function MarketingNavigation() {
           </button>
           
           <div className="flex items-center" style={{ gap: '20px' }}>
-            <Link to="/login">
-              <Button variant="outline" className="h-10 rounded flex items-center justify-center pt-2.5 pb-2" style={{ color: '#147fe3', borderColor: '#147fe3' }}>SIGN IN</Button>
-            </Link>
-            <Button 
+            <Button
               onClick={handleJoinWaitlistClick}
-              className="h-10 rounded flex items-center justify-center pt-2.5 pb-2" 
-              style={{ backgroundColor: '#147fe3', color: 'white' }} 
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1171CD'} 
+              className="h-10 rounded flex items-center justify-center pt-2.5 pb-2"
+              style={{ backgroundColor: '#147fe3', color: 'white' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1171CD'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#147fe3'}
             >
               JOIN WAITLIST

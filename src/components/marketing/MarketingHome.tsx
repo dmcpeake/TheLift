@@ -1317,24 +1317,6 @@ export function MarketingHome() {
             </div>
             
             <p className="mb-4" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>&copy; 2025 The Lift Up Ltd. All rights reserved.</p>
-            
-            {/* Temporary development links */}
-            <div className="space-x-4">
-              <Link 
-                to="/admin/login" 
-                className="text-xs underline hover:opacity-70"
-                style={{ color: 'rgba(255, 255, 255, 0.8)' }}
-              >
-                [Dev] Admin Login
-              </Link>
-              <Link 
-                to="/login" 
-                className="text-xs underline hover:opacity-70"
-                style={{ color: 'rgba(255, 255, 255, 0.8)' }}
-              >
-                [Dev] Unified Login
-              </Link>
-            </div>
           </div>
         </div>
       </footer>
