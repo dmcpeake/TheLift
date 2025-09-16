@@ -161,6 +161,7 @@ export function CheckinProgressViz() {
         console.log('No sessions found')
         setSessionData([])
         setChildProgress([])
+      }
 
     } catch (error: any) {
       console.error('Error loading data:', error)
