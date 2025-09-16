@@ -26,42 +26,40 @@ export function Footer({
       {phase === 'intro' && !running && (
         <button
           onClick={onStart}
-          className="breathing-button breathing-button-primary"
+          className="breathing-button-circle breathing-button-primary"
+          aria-label="Start"
         >
-          <Play style={{ width: '20px', height: '20px' }} />
-          Start
+          <Play style={{ width: '24px', height: '24px', color: 'white' }} />
         </button>
       )}
 
       {isBreathingPhase && running && (
         <button
           onClick={onPause}
-          className="breathing-button breathing-button-secondary"
-          style={{ minWidth: '160px' }}
+          className="breathing-button-circle breathing-button-secondary"
+          aria-label="Pause"
         >
-          <Pause style={{ width: '20px', height: '20px' }} />
-          Pause
+          <Pause style={{ width: '24px', height: '24px', color: 'white' }} />
         </button>
       )}
 
       {isBreathingPhase && !running && (
         <button
           onClick={onResume}
-          className="breathing-button breathing-button-secondary"
-          style={{ minWidth: '160px' }}
+          className="breathing-button-circle breathing-button-secondary"
+          aria-label="Resume"
         >
-          <Play style={{ width: '20px', height: '20px' }} />
-          Resume
+          <Play style={{ width: '24px', height: '24px', color: 'white' }} />
         </button>
       )}
 
       {phase === 'complete' && (
         <button
           onClick={onContinue}
-          className="breathing-button breathing-button-primary"
+          className="breathing-button-circle breathing-button-primary"
+          aria-label="Continue"
         >
-          Continue
-          <ArrowRight style={{ width: '20px', height: '20px' }} />
+          <ArrowRight style={{ width: '24px', height: '24px', color: 'white' }} />
         </button>
       )}
     </div>

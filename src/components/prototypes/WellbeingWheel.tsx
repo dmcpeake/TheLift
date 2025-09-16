@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 interface SectionData {
   name: string
@@ -15,22 +15,74 @@ interface WheelData {
   time_to_complete_seconds: number
 }
 
-export function WellbeingWheel() {
+interface WellbeingWheelProps {
+  onComplete?: (data: WheelData) => void
+  showNextButton?: boolean
+  onSelectionMade?: () => void
+  hideDebugInfo?: boolean
+  triggerCompletion?: boolean
+  initialData?: any
+}
+
+export function WellbeingWheel({ onComplete, showNextButton = false, onSelectionMade, hideDebugInfo = false, triggerCompletion = false, initialData }: WellbeingWheelProps = {}) {
   const [sections, setSections] = useState<Record<string, SectionData>>({})
-  const [currentSection, setCurrentSection] = useState<string | null>(null)
-  const [tempNotes, setTempNotes] = useState('')
-  const [tempMood, setTempMood] = useState<typeof moods[0] | null>(null)
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
   const [finalData, setFinalData] = useState<WheelData | null>(null)
   const [startTime] = useState(Date.now())
 
+  // Initialize with existing data if available
+  useEffect(() => {
+    if (initialData && Object.keys(sections).length === 0) {
+      if (initialData.sections) {
+        const sectionsMap: Record<string, SectionData> = {}
+        initialData.sections.forEach((section: SectionData) => {
+          // Find the section ID by matching the name
+          const sectionDef = wheelSections.find(s => s.name === section.name)
+          if (sectionDef) {
+            sectionsMap[sectionDef.id] = section
+          }
+        })
+        setSections(sectionsMap)
+        if (Object.keys(sectionsMap).length > 0) {
+          onSelectionMade?.()
+        }
+      }
+    }
+  }, [initialData, onSelectionMade])
+
+  // Handle external trigger for completion
+  useEffect(() => {
+    if (triggerCompletion && Object.keys(sections).length > 0) {
+      const completedSections = Object.values(sections).filter(section =>
+        section.mood_level !== '' && section.mood_numeric > 0
+      )
+
+      if (completedSections.length > 0) {
+        const overallScore = Math.round(
+          completedSections.reduce((sum, section) => sum + section.mood_numeric, 0) / completedSections.length
+        )
+
+        const completionData: WheelData = {
+          sections: completedSections,
+          overall_score: overallScore,
+          completed_sections: completedSections.length,
+          completed_at: new Date().toISOString(),
+          time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
+        }
+
+        onComplete?.(completionData)
+      }
+    }
+  }, [triggerCompletion, sections, startTime, onComplete])
+
   const wheelSections = [
-    { id: 'family', name: 'Family & Friends', icon: '👨‍👩‍👧‍👦' },
-    { id: 'school', name: 'School & Learning', icon: '📚' },
-    { id: 'health', name: 'Health & Body', icon: '💪' },
-    { id: 'emotions', name: 'Emotions & Feelings', icon: '❤️' },
-    { id: 'fun', name: 'Fun & Hobbies', icon: '🎮' },
-    { id: 'safety', name: 'Safety & Security', icon: '🛡️' },
-    { id: 'growth', name: 'Growth & Goals', icon: '🌱' }
+    { id: 'family', name: 'Family & Friends' },
+    { id: 'school', name: 'School & Learning' },
+    { id: 'health', name: 'Health & Body' },
+    { id: 'emotions', name: 'Emotions & Feelings' },
+    { id: 'fun', name: 'Fun & Hobbies' },
+    { id: 'safety', name: 'Safety & Security' },
+    { id: 'growth', name: 'Growth & Goals' }
   ]
 
   const moods = [
@@ -41,27 +93,52 @@ export function WellbeingWheel() {
     { emoji: '😄', level: 'very_happy', numeric: 5, color: 'bg-blue-500' }
   ]
 
-  const selectMood = (mood: typeof moods[0]) => {
-    setTempMood(mood)
-  }
-
-  const saveSection = (sectionId: string) => {
-    if (!tempMood) return
-
+  const selectMood = (sectionId: string, mood: typeof moods[0]) => {
     const section = wheelSections.find(s => s.id === sectionId)!
     const data: SectionData = {
       name: section.name,
-      mood_level: tempMood.level,
-      mood_numeric: tempMood.numeric,
-      notes: tempNotes
+      mood_level: mood.level,
+      mood_numeric: mood.numeric,
+      notes: ''
     }
 
-    setSections(prev => ({ ...prev, [sectionId]: data }))
-    setCurrentSection(null)
-    setTempNotes('')
-    setTempMood(null)
-
+    setSections(prev => {
+      const newSections = { ...prev, [sectionId]: data }
+      // Only signal selection made when all 7 areas are completed
+      if (Object.keys(newSections).length === wheelSections.length) {
+        onSelectionMade?.()
+      }
+      return newSections
+    })
     console.log(`🎯 WELLBEING WHEEL SECTION DATA - ${section.name}:`, data)
+
+    // Auto-advance to next section after a brief delay for animation
+    setTimeout(() => {
+      const nextIndex = wheelSections.findIndex(s => s.id === sectionId) + 1
+      if (nextIndex < wheelSections.length) {
+        // Find next unrated section or go to next in sequence
+        let targetIndex = nextIndex
+        while (targetIndex < wheelSections.length && sections[wheelSections[targetIndex].id]) {
+          targetIndex++
+        }
+        if (targetIndex < wheelSections.length) {
+          setCurrentSectionIndex(targetIndex)
+        }
+      }
+    }, 300)
+  }
+
+  const editSection = (sectionId: string) => {
+    // Remove the section from completed sections so it doesn't show as a pill
+    setSections(prev => {
+      const newSections = { ...prev }
+      delete newSections[sectionId]
+      return newSections
+    })
+
+    // Make it the current active question
+    const index = wheelSections.findIndex(s => s.id === sectionId)
+    setCurrentSectionIndex(index)
   }
 
   const completeWheel = () => {
@@ -80,168 +157,204 @@ export function WellbeingWheel() {
     }
 
     console.log('🎯 WELLBEING WHEEL COMPLETE DATA:', data)
-    setFinalData(data)
+
+    if (showNextButton && onComplete) {
+      onComplete(data)
+    } else {
+      setFinalData(data)
+    }
   }
 
   const reset = () => {
     setSections({})
-    setCurrentSection(null)
-    setTempNotes('')
+    setCurrentSectionIndex(0)
     setFinalData(null)
   }
 
   const completedCount = Object.keys(sections).length
+  const allCompleted = completedCount === wheelSections.length
+  const currentSection = wheelSections[currentSectionIndex]
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Wellbeing Wheel Prototype</h2>
+    <>
+      {/* Centered title like breathing exercise */}
+      <div className="text-center" style={{ marginTop: '40px', marginBottom: '2rem' }}>
+        <h1 className="text-gray-900 mb-2" style={{ fontSize: '40px', fontWeight: 600, letterSpacing: '0.02em' }}>Wellbeing Wheel</h1>
+        <p className="text-gray-600 text-lg">Rate each area of your life</p>
+      </div>
 
       {!finalData ? (
-        <>
-          <p className="text-gray-600 mb-4">
-            Rate each area of your life ({completedCount}/7 completed)
-          </p>
+        <div className="max-w-4xl mx-auto px-4 relative" style={{ minHeight: 'calc(100vh - 300px)' }}>
+          {/* Completed sections as pills - fixed position */}
+          <div className="absolute top-0 left-0 right-0">
+            {completedCount > 0 && (
+              <div className="flex flex-wrap gap-3 justify-center">
+                {wheelSections.map((section) => {
+                  const sectionData = sections[section.id]
+                  if (!sectionData || section.id === currentSection?.id) return null
 
-          {/* Progress bar */}
-          <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
-            <div
-              className="bg-green-500 h-2 rounded-full transition-all"
-              style={{ width: `${(completedCount / 7) * 100}%` }}
-            />
-          </div>
-
-          {/* Wheel Sections */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            {wheelSections.map((section) => (
-              <div
-                key={section.id}
-                className={`border rounded-lg p-4 ${
-                  sections[section.id] ? 'bg-green-50 border-green-300' : 'border-gray-200'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{section.icon}</span>
-                    <h3 className="font-semibold">{section.name}</h3>
-                  </div>
-                  {sections[section.id] && (
-                    <span className="text-2xl">
-                      {moods.find(m => m.level === sections[section.id].mood_level)?.emoji}
-                    </span>
-                  )}
-                </div>
-
-                {currentSection === section.id ? (
-                  <div className="space-y-3">
-                    <p className="text-sm text-gray-600 text-center">How do you feel about this area?</p>
-                    <div className="flex gap-2 justify-center">
-                      {moods.map((mood) => (
-                        <button
-                          key={mood.level}
-                          onClick={() => selectMood(mood)}
-                          className={`p-2 rounded-lg transition-all hover:scale-110 ${
-                            tempMood?.level === mood.level
-                              ? 'bg-blue-500 text-white'
-                              : 'bg-gray-100 hover:bg-gray-200'
-                          }`}
-                        >
-                          <span className="text-xl">{mood.emoji}</span>
-                        </button>
-                      ))}
-                    </div>
-
-                    {tempMood && (
-                      <>
-                        <textarea
-                          value={tempNotes}
-                          onChange={(e) => setTempNotes(e.target.value.slice(0, 200))}
-                          placeholder="Why are you feeling like this?"
-                          className="w-full p-2 border rounded text-sm h-20 resize-none"
-                          maxLength={200}
-                        />
-                        <p className="text-xs text-gray-500">{tempNotes.length}/200 characters</p>
-                      </>
-                    )}
-
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setCurrentSection(null)
-                          setTempNotes('')
-                          setTempMood(null)
+                  const mood = moods.find(m => m.level === sectionData.mood_level)
+                  return (
+                    <button
+                      key={section.id}
+                      onClick={() => editSection(section.id)}
+                      className="flex items-center bg-white rounded-full transition-all"
+                      style={{
+                        height: '40px',
+                        border: '1px solid #3a7ddc',
+                        paddingLeft: '10px',
+                        paddingRight: '2px', // 2px gap to right border
+                        whiteSpace: 'nowrap'
+                      }}
+                      onMouseEnter={(e) => {
+                        const emojiIcon = e.currentTarget.querySelector('.emoji-icon')
+                        const editIcon = e.currentTarget.querySelector('.edit-icon')
+                        const iconCircle = e.currentTarget.querySelector('.icon-circle')
+                        if (emojiIcon && editIcon && iconCircle) {
+                          emojiIcon.style.display = 'none'
+                          editIcon.style.display = 'block'
+                          iconCircle.style.backgroundColor = '#3a7ddc'
+                          e.currentTarget.style.border = '2px solid #3a7ddc'
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        const emojiIcon = e.currentTarget.querySelector('.emoji-icon')
+                        const editIcon = e.currentTarget.querySelector('.edit-icon')
+                        const iconCircle = e.currentTarget.querySelector('.icon-circle')
+                        if (emojiIcon && editIcon && iconCircle) {
+                          emojiIcon.style.display = 'block'
+                          editIcon.style.display = 'none'
+                          iconCircle.style.backgroundColor = 'rgba(58, 125, 220, 0.2)'
+                          e.currentTarget.style.border = '1px solid #3a7ddc'
+                        }
+                      }}
+                    >
+                      <span className="text-sm font-medium flex-grow" style={{ color: '#3a7ddc', marginRight: '10px' }}>{section.name}</span>
+                      <div
+                        className="icon-circle flex items-center justify-center rounded-full transition-colors"
+                        style={{
+                          backgroundColor: 'rgba(58, 125, 220, 0.2)',
+                          width: '32px',
+                          height: '32px',
+                          flexShrink: 0
                         }}
-                        className="flex-1 py-2 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
                       >
-                        Cancel
-                      </button>
-                      {tempMood && (
-                        <button
-                          onClick={() => saveSection(section.id)}
-                          className="flex-1 py-2 text-sm bg-green-500 text-white rounded hover:bg-green-600"
+                        <span className="emoji-icon text-lg">{mood?.emoji}</span>
+                        <svg
+                          className="edit-icon w-4 h-4 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          viewBox="0 0 24 24"
+                          style={{ display: 'none' }}
                         >
-                          Save
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setCurrentSection(section.id)
-                      setTempNotes(sections[section.id]?.notes || '')
-                      setTempMood(null)
-                    }}
-                    className="w-full py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-all"
-                  >
-                    {sections[section.id] ? 'Edit' : 'Rate this area'}
-                  </button>
-                )}
-
-                {/* Show data captured for this section if completed */}
-                {sections[section.id] && (
-                  <div className="mt-3 pt-3 border-t">
-                    <p className="text-xs font-semibold mb-1">Data Captured:</p>
-                    <pre className="bg-gray-900 text-white p-2 rounded text-xs overflow-x-auto">
-                      {JSON.stringify(sections[section.id], null, 2)}
-                    </pre>
-                  </div>
-                )}
+                          <path d="m18 2 4 4-14 14H4v-4L18 2z"/>
+                          <path d="M14.5 5.5 18.5 9.5"/>
+                        </svg>
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
-            ))}
+            )}
           </div>
 
-          {completedCount === 7 && (
-            <button
-              onClick={completeWheel}
-              className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold"
-            >
-              Complete Wheel Assessment ✓
-            </button>
+          {/* Current question - positioned at same level as chevron tabs */}
+          {!allCompleted && currentSection && (
+            <>
+              {/* Title positioned above the chevron level */}
+              <div className="fixed left-1/2 top-1/2 transform -translate-x-1/2 text-center" style={{ marginTop: '-90px' }}>
+                <h2 className="text-2xl font-semibold text-gray-900">{currentSection.name}</h2>
+              </div>
+
+              {/* Mood selection - exactly at chevron level */}
+              <div className="fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex gap-4 justify-center">
+                {moods.map((mood) => (
+                  <button
+                    key={mood.level}
+                    onClick={() => selectMood(currentSection.id, mood)}
+                    className="p-4 rounded-lg transition-all hover:scale-110 bg-gray-100 hover:bg-gray-200"
+                  >
+                    <span className="text-4xl">{mood.emoji}</span>
+                  </button>
+                ))}
+              </div>
+            </>
           )}
-        </>
+
+
+          {/* Debug info */}
+          {!hideDebugInfo && completedCount > 0 && (
+            <div className="mt-8 max-w-2xl mx-auto">
+              <h3 className="text-lg font-semibold mb-2">📊 Data Captured:</h3>
+              <pre className="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto text-sm">
+                {JSON.stringify(Object.values(sections), null, 2)}
+              </pre>
+            </div>
+          )}
+        </div>
       ) : (
-        <div>
+        <div className="max-w-4xl mx-auto px-4 text-center">
           <h3 className="text-lg font-semibold mb-2">✅ Complete!</h3>
-          <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+          <div className="mb-4 p-4 bg-blue-50 rounded-lg max-w-lg mx-auto">
             <p className="text-2xl font-bold text-center">
               Overall Score: {finalData.overall_score}/5.0
             </p>
           </div>
-          <h4 className="font-medium mb-2">📊 Data Captured:</h4>
-          <pre className="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto text-sm mb-4">
-            {JSON.stringify(finalData, null, 2)}
-          </pre>
-          <p className="text-xs text-gray-500 mb-4">
-            ✅ This data would be sent to: /api/wellbeing-wheel
-          </p>
+          {!hideDebugInfo && (
+            <div className="max-w-2xl mx-auto">
+              <h4 className="font-medium mb-2">📊 Data Captured:</h4>
+              <pre className="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto text-sm mb-4">
+                {JSON.stringify(finalData, null, 2)}
+              </pre>
+              <p className="text-xs text-gray-500 mb-4">
+                ✅ This data would be sent to: /api/wellbeing-wheel
+              </p>
+            </div>
+          )}
+
+          {!showNextButton && (
+            <button
+              onClick={reset}
+              className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+            >
+              Start Over
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Fixed bottom button - only show when all 7 areas completed */}
+      {!finalData && allCompleted && (
+        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center z-1000">
           <button
-            onClick={reset}
-            className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+            onClick={completeWheel}
+            style={{
+              width: '56px',
+              height: '56px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '50%',
+              backgroundColor: '#e87e67', // Orange color
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              color: 'white'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d86b4f'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
+            aria-label="Complete"
           >
-            Start Over
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20,6 9,17 4,12"></polyline>
+            </svg>
           </button>
         </div>
       )}
-    </div>
+    </>
   )
 }

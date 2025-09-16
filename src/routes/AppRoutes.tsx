@@ -49,6 +49,8 @@ import { WaitlistManagement } from '../components/admin/WaitlistManagement'
 // Test Components (for designer testing)
 import { PrototypesPage } from '../components/prototypes/PrototypesPage'
 import { DataHierarchy } from '../components/prototypes/DataHierarchy'
+import { CheckInHome } from '../components/checkin/CheckInHome'
+import { CheckInFlow } from '../components/checkin/CheckInFlow'
 
 export function AppRoutes() {
   const { user } = React.useContext(AuthContext)
@@ -226,6 +228,9 @@ export function AppRoutes() {
         {/* Prototypes Route - No authentication required */}
         <Route path="/prototypes" element={<PrototypesPage />} />
         <Route path="/test/data-hierarchy" element={<DataHierarchy />} />
+        <Route path="/checkin" element={<PrototypesPage />} />
+        <Route path="/checkin/home" element={<CheckInHome />} />
+        <Route path="/checkin/flow/:step" element={<CheckInFlow />} />
 
         {/* Unauthorized route */}
         <Route path="/unauthorized" element={

@@ -27,23 +27,33 @@
   }
 }
 
+@keyframes waitingBreath {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
 @keyframes textGlow {
   0%, 100% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
   50% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.6); }
 }
 
-.breathing-container {
-  min-height: 100vh;
+.breathing-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
   background-size: 400% 400%;
   animation: breathingBackground 15s ease infinite;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow: hidden;
+  z-index: 0;
 }
 
-.breathing-container::before {
+.breathing-background::before {
   content: '';
   position: absolute;
   top: 0;
@@ -56,22 +66,21 @@
   z-index: 1;
 }
 
-.breathing-header {
-  padding: 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.breathing-content {
   position: relative;
   z-index: 10;
+  min-height: 100vh;
+  padding-top: 60px;
+  display: flex;
+  flex-direction: column;
 }
 
-.breathing-title {
-  font-size: 2.5rem;
-  font-weight: 200;
-  color: white;
-  margin: 0;
-  letter-spacing: 0.05em;
-  animation: textGlow 3s ease-in-out infinite;
+.breathing-stage-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
 }
 
 .breathing-stage {
@@ -79,10 +88,51 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex: 1;
-  padding: 4rem 2rem 8rem 2rem;
   position: relative;
-  z-index: 10;
+  margin-top: 40px;
+}
+
+/* Circular icon-only buttons */
+.breathing-button-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  background: #3a7ddc;
+  color: white;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  transform: none !important;
+}
+
+.breathing-button-circle:hover {
+  background: #2e6bc7 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.breathing-button-circle.breathing-button-primary {
+  background: #3a7ddc;
+}
+
+.breathing-button-circle.breathing-button-primary:hover {
+  background: #2e6bc7 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.breathing-button-circle.breathing-button-secondary {
+  background: #3a7ddc;
+}
+
+.breathing-button-circle.breathing-button-secondary:hover {
+  background: #2e6bc7 !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 .breathing-circle-container {
@@ -92,6 +142,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Add waiting breath animation when intro - only for inner circle */
+.breathing-circle.waiting {
+  animation: waitingBreath 4s ease-in-out infinite;
 }
 
 /* Floating orbs around the circle */
@@ -123,23 +178,19 @@
 .breathing-circle {
   width: 280px;
   height: 280px;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.98) 0%, 
-    rgba(248, 250, 252, 0.95) 30%,
-    rgba(241, 245, 249, 0.98) 100%
-  );
+  background: rgba(255, 255, 255, 0.98);
   border-radius: 50% !important;
   display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(20px);
   border: none;
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.08),
     0 2px 16px rgba(0, 0, 0, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  transition: transform cubic-bezier(0.25, 0.8, 0.25, 1), background cubic-bezier(0.25, 0.8, 0.25, 1);
-  transition-property: transform, background;
+  transition: transform cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition-property: transform;
   position: relative;
   z-index: 5;
   animation: pulseGlow 4s ease-in-out infinite;
@@ -148,29 +199,14 @@
 
 .breathing-circle.inhale {
   transform: scale(1.2);
-  background: linear-gradient(135deg, 
-    rgba(219, 234, 254, 0.98) 0%, 
-    rgba(248, 250, 252, 0.95) 30%, 
-    rgba(233, 213, 255, 0.98) 100%
-  );
 }
 
 .breathing-circle.hold {
   transform: scale(1.2);
-  background: linear-gradient(135deg, 
-    rgba(238, 242, 255, 0.98) 0%, 
-    rgba(248, 250, 252, 0.95) 30%, 
-    rgba(219, 234, 254, 0.98) 100%
-  );
 }
 
 .breathing-circle.exhale {
   transform: scale(0.7);
-  background: linear-gradient(135deg, 
-    rgba(220, 252, 231, 0.98) 0%, 
-    rgba(248, 250, 252, 0.95) 30%, 
-    rgba(209, 250, 229, 0.98) 100%
-  );
 }
 
 .breathing-text {
@@ -182,8 +218,8 @@
 }
 
 .breathing-instruction {
-  font-size: 1.8rem;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 400;
   margin: 0 0 0.5rem 0;
   letter-spacing: 0.02em;
   color: #1f2937;
@@ -211,7 +247,7 @@
 
 .progress-ring-bg {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.25);
+  stroke: white;
   stroke-width: 8;
   stroke-dasharray: 12 6;
   filter: blur(0.5px);
@@ -219,12 +255,11 @@
 
 .progress-ring-progress {
   fill: none;
-  stroke: url(#progressGradient);
+  stroke: #e87e67;
   stroke-width: 8;
   stroke-dasharray: 12 6;
   stroke-linecap: round;
   transition: stroke-dashoffset linear;
-  filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.7));
 }
 
 .breathing-footer {
@@ -237,7 +272,6 @@
   justify-content: center;
   z-index: 1000;
   background: transparent;
-  pointer-events: none;
 }
 
 .breathing-button {
@@ -323,9 +357,6 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .breathing-title {
-    font-size: 2rem;
-  }
   
   .breathing-circle-container {
     width: 350px;
