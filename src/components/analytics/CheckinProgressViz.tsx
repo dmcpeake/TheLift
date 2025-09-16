@@ -121,19 +121,29 @@ export function CheckinProgressViz() {
         console.log('Found sessions:', sessions.length)
         console.log('Sample session:', sessions[0])
 
-        // Load mood data separately
+        // Load mood data in batches to avoid URL too long error
         const sessionIds = sessions.map(s => s.id)
         console.log('Loading mood data for', sessionIds.length, 'sessions')
-        const { data: moods, error: moodsError } = await supabase
-          .from('mood_meter_usage')
-          .select('session_id, mood_numeric, mood_level')
-          .in('session_id', sessionIds)
 
-        if (moodsError) {
-          console.error('Error loading mood data:', moodsError)
-        } else {
-          console.log('Loaded mood data:', moods?.length || 0, 'entries')
+        let allMoods: any[] = []
+        const batchSize = 50 // Process 50 sessions at a time
+
+        for (let i = 0; i < sessionIds.length; i += batchSize) {
+          const batch = sessionIds.slice(i, i + batchSize)
+          const { data: moods, error: moodsError } = await supabase
+            .from('mood_meter_usage')
+            .select('session_id, mood_numeric, mood_level')
+            .in('session_id', batch)
+
+          if (moodsError) {
+            console.error('Error loading mood data batch:', moodsError)
+          } else if (moods) {
+            allMoods = [...allMoods, ...moods]
+          }
         }
+
+        const moods = allMoods
+        console.log('Loaded mood data:', moods?.length || 0, 'entries')
 
         // Combine sessions with mood data
         const sessionsWithMood = sessions.map(session => ({
@@ -271,7 +281,7 @@ export function CheckinProgressViz() {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-gray-800 p-3 rounded-lg shadow-xl border border-gray-700">
+        <div className="bg-slate-800 p-3 rounded-lg shadow-xl border border-slate-600">
           <p className="text-white font-semibold">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} style={{ color: entry.color }}>
@@ -286,7 +296,7 @@ export function CheckinProgressViz() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 p-8">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -303,7 +313,7 @@ export function CheckinProgressViz() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 p-8">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -329,7 +339,7 @@ export function CheckinProgressViz() {
 
   if (!sessionData.length && !loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 p-8">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -355,7 +365,7 @@ export function CheckinProgressViz() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
@@ -364,7 +374,7 @@ export function CheckinProgressViz() {
           className="mb-8"
         >
           <h1 className="text-5xl font-bold text-white mb-2">Check-in Progress Analytics</h1>
-          <p className="text-gray-300">Real-time insights into children's wellbeing journeys</p>
+          <p className="text-slate-200">Real-time insights into children's wellbeing journeys</p>
         </motion.div>
 
         {/* Filters */}
@@ -372,16 +382,16 @@ export function CheckinProgressViz() {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-gray-800/50 backdrop-blur rounded-xl p-6 mb-8"
+          className="bg-slate-800/80 backdrop-blur-md rounded-xl p-6 mb-8 border border-slate-700/50"
         >
           <div className="flex flex-wrap gap-4">
             {/* Organization Filter */}
             <div className="flex-1 min-w-[200px]">
-              <label className="text-gray-300 text-sm mb-2 block">Organization</label>
+              <label className="text-slate-100 text-sm mb-2 block font-medium">Organization</label>
               <select
                 value={selectedOrg}
                 onChange={(e) => setSelectedOrg(e.target.value)}
-                className="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full bg-slate-700/80 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 border border-slate-600"
               >
                 <option value="all">All Organizations</option>
                 {organizations.map(org => (
@@ -392,7 +402,7 @@ export function CheckinProgressViz() {
 
             {/* Date Range */}
             <div className="flex-1 min-w-[200px]">
-              <label className="text-gray-300 text-sm mb-2 block">Time Period</label>
+              <label className="text-slate-100 text-sm mb-2 block font-medium">Time Period</label>
               <div className="flex gap-2">
                 {(['week', 'month', 'all'] as const).map(range => (
                   <button
@@ -401,7 +411,7 @@ export function CheckinProgressViz() {
                     className={`flex-1 py-2 px-4 rounded-lg transition-all ${
                       dateRange === range
                         ? 'bg-purple-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        : 'bg-slate-700/80 text-slate-100 hover:bg-slate-600 border border-slate-600'
                     }`}
                   >
                     {range === 'all' ? 'All Time' : range === 'week' ? 'Week' : 'Month'}
@@ -412,7 +422,7 @@ export function CheckinProgressViz() {
 
             {/* View Mode */}
             <div className="flex-1 min-w-[300px]">
-              <label className="text-gray-300 text-sm mb-2 block">View</label>
+              <label className="text-slate-100 text-sm mb-2 block font-medium">View</label>
               <div className="flex gap-2">
                 {(['overview', 'timeline', 'children', 'insights'] as const).map(mode => (
                   <button
@@ -421,7 +431,7 @@ export function CheckinProgressViz() {
                     className={`flex-1 py-2 px-4 rounded-lg transition-all capitalize ${
                       viewMode === mode
                         ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        : 'bg-slate-700/80 text-slate-100 hover:bg-slate-600 border border-slate-600'
                     }`}
                   >
                     {mode}
@@ -469,8 +479,8 @@ export function CheckinProgressViz() {
               className="space-y-8"
             >
               {/* Sessions Timeline */}
-              <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-4">Sessions Over Time</h3>
+              <div className="bg-slate-800/80 backdrop-blur-md rounded-xl p-6 border border-slate-700/50">
+                <h3 className="text-xl font-semibold text-slate-100 mb-4">Sessions Over Time</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={sessionData}>
                     <defs>
@@ -479,9 +489,9 @@ export function CheckinProgressViz() {
                         <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.1}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="date" stroke="#9CA3AF" />
-                    <YAxis stroke="#9CA3AF" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
+                    <XAxis dataKey="date" stroke="#CBD5E1" />
+                    <YAxis stroke="#CBD5E1" />
                     <Tooltip content={<CustomTooltip />} />
                     <Area
                       type="monotone"
@@ -496,12 +506,12 @@ export function CheckinProgressViz() {
               </div>
 
               {/* Mood Trends */}
-              <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-4">Mood Trends</h3>
+              <div className="bg-slate-800/80 backdrop-blur-md rounded-xl p-6 border border-slate-700/50">
+                <h3 className="text-xl font-semibold text-slate-100 mb-4">Mood Trends</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={sessionData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="date" stroke="#9CA3AF" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
+                    <XAxis dataKey="date" stroke="#CBD5E1" />
                     <YAxis domain={[0, 5]} stroke="#9CA3AF" />
                     <Tooltip content={<CustomTooltip />} />
                     <Line
@@ -524,7 +534,7 @@ export function CheckinProgressViz() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="bg-gray-800/50 backdrop-blur rounded-xl p-6"
+              className="bg-slate-800/80 backdrop-blur-md rounded-xl p-6 border border-slate-700/50"
             >
               <h3 className="text-xl font-semibold text-white mb-4">Detailed Timeline</h3>
               <ResponsiveContainer width="100%" height={400}>
@@ -551,8 +561,8 @@ export function CheckinProgressViz() {
               exit={{ opacity: 0 }}
               className="space-y-6"
             >
-              <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-4">Individual Progress</h3>
+              <div className="bg-slate-800/80 backdrop-blur-md rounded-xl p-6 border border-slate-700/50">
+                <h3 className="text-xl font-semibold text-slate-100 mb-4">Individual Progress</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {childProgress.slice(0, 12).map((child) => (
                     <motion.div
@@ -612,8 +622,8 @@ export function CheckinProgressViz() {
               className="grid grid-cols-1 lg:grid-cols-2 gap-6"
             >
               {/* Engagement by Organization */}
-              <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-4">Engagement by Organization</h3>
+              <div className="bg-slate-800/80 backdrop-blur-md rounded-xl p-6 border border-slate-700/50">
+                <h3 className="text-xl font-semibold text-slate-100 mb-4">Engagement by Organization</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
@@ -638,8 +648,8 @@ export function CheckinProgressViz() {
               </div>
 
               {/* Progress Distribution */}
-              <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-4">Progress Distribution</h3>
+              <div className="bg-slate-800/80 backdrop-blur-md rounded-xl p-6 border border-slate-700/50">
+                <h3 className="text-xl font-semibold text-slate-100 mb-4">Progress Distribution</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart
                     data={[
@@ -649,9 +659,9 @@ export function CheckinProgressViz() {
                       { range: '76-100%', count: childProgress.filter(c => c.progress > 75).length },
                     ]}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
                     <XAxis dataKey="range" stroke="#9CA3AF" />
-                    <YAxis stroke="#9CA3AF" />
+                    <YAxis stroke="#CBD5E1" />
                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="count" fill="#8B5CF6" />
                   </BarChart>
@@ -660,7 +670,7 @@ export function CheckinProgressViz() {
 
               {/* Key Insights */}
               <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 lg:col-span-2">
-                <h3 className="text-xl font-semibold text-white mb-4">Key Insights</h3>
+                <h3 className="text-xl font-semibold text-slate-100 mb-4">Key Insights</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-gradient-to-r from-green-600/20 to-teal-600/20 border border-green-600/30 rounded-lg p-4">
                     <h4 className="text-green-400 font-semibold mb-2">Top Performers</h4>
