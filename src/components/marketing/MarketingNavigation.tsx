@@ -71,6 +71,22 @@ export function MarketingNavigation() {
           
           <div className="flex items-center" style={{ gap: '20px' }}>
             <Button
+              onClick={() => window.location.href = '/login'}
+              variant="outline"
+              className="h-10 rounded flex items-center justify-center pt-2.5 pb-2"
+              style={{ border: '1px solid #147fe3', color: '#147fe3', backgroundColor: 'transparent' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#147fe3'
+                e.currentTarget.style.color = 'white'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+                e.currentTarget.style.color = '#147fe3'
+              }}
+            >
+              SIGN IN
+            </Button>
+            <Button
               onClick={handleJoinWaitlistClick}
               className="h-10 rounded flex items-center justify-center pt-2.5 pb-2"
               style={{ backgroundColor: '#147fe3', color: 'white' }}

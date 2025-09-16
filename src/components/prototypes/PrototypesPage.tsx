@@ -58,6 +58,25 @@ export function PrototypesPage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="space-y-8">
+          
+          {/* Sequential Check-in Flow */}
+          <div className="animate-fadeIn">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-8 text-white mb-8">
+              <h2 className="text-3xl font-bold mb-4">🌟 Full Check-in Experience</h2>
+              <p className="text-blue-100 mb-6 text-lg">
+                Experience the complete wellbeing journey: Breathing → Mood → Emotions → Wellbeing Wheel
+              </p>
+              <div className="flex items-center gap-4">
+                <a
+                  href="/checkin/home"
+                  className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors inline-block"
+                >
+                  Start Full Check-in Flow →
+                </a>
+                <span className="text-blue-200 text-sm">~ 5-10 minutes</span>
+              </div>
+            </div>
+          </div>
           {/* Tool 1: Mood Meter */}
           <div className="animate-fadeIn">
             <MoodMeter />
@@ -120,7 +139,7 @@ export function PrototypesPage() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;

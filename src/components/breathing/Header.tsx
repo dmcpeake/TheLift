@@ -2,6 +2,7 @@ import React from 'react'
 import { Button } from '../ui/button'
 import { Settings, SkipForward } from 'lucide-react'
 import { Phase } from './types'
+import { useLocation } from 'react-router-dom'
 
 interface HeaderProps {
   onSkip: () => void
@@ -11,47 +12,17 @@ interface HeaderProps {
 }
 
 export function Header({ onSkip, onSettings, phase, techniqueName }: HeaderProps) {
+  const location = useLocation()
+  const isInCheckinFlow = location.pathname.includes('/checkin/flow')
   const showSkip = phase !== 'complete'
-  
+
   return (
-    <div className="breathing-header">
-      <h1 className="breathing-title">
-        {techniqueName || 'Breathing Exercise'}
-      </h1>
-      
-      <div style={{ position: 'absolute', right: '2rem', display: 'flex', gap: '0.5rem' }}>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onSettings}
-          style={{
-            color: 'rgba(255, 255, 255, 0.8)',
-            border: 'none',
-            background: 'none'
-          }}
-          className="hover:text-white hover:bg-white/20"
-          aria-label="Settings"
-        >
-          <Settings className="h-5 w-5" />
-        </Button>
-        
-        {showSkip && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onSkip}
-            style={{
-              color: 'rgba(255, 255, 255, 0.8)',
-              border: 'none',
-              background: 'none'
-            }}
-            className="hover:text-white hover:bg-white/20"
-          >
-            <SkipForward className="h-4 w-4 mr-1" />
-            Skip
-          </Button>
-        )}
+    <>
+      {/* Centered title like breathing exercise */}
+      <div className="text-center" style={{ marginTop: '80px', marginBottom: '2rem' }}>
+        <h1 className="text-white mb-2" style={{ fontSize: '40px', fontWeight: 600, letterSpacing: '0.02em' }}>Breathing Exercise</h1>
+        <p className="text-white text-lg opacity-80">Take a moment to breathe</p>
       </div>
-    </div>
+    </>
   )
 }

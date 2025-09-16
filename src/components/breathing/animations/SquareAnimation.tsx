@@ -11,6 +11,7 @@ interface SquareAnimationProps {
 export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnimationProps) {
   const [animationKey, setAnimationKey] = useState(0)
   const [shouldAnimate, setShouldAnimate] = useState(false)
+  const [currentScale, setCurrentScale] = useState(0.85)
 
   // Start animation when breathing begins
   useEffect(() => {
@@ -27,6 +28,36 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
     }
   }, [cycle, shouldAnimate])
 
+  // Handle scale transitions with proper timing
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout
+
+    switch (phase) {
+      case 'inhale':
+        // Start at current scale, then transition to 1.1
+        timeoutId = setTimeout(() => setCurrentScale(1.1), 50)
+        break
+      case 'hold':
+        // Stay at 1.1 (inhaled state)
+        setCurrentScale(1.1)
+        break
+      case 'exhale':
+        // Start at 1.1, then transition to 0.85
+        timeoutId = setTimeout(() => setCurrentScale(0.85), 50)
+        break
+      case 'holdAfter':
+        // Stay at 0.85 (exhaled state)
+        setCurrentScale(0.85)
+        break
+      default:
+        setCurrentScale(0.85)
+    }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [phase])
+
   const squareSize = 280
   const strokeWidth = 12
   
@@ -35,13 +66,13 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
 
   const getInstructionText = () => {
     switch (phase) {
-      case 'intro': return 'tap start'
-      case 'inhale': return 'breathe in'
-      case 'hold': return 'hold'
-      case 'exhale': return 'breathe out'
-      case 'holdAfter': return 'hold'
-      case 'complete': return 'well done!'
-      default: return 'breathe'
+      case 'intro': return 'Tap play to begin'
+      case 'inhale': return 'Breathe in'
+      case 'hold': return 'Hold'
+      case 'exhale': return 'Breathe out'
+      case 'holdAfter': return 'Hold'
+      case 'complete': return 'Well done!'
+      default: return 'Breathe'
     }
   }
 
@@ -60,28 +91,30 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
         viewBox="0 0 480 480"
         style={{ position: 'absolute' }}
       >
-        <defs>
-          <linearGradient id="squareGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#3b82f6" />
-            <stop offset="25%" stopColor="#10b981" />
-            <stop offset="50%" stopColor="#f59e0b" />
-            <stop offset="75%" stopColor="#ef4444" />
-            <stop offset="100%" stopColor="#8b5cf6" />
-          </linearGradient>
-        </defs>
-
-        {/* Background white square */}
+        {/* Background white square - animated with breathing */}
         <rect
           x="100"
           y="100"
           width={squareSize}
           height={squareSize}
           rx="20"
-          fill="rgba(255, 255, 255, 0.95)"
+          fill="rgba(255, 255, 255, 0.98)"
           stroke="none"
+          style={{
+            transformOrigin: 'center',
+            transform: `scale(${currentScale})`,
+            animation: phase === 'intro' ? 'squareWaiting 4s ease-in-out infinite' : 'none',
+            transition: phase === 'intro' ? 'none' : `transform ${
+              phase === 'inhale' ? pace.in :
+              phase === 'hold' ? 0 :
+              phase === 'exhale' ? pace.out :
+              phase === 'holdAfter' ? 0 :
+              0.5
+            }s linear`
+          }}
         />
 
-        {/* Dotted outline square - 40px gap from white box */}
+        {/* Dotted outline square - solid white */}
         <rect
           x="60"
           y="60"
@@ -89,12 +122,12 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
           height={squareSize + 80}
           rx="30"
           fill="none"
-          stroke="rgba(255, 255, 255, 0.25)"
+          stroke="white"
           strokeWidth="8"
           strokeDasharray="12 6"
         />
 
-        {/* Animated line that traces around the outer square - only show when breathing */}
+        {/* Animated line that traces around the outer square - orange without glow */}
         {shouldAnimate && (
           <rect
             key={animationKey}
@@ -104,7 +137,7 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
             height={squareSize + 80}
             rx="30"
             fill="none"
-            stroke="url(#squareGradient)"
+            stroke="#e87e67"
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -124,6 +157,15 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
             stroke-dashoffset: 0;
           }
         }
+
+        @keyframes squareWaiting {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+        }
       `}</style>
 
       {/* Center text */}
@@ -134,8 +176,8 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
         padding: '2rem'
       }}>
         <h2 style={{
-          fontSize: '1.8rem',
-          fontWeight: '600',
+          fontSize: '16px',
+          fontWeight: '400',
           color: '#1f2937',
           marginBottom: '0.5rem'
         }}>

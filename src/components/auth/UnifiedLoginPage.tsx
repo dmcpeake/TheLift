@@ -530,24 +530,8 @@ export function UnifiedLoginPage() {
                 onClick={async () => {
                   setLoadingButton('child')
                   try {
-                    // Auto-login to test child account
-                    const { data, error } = await supabase.auth.signInWithPassword({
-                      email: 'testchild@child.local',
-                      password: '1234'
-                    })
-                    
-                    if (error) throw error
-                    
-                    // The auth state change will handle navigation
-                  } catch (error: any) {
-                    console.error('Child auto-login failed:', error)
-                    // Fallback to bypass if auto-login fails
-                    setUser({
-                      id: 'test-child-id',
-                      email: 'testchild@child.local',
-                      profile: { role: 'Child', name: 'Test Child' }
-                    })
-                    navigate('/child/home')
+                    // Navigate directly to check-in for testing wellbeing tools
+                    navigate('/checkin')
                   } finally {
                     setLoadingButton(null)
                   }

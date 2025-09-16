@@ -80,17 +80,17 @@ export function Stage({
   const getInstructionText = () => {
     switch (phase) {
       case 'intro':
-        return 'tap start'
+        return 'Tap play to begin'
       case 'inhale':
-        return 'breathe in'
+        return 'Breathe in'
       case 'hold':
-        return 'hold'
+        return 'Hold'
       case 'exhale':
-        return 'breathe out'
+        return 'Breathe out'
       case 'complete':
-        return 'well done!'
+        return 'Well done!'
       default:
-        return 'breathe'
+        return 'Breathe'
     }
   }
 
@@ -199,17 +199,17 @@ export function Stage({
             </svg>
 
             {/* Inner balloon circle */}
-            <div 
-              className={highContrast ? 'breathing-circle high-contrast' : circleClass}
+            <div
+              className={`${highContrast ? 'breathing-circle high-contrast' : circleClass} ${phase === 'intro' ? 'waiting' : ''}`}
               style={{
                 transitionProperty: 'transform, background',
-                transitionDuration: `${
+                transitionDuration: phase === 'intro' ? '0s' : `${
                   phase === 'inhale' ? pace.in :
                   phase === 'hold' ? pace.hold :
                   phase === 'exhale' ? pace.out :
                   4
                 }s`,
-                transitionTimingFunction: 'cubic-bezier(0.25, 0.8, 0.25, 1)',
+                transitionTimingFunction: 'linear',
                 borderRadius: '50%'
               }}
             >

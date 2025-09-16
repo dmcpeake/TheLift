@@ -1,6 +1,6 @@
 import React from 'react'
 import { BREATHING_TECHNIQUES } from './techniques'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Settings, X } from 'lucide-react'
 
 interface TechniqueSelectorProps {
   selectedId: string
@@ -19,69 +19,49 @@ export function TechniqueSelector({
 
   return (
     <>
-      {/* Toggle Button */}
+      {/* Settings Button - Top Right */}
       <button
         onClick={onToggle}
-        className="technique-toggle"
+        className="breathing-settings-button"
         style={{
           position: 'fixed',
-          right: isOpen ? '320px' : '0',
-          top: '50%',
-          transform: 'translateY(-50%)',
+          right: '24px',
+          top: '150px', // 50px under the progress header (10px lower)
           zIndex: 1001,
-          padding: '1rem 0.5rem',
-          background: 'rgba(255, 255, 255, 0.95)',
+          width: '56px',
+          height: '56px',
+          background: 'transparent',
           border: 'none',
-          borderTopLeftRadius: '1rem',
-          borderBottomLeftRadius: '1rem',
           cursor: 'pointer',
-          transition: 'right 0.3s ease',
-          backdropFilter: 'blur(10px)',
-          boxShadow: '-2px 0 10px rgba(0,0,0,0.1)'
+          transition: 'all 0.3s ease',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}
+        aria-label={isOpen ? 'Close settings' : 'Open settings'}
       >
         {isOpen ? (
-          <ChevronRight style={{ width: '24px', height: '24px', color: '#6b7280' }} />
+          <X style={{ width: '24px', height: '24px', color: '#3a7ddc' }} />
         ) : (
-          <ChevronLeft style={{ width: '24px', height: '24px', color: '#6b7280' }} />
+          <Settings style={{ width: '24px', height: '24px', color: '#3a7ddc' }} />
         )}
       </button>
 
-      {/* Sidebar */}
-      <div
-        className="technique-sidebar"
-        style={{
-          position: 'fixed',
-          right: isOpen ? '0' : '-320px',
-          top: '0',
-          bottom: '0',
-          width: '320px',
-          background: 'rgba(255, 255, 255, 0.98)',
-          backdropFilter: 'blur(20px)',
-          transition: 'right 0.3s ease',
-          zIndex: 1000,
-          overflowY: 'auto',
-          boxShadow: isOpen ? '-10px 0 30px rgba(0,0,0,0.1)' : 'none'
-        }}
-      >
-        <div style={{ padding: '2rem 1.5rem' }}>
-          <h2 style={{ 
-            fontSize: '1.5rem', 
-            fontWeight: '600',
-            color: '#1f2937',
-            marginBottom: '0.5rem'
-          }}>
-            Breathing Techniques
-          </h2>
-          <p style={{ 
-            fontSize: '0.9rem', 
-            color: '#6b7280',
-            marginBottom: '1.5rem'
-          }}>
-            Choose a technique that works best for you
-          </p>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {/* Cards Dropdown */}
+      {isOpen && (
+        <div
+          className="technique-cards"
+          style={{
+            position: 'fixed',
+            right: '24px',
+            top: '220px', // Below the settings button
+            zIndex: 1000,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            maxWidth: '320px'
+          }}
+        >
             {BREATHING_TECHNIQUES.map(technique => {
               const isSelected = technique.id === selectedId
               return (
@@ -90,92 +70,58 @@ export function TechniqueSelector({
                   onClick={() => onSelect(technique.id)}
                   style={{
                     padding: '1rem',
-                    borderRadius: '0.75rem',
-                    border: `2px solid ${isSelected ? technique.theme?.primaryColor : 'transparent'}`,
-                    background: isSelected 
-                      ? `linear-gradient(135deg, ${technique.theme?.primaryColor}20 0%, ${technique.theme?.secondaryColor}20 100%)`
-                      : 'rgba(249, 250, 251, 0.8)',
+                    borderRadius: '12px',
+                    border: `2px solid ${isSelected ? '#3b82f6' : 'transparent'}`,
+                    background: isSelected
+                      ? 'rgba(255, 255, 255, 0.9)'
+                      : 'rgba(255, 255, 255, 0.85)',
+                    backdropFilter: 'blur(10px)',
                     cursor: 'pointer',
                     textAlign: 'left',
                     transition: 'all 0.2s ease',
-                    transform: isSelected ? 'scale(1.02)' : 'scale(1)',
-                    boxShadow: isSelected 
-                      ? '0 4px 12px rgba(0,0,0,0.08)' 
-                      : '0 2px 4px rgba(0,0,0,0.04)'
+                    width: '280px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
                   }}
                   onMouseEnter={e => {
                     if (!isSelected) {
-                      e.currentTarget.style.background = 'rgba(243, 244, 246, 0.9)'
-                      e.currentTarget.style.transform = 'scale(1.01)'
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)'
+                      e.currentTarget.style.transform = 'scale(1.02)'
                     }
                   }}
                   onMouseLeave={e => {
                     if (!isSelected) {
-                      e.currentTarget.style.background = 'rgba(249, 250, 251, 0.8)'
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.85)'
                       e.currentTarget.style.transform = 'scale(1)'
                     }
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                    <span style={{ fontSize: '1.5rem' }}>{technique.theme?.icon}</span>
+                  <div style={{ display: 'flex', alignItems: 'flex-start' }}>
                     <div style={{ flex: 1 }}>
-                      <h3 style={{ 
-                        fontSize: '1rem', 
+                      <h3 style={{
+                        fontSize: '1rem',
                         fontWeight: '600',
                         color: '#1f2937',
                         marginBottom: '0.25rem'
                       }}>
                         {technique.name}
                       </h3>
-                      <p style={{ 
-                        fontSize: '0.8rem', 
+                      <p style={{
+                        fontSize: '0.875rem',
                         color: '#6b7280',
-                        marginBottom: '0.5rem',
-                        lineHeight: '1.4'
-                      }}>
-                        {technique.description}
-                      </p>
-                      <div style={{ 
-                        fontSize: '0.75rem', 
-                        color: '#9ca3af'
+                        lineHeight: '1.4',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
                       }}>
                         {technique.pace.in}s in • {technique.pace.hold}s hold • {technique.pace.out}s out
-                        {technique.pace.holdAfter ? ` • ${technique.pace.holdAfter}s hold` : ''}
-                      </div>
+                      </p>
                     </div>
                   </div>
                 </button>
               )
             })}
-          </div>
-
-          {/* Currently selected info */}
-          {selected && (
-            <div style={{
-              marginTop: '1.5rem',
-              padding: '1rem',
-              borderRadius: '0.75rem',
-              background: 'rgba(241, 245, 249, 0.8)',
-              border: '1px solid rgba(226, 232, 240, 0.8)'
-            }}>
-              <p style={{ 
-                fontSize: '0.85rem', 
-                color: '#64748b',
-                marginBottom: '0.25rem'
-              }}>
-                Currently practicing:
-              </p>
-              <p style={{ 
-                fontSize: '1rem', 
-                fontWeight: '600',
-                color: '#1e293b'
-              }}>
-                {selected.theme?.icon} {selected.name}
-              </p>
-            </div>
-          )}
         </div>
-      </div>
+      )}
     </>
   )
 }
