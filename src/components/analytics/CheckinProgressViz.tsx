@@ -53,12 +53,13 @@ interface ChildProgress {
 
 export function CheckinProgressViz() {
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [selectedOrg, setSelectedOrg] = useState<string>('all')
   const [sessionData, setSessionData] = useState<SessionData[]>([])
   const [childProgress, setChildProgress] = useState<ChildProgress[]>([])
   const [viewMode, setViewMode] = useState<'overview' | 'timeline' | 'children' | 'insights'>('overview')
-  const [dateRange, setDateRange] = useState<'week' | 'month' | 'all'>('month')
+  const [dateRange, setDateRange] = useState<'week' | 'month' | 'all'>('all')
 
   useEffect(() => {
     loadData()
@@ -67,15 +68,22 @@ export function CheckinProgressViz() {
   const loadData = async () => {
     try {
       setLoading(true)
+      setError(null)
+      console.log('Loading data for CheckinProgressViz...')
 
       // Load organizations
-      const { data: orgs } = await supabase
+      const { data: orgs, error: orgsError } = await supabase
         .from('organisations')
         .select('*')
         .order('name')
 
-      if (orgs) {
-        setOrganizations(orgs)
+      if (orgsError) {
+        console.error('Error loading organizations:', orgsError)
+      } else {
+        console.log('Loaded organizations:', orgs?.length || 0)
+        if (orgs) {
+          setOrganizations(orgs)
+        }
       }
 
       // Build query based on filters - simplified query
@@ -85,6 +93,7 @@ export function CheckinProgressViz() {
         .order('started_at', { ascending: false })
 
       if (selectedOrg !== 'all') {
+        console.log('Filtering by org:', selectedOrg)
         sessionsQuery = sessionsQuery.eq('org_id', selectedOrg)
       }
 
@@ -93,25 +102,38 @@ export function CheckinProgressViz() {
       if (dateRange === 'week') {
         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
         sessionsQuery = sessionsQuery.gte('started_at', weekAgo.toISOString())
+        console.log('Filtering by week, from:', weekAgo.toISOString())
       } else if (dateRange === 'month') {
         const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
         sessionsQuery = sessionsQuery.gte('started_at', monthAgo.toISOString())
+        console.log('Filtering by month, from:', monthAgo.toISOString())
       }
 
       const { data: sessions, error } = await sessionsQuery
 
-      if (error) throw error
+      if (error) {
+        console.error('Error loading sessions:', error)
+        throw error
+      }
 
       // Process session data
       if (sessions && sessions.length > 0) {
         console.log('Found sessions:', sessions.length)
+        console.log('Sample session:', sessions[0])
 
         // Load mood data separately
         const sessionIds = sessions.map(s => s.id)
-        const { data: moods } = await supabase
+        console.log('Loading mood data for', sessionIds.length, 'sessions')
+        const { data: moods, error: moodsError } = await supabase
           .from('mood_meter_usage')
           .select('session_id, mood_numeric, mood_level')
           .in('session_id', sessionIds)
+
+        if (moodsError) {
+          console.error('Error loading mood data:', moodsError)
+        } else {
+          console.log('Loaded mood data:', moods?.length || 0, 'entries')
+        }
 
         // Combine sessions with mood data
         const sessionsWithMood = sessions.map(session => ({
@@ -122,22 +144,27 @@ export function CheckinProgressViz() {
         processSessionData(sessionsWithMood, orgs || [])
 
         // Load child progress
-        const { data: children } = await supabase
+        console.log('Loading child profiles...')
+        const { data: children, error: childrenError } = await supabase
           .from('profiles')
           .select('*')
           .eq('role', 'Child')
 
-        if (children) {
+        if (childrenError) {
+          console.error('Error loading children:', childrenError)
+        } else if (children) {
+          console.log('Loaded children:', children.length)
           processChildProgress(children, sessionsWithMood)
         }
       } else {
         // No sessions found, set empty data
+        console.log('No sessions found')
         setSessionData([])
         setChildProgress([])
-      }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading data:', error)
+      setError(error?.message || 'Failed to load data')
     } finally {
       setLoading(false)
     }
@@ -267,6 +294,59 @@ export function CheckinProgressViz() {
           >
             <h1 className="text-4xl font-bold text-white mb-4">Loading Analytics...</h1>
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+          </motion.div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-8">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center"
+          >
+            <h1 className="text-4xl font-bold text-white mb-4">Error Loading Analytics</h1>
+            <p className="text-red-400 mb-4">{error}</p>
+            <button
+              onClick={() => {
+                setError(null)
+                loadData()
+              }}
+              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            >
+              Retry
+            </button>
+          </motion.div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!sessionData.length && !loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-8">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center"
+          >
+            <h1 className="text-4xl font-bold text-white mb-4">No Data Available</h1>
+            <p className="text-gray-300 mb-4">No check-in sessions found for the selected filters.</p>
+            <p className="text-gray-400 text-sm mb-6">Try adjusting the date range or organization filter.</p>
+            <button
+              onClick={() => {
+                setDateRange('all')
+                setSelectedOrg('all')
+              }}
+              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            >
+              Reset Filters
+            </button>
           </motion.div>
         </div>
       </div>
