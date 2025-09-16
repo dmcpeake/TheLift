@@ -78,16 +78,10 @@ export function CheckinProgressViz() {
         setOrganizations(orgs)
       }
 
-      // Build query based on filters
+      // Build query based on filters - simplified query
       let sessionsQuery = supabase
         .from('checkin_sessions')
-        .select(`
-          *,
-          mood_meter_usage!inner(mood_numeric, mood_level),
-          breathing_tool_usage(duration_seconds),
-          emotion_grid_usage(step_completed),
-          wellbeing_wheel_usage(overall_score)
-        `)
+        .select('*')
         .order('started_at', { ascending: false })
 
       if (selectedOrg !== 'all') {
@@ -109,18 +103,37 @@ export function CheckinProgressViz() {
       if (error) throw error
 
       // Process session data
-      if (sessions) {
-        processSessionData(sessions, orgs || [])
-      }
+      if (sessions && sessions.length > 0) {
+        console.log('Found sessions:', sessions.length)
 
-      // Load child progress
-      const { data: children } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'Child')
+        // Load mood data separately
+        const sessionIds = sessions.map(s => s.id)
+        const { data: moods } = await supabase
+          .from('mood_meter_usage')
+          .select('session_id, mood_numeric, mood_level')
+          .in('session_id', sessionIds)
 
-      if (children) {
-        processChildProgress(children, sessions || [])
+        // Combine sessions with mood data
+        const sessionsWithMood = sessions.map(session => ({
+          ...session,
+          mood_data: moods?.find(m => m.session_id === session.id)
+        }))
+
+        processSessionData(sessionsWithMood, orgs || [])
+
+        // Load child progress
+        const { data: children } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('role', 'Child')
+
+        if (children) {
+          processChildProgress(children, sessionsWithMood)
+        }
+      } else {
+        // No sessions found, set empty data
+        setSessionData([])
+        setChildProgress([])
       }
 
     } catch (error) {
@@ -145,8 +158,8 @@ export function CheckinProgressViz() {
       }
 
       acc[date].sessions++
-      if (session.mood_meter_usage?.[0]?.mood_numeric) {
-        acc[date].moods.push(session.mood_meter_usage[0].mood_numeric)
+      if (session.mood_data?.mood_numeric) {
+        acc[date].moods.push(session.mood_data.mood_numeric)
       }
       acc[date].tools.add(...(session.tools_completed || []))
       acc[date].orgs.add(session.org_id)
@@ -176,15 +189,21 @@ export function CheckinProgressViz() {
       const recentSessions = childSessions.slice(0, 10)
       const olderSessions = childSessions.slice(10, 20)
 
-      const recentMood = recentSessions
-        .filter(s => s.mood_meter_usage?.[0]?.mood_numeric)
-        .map(s => s.mood_meter_usage[0].mood_numeric)
-        .reduce((a, b) => a + b, 0) / (recentSessions.length || 1)
+      const recentMoods = recentSessions
+        .filter(s => s.mood_data?.mood_numeric)
+        .map(s => s.mood_data.mood_numeric)
 
-      const olderMood = olderSessions
-        .filter(s => s.mood_meter_usage?.[0]?.mood_numeric)
-        .map(s => s.mood_meter_usage[0].mood_numeric)
-        .reduce((a, b) => a + b, 0) / (olderSessions.length || 1)
+      const olderMoods = olderSessions
+        .filter(s => s.mood_data?.mood_numeric)
+        .map(s => s.mood_data.mood_numeric)
+
+      const recentMood = recentMoods.length > 0
+        ? recentMoods.reduce((a, b) => a + b, 0) / recentMoods.length
+        : 3
+
+      const olderMood = olderMoods.length > 0
+        ? olderMoods.reduce((a, b) => a + b, 0) / olderMoods.length
+        : 3
 
       let trend: 'up' | 'down' | 'stable' = 'stable'
       if (recentMood > olderMood + 0.5) trend = 'up'
