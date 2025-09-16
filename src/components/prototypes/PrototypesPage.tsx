@@ -40,6 +40,19 @@ export function PrototypesPage() {
             <li>• No database connections - everything is local state only</li>
           </ul>
         </div>
+
+        {/* Data Hierarchy Link */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+          <a
+            href="/test/data-hierarchy"
+            className="text-blue-700 hover:text-blue-900 underline font-semibold text-lg"
+          >
+            📊 View Supabase Data Hierarchy →
+          </a>
+          <p className="text-blue-600 text-sm mt-1">
+            View actual database data organized by Organization → Practitioner → Child → Check-ins
+          </p>
+        </div>
       </div>
 
       {/* Main Content */}
