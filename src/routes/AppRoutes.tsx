@@ -47,7 +47,6 @@ import { EditClient } from '../components/admin/EditClient'
 import { WaitlistManagement } from '../components/admin/WaitlistManagement'
 
 // Test Components (for designer testing)
-import { WellbeingTestPage } from '../components/wellbeing-test/WellbeingTestPage'
 import { PrototypesPage } from '../components/prototypes/PrototypesPage'
 
 export function AppRoutes() {
@@ -220,13 +219,6 @@ export function AppRoutes() {
         <Route path="/admin/waitlist" element={
           <ProtectedRoute allowedRoles={['Account']}>
             <WaitlistManagement />
-          </ProtectedRoute>
-        } />
-
-        {/* Test Routes for Designer - Protected for authenticated users */}
-        <Route path="/test/wellbeing" element={
-          <ProtectedRoute allowedRoles={['Practitioner', 'GroupContact', 'Child', 'Account']}>
-            <WellbeingTestPage />
           </ProtectedRoute>
         } />
 
