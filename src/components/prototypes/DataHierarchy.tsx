@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
-import { projectId, publicAnonKey } from '../../utils/supabase/info'
+import { getSupabaseClient } from '../../utils/supabase/client'
 
-const supabase = createClient(
-  `https://${projectId}.supabase.co`,
-  publicAnonKey
-)
+const supabase = getSupabaseClient()
 
 interface Organization {
   id: string
@@ -17,15 +13,17 @@ interface Practitioner {
   id: string
   name: string
   email: string
-  organization_id: string
+  org_id: string
+  role: string
   children?: Child[]
 }
 
 interface Child {
   id: string
-  name: string
-  age?: number
-  practitioner_id: string
+  first_name: string
+  date_of_birth?: string
+  primary_practitioner_id: string
+  profile?: any
   checkins?: CheckIn[]
 }
 
@@ -53,29 +51,39 @@ export function DataHierarchy() {
       setLoading(true)
       setError(null)
 
-      // Load organizations
+      // Load organizations (note: table is 'organisations' with an 's')
       const { data: orgs, error: orgError } = await supabase
-        .from('organizations')
+        .from('organisations')
         .select('*')
         .order('name')
 
-      if (orgError) throw orgError
+      if (orgError) {
+        console.error('Organization error:', orgError)
+        throw new Error(`Failed to load organizations: ${orgError.message}`)
+      }
 
-      // Load practitioners
+      // Load practitioners (from profiles table with role filter)
       const { data: practitioners, error: practError } = await supabase
-        .from('practitioners')
+        .from('profiles')
         .select('*')
+        .in('role', ['Practitioner', 'GroupContact'])
         .order('name')
 
-      if (practError) throw practError
+      if (practError) {
+        console.error('Practitioner error:', practError)
+        throw new Error(`Failed to load practitioners: ${practError.message}`)
+      }
 
-      // Load children
+      // Load children with their profile info
       const { data: children, error: childError } = await supabase
         .from('children')
-        .select('*')
-        .order('name')
+        .select('*, profile:profiles!children_id_fkey(name, email)')
+        .order('first_name')
 
-      if (childError) throw childError
+      if (childError) {
+        console.error('Children error:', childError)
+        throw new Error(`Failed to load children: ${childError.message}`)
+      }
 
       // Load check-in sessions
       const { data: sessions, error: sessionError } = await supabase
@@ -83,52 +91,65 @@ export function DataHierarchy() {
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (sessionError) throw sessionError
+      if (sessionError) console.warn('Sessions table may not exist:', sessionError)
 
       // Load breathing data
       const { data: breathingData, error: breathingError } = await supabase
         .from('breathing_tool_data')
         .select('*')
 
-      if (breathingError) throw breathingError
+      if (breathingError) console.warn('Breathing data table may not exist:', breathingError)
 
       // Load mood meter data
       const { data: moodData, error: moodError } = await supabase
         .from('mood_meter_data')
         .select('*')
 
-      if (moodError) throw moodError
+      if (moodError) console.warn('Mood meter table may not exist:', moodError)
 
       // Load emotion grid data
       const { data: emotionData, error: emotionError } = await supabase
         .from('emotion_grid_data')
         .select('*')
 
-      if (emotionError) throw emotionError
+      if (emotionError) console.warn('Emotion grid table may not exist:', emotionError)
 
       // Load wellbeing wheel data
       const { data: wellbeingData, error: wellbeingError } = await supabase
         .from('wellbeing_wheel_data')
         .select('*')
 
-      if (wellbeingError) throw wellbeingError
+      if (wellbeingError) console.warn('Wellbeing wheel table may not exist:', wellbeingError)
 
       // Organize data hierarchically
       const organizedData = (orgs || []).map(org => {
-        const orgPractitioners = (practitioners || []).filter(p => p.organization_id === org.id)
-        
+        const orgPractitioners = (practitioners || []).filter(p => p.org_id === org.id)
+
         return {
           ...org,
           practitioners: orgPractitioners.map(pract => {
-            const practChildren = (children || []).filter(c => c.practitioner_id === pract.id)
-            
+            const practChildren = (children || []).filter(c => c.primary_practitioner_id === pract.id)
+
             return {
               ...pract,
               children: practChildren.map(child => {
                 const childSessions = (sessions || []).filter(s => s.child_id === child.id)
-                
+
                 const checkins: CheckIn[] = []
-                
+
+                // Add session data
+                childSessions?.forEach(s => {
+                  checkins.push({
+                    id: s.id,
+                    type: 'Check-in Session',
+                    data: {
+                      session_type: s.session_type,
+                      completed: s.completed
+                    },
+                    created_at: s.created_at
+                  })
+                })
+
                 // Add breathing data
                 const childBreathing = (breathingData || []).filter(b => b.child_id === child.id)
                 childBreathing.forEach(b => {
@@ -143,7 +164,7 @@ export function DataHierarchy() {
                     created_at: b.created_at
                   })
                 })
-                
+
                 // Add mood data
                 const childMood = (moodData || []).filter(m => m.child_id === child.id)
                 childMood.forEach(m => {
@@ -157,7 +178,7 @@ export function DataHierarchy() {
                     created_at: m.created_at
                   })
                 })
-                
+
                 // Add emotion data
                 const childEmotion = (emotionData || []).filter(e => e.child_id === child.id)
                 childEmotion.forEach(e => {
@@ -172,7 +193,7 @@ export function DataHierarchy() {
                     created_at: e.created_at
                   })
                 })
-                
+
                 // Add wellbeing data
                 const childWellbeing = (wellbeingData || []).filter(w => w.child_id === child.id)
                 childWellbeing.forEach(w => {
@@ -188,10 +209,10 @@ export function DataHierarchy() {
                     created_at: w.created_at
                   })
                 })
-                
+
                 // Sort checkins by date
                 checkins.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                
+
                 return {
                   ...child,
                   checkins
@@ -203,6 +224,11 @@ export function DataHierarchy() {
       })
 
       setOrganizations(organizedData)
+      console.log('Loaded data:', {
+        organizations: orgs?.length || 0,
+        practitioners: practitioners?.length || 0,
+        children: children?.length || 0
+      })
     } catch (err) {
       console.error('Error loading data:', err)
       setError(err instanceof Error ? err.message : 'Failed to load data')
@@ -259,7 +285,7 @@ export function DataHierarchy() {
           <h1 className="text-3xl font-bold mb-8">Supabase Data Hierarchy</h1>
           <div className="bg-red-900/20 border border-red-500 rounded-lg p-4">
             <div className="text-red-400">Error: {error}</div>
-            <button 
+            <button
               onClick={loadData}
               className="mt-4 px-4 py-2 bg-red-600 rounded hover:bg-red-700"
             >
@@ -276,22 +302,27 @@ export function DataHierarchy() {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Supabase Data Hierarchy</h1>
-          <button 
+          <button
             onClick={loadData}
             className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
           >
             Refresh Data
           </button>
         </div>
-        
+
         {organizations.length === 0 ? (
-          <div className="text-gray-400">No organizations found</div>
+          <div className="bg-gray-800 rounded-lg p-8 text-center">
+            <div className="text-gray-400 mb-4">No organizations found in the database</div>
+            <div className="text-sm text-gray-500">
+              Make sure the database has been seeded with test data
+            </div>
+          </div>
         ) : (
           <div className="space-y-4">
             {organizations.map(org => (
               <div key={org.id} className="bg-gray-800 rounded-lg p-4">
-                <div 
-                  className="flex items-center justify-between cursor-pointer"
+                <div
+                  className="flex items-center justify-between cursor-pointer hover:bg-gray-700/30 p-2 rounded"
                   onClick={() => toggleOrg(org.id)}
                 >
                   <div className="flex items-center gap-2">
@@ -306,13 +337,13 @@ export function DataHierarchy() {
                     </span>
                   </div>
                 </div>
-                
-                {expandedOrgs.has(org.id) && org.practitioners && (
+
+                {expandedOrgs.has(org.id) && org.practitioners && org.practitioners.length > 0 && (
                   <div className="ml-8 mt-4 space-y-3">
                     {org.practitioners.map(pract => (
                       <div key={pract.id} className="bg-gray-700 rounded-lg p-3">
-                        <div 
-                          className="flex items-center justify-between cursor-pointer"
+                        <div
+                          className="flex items-center justify-between cursor-pointer hover:bg-gray-600/30 p-2 rounded"
                           onClick={() => togglePractitioner(pract.id)}
                         >
                           <div className="flex items-center gap-2">
@@ -323,6 +354,9 @@ export function DataHierarchy() {
                               👤 {pract.name}
                             </span>
                             <span className="text-gray-400 text-sm">
+                              ({pract.role})
+                            </span>
+                            <span className="text-gray-400 text-sm">
                               {pract.email}
                             </span>
                             <span className="text-gray-500 text-sm">
@@ -330,13 +364,13 @@ export function DataHierarchy() {
                             </span>
                           </div>
                         </div>
-                        
-                        {expandedPractitioners.has(pract.id) && pract.children && (
+
+                        {expandedPractitioners.has(pract.id) && pract.children && pract.children.length > 0 && (
                           <div className="ml-8 mt-3 space-y-2">
                             {pract.children.map(child => (
                               <div key={child.id} className="bg-gray-600 rounded-lg p-2">
-                                <div 
-                                  className="flex items-center justify-between cursor-pointer"
+                                <div
+                                  className="flex items-center justify-between cursor-pointer hover:bg-gray-500/30 p-2 rounded"
                                   onClick={() => toggleChild(child.id)}
                                 >
                                   <div className="flex items-center gap-2">
@@ -344,11 +378,11 @@ export function DataHierarchy() {
                                       {expandedChildren.has(child.id) ? '▼' : '▶'}
                                     </span>
                                     <span className="text-yellow-400">
-                                      👶 {child.name}
+                                      👶 {child.first_name || child.profile?.name || 'Unnamed'}
                                     </span>
-                                    {child.age && (
+                                    {child.date_of_birth && (
                                       <span className="text-gray-400 text-sm">
-                                        (Age: {child.age})
+                                        (DOB: {new Date(child.date_of_birth).toLocaleDateString()})
                                       </span>
                                     )}
                                     <span className="text-gray-500 text-sm">
@@ -356,7 +390,7 @@ export function DataHierarchy() {
                                     </span>
                                   </div>
                                 </div>
-                                
+
                                 {expandedChildren.has(child.id) && child.checkins && child.checkins.length > 0 && (
                                   <div className="ml-8 mt-2 space-y-1">
                                     {child.checkins.map(checkin => (
@@ -371,8 +405,8 @@ export function DataHierarchy() {
                                             </span>
                                           </div>
                                         </div>
-                                        <div className="mt-1 text-gray-200 font-mono text-xs">
-                                          {JSON.stringify(checkin.data, null, 2)}
+                                        <div className="mt-1 text-gray-200 font-mono text-xs bg-gray-900/50 p-2 rounded">
+                                          <pre>{JSON.stringify(checkin.data, null, 2)}</pre>
                                         </div>
                                       </div>
                                     ))}
@@ -386,10 +420,26 @@ export function DataHierarchy() {
                     ))}
                   </div>
                 )}
+
+                {expandedOrgs.has(org.id) && (!org.practitioners || org.practitioners.length === 0) && (
+                  <div className="ml-8 mt-4 text-gray-500 italic">
+                    No practitioners in this organization
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
+
+        <div className="mt-8 bg-gray-800 rounded-lg p-4">
+          <h2 className="font-semibold text-gray-300 mb-2">Database Info</h2>
+          <div className="text-sm text-gray-500 space-y-1">
+            <div>• Table names: organisations, profiles, children</div>
+            <div>• Check-in tables: checkin_sessions, breathing_tool_data, mood_meter_data, emotion_grid_data, wellbeing_wheel_data</div>
+            <div>• Click any item to expand/collapse</div>
+            <div>• Data is loaded from your Supabase project</div>
+          </div>
+        </div>
       </div>
     </div>
   )
