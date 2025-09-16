@@ -1,0 +1,39 @@
+# Child ID Mapping for Session Generation
+# Generated: 2025-09-16 20:23:37.725639
+
+
+# Hospital Children
+Emma Thompson: ce864083-bdf5-4ead-b56a-3c36208d3b69
+Aisha Patel: 1d0d16ae-2aa0-4d72-9abc-fd641147291f
+Kai Chen: 621635c0-c6c8-4eed-8a8a-48e04e9a722a
+Mia Rodriguez: 87c1f890-2789-411f-b8bd-801b7b568c47
+Ethan Williams: 5b864e7e-473e-4232-98b6-5eabdac2ece4
+Zara Ahmed: 332fe862-786f-4bd5-aba5-8742fbcc460f
+Lucas Brown: 2598d59d-1fda-4391-9fa0-85f28116eab2
+Amara Johnson: 3e8e4d85-1e43-41c4-95fc-77741fd5b7a5
+Ben Young: 616f03bd-aa58-4689-9e88-f1c7d5424f04
+Chloe King: 28e7a649-8677-4476-b88c-b5b923a9a4e2
+
+# School Children
+Oliver Davies: d9e80399-1a4d-4ac6-8634-077f35846eec
+Jayden Smith: 02855440-b7f1-478e-b8fe-f72e2b6511cd
+Sophia Wilson: b6d90425-2c36-4f96-8040-8eefdec50224
+Tyler Anderson: 584bad64-a040-4eed-8a99-e5eb81cb2dd9
+Ava Taylor: 9620e76e-2de6-4580-9b05-466f854478f4
+Noah Martin: 7c2f657d-1607-4045-9e2f-6ebf3ec51d05
+Isla Roberts: 23d3a8d1-7ab6-4a5f-b9be-377ab6370d54
+Ravi Singh: 3f9cb391-c1cd-4473-9adb-2af0d05cd514
+Evie Scott: f50e666e-538f-4109-baa1-d3cc969ab870
+Felix Baker: 0804f356-4551-4b5d-83a2-c3c787bdac02
+
+# Clinic Children
+Sebastian Clark: 20a239a5-2730-49b2-b9f4-2af18d737e4b
+Lily Evans: c02ac4c9-38e5-4e66-978c-97de2368efc2
+Charlie White: d6161b21-90ce-4c83-8142-98cabaddb655
+Maya Green: c26fa169-9aa6-458b-94d0-0c13002e0ea6
+Oscar Harris: 2b775f59-359e-4e2d-a30d-fb5d263997c0
+Ruby Lewis: f6f1730c-6bc8-4f39-ba47-71e47f1588dc
+Finn Walker: 6d80de20-8ce5-4885-87a5-0af2a3c087a5
+Zoe Hall: 7a93c126-c19c-4e8f-bec0-faa44b5043c2
+Dex Wright: 34075c5b-c6dd-4a1a-9607-ee6186add964
+Grace Turner: 036a6ee1-7871-4b82-b74c-0bbcfc1fa646
