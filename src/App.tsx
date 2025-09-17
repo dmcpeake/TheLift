@@ -75,8 +75,9 @@ function AppContent() {
       }
     }
 
-    // Initialize test users first, then check for existing session
-    initializeTestUsers().then(() => checkUser())
+    // Skip test user initialization - not needed in production
+    // initializeTestUsers().then(() => checkUser())
+    checkUser()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
