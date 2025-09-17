@@ -82,6 +82,8 @@ export function EmotionGridDashboard({ selectedOrg = 'all', dateRange = 'week' }
     try {
       setLoading(true)
 
+      console.log('Loading emotion data with:', { selectedOrg, dateRange })
+
       // Get date range
       const now = new Date()
       let startDate = new Date()
@@ -94,13 +96,12 @@ export function EmotionGridDashboard({ selectedOrg = 'all', dateRange = 'week' }
         startDate.setFullYear(now.getFullYear() - 1)
       }
 
-      // Fetch emotion grid data
+      console.log('Date range:', { startDate: startDate.toISOString(), now: now.toISOString() })
+
+      // Fetch emotion grid data - simplified query first
       let emotionQuery = supabase
         .from('emotion_grid_usage')
-        .select(`
-          *,
-          emotion_grid_feelings (*)
-        `)
+        .select('*')
         .gte('created_at', startDate.toISOString())
         .order('created_at', { ascending: false })
 
@@ -109,6 +110,12 @@ export function EmotionGridDashboard({ selectedOrg = 'all', dateRange = 'week' }
       }
 
       const { data: emotionGridData, error: emotionError } = await emotionQuery
+
+      console.log('Emotion grid data:', {
+        count: emotionGridData?.length || 0,
+        data: emotionGridData,
+        error: emotionError
+      })
 
       if (emotionError) throw emotionError
 
@@ -125,7 +132,24 @@ export function EmotionGridDashboard({ selectedOrg = 'all', dateRange = 'week' }
 
       const { data: moodData, error: moodError } = await moodQuery
 
+      console.log('Mood meter data:', {
+        count: moodData?.length || 0,
+        data: moodData,
+        error: moodError
+      })
+
       if (moodError) throw moodError
+
+      // Also fetch emotion_grid_feelings separately to understand the data
+      const { data: feelingsData, error: feelingsError } = await supabase
+        .from('emotion_grid_feelings')
+        .select('*')
+
+      console.log('Available feelings:', {
+        count: feelingsData?.length || 0,
+        data: feelingsData,
+        error: feelingsError
+      })
 
       // Fetch child profiles
       const childIds = [...new Set([
@@ -144,8 +168,10 @@ export function EmotionGridDashboard({ selectedOrg = 'all', dateRange = 'week' }
       const processed: EmotionData[] = []
 
       emotionGridData?.forEach(item => {
-        const feelings = item.emotion_grid_feelings?.map((f: any) => f.feeling_name) || []
-        const categories = item.emotion_grid_feelings?.map((f: any) => f.feeling_category) || []
+        // For now, use mock data based on item properties
+        // We'll need to understand how feelings are linked to usage
+        const feelings: string[] = ['Happy', 'Excited'] // Placeholder
+        const categories: string[] = ['high-energy-comfortable'] // Placeholder
 
         // Find corresponding mood score
         const mood = moodData?.find(m =>
@@ -164,6 +190,12 @@ export function EmotionGridDashboard({ selectedOrg = 'all', dateRange = 'week' }
           moodScore: mood?.mood_numeric,
           dominantEmotion: categories[0] // First selected is usually dominant
         })
+      })
+
+      console.log('Processed emotion data:', {
+        count: processed.length,
+        data: processed,
+        sampleItem: processed[0]
       })
 
       setEmotionData(processed)
