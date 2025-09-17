@@ -90,11 +90,16 @@ function AppContent() {
         console.log('User data fetched:', userData)
         setUser(userData)
         
-        // Set default mode and navigate based on user role
+        // Set default mode and navigate based on user role (but don't redirect from checkin routes)
         if (userData?.profile?.role) {
           const defaultMode = getDefaultModeForRole(userData.profile.role)
           setCurrentMode(defaultMode)
-          navigate(getNavigationPathForRole(userData.profile.role))
+
+          // Don't redirect if user is on checkin routes (public prototype routes)
+          const currentPath = window.location.pathname
+          if (!currentPath.startsWith('/checkin')) {
+            navigate(getNavigationPathForRole(userData.profile.role))
+          }
         } else {
           // Fallback to admin mode
           setCurrentMode('admin')

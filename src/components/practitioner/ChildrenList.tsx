@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Link } from 'react-router-dom'
-import { AuthContext } from '../../App'
+import { AuthContext } from '../../utils/auth/context'
 import { getSupabaseClient } from '../../utils/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'

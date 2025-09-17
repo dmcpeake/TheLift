@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { AuthContext } from '../../App'
+import { AuthContext } from '../../utils/auth/context'
 import { getSupabaseClient } from '../../utils/supabase/client'
 import { Button } from '../ui/button'
 import { Alert, AlertDescription } from '../ui/alert'

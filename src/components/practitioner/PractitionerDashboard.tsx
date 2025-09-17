@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Link } from 'react-router-dom'
-import { AuthContext } from '../../App'
+import { AuthContext } from '../../utils/auth/context'
 import { getSupabaseClient } from '../../utils/supabase/client'
 import { projectId } from '../../utils/supabase/info'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
@@ -125,7 +125,48 @@ export function PractitionerDashboard() {
   }, [user, currentMode])
 
   const fetchDashboardData = async () => {
-    if (!user) return
+    // Demo mode - load demo data when no user is authenticated
+    if (!user) {
+      setStats({
+        totalChildren: 12,
+        activeChildren: 10,
+        needsAttention: 2,
+        flaggedChildren: 0,
+        archivedChildren: 2,
+        usedSeats: 12,
+        totalSeats: 25
+      })
+
+      setChildren([
+        {
+          id: 'demo-1',
+          name: 'Emma Thompson',
+          lastCheckIn: '2 hours ago',
+          status: 'fine',
+          practitioner: 'Demo Practitioner',
+          practitionerId: 'demo-pract-1'
+        },
+        {
+          id: 'demo-2',
+          name: 'James Wilson',
+          lastCheckIn: '1 day ago',
+          status: 'needs_attention',
+          practitioner: 'Demo Practitioner',
+          practitionerId: 'demo-pract-1'
+        },
+        {
+          id: 'demo-3',
+          name: 'Sophie Chen',
+          lastCheckIn: '3 hours ago',
+          status: 'fine',
+          practitioner: 'Demo Practitioner',
+          practitionerId: 'demo-pract-1'
+        }
+      ])
+
+      setLoading(false)
+      return
+    }
 
     try {
       const supabase = getSupabaseClient()
