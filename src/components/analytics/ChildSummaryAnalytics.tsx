@@ -93,16 +93,34 @@ export function ChildSummaryAnalytics() {
   }, [selectedOrg])
 
   const loadOrganizations = async () => {
-    const { data } = await supabase
-      .from('organizations')
-      .select('id, name')
-      .order('name')
+    try {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name')
+        .order('name')
 
-    if (data) {
-      setOrganizations(data)
-      if (data.length > 0 && selectedOrg === 'all') {
-        setSelectedOrg(data[0].id)
+      if (error) {
+        console.error('Error loading organizations:', error)
+        // Use a fallback organization if table doesn't exist
+        setOrganizations([{ id: 'default', name: 'All Children' }])
+        setSelectedOrg('default')
+        return
       }
+
+      if (data && data.length > 0) {
+        setOrganizations(data)
+        if (selectedOrg === 'all') {
+          setSelectedOrg(data[0].id)
+        }
+      } else {
+        // If no organizations exist, create a default
+        setOrganizations([{ id: 'default', name: 'All Children' }])
+        setSelectedOrg('default')
+      }
+    } catch (error) {
+      console.error('Error in loadOrganizations:', error)
+      setOrganizations([{ id: 'default', name: 'All Children' }])
+      setSelectedOrg('default')
     }
   }
 
@@ -117,7 +135,8 @@ export function ChildSummaryAnalytics() {
         .eq('role', 'Child')
         .order('name')
 
-      if (selectedOrg !== 'all') {
+      // Only filter by org if it's not the default fallback
+      if (selectedOrg !== 'all' && selectedOrg !== 'default') {
         childQuery = childQuery.eq('org_id', selectedOrg)
       }
 
