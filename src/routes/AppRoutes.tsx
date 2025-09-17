@@ -66,8 +66,8 @@ export function AppRoutes() {
   )
   const isAuthApp = ['/login', '/admin/login'].includes(location.pathname)
   
-  // Show navigation for authenticated users on non-child, non-marketing, and non-auth routes
-  const showNavigation = user && !isChildApp && !isMarketingApp && !isAuthApp
+  // Show navigation for demo mode - always show on admin/dashboard routes
+  const showNavigation = !isChildApp && !isMarketingApp && !isAuthApp
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -92,130 +92,37 @@ export function AppRoutes() {
         {/* Practitioner/GroupContact Routes - Demo accessible */}
         <Route path="/dashboard" element={<PractitionerDashboard />} />
         
-        {/* Child management routes */}
-        <Route path="/children/add" element={
-          <ProtectedRoute allowedRoles={['Practitioner', 'GroupContact']}>
-            <AddChild />
-          </ProtectedRoute>
-        } />
+        {/* Child management routes - Demo accessible */}
+        <Route path="/children/add" element={<AddChild />} />
+        <Route path="/children/bulk-import" element={<BulkImportChildren />} />
+        <Route path="/children/:id" element={<ChildProfile />} />
+        <Route path="/children/:id/edit" element={<EditChild />} />
         
-        <Route path="/children/bulk-import" element={
-          <ProtectedRoute allowedRoles={['Practitioner', 'GroupContact']}>
-            <BulkImportChildren />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/children/:id" element={
-          <ProtectedRoute allowedRoles={['Practitioner', 'GroupContact']}>
-            <ChildProfile />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/children/:id/edit" element={
-          <ProtectedRoute allowedRoles={['Practitioner', 'GroupContact']}>
-            <EditChild />
-          </ProtectedRoute>
-        } />
-        
-        {/* Admin-only routes for GroupContact */}
-        <Route path="/invite/practitioner" element={
-          <ProtectedRoute allowedRoles={['GroupContact']}>
-            <InvitePractitioner />
-          </ProtectedRoute>
-        } />
-        
-        {/* Group Admin Routes - Demo accessible */}
+        {/* Practitioner management routes - Demo accessible */}
+        <Route path="/invite/practitioner" element={<InvitePractitioner />} />
         <Route path="/practitioners" element={<ManagePractitioners />} />
+        <Route path="/practitioners/:id/manage" element={<PractitionerManagement />} />
+        <Route path="/profile" element={<UserProfile />} />
         
-        <Route path="/practitioners/:id/manage" element={
-          <ProtectedRoute allowedRoles={['GroupContact']}>
-            <PractitionerManagement />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/profile" element={
-          <ProtectedRoute allowedRoles={['Account', 'GroupContact', 'Practitioner', 'Child']}>
-            <UserProfile />
-          </ProtectedRoute>
-        } />
-        
-        {/* Child Routes */}
-        <Route path="/child/onboarding" element={
-          <ProtectedRoute allowedRoles={['Child']}>
-            <ChildOnboarding />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/child/home" element={
-          <ProtectedRoute allowedRoles={['Child']}>
-            <ChildHome />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/child/breathing" element={
-          <ProtectedRoute allowedRoles={['Child', 'Practitioner', 'GroupContact']}>
-            <BreathingRoute />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/child/check-in/wheel" element={
-          <ProtectedRoute allowedRoles={['Child', 'Practitioner', 'GroupContact']}>
-            <WellbeingWheel />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/child/check-in/garden" element={
-          <ProtectedRoute allowedRoles={['Child', 'Practitioner', 'GroupContact']}>
-            <MyGarden />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/child/check-in/wrap-up" element={
-          <ProtectedRoute allowedRoles={['Child', 'Practitioner', 'GroupContact']}>
-            <WrapUp />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/child/stickers" element={
-          <ProtectedRoute allowedRoles={['Child']}>
-            <StickerBook />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/child/community" element={
-          <ProtectedRoute allowedRoles={['Child']}>
-            <Community />
-          </ProtectedRoute>
-        } />
+        {/* Child Routes - Demo accessible */}
+        <Route path="/child/onboarding" element={<ChildOnboarding />} />
+        <Route path="/child/home" element={<ChildHome />} />
+        <Route path="/child/breathing" element={<BreathingRoute />} />
+        <Route path="/child/check-in/wheel" element={<WellbeingWheel />} />
+        <Route path="/child/check-in/garden" element={<MyGarden />} />
+        <Route path="/child/check-in/wrap-up" element={<WrapUp />} />
+        <Route path="/child/stickers" element={<StickerBook />} />
+        <Route path="/child/community" element={<Community />} />
         
         {/* Admin Routes - Demo accessible */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
 
         <Route path="/admin" element={<AdminDashboard />} />
         
-        <Route path="/admin/clients/new" element={
-          <ProtectedRoute allowedRoles={['Account']}>
-            <CreateClient />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/admin/clients/:id" element={
-          <ProtectedRoute allowedRoles={['Account']}>
-            <ClientDetails />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/admin/clients/:id/edit" element={
-          <ProtectedRoute allowedRoles={['Account']}>
-            <EditClient />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/admin/waitlist" element={
-          <ProtectedRoute allowedRoles={['Account']}>
-            <WaitlistManagement />
-          </ProtectedRoute>
-        } />
+        <Route path="/admin/clients/new" element={<CreateClient />} />
+        <Route path="/admin/clients/:id" element={<ClientDetails />} />
+        <Route path="/admin/clients/:id/edit" element={<EditClient />} />
+        <Route path="/admin/waitlist" element={<WaitlistManagement />} />
 
         {/* Check-in Flow Routes - Public access for prototypes */}
         <Route path="/checkin/home" element={<CheckInHome />} />
