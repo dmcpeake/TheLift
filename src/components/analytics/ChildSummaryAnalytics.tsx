@@ -61,7 +61,11 @@ const MOOD_EMOJIS = {
   5: '😊'
 }
 
-// Define avatar styles with proper Tailwind classes
+// Force Tailwind to include these classes by using them in a hidden div
+// This ensures all avatar colors are available in production build
+const FORCE_TAILWIND_CLASSES = (
+  <div className="hidden bg-blue-500 bg-green-500 bg-purple-500 bg-orange-500 bg-pink-500 bg-teal-500 bg-red-500 bg-indigo-500 bg-yellow-500 bg-cyan-500 bg-emerald-500 bg-rose-500 bg-violet-500 bg-amber-500 bg-sky-500 bg-lime-500 bg-fuchsia-500 bg-slate-500 rounded-full rounded-lg" />
+)
 const AVATAR_STYLES = [
   { bg: 'bg-blue-500', shape: 'rounded-full' },
   { bg: 'bg-green-500', shape: 'rounded-lg' },
@@ -409,6 +413,9 @@ export function ChildSummaryAnalytics() {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
+      {/* Force Tailwind to include avatar colors */}
+      {FORCE_TAILWIND_CLASSES}
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Child Wellbeing Summary</h1>
@@ -446,11 +453,18 @@ export function ChildSummaryAnalytics() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   {/* Avatar - Always use generated avatars, ignore database URLs */}
-                  <div className={`w-12 h-12 flex items-center justify-center text-white font-semibold transition-transform hover:scale-110 shadow-md ${getAvatarStyle(index).bg} ${getAvatarStyle(index).shape}`}>
-                    <span className="text-sm">
-                      {child.initials}
-                    </span>
-                  </div>
+                  {(() => {
+                    const style = getAvatarStyle(index)
+                    // Construct className with all possible values to ensure Tailwind includes them
+                    const baseClasses = "w-12 h-12 flex items-center justify-center text-white font-semibold transition-transform hover:scale-110 shadow-md"
+                    return (
+                      <div className={`${baseClasses} ${style.bg} ${style.shape}`}>
+                        <span className="text-sm">
+                          {child.initials}
+                        </span>
+                      </div>
+                    )
+                  })()}
 
                   {/* Name and Basic Info */}
                   <div>

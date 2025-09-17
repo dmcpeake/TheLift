@@ -1,4 +1,7 @@
-/*! tailwindcss v4.1.3 | MIT License | https://tailwindcss.com */
+/* Tailwind CSS v3 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Text cycling animations */
 @keyframes fadeUpIn1 {
