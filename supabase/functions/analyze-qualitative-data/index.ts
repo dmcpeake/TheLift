@@ -275,8 +275,8 @@ Format your response in clear sections with specific examples and actionable ins
     if (error.message?.includes('Anthropic API key')) {
       errorMessage = 'Anthropic API key not configured. Please set ANTHROPIC_API_KEY in Supabase secrets.'
       statusCode = 500
-    } else if (error.message?.includes('rate limit')) {
-      errorMessage = 'API rate limit exceeded. Please try again later.'
+    } else if (error.message?.includes('rate limit') || error.status === 429) {
+      errorMessage = 'API rate limit exceeded. Please wait 10-15 seconds before trying again.'
       statusCode = 429
     } else if (error.message) {
       errorMessage = error.message

@@ -65,6 +65,7 @@ export function CheckinProgressViz() {
   const [qualitativeData, setQualitativeData] = useState<any[]>([])
   const [aiAnalysis, setAiAnalysis] = useState<any>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [analysisError, setAnalysisError] = useState<string | null>(null)
 
   useEffect(() => {
     loadData()
@@ -257,9 +258,16 @@ export function CheckinProgressViz() {
   }
 
   const runAIAnalysis = async (analysisType: 'trends' | 'sentiment' | 'concerns' | 'comprehensive' = 'comprehensive') => {
+    // Prevent multiple simultaneous requests
+    if (isAnalyzing) {
+      console.log('Analysis already in progress, skipping...')
+      return
+    }
+
     try {
       setIsAnalyzing(true)
       setAiAnalysis(null)
+      setAnalysisError(null)
 
       // Check for user but don't require it (demo mode)
       const { data: { user } } = await supabase.auth.getUser()
@@ -278,9 +286,15 @@ export function CheckinProgressViz() {
       }
 
       setAiAnalysis(response.data)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error running AI analysis:', error)
-      setError('Failed to run AI analysis')
+
+      // Check for specific error types
+      if (error.message?.includes('429') || response?.error?.message?.includes('rate limit')) {
+        setAnalysisError('Rate limit reached. Please wait a moment before trying again.')
+      } else {
+        setAnalysisError(error.message || 'Failed to run AI analysis')
+      }
     } finally {
       setIsAnalyzing(false)
     }
@@ -950,8 +964,20 @@ export function CheckinProgressViz() {
                   {!aiAnalysis && !isAnalyzing && (
                     <div className="text-center py-8">
                       <Brain className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-600 mb-2">No AI analysis yet</p>
-                      <p className="text-sm text-gray-500">Click one of the analysis buttons above to get AI-powered insights</p>
+                      {analysisError ? (
+                        <>
+                          <p className="text-red-600 mb-2">Analysis Error</p>
+                          <p className="text-sm text-red-500 mb-4">{analysisError}</p>
+                          {analysisError.includes('Rate limit') && (
+                            <p className="text-xs text-gray-500">Wait 10-15 seconds before trying again</p>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-gray-600 mb-2">No AI analysis yet</p>
+                          <p className="text-sm text-gray-500">Click one of the analysis buttons above to get AI-powered insights</p>
+                        </>
+                      )}
                     </div>
                   )}
                 </CardContent>
