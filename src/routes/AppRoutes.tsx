@@ -228,29 +228,9 @@ export function AppRoutes() {
           </ProtectedRoute>
         } />
 
-        {/* Check-in Flow Routes */}
-        <Route path="/checkin/home" element={
-          <ProtectedRoute allowedRoles={['Child', 'Practitioner', 'GroupContact']}>
-            <CheckInHome />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/checkin/flow/:step" element={
-          <ProtectedRoute allowedRoles={['Child', 'Practitioner', 'GroupContact']}>
-            <CheckInFlow />
-          </ProtectedRoute>
-        } />
-
-        <Route path="/checkin/flow/complete" element={
-          <ProtectedRoute allowedRoles={['Child', 'Practitioner', 'GroupContact']}>
-            <div className="min-h-screen flex items-center justify-center bg-white">
-              <div className="text-center">
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">Check-in Complete!</h1>
-                <p className="text-gray-600">Great job completing your check-in today.</p>
-              </div>
-            </div>
-          </ProtectedRoute>
-        } />
+        {/* Check-in Flow Routes - Public access for prototypes */}
+        <Route path="/checkin/home" element={<CheckInHome />} />
+        <Route path="/checkin/flow/:step" element={<CheckInFlow />} />
 
         {/* Prototypes Route - No authentication required */}
         <Route path="/prototypes" element={<PrototypesPage />} />
