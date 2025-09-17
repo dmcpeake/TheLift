@@ -49,7 +49,7 @@ import { WaitlistManagement } from '../components/admin/WaitlistManagement'
 // Test Components (for designer testing)
 import { PrototypesPage } from '../components/prototypes/PrototypesPage'
 import { DataHierarchy } from '../components/prototypes/DataHierarchy'
-import { CheckinProgressViz } from '../components/analytics/CheckinProgressViz'
+import CheckinProgressViz from '../components/analytics/CheckinProgressViz'
 
 // Check-in Flow Components
 import { CheckInHome } from '../components/checkin/CheckInHome'
