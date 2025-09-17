@@ -18,10 +18,30 @@ export function DataHierarchy() {
   const [exportData, setExportData] = useState<string>('')
   const [showExport, setShowExport] = useState(false)
   const [copySuccess, setCopySuccess] = useState(false)
+  const [organizations, setOrganizations] = useState<any[]>([])
+  const [selectedOrg, setSelectedOrg] = useState<string>('all')
+  const [recordLimit, setRecordLimit] = useState<number>(100)
+  const [exportOffset, setExportOffset] = useState<number>(0)
 
   useEffect(() => {
+    loadOrganizations()
     loadData()
   }, [])
+
+  const loadOrganizations = async () => {
+    try {
+      const { data } = await supabase
+        .from('organisations')
+        .select('id, name')
+        .order('name')
+
+      if (data) {
+        setOrganizations(data)
+      }
+    } catch (error) {
+      console.error('Error loading organizations:', error)
+    }
+  }
 
   const loadData = async () => {
     try {
@@ -113,39 +133,71 @@ export function DataHierarchy() {
     setExpandedTables(newExpanded)
   }
 
-  const generateExportData = () => {
-    const existingTables = tables.filter(t => !t.error && t.allData && t.allData.length > 0)
-    const emptyTables = tables.filter(t => !t.error && (!t.allData || t.allData.length === 0))
-    const missingTables = tables.filter(t => t.error)
+  const generateExportData = async () => {
+    try {
+      setLoading(true)
 
-    const exportObj = {
-      metadata: {
-        exported_at: new Date().toISOString(),
-        database_url: `https://${supabase.supabaseUrl?.split('//')[1]}`,
-        total_tables: tables.length,
-        tables_with_data: existingTables.length,
-        empty_tables: emptyTables.length,
-        missing_tables: missingTables.length
-      },
-      tables_with_data: {} as any,
-      empty_tables: emptyTables.map(t => t.name),
-      missing_tables: missingTables.map(t => ({
-        name: t.name,
-        error: t.error
-      }))
-    }
+      // Build queries with organization filter and chunking
+      const tableConfigs = [
+        'organisations',
+        'profiles',
+        'checkin_sessions',
+        'breathing_tool_usage',
+        'mood_meter_usage',
+        'emotion_grid_usage',
+        'emotion_grid_feelings',
+        'wellbeing_wheel_usage',
+        'wellbeing_wheel_sections',
+        'child_profile_scores'
+      ]
 
-    // Add all table data
-    existingTables.forEach(table => {
-      exportObj.tables_with_data[table.name] = {
-        count: table.count,
-        data: table.allData
+      const exportObj: any = {
+        metadata: {
+          exported_at: new Date().toISOString(),
+          organization: selectedOrg === 'all' ? 'All Organizations' : organizations.find(o => o.id === selectedOrg)?.name || selectedOrg,
+          record_limit: recordLimit,
+          offset: exportOffset,
+          chunk_info: `Records ${exportOffset + 1} to ${exportOffset + recordLimit}`
+        },
+        data: {}
       }
-    })
 
-    const exportString = JSON.stringify(exportObj, null, 2)
-    setExportData(exportString)
-    setShowExport(true)
+      for (const tableName of tableConfigs) {
+        try {
+          let query = supabase.from(tableName).select('*')
+
+          // Apply organization filter for tables that have org_id
+          if (selectedOrg !== 'all' && ['profiles', 'checkin_sessions', 'mood_meter_usage',
+              'emotion_grid_usage', 'wellbeing_wheel_usage', 'child_profile_scores'].includes(tableName)) {
+            query = query.eq('org_id', selectedOrg)
+          }
+
+          // Apply limit and offset for chunking
+          query = query.range(exportOffset, exportOffset + recordLimit - 1)
+          query = query.order('created_at', { ascending: false, nullsFirst: false })
+
+          const { data, error, count } = await query
+
+          if (!error && data) {
+            exportObj.data[tableName] = {
+              count: data.length,
+              total_available: count,
+              records: data
+            }
+          }
+        } catch (err) {
+          console.error(`Error exporting ${tableName}:`, err)
+        }
+      }
+
+      const exportString = JSON.stringify(exportObj, null, 2)
+      setExportData(exportString)
+      setShowExport(true)
+    } catch (error) {
+      console.error('Export error:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const copyToClipboard = async () => {
@@ -177,22 +229,99 @@ export function DataHierarchy() {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Supabase Database Explorer</h1>
-          <div className="flex gap-3">
-            <button
-              onClick={generateExportData}
-              className="px-4 py-2 bg-green-600 rounded hover:bg-green-700 flex items-center gap-2"
-            >
-              <span>📋</span>
-              Export All Data
-            </button>
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-3xl font-bold">Supabase Database Explorer</h1>
             <button
               onClick={loadData}
               className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
             >
               Refresh Data
             </button>
+          </div>
+
+          {/* Export Controls */}
+          <div className="bg-gray-800 rounded-lg p-4">
+            <h2 className="text-lg font-semibold mb-3">Export Controls</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {/* Organization Filter */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Organization</label>
+                <select
+                  value={selectedOrg}
+                  onChange={(e) => setSelectedOrg(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500"
+                >
+                  <option value="all">All Organizations</option>
+                  {organizations.map(org => (
+                    <option key={org.id} value={org.id}>{org.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Record Limit */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Records per Table</label>
+                <select
+                  value={recordLimit}
+                  onChange={(e) => setRecordLimit(Number(e.target.value))}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500"
+                >
+                  <option value={10}>10 records</option>
+                  <option value={50}>50 records</option>
+                  <option value={100}>100 records</option>
+                  <option value={250}>250 records</option>
+                  <option value={500}>500 records</option>
+                </select>
+              </div>
+
+              {/* Offset */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Start from Record</label>
+                <input
+                  type="number"
+                  value={exportOffset}
+                  onChange={(e) => setExportOffset(Number(e.target.value))}
+                  min="0"
+                  step={recordLimit}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500"
+                />
+              </div>
+
+              {/* Chunk Navigation */}
+              <div className="flex items-end gap-2">
+                <button
+                  onClick={() => setExportOffset(Math.max(0, exportOffset - recordLimit))}
+                  disabled={exportOffset === 0}
+                  className="px-3 py-2 bg-gray-600 rounded hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  ← Previous
+                </button>
+                <button
+                  onClick={() => setExportOffset(exportOffset + recordLimit)}
+                  className="px-3 py-2 bg-gray-600 rounded hover:bg-gray-500"
+                >
+                  Next →
+                </button>
+              </div>
+
+              {/* Export Button */}
+              <div className="flex items-end">
+                <button
+                  onClick={generateExportData}
+                  className="w-full px-4 py-2 bg-green-600 rounded hover:bg-green-700 flex items-center justify-center gap-2"
+                >
+                  <span>📋</span>
+                  Export Chunk
+                </button>
+              </div>
+            </div>
+
+            {/* Chunk Info */}
+            <div className="mt-3 text-sm text-gray-400">
+              Current chunk: Records {exportOffset + 1} to {exportOffset + recordLimit}
+              {selectedOrg !== 'all' && ' (filtered by organization)'}
+            </div>
           </div>
         </div>
 
