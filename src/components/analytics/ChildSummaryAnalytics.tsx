@@ -455,10 +455,14 @@ export function ChildSummaryAnalytics() {
                   {/* Avatar - Always use generated avatars, ignore database URLs */}
                   {(() => {
                     const style = getAvatarStyle(index)
+                    // Debug: Log the style to console
+                    console.log(`Avatar ${index} for ${child.name}:`, style)
                     // Construct className with all possible values to ensure Tailwind includes them
                     const baseClasses = "w-12 h-12 flex items-center justify-center text-white font-semibold transition-transform hover:scale-110 shadow-md"
+                    const avatarClassName = `${baseClasses} ${style.bg} ${style.shape}`
+                    console.log(`Avatar className:`, avatarClassName)
                     return (
-                      <div className={`${baseClasses} ${style.bg} ${style.shape}`}>
+                      <div className={avatarClassName} data-avatar-index={index} data-avatar-bg={style.bg}>
                         <span className="text-sm">
                           {child.initials}
                         </span>
