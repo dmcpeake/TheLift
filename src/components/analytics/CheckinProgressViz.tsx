@@ -9,7 +9,7 @@ import {
 } from 'recharts'
 import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { Building2, TrendingUp, Users, Activity } from 'lucide-react'
+import { Building2, TrendingUp, Users, Activity, Brain, MessageSquare, AlertCircle, Sparkles } from 'lucide-react'
 
 const supabase = getSupabaseClient()
 
@@ -60,8 +60,11 @@ export function CheckinProgressViz() {
   const [selectedOrg, setSelectedOrg] = useState<string>('all')
   const [sessionData, setSessionData] = useState<SessionData[]>([])
   const [childProgress, setChildProgress] = useState<ChildProgress[]>([])
-  const [viewMode, setViewMode] = useState<'overview' | 'timeline' | 'children' | 'insights'>('overview')
+  const [viewMode, setViewMode] = useState<'overview' | 'timeline' | 'children' | 'insights' | 'qualitative'>('overview')
   const [dateRange, setDateRange] = useState<'week' | 'month' | 'all'>('all')
+  const [qualitativeData, setQualitativeData] = useState<any[]>([])
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -175,11 +178,112 @@ export function CheckinProgressViz() {
         setChildProgress([])
       }
 
+      // Load qualitative data
+      await loadQualitativeData()
+
     } catch (error: any) {
       console.error('Error loading data:', error)
       setError(error?.message || 'Failed to load data')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadQualitativeData = async () => {
+    try {
+      console.log('Loading qualitative data...')
+
+      // Load emotion grid data with explanations
+      let emotionQuery = supabase
+        .from('emotion_grid_usage')
+        .select(`
+          *,
+          emotion_grid_feelings (*)
+        `)
+        .not('explanation_text', 'is', null)
+        .order('created_at', { ascending: false })
+
+      if (selectedOrg !== 'all') {
+        emotionQuery = emotionQuery.eq('org_id', selectedOrg)
+      }
+
+      // Apply date filter
+      const now = new Date()
+      if (dateRange === 'week') {
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+        emotionQuery = emotionQuery.gte('created_at', weekAgo.toISOString())
+      } else if (dateRange === 'month') {
+        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+        emotionQuery = emotionQuery.gte('created_at', monthAgo.toISOString())
+      }
+
+      const { data: emotionData, error: emotionError } = await emotionQuery
+
+      if (emotionError) {
+        console.error('Error loading emotion data:', emotionError)
+      } else if (emotionData) {
+        console.log('Loaded emotion data:', emotionData.length)
+
+        // Get child names
+        const childIds = [...new Set(emotionData.map(e => e.child_id))]
+        const { data: childProfiles } = await supabase
+          .from('profiles')
+          .select('id, name')
+          .in('id', childIds)
+
+        const childNames = new Map(childProfiles?.map(p => [p.id, p.name]) || [])
+
+        // Process qualitative data
+        const processed = emotionData.map(item => ({
+          id: item.id,
+          childName: childNames.get(item.child_id) || 'Unknown',
+          childId: item.child_id,
+          date: new Date(item.created_at).toLocaleDateString(),
+          time: new Date(item.created_at).toLocaleTimeString(),
+          explanation: item.explanation_text,
+          feelings: item.emotion_grid_feelings?.map((f: any) => ({
+            name: f.feeling_name,
+            category: f.feeling_category,
+            emoji: f.feeling_emoji
+          })) || [],
+          inputMethod: item.input_method
+        }))
+
+        setQualitativeData(processed)
+      }
+    } catch (error) {
+      console.error('Error loading qualitative data:', error)
+    }
+  }
+
+  const runAIAnalysis = async (analysisType: 'trends' | 'sentiment' | 'concerns' | 'comprehensive' = 'comprehensive') => {
+    try {
+      setIsAnalyzing(true)
+      setAiAnalysis(null)
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const response = await supabase.functions.invoke('analyze-qualitative-data', {
+        body: {
+          orgId: selectedOrg === 'all' ? null : selectedOrg,
+          dateRange,
+          analysisType
+        }
+      })
+
+      if (response.error) {
+        throw response.error
+      }
+
+      setAiAnalysis(response.data)
+    } catch (error) {
+      console.error('Error running AI analysis:', error)
+      setError('Failed to run AI analysis')
+    } finally {
+      setIsAnalyzing(false)
     }
   }
 
@@ -400,10 +504,10 @@ export function CheckinProgressViz() {
             </div>
 
             {/* View Mode */}
-            <div className="flex-1 min-w-[300px]">
+            <div className="flex-1 min-w-[400px]">
               <label className="text-gray-700 text-sm mb-2 block font-medium">View</label>
               <div className="flex gap-2">
-                {(['overview', 'timeline', 'children', 'insights'] as const).map(mode => (
+                {(['overview', 'timeline', 'children', 'insights', 'qualitative'] as const).map(mode => (
                   <button
                     key={mode}
                     onClick={() => setViewMode(mode)}
@@ -749,6 +853,213 @@ export function CheckinProgressViz() {
                 </div>
                 </CardContent>
               </Card>
+            </motion.div>
+          )}
+
+          {viewMode === 'qualitative' && (
+            <motion.div
+              key="qualitative"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-6"
+            >
+              {/* AI Analysis Section */}
+              <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-gray-700">
+                      <Brain className="h-5 w-5" />
+                      AI-Powered Insights
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => runAIAnalysis('trends')}
+                        disabled={isAnalyzing}
+                        className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm"
+                      >
+                        Analyze Trends
+                      </button>
+                      <button
+                        onClick={() => runAIAnalysis('sentiment')}
+                        disabled={isAnalyzing}
+                        className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm"
+                      >
+                        Sentiment Analysis
+                      </button>
+                      <button
+                        onClick={() => runAIAnalysis('concerns')}
+                        disabled={isAnalyzing}
+                        className="px-3 py-1 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 text-sm"
+                      >
+                        Flag Concerns
+                      </button>
+                      <button
+                        onClick={() => runAIAnalysis('comprehensive')}
+                        disabled={isAnalyzing}
+                        className="px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 text-sm"
+                      >
+                        Full Analysis
+                      </button>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isAnalyzing && (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-600 border-t-transparent"></div>
+                      <span className="ml-3 text-gray-600">Analyzing with Claude AI...</span>
+                    </div>
+                  )}
+                  {aiAnalysis && !isAnalyzing && (
+                    <div className="space-y-4">
+                      {aiAnalysis.analysis && (
+                        <div className="prose prose-sm max-w-none">
+                          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                            <h4 className="flex items-center gap-2 text-purple-700 font-semibold mb-3">
+                              <Sparkles className="h-4 w-4" />
+                              Analysis Results
+                            </h4>
+                            <div className="text-gray-700 whitespace-pre-wrap">
+                              {aiAnalysis.analysis}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {aiAnalysis.metadata && (
+                        <div className="grid grid-cols-4 gap-4 mt-4">
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Data Points</p>
+                            <p className="text-lg font-semibold text-gray-800">{aiAnalysis.metadata.dataPoints}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Children</p>
+                            <p className="text-lg font-semibold text-gray-800">{aiAnalysis.metadata.uniqueChildren}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Period</p>
+                            <p className="text-lg font-semibold text-gray-800">{aiAnalysis.metadata.dateRange}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <p className="text-xs text-gray-500">Analysis Type</p>
+                            <p className="text-lg font-semibold text-gray-800 capitalize">{aiAnalysis.metadata.analysisType}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {!aiAnalysis && !isAnalyzing && (
+                    <div className="text-center py-8">
+                      <Brain className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-600 mb-2">No AI analysis yet</p>
+                      <p className="text-sm text-gray-500">Click one of the analysis buttons above to get AI-powered insights</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Qualitative Data Table */}
+              <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-gray-700">
+                    <MessageSquare className="h-5 w-5" />
+                    Children's Expressions & Feelings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {qualitativeData.length > 0 ? (
+                    <div className="space-y-4 max-h-96 overflow-y-auto">
+                      {qualitativeData.map((item) => (
+                        <motion.div
+                          key={item.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="font-semibold text-gray-800">{item.childName}</h4>
+                            <span className="text-xs text-gray-500">
+                              {item.date} {item.time}
+                            </span>
+                          </div>
+
+                          {item.feelings.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-3">
+                              {item.feelings.map((feeling: any, idx: number) => (
+                                <span
+                                  key={idx}
+                                  className="px-2 py-1 bg-white border border-gray-300 rounded-full text-xs flex items-center gap-1"
+                                >
+                                  <span>{feeling.emoji}</span>
+                                  <span>{feeling.name}</span>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {item.explanation && (
+                            <div className="bg-white border border-gray-200 rounded p-3">
+                              <p className="text-sm text-gray-700 italic">
+                                "{item.explanation}"
+                              </p>
+                              {item.inputMethod && (
+                                <p className="text-xs text-gray-500 mt-2">
+                                  Input: {item.inputMethod === 'speech_to_text' ? '🎤 Voice' : '⌨️ Typed'}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </motion.div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <MessageSquare className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-600">No qualitative data available</p>
+                      <p className="text-sm text-gray-500 mt-2">
+                        Children's explanations and feelings will appear here when available
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Summary Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm text-gray-600">Total Expressions</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-2xl font-bold text-gray-800">{qualitativeData.length}</p>
+                    <p className="text-xs text-gray-500">emotional explanations</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm text-gray-600">Unique Children</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-2xl font-bold text-gray-800">
+                      {new Set(qualitativeData.map(d => d.childId)).size}
+                    </p>
+                    <p className="text-xs text-gray-500">sharing feelings</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm text-gray-600">Voice Input</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-2xl font-bold text-gray-800">
+                      {qualitativeData.filter(d => d.inputMethod === 'speech_to_text').length}
+                    </p>
+                    <p className="text-xs text-gray-500">voice recordings</p>
+                  </CardContent>
+                </Card>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
