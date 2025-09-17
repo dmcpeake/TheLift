@@ -65,11 +65,22 @@ const AVATAR_COLORS = [
   'bg-blue-500',
   'bg-green-500',
   'bg-purple-500',
-  'bg-pink-500',
-  'bg-indigo-500',
-  'bg-teal-500',
   'bg-orange-500',
+  'bg-pink-500',
+  'bg-teal-500',
+  'bg-red-500',
+  'bg-indigo-500',
+  'bg-yellow-500',
   'bg-cyan-500'
+]
+
+const AVATAR_SHAPES = [
+  'rounded-full',           // circle
+  'rounded-lg',            // square
+  'rounded-lg rotate-45',  // diamond
+  'rounded-full',          // circle variant
+  'rounded-lg',           // square variant
+  'rounded-lg rotate-12'   // tilted square
 ]
 
 export function ChildSummaryAnalytics() {
@@ -226,36 +237,18 @@ export function ChildSummaryAnalytics() {
       .select('*')
       .eq('child_id', childId)
       .order('created_at', { ascending: false })
-      .limit(30)
+      .limit(10) // Reduced to 10 most recent
 
-    const { data: emotionData } = await supabase
-      .from('emotion_grid_usage')
-      .select(`
-        *,
-        emotion_grid_feelings (*)
-      `)
-      .eq('child_id', childId)
-      .order('created_at', { ascending: false })
-      .limit(30)
-
-    // Combine and process check-in data
-    const checkIns: CheckIn[] = []
-
-    moodData?.forEach(mood => {
-      const emotion = emotionData?.find(e =>
-        Math.abs(new Date(e.created_at).getTime() - new Date(mood.created_at).getTime()) < 3600000
-      )
-
-      checkIns.push({
-        id: mood.id,
-        created_at: mood.created_at,
-        mood_numeric: mood.mood_numeric,
-        mood_level: mood.mood_level,
-        notes: mood.notes,
-        feelings: emotion?.emotion_grid_feelings?.map((f: any) => f.feeling_name) || [],
-        explanation: emotion?.explanation_text
-      })
-    })
+    // Only fetch mood data, not emotion data separately to avoid duplication
+    const checkIns: CheckIn[] = moodData?.map(mood => ({
+      id: mood.id,
+      created_at: mood.created_at,
+      mood_numeric: mood.mood_numeric,
+      mood_level: mood.mood_level,
+      notes: mood.notes,
+      feelings: [], // We don't have emotion_grid_feelings yet
+      explanation: null
+    })) || []
 
     setCheckInHistory(prev => ({
       ...prev,
@@ -267,12 +260,14 @@ export function ChildSummaryAnalytics() {
     // Check if already loading or loaded
     if (loadingInsights[childId] || aiInsights[childId]) return
 
+    console.log('Loading AI insights for child:', childId)
     setLoadingInsights(prev => ({ ...prev, [childId]: true }))
 
     try {
       // Use the correct Supabase URL and key
       const supabaseUrl = `https://${projectId}.supabase.co`
 
+      console.log('Calling AI analysis edge function...')
       // Call the AI analysis edge function (use original until optimized is deployed)
       const response = await fetch(
         `${supabaseUrl}/functions/v1/analyze-qualitative-data`,
@@ -290,8 +285,10 @@ export function ChildSummaryAnalytics() {
         }
       )
 
+      console.log('AI analysis response:', response.status, response.ok)
       if (response.ok) {
         const data = await response.json()
+        console.log('AI analysis data:', data)
 
         // Parse the AI response into structured insights
         const analysis = data.analysis || ''
@@ -352,8 +349,10 @@ export function ChildSummaryAnalytics() {
     }
   }
 
-  const getAvatarColor = (index: number) => {
-    return AVATAR_COLORS[index % AVATAR_COLORS.length]
+  const getAvatarStyle = (index: number) => {
+    const color = AVATAR_COLORS[index % AVATAR_COLORS.length]
+    const shape = AVATAR_SHAPES[index % AVATAR_SHAPES.length]
+    return `${color} ${shape}`
   }
 
   const getTrendIcon = (trend?: 'improving' | 'declining' | 'stable') => {
@@ -414,11 +413,13 @@ export function ChildSummaryAnalytics() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   {/* Avatar */}
-                  <div className={`w-12 h-12 rounded-full ${getAvatarColor(index)} flex items-center justify-center text-white font-semibold`}>
+                  <div className={`w-12 h-12 ${getAvatarStyle(index)} flex items-center justify-center text-white font-semibold transition-transform hover:scale-105`}>
                     {child.avatar_url ? (
                       <img src={child.avatar_url} alt={child.name} className="w-full h-full rounded-full object-cover" />
                     ) : (
-                      child.initials
+                      <span className={AVATAR_SHAPES[index % AVATAR_SHAPES.length].includes('rotate') ? '-rotate-45' : ''}>
+                        {child.initials}
+                      </span>
                     )}
                   </div>
 
