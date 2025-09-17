@@ -25,7 +25,6 @@ CREATE POLICY "Anyone can update analyses"
 ALTER TABLE public.ai_analyses
 ALTER COLUMN created_by DROP NOT NULL;
 
--- Add a demo user profile if it doesn't exist
-INSERT INTO public.profiles (id, email, name, role, status)
-VALUES ('00000000-0000-0000-0000-000000000000', 'demo@the-lift.org', 'Demo User', 'Practitioner', 'active')
-ON CONFLICT (id) DO NOTHING;
+-- Since we can't create a profile without an auth.users entry,
+-- we'll just use NULL for created_by in demo mode
+-- The edge function has been updated to handle this

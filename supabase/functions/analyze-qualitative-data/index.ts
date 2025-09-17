@@ -226,17 +226,23 @@ Format your response in clear sections with specific examples and actionable ins
     const analysis = message.content[0].type === 'text' ? message.content[0].text : ''
 
     // Store the analysis in the database for caching
+    const insertData: any = {
+      org_id: orgId,
+      child_id: childId,
+      analysis_type: analysisType,
+      date_range: dateRange,
+      analysis_result: analysis,
+      data_points_analyzed: qualitativeData.summary.totalEntries
+    }
+
+    // Only add created_by if we have a user ID
+    if (userId) {
+      insertData.created_by = userId
+    }
+
     const { data: analysisRecord } = await supabaseClient
       .from('ai_analyses')
-      .insert({
-        org_id: orgId,
-        child_id: childId,
-        analysis_type: analysisType,
-        date_range: dateRange,
-        analysis_result: analysis,
-        data_points_analyzed: qualitativeData.summary.totalEntries,
-        created_by: userId
-      })
+      .insert(insertData)
       .select()
       .single()
 
