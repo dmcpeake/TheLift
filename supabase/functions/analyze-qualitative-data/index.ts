@@ -215,7 +215,7 @@ Format your response in clear sections with specific examples and actionable ins
 
     // Call Claude API
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20240620',  // Updated to latest available model
+      model: 'claude-3-haiku-20240307',  // Using stable Haiku model
       max_tokens: 2000,
       temperature: 0.7,
       system: systemPrompt,
