@@ -5,6 +5,7 @@ import Anthropic from 'https://esm.sh/@anthropic-ai/sdk@0.20.1'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 }
 
 interface AnalysisRequest {
@@ -15,8 +16,12 @@ interface AnalysisRequest {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders
+    })
   }
 
   try {
@@ -30,10 +35,9 @@ serve(async (req) => {
       }
     )
 
+    // Check for authenticated user (optional for demo mode)
     const { data: userData } = await supabaseClient.auth.getUser()
-    if (!userData?.user) {
-      throw new Error('Unauthorized')
-    }
+    const userId = userData?.user?.id || '00000000-0000-0000-0000-000000000000' // Use demo user ID
 
     const requestData: AnalysisRequest = await req.json()
     const { orgId, childId, dateRange = 'month', analysisType = 'comprehensive' } = requestData
@@ -231,7 +235,7 @@ Format your response in clear sections with specific examples and actionable ins
         date_range: dateRange,
         analysis_result: analysis,
         data_points_analyzed: qualitativeData.summary.totalEntries,
-        created_by: userData.user.id
+        created_by: userId
       })
       .select()
       .single()

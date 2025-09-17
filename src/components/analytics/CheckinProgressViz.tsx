@@ -261,10 +261,9 @@ export function CheckinProgressViz() {
       setIsAnalyzing(true)
       setAiAnalysis(null)
 
+      // Check for user but don't require it (demo mode)
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        throw new Error('User not authenticated')
-      }
+      console.log('Running AI analysis, user:', user?.email || 'demo mode')
 
       const response = await supabase.functions.invoke('analyze-qualitative-data', {
         body: {
