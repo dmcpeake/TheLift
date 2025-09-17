@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { AuthContext } from '../../App'
+import { AuthContext } from '../../utils/auth/context'
 import { projectId, publicAnonKey } from '../../utils/supabase/info'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
