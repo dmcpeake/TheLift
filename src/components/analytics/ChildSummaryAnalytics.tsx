@@ -158,16 +158,13 @@ export function ChildSummaryAnalytics() {
         return
       }
 
-      // Load recent mood data for each child
+      // Load all mood data for each child (not just recent)
       const childIds = childProfiles.map(c => c.id)
-      const thirtyDaysAgo = new Date()
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
       const { data: moodData } = await supabase
         .from('mood_meter_usage')
         .select('*')
         .in('child_id', childIds)
-        .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: false })
 
       // Process children with mood data
@@ -279,7 +276,7 @@ export function ChildSummaryAnalytics() {
           },
           body: JSON.stringify({
             childId,
-            dateRange: 'month',
+            dateRange: 'all',  // Changed from 'month' to 'all' to capture the demo data
             analysisType: 'comprehensive'
           })
         }
@@ -292,17 +289,26 @@ export function ChildSummaryAnalytics() {
 
         // Parse the AI response into structured insights
         const analysis = data.analysis || ''
+
+        // Better parsing for the AI response
         const insights: AIInsights = {
-          summary: extractSection(analysis, 'Overview') ||
+          summary: extractSection(analysis, 'Executive Summary') ||
+                   extractSection(analysis, 'Overview') ||
                    extractSection(analysis, 'Summary') ||
-                   'No summary available.',
-          concerns: extractBulletPoints(analysis, 'Concerns') ||
+                   analysis.split('\n')[0] || // First line as fallback
+                   'Analysis in progress...',
+          concerns: extractBulletPoints(analysis, 'Key Concerns') ||
+                   extractBulletPoints(analysis, 'Concerns') ||
                    extractBulletPoints(analysis, 'Areas of Concern'),
-          strengths: extractBulletPoints(analysis, 'Positive Indicators') ||
+          strengths: extractBulletPoints(analysis, 'Positive Trends') ||
+                    extractBulletPoints(analysis, 'Positive Indicators') ||
                     extractBulletPoints(analysis, 'Strengths'),
-          recommendations: extractBulletPoints(analysis, 'Recommendations'),
+          recommendations: extractBulletPoints(analysis, 'Recommendations') ||
+                          extractBulletPoints(analysis, 'Top 3 Recommendations'),
           lastAnalyzed: new Date().toLocaleDateString()
         }
+
+        console.log('Parsed insights:', insights)
 
         setAIInsights(prev => ({
           ...prev,
@@ -317,23 +323,52 @@ export function ChildSummaryAnalytics() {
   }
 
   const extractSection = (text: string, section: string): string => {
-    const regex = new RegExp(`\\*\\*${section}\\*\\*:?\\s*([^\\*]+)`, 'i')
-    const match = text.match(regex)
-    return match ? match[1].trim() : ''
+    // Try multiple formats: **Section**, Section:, or just Section at start of line
+    const patterns = [
+      new RegExp(`\\*\\*${section}\\*\\*:?\\s*([^\\*\\n]+)`, 'i'),
+      new RegExp(`^${section}:?\\s*([^\\n]+)`, 'im'),
+      new RegExp(`\\n${section}:?\\s*([^\\n]+)`, 'i'),
+      new RegExp(`\\d+\\.\\s*\\*\\*${section}\\*\\*:?\\s*([^\\*\\n]+)`, 'i')
+    ]
+
+    for (const pattern of patterns) {
+      const match = text.match(pattern)
+      if (match && match[1]) {
+        return match[1].trim()
+      }
+    }
+    return ''
   }
 
   const extractBulletPoints = (text: string, section: string): string[] | undefined => {
-    const sectionRegex = new RegExp(`\\*\\*${section}\\*\\*:?([^\\*\\*]+)`, 'i')
-    const sectionMatch = text.match(sectionRegex)
+    // Try to find the section
+    const patterns = [
+      new RegExp(`\\*\\*${section}\\*\\*:?([^\\*\\*]+?)(?=\\n\\n|\\*\\*|\\d+\\.|$)`, 'is'),
+      new RegExp(`^${section}:?([^\\n]+(?:\\n(?!\\n|\\d+\\.|\\*\\*).*)+)`, 'im'),
+      new RegExp(`\\d+\\.\\s*\\*\\*${section}\\*\\*:?([^\\*\\*]+?)(?=\\n\\n|\\d+\\.|$)`, 'is')
+    ]
 
-    if (!sectionMatch) return undefined
+    let sectionContent = ''
+    for (const pattern of patterns) {
+      const match = text.match(pattern)
+      if (match && match[1]) {
+        sectionContent = match[1]
+        break
+      }
+    }
 
-    const bulletRegex = /[-•]\s*([^\n-•]+)/g
+    if (!sectionContent) return undefined
+
+    // Extract bullet points
+    const bulletRegex = /[-•*]\s*([^\n-•*]+)/g
     const bullets: string[] = []
     let match
 
-    while ((match = bulletRegex.exec(sectionMatch[1])) !== null) {
-      bullets.push(match[1].trim())
+    while ((match = bulletRegex.exec(sectionContent)) !== null) {
+      const bullet = match[1].trim()
+      if (bullet.length > 0) {
+        bullets.push(bullet)
+      }
     }
 
     return bullets.length > 0 ? bullets : undefined
@@ -413,15 +448,15 @@ export function ChildSummaryAnalytics() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   {/* Avatar */}
-                  <div className={`w-12 h-12 ${getAvatarStyle(index)} flex items-center justify-center text-white font-semibold transition-transform hover:scale-105`}>
-                    {child.avatar_url ? (
-                      <img src={child.avatar_url} alt={child.name} className="w-full h-full rounded-full object-cover" />
-                    ) : (
-                      <span className={AVATAR_SHAPES[index % AVATAR_SHAPES.length].includes('rotate') ? '-rotate-45' : ''}>
+                  {child.avatar_url ? (
+                    <img src={child.avatar_url} alt={child.name} className="w-12 h-12 rounded-full object-cover" />
+                  ) : (
+                    <div className={`w-12 h-12 flex items-center justify-center text-white font-semibold transition-transform hover:scale-105 ${getAvatarStyle(index)}`}>
+                      <span className={AVATAR_SHAPES[index % AVATAR_SHAPES.length].includes('rotate') ? 'transform -rotate-45' : ''}>
                         {child.initials}
                       </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   {/* Name and Basic Info */}
                   <div>
