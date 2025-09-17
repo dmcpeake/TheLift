@@ -58,7 +58,40 @@ export function ManagePractitioners() {
   }, [])
 
   const fetchPractitionersData = async () => {
-    if (!user) return
+    // Demo mode - load demo data when no user is authenticated
+    if (!user) {
+      setData({
+        practitioners: [
+          {
+            id: 'demo-pract-1',
+            name: 'Sarah Johnson',
+            email: 'sarah.j@demo-school.com',
+            role: 'Practitioner',
+            status: 'active',
+            lastLogin: '2024-03-15T10:30:00Z',
+            assignedChildren: 8,
+            inviteStatus: 'accepted'
+          },
+          {
+            id: 'demo-pract-2',
+            name: 'Mike Rodriguez',
+            email: 'mike.r@demo-school.com',
+            role: 'Practitioner',
+            status: 'active',
+            lastLogin: '2024-03-14T16:45:00Z',
+            assignedChildren: 4,
+            inviteStatus: 'accepted'
+          }
+        ],
+        stats: {
+          totalPractitioners: 2,
+          activePractitioners: 2,
+          pendingInvites: 0
+        }
+      })
+      setLoading(false)
+      return
+    }
 
     try {
       const supabase = getSupabaseClient()
