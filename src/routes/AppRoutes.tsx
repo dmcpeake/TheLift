@@ -89,12 +89,8 @@ export function AppRoutes() {
         {/* Auth Routes */}
         <Route path="/login" element={<UnifiedLoginPage />} />
         
-        {/* Practitioner/GroupContact Routes */}
-        <Route path="/dashboard" element={
-          <ProtectedRoute allowedRoles={['Practitioner', 'GroupContact']}>
-            <PractitionerDashboard />
-          </ProtectedRoute>
-        } />
+        {/* Practitioner/GroupContact Routes - Demo accessible */}
+        <Route path="/dashboard" element={<PractitionerDashboard />} />
         
         {/* Child management routes */}
         <Route path="/children/add" element={
@@ -128,11 +124,8 @@ export function AppRoutes() {
           </ProtectedRoute>
         } />
         
-        <Route path="/practitioners" element={
-          <ProtectedRoute allowedRoles={['GroupContact']}>
-            <ManagePractitioners />
-          </ProtectedRoute>
-        } />
+        {/* Group Admin Routes - Demo accessible */}
+        <Route path="/practitioners" element={<ManagePractitioners />} />
         
         <Route path="/practitioners/:id/manage" element={
           <ProtectedRoute allowedRoles={['GroupContact']}>
@@ -195,14 +188,10 @@ export function AppRoutes() {
           </ProtectedRoute>
         } />
         
-        {/* Admin Routes */}
+        {/* Admin Routes - Demo accessible */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
-        
-        <Route path="/admin" element={
-          <ProtectedRoute allowedRoles={['Account']}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        } />
+
+        <Route path="/admin" element={<AdminDashboard />} />
         
         <Route path="/admin/clients/new" element={
           <ProtectedRoute allowedRoles={['Account']}>
