@@ -25,6 +25,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Edge function invoked:', req.method, req.url)
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -37,7 +39,7 @@ serve(async (req) => {
 
     // Check for authenticated user (optional for demo mode)
     const { data: userData } = await supabaseClient.auth.getUser()
-    const userId = userData?.user?.id || '00000000-0000-0000-0000-000000000000' // Use demo user ID
+    const userId = userData?.user?.id || null // Use null for demo mode
 
     const requestData: AnalysisRequest = await req.json()
     const { orgId, childId, dateRange = 'month', analysisType = 'comprehensive' } = requestData
@@ -142,8 +144,10 @@ serve(async (req) => {
 
     // Initialize Claude
     const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY')
+    console.log('Anthropic API key configured:', !!anthropicApiKey)
+
     if (!anthropicApiKey) {
-      throw new Error('Anthropic API key not configured')
+      throw new Error('Anthropic API key not configured. Please set ANTHROPIC_API_KEY in Supabase secrets.')
     }
 
     const anthropic = new Anthropic({
@@ -261,16 +265,32 @@ Format your response in clear sections with specific examples and actionable ins
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
-  } catch (error) {
-    console.error('Error:', error)
+  } catch (error: any) {
+    console.error('Error in analyze-qualitative-data:', error)
+
+    // Provide more detailed error messages
+    let errorMessage = 'An error occurred during analysis'
+    let statusCode = 400
+
+    if (error.message?.includes('Anthropic API key')) {
+      errorMessage = 'Anthropic API key not configured. Please set ANTHROPIC_API_KEY in Supabase secrets.'
+      statusCode = 500
+    } else if (error.message?.includes('rate limit')) {
+      errorMessage = 'API rate limit exceeded. Please try again later.'
+      statusCode = 429
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || 'An error occurred during analysis'
+        error: errorMessage,
+        details: error.toString()
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400
+        status: statusCode
       }
     )
   }
