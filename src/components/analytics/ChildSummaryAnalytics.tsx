@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getSupabaseClient } from '../../utils/supabase/client.tsx'
+import { projectId, publicAnonKey } from '../../utils/supabase/info.tsx'
 import {
   ChevronDown, ChevronRight, TrendingUp, TrendingDown,
   Calendar, Heart, Brain, MessageSquare, Sparkles,
@@ -250,14 +251,17 @@ export function ChildSummaryAnalytics() {
     setLoadingInsights(prev => ({ ...prev, [childId]: true }))
 
     try {
+      // Use the correct Supabase URL and key
+      const supabaseUrl = `https://${projectId}.supabase.co`
+
       // Call the AI analysis edge function
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-qualitative-data`,
+        `${supabaseUrl}/functions/v1/analyze-qualitative-data`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+            'Authorization': `Bearer ${publicAnonKey}`
           },
           body: JSON.stringify({
             childId,
