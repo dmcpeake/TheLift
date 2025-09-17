@@ -42,16 +42,21 @@ serve(async (req) => {
     const userId = userData?.user?.id || null // Use null for demo mode
 
     const requestData: AnalysisRequest = await req.json()
-    const { orgId, childId, dateRange = 'month', analysisType = 'comprehensive' } = requestData
+    const { orgId, childId, dateRange = 'week', analysisType = 'comprehensive' } = requestData
+
+    // OPTIMIZATION 1: Limit data to most recent entries
+    const RECORD_LIMIT = childId ? 30 : 10 // More records for single child, fewer for org
 
     // Build query for qualitative data
     let emotionQuery = supabaseClient
       .from('emotion_grid_usage')
       .select(`
-        *,
-        emotion_grid_feelings (*)
+        created_at,
+        explanation_text,
+        child_id
       `)
       .order('created_at', { ascending: false })
+      .limit(RECORD_LIMIT)
 
     // Apply filters
     if (childId) {
@@ -76,8 +81,9 @@ serve(async (req) => {
     // Fetch mood data
     let moodQuery = supabaseClient
       .from('mood_meter_usage')
-      .select('*')
+      .select('created_at, mood_numeric, notes, child_id')
       .order('created_at', { ascending: false })
+      .limit(RECORD_LIMIT)
 
     if (childId) {
       moodQuery = moodQuery.eq('child_id', childId)
@@ -96,50 +102,53 @@ serve(async (req) => {
     const { data: moodData, error: moodError } = await moodQuery
     if (moodError) throw moodError
 
-    // Fetch children profiles for context
-    let childrenQuery = supabaseClient
-      .from('profiles')
-      .select('id, name')
-      .eq('role', 'Child')
-
-    if (childId) {
-      childrenQuery = childrenQuery.eq('id', childId)
-    } else if (orgId) {
-      childrenQuery = childrenQuery.eq('org_id', orgId)
-    }
-
-    const { data: children } = await childrenQuery
-
-    // Create a map of child names
-    const childNames = new Map(children?.map(c => [c.id, c.name]) || [])
-
-    // Prepare data for Claude analysis
-    const qualitativeData = {
-      emotionExplanations: emotionData?.filter(e => e.explanation_text).map(e => ({
-        childName: childNames.get(e.child_id) || 'Anonymous',
-        date: e.created_at,
-        explanation: e.explanation_text,
-        feelings: e.emotion_grid_feelings?.map(f => f.feeling_name) || [],
-        feelingCategories: e.emotion_grid_feelings?.map(f => f.feeling_category) || []
-      })) || [],
-      moodData: moodData?.map(m => ({
-        childName: childNames.get(m.child_id) || 'Anonymous',
-        date: m.created_at,
-        mood: m.mood_level,
-        moodScore: m.mood_numeric,
-        notes: m.notes
-      })) || [],
+    // OPTIMIZATION 2: Aggregate data before sending to Claude
+    const aggregatedData: any = {
       summary: {
-        totalEntries: (emotionData?.length || 0) + (moodData?.length || 0),
-        uniqueChildren: new Set([
-          ...(emotionData?.map(e => e.child_id) || []),
-          ...(moodData?.map(m => m.child_id) || [])
-        ]).size,
+        totalCheckIns: moodData?.length || 0,
         dateRange,
         avgMood: moodData?.length
-          ? moodData.reduce((acc, m) => acc + m.mood_numeric, 0) / moodData.length
-          : null
-      }
+          ? (moodData.reduce((acc, m) => acc + m.mood_numeric, 0) / moodData.length).toFixed(1)
+          : 'N/A'
+      },
+      moodTrend: calculateMoodTrend(moodData || []),
+      keyThemes: extractKeyThemes(emotionData || [], moodData || []),
+      sampleExplanations: (emotionData || [])
+        .filter(e => e.explanation_text)
+        .slice(0, 5) // Only top 5 explanations
+        .map(e => e.explanation_text),
+      concerningPatterns: identifyConcerns(moodData || [])
+    }
+
+    // OPTIMIZATION 3: For organization-wide analysis, group by child
+    if (orgId && !childId) {
+      const childStats = new Map<string, any>()
+
+      moodData?.forEach(m => {
+        if (!childStats.has(m.child_id)) {
+          childStats.set(m.child_id, {
+            checkIns: 0,
+            totalMood: 0,
+            lowestMood: 5,
+            notes: []
+          })
+        }
+        const stats = childStats.get(m.child_id)
+        stats.checkIns++
+        stats.totalMood += m.mood_numeric
+        stats.lowestMood = Math.min(stats.lowestMood, m.mood_numeric)
+        if (m.notes) stats.notes.push(m.notes)
+      })
+
+      aggregatedData.childrenRequiringAttention = Array.from(childStats.entries())
+        .map(([childId, stats]) => ({
+          childId,
+          avgMood: (stats.totalMood / stats.checkIns).toFixed(1),
+          lowestMood: stats.lowestMood,
+          checkInCount: stats.checkIns
+        }))
+        .filter(child => parseFloat(child.avgMood) < 3 || child.lowestMood <= 2)
+        .slice(0, 5) // Only top 5 children needing attention
     }
 
     // Initialize Claude
@@ -154,69 +163,58 @@ serve(async (req) => {
       apiKey: anthropicApiKey,
     })
 
-    // Prepare the prompt based on analysis type
-    let systemPrompt = `You are an expert child psychologist and wellbeing analyst specializing in analyzing children's emotional data from check-in sessions. Your role is to identify patterns, trends, and insights that can help practitioners support children's wellbeing.`
+    // OPTIMIZATION 4: Shorter, more focused prompts
+    let systemPrompt = `You are a child wellbeing analyst. Analyze the aggregated data and provide concise, actionable insights.`
 
     let userPrompt = ''
 
     switch (analysisType) {
       case 'trends':
-        userPrompt = `Analyze the following emotional data and identify key trends over time. Focus on:
-1. Patterns in emotional states
-2. Changes in mood over the ${dateRange}
-3. Recurring themes in explanations
-4. Notable shifts in wellbeing
+        userPrompt = `Analyze the following aggregated wellbeing data for trends:
 
-Data: ${JSON.stringify(qualitativeData, null, 2)}
+${JSON.stringify(aggregatedData, null, 2)}
 
-Provide a structured analysis with clear trends and actionable insights.`
+Focus on: mood trends, patterns over time, and notable changes.
+Provide bullet points. Keep response under 200 words.`
         break
 
       case 'sentiment':
-        userPrompt = `Analyze the sentiment and emotional tone of the following data. Focus on:
-1. Overall emotional climate
-2. Positive vs negative sentiment distribution
-3. Emotional vocabulary being used
-4. Signs of emotional growth or regression
+        userPrompt = `Analyze the sentiment of this aggregated wellbeing data:
 
-Data: ${JSON.stringify(qualitativeData, null, 2)}
+${JSON.stringify(aggregatedData, null, 2)}
 
-Provide a sentiment analysis with specific examples and recommendations.`
+Focus on: overall emotional climate and sentiment distribution.
+Provide bullet points. Keep response under 200 words.`
         break
 
       case 'concerns':
-        userPrompt = `Review the following emotional data for any concerning patterns or red flags. Focus on:
-1. Signs of persistent negative emotions
-2. Concerning language or themes
-3. Children who may need additional support
-4. Urgent matters requiring attention
+        userPrompt = `Review this aggregated data for concerns:
 
-Data: ${JSON.stringify(qualitativeData, null, 2)}
+${JSON.stringify(aggregatedData, null, 2)}
 
-Highlight any concerns with appropriate sensitivity and suggest support strategies. Use child names when identifying specific concerns.`
+Identify: concerning patterns, children needing support (if any).
+Provide bullet points. Keep response under 200 words.`
         break
 
       case 'comprehensive':
       default:
-        userPrompt = `Provide a comprehensive analysis of the following children's wellbeing data. Include:
+        userPrompt = `Analyze this aggregated wellbeing data:
 
-1. **Overview**: Summary of the data and key statistics
-2. **Emotional Trends**: Patterns in emotions and mood over time
-3. **Individual Insights**: Notable observations about specific children (use names)
-4. **Themes**: Common themes in children's explanations and feelings
-5. **Positive Indicators**: Signs of wellbeing and resilience
-6. **Areas of Concern**: Any patterns requiring attention
-7. **Recommendations**: Actionable steps for practitioners
+${JSON.stringify(aggregatedData, null, 2)}
 
-Data: ${JSON.stringify(qualitativeData, null, 2)}
+Provide:
+1. Executive Summary (2-3 sentences)
+2. Key Concerns (if any, bullet points)
+3. Positive Trends (bullet points)
+4. Top 3 Recommendations
 
-Format your response in clear sections with specific examples and actionable insights.`
+Keep response under 300 words.`
     }
 
-    // Call Claude API
+    // Call Claude API with reduced token usage
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',  // Using latest Sonnet 4 model
-      max_tokens: 2000,
+      model: 'claude-3-haiku-20240307', // Use Haiku for cost efficiency
+      max_tokens: 500, // Limit response length
       temperature: 0.7,
       system: systemPrompt,
       messages: [
@@ -236,7 +234,7 @@ Format your response in clear sections with specific examples and actionable ins
       analysis_type: analysisType,
       date_range: dateRange,
       analysis_result: analysis,
-      data_points_analyzed: qualitativeData.summary.totalEntries
+      data_points_analyzed: aggregatedData.summary.totalCheckIns
     }
 
     // Only add created_by if we have a user ID
@@ -255,8 +253,7 @@ Format your response in clear sections with specific examples and actionable ins
         success: true,
         analysis,
         metadata: {
-          dataPoints: qualitativeData.summary.totalEntries,
-          uniqueChildren: qualitativeData.summary.uniqueChildren,
+          dataPoints: aggregatedData.summary.totalCheckIns,
           dateRange,
           analysisType,
           timestamp: new Date().toISOString()
@@ -295,3 +292,56 @@ Format your response in clear sections with specific examples and actionable ins
     )
   }
 })
+
+// Helper functions
+function calculateMoodTrend(moodData: any[]): string {
+  if (moodData.length < 2) return 'insufficient_data'
+
+  const recent = moodData.slice(0, Math.floor(moodData.length / 2))
+  const older = moodData.slice(Math.floor(moodData.length / 2))
+
+  const recentAvg = recent.reduce((acc, m) => acc + m.mood_numeric, 0) / recent.length
+  const olderAvg = older.reduce((acc, m) => acc + m.mood_numeric, 0) / older.length
+
+  if (recentAvg > olderAvg + 0.3) return 'improving'
+  if (recentAvg < olderAvg - 0.3) return 'declining'
+  return 'stable'
+}
+
+function extractKeyThemes(emotionData: any[], moodData: any[]): string[] {
+  const themes: string[] = []
+
+  // Count low moods
+  const lowMoods = moodData.filter(m => m.mood_numeric <= 2).length
+  if (lowMoods > moodData.length * 0.3) {
+    themes.push('frequent_low_moods')
+  }
+
+  // Check for consistent patterns
+  const hasNotes = moodData.filter(m => m.notes).length
+  if (hasNotes > moodData.length * 0.5) {
+    themes.push('high_engagement')
+  }
+
+  return themes
+}
+
+function identifyConcerns(moodData: any[]): string[] {
+  const concerns: string[] = []
+
+  // Check for consistently low moods
+  const avgMood = moodData.reduce((acc, m) => acc + m.mood_numeric, 0) / moodData.length
+  if (avgMood < 2.5) {
+    concerns.push('consistently_low_mood')
+  }
+
+  // Check for declining trend
+  if (moodData.length >= 3) {
+    const last3 = moodData.slice(0, 3)
+    if (last3.every((m, i) => i === 0 || m.mood_numeric <= last3[i - 1].mood_numeric)) {
+      concerns.push('declining_pattern')
+    }
+  }
+
+  return concerns
+}

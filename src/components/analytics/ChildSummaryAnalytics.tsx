@@ -95,7 +95,7 @@ export function ChildSummaryAnalytics() {
   const loadOrganizations = async () => {
     try {
       const { data, error } = await supabase
-        .from('organizations')
+        .from('organisations')  // Fixed: table name has 's'
         .select('id, name')
         .order('name')
 
@@ -273,9 +273,9 @@ export function ChildSummaryAnalytics() {
       // Use the correct Supabase URL and key
       const supabaseUrl = `https://${projectId}.supabase.co`
 
-      // Call the optimized AI analysis edge function
+      // Call the AI analysis edge function (use original until optimized is deployed)
       const response = await fetch(
-        `${supabaseUrl}/functions/v1/analyze-qualitative-data-optimized`,
+        `${supabaseUrl}/functions/v1/analyze-qualitative-data`,
         {
           method: 'POST',
           headers: {
