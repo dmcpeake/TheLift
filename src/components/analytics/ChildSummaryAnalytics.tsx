@@ -458,12 +458,13 @@ export function ChildSummaryAnalytics() {
                     const baseClasses = "w-12 h-12 flex items-center justify-center text-white font-semibold transition-transform hover:scale-110 shadow-md"
                     const avatarClassName = `${baseClasses} ${style.bg} ${style.shape}`
 
-                    // Debug logging
-                    console.log(`Child ${index}: ${child.name}`)
-                    console.log(`  - Style index: ${index % AVATAR_STYLES.length}`)
-                    console.log(`  - Background: ${style.bg}`)
-                    console.log(`  - Shape: ${style.shape}`)
-                    console.log(`  - Full className: ${avatarClassName}`)
+                    // Debug logging - v2 with cache bust
+                    console.log(`[v2] Child ${index}: ${child.name}`)
+                    console.log(`[v2]   - Style index: ${index % AVATAR_STYLES.length}`)
+                    console.log(`[v2]   - Background: ${style.bg}`)
+                    console.log(`[v2]   - Shape: ${style.shape}`)
+                    console.log(`[v2]   - Full className: ${avatarClassName}`)
+                    console.log(`[v2]   - Build timestamp: ${new Date().toISOString()}`)
 
                     // Check computed style after render
                     setTimeout(() => {
