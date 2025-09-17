@@ -7,9 +7,9 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, ComposedChart, Scatter
 } from 'recharts'
-import { getSupabaseClient } from '../../utils/supabase/client'
+import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { Buildings, TrendingUp, Users, Activity } from 'lucide-react'
+import { Building2, TrendingUp, Users, Activity } from 'lucide-react'
 
 const supabase = getSupabaseClient()
 
@@ -468,7 +468,7 @@ export function CheckinProgressViz() {
           <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-gray-700">
-                <Buildings className="h-5 w-5" />
+                <Building2 className="h-5 w-5" />
                 Engagement
               </CardTitle>
             </CardHeader>
