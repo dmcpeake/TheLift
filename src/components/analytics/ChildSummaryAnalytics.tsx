@@ -273,9 +273,9 @@ export function ChildSummaryAnalytics() {
       // Use the correct Supabase URL and key
       const supabaseUrl = `https://${projectId}.supabase.co`
 
-      // Call the AI analysis edge function
+      // Call the optimized AI analysis edge function
       const response = await fetch(
-        `${supabaseUrl}/functions/v1/analyze-qualitative-data`,
+        `${supabaseUrl}/functions/v1/analyze-qualitative-data-optimized`,
         {
           method: 'POST',
           headers: {
