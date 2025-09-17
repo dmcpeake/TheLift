@@ -51,13 +51,17 @@ import { PrototypesPage } from '../components/prototypes/PrototypesPage'
 import { DataHierarchy } from '../components/prototypes/DataHierarchy'
 import { CheckinProgressViz } from '../components/analytics/CheckinProgressViz'
 
+// Check-in Flow Components
+import { CheckInHome } from '../components/checkin/CheckInHome'
+import { CheckInFlow } from '../components/checkin/CheckInFlow'
+
 export function AppRoutes() {
   const { user } = React.useContext(AuthContext)
   const location = useLocation()
   
   // Determine if we're in a child-specific route (more specific matching)
-  const isChildApp = location.pathname.startsWith('/child/') || location.pathname === '/child/onboarding'
-  const isMarketingApp = ['/', '/about', '/how-it-works', '/pricing', '/contact', '/waitlist', '/legal', '/sitemap'].some(path => 
+  const isChildApp = location.pathname.startsWith('/child/') || location.pathname === '/child/onboarding' || location.pathname.startsWith('/checkin/')
+  const isMarketingApp = ['/', '/about', '/how-it-works', '/pricing', '/contact', '/waitlist', '/legal', '/sitemap'].some(path =>
     location.pathname === path || location.pathname.startsWith('/legal')
   )
   const isAuthApp = ['/login', '/admin/login'].includes(location.pathname)
@@ -221,6 +225,30 @@ export function AppRoutes() {
         <Route path="/admin/waitlist" element={
           <ProtectedRoute allowedRoles={['Account']}>
             <WaitlistManagement />
+          </ProtectedRoute>
+        } />
+
+        {/* Check-in Flow Routes */}
+        <Route path="/checkin/home" element={
+          <ProtectedRoute allowedRoles={['Child', 'Practitioner', 'GroupContact']}>
+            <CheckInHome />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/checkin/flow/:step" element={
+          <ProtectedRoute allowedRoles={['Child', 'Practitioner', 'GroupContact']}>
+            <CheckInFlow />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/checkin/flow/complete" element={
+          <ProtectedRoute allowedRoles={['Child', 'Practitioner', 'GroupContact']}>
+            <div className="min-h-screen flex items-center justify-center bg-white">
+              <div className="text-center">
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">Check-in Complete!</h1>
+                <p className="text-gray-600">Great job completing your check-in today.</p>
+              </div>
+            </div>
           </ProtectedRoute>
         } />
 
