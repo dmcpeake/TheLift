@@ -9,9 +9,133 @@ import {
 } from 'recharts'
 import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { Building2, TrendingUp, Users, Activity, Brain, MessageSquare, AlertCircle, Sparkles } from 'lucide-react'
+import { Building2, TrendingUp, Users, Activity, Brain, MessageSquare, AlertCircle, Sparkles, ChevronRight, Heart, AlertTriangle, CheckCircle } from 'lucide-react'
 
 const supabase = getSupabaseClient()
+
+// Component to properly display formatted analysis content
+function AnalysisDisplay({ content }: { content: string }) {
+  const [expandedSections, setExpandedSections] = React.useState<Set<number>>(new Set([0, 1, 2])) // First 3 expanded by default
+
+  // Parse the markdown-like content into structured sections
+  const sections = content.split('##').filter(Boolean)
+
+  const toggleSection = (index: number) => {
+    const newExpanded = new Set(expandedSections)
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index)
+    } else {
+      newExpanded.add(index)
+    }
+    setExpandedSections(newExpanded)
+  }
+
+  return (
+    <div className="space-y-6">
+      {sections.map((section, index) => {
+        const lines = section.trim().split('\n')
+        const title = lines[0].replace(/^\s*\d+\.\s*/, '').trim()
+        const body = lines.slice(1).join('\n')
+
+        // Add icons for specific sections
+        let icon = null
+        if (title.toLowerCase().includes('positive') || title.toLowerCase().includes('growth')) {
+          icon = <CheckCircle className="h-5 w-5 text-green-600" />
+        } else if (title.toLowerCase().includes('concern') || title.toLowerCase().includes('regression')) {
+          icon = <AlertTriangle className="h-5 w-5 text-orange-600" />
+        } else if (title.toLowerCase().includes('recommendation') || title.toLowerCase().includes('action')) {
+          icon = <ChevronRight className="h-5 w-5 text-blue-600" />
+        } else if (title.toLowerCase().includes('sentiment') || title.toLowerCase().includes('emotional')) {
+          icon = <Heart className="h-5 w-5 text-pink-600" />
+        }
+
+        const isExpanded = expandedSections.has(index)
+
+        return (
+          <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <button
+              onClick={() => toggleSection(index)}
+              className="w-full p-4 text-left hover:bg-gray-50 transition-colors flex items-center justify-between"
+            >
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                {icon}
+                {title}
+              </h3>
+              <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform ${
+                isExpanded ? 'rotate-90' : ''
+              }`} />
+            </button>
+            {isExpanded && (
+              <div className="px-4 pb-4 text-gray-700 space-y-2 border-t border-gray-100">
+              {body.split('\n').map((paragraph, pIndex) => {
+                // Handle different formatting patterns
+                if (paragraph.startsWith('###')) {
+                  return (
+                    <h4 key={pIndex} className="font-semibold text-gray-800 mt-3 mb-2">
+                      {paragraph.replace('###', '').trim()}
+                    </h4>
+                  )
+                } else if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
+                  return (
+                    <h5 key={pIndex} className="font-medium text-gray-800 mt-2">
+                      {paragraph.replace(/\*\*/g, '').replace(':', '')}
+                    </h5>
+                  )
+                } else if (paragraph.startsWith('-')) {
+                  const text = paragraph.replace('-', '').trim()
+                  // Check for percentage or key metrics
+                  const hasPercentage = text.includes('%')
+                  const hasNumber = /\d+/.test(text)
+
+                  return (
+                    <li key={pIndex} className={`ml-4 list-disc text-sm ${
+                      hasPercentage || hasNumber ? 'font-medium text-gray-900' : ''
+                    }`}>
+                      {formatText(text)}
+                    </li>
+                  )
+                } else if (paragraph.match(/^\d+\./)) {
+                  return (
+                    <li key={pIndex} className="ml-4 list-decimal text-sm">
+                      {formatText(paragraph.replace(/^\d+\./, '').trim())}
+                    </li>
+                  )
+                } else if (paragraph.trim()) {
+                  return (
+                    <p key={pIndex} className="text-sm leading-relaxed">
+                      {formatText(paragraph)}
+                    </p>
+                  )
+                }
+                return null
+              })}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// Helper function to format inline text (bold, italic, etc.)
+function formatText(text: string): React.ReactNode {
+  // Handle bold text
+  const parts = text.split(/\*\*([^*]+)\*\*/g)
+  return parts.map((part, index) => {
+    if (index % 2 === 1) {
+      return <strong key={index} className="font-semibold text-gray-900">{part}</strong>
+    }
+    // Handle inline code
+    const codeParts = part.split(/`([^`]+)`/g)
+    return codeParts.map((codePart, codeIndex) => {
+      if (codeIndex % 2 === 1) {
+        return <code key={`${index}-${codeIndex}`} className="bg-gray-100 px-1 py-0.5 rounded text-xs">{codePart}</code>
+      }
+      return codePart
+    })
+  })
+}
 
 // Modern color palette
 const COLORS = {
@@ -928,14 +1052,12 @@ export function CheckinProgressViz() {
                     <div className="space-y-4">
                       {aiAnalysis.analysis && (
                         <div className="prose prose-sm max-w-none">
-                          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                            <h4 className="flex items-center gap-2 text-purple-700 font-semibold mb-3">
+                          <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                            <h4 className="flex items-center gap-2 text-purple-700 font-semibold mb-4">
                               <Sparkles className="h-4 w-4" />
                               Analysis Results
                             </h4>
-                            <div className="text-gray-700 whitespace-pre-wrap">
-                              {aiAnalysis.analysis}
-                            </div>
+                            <AnalysisDisplay content={aiAnalysis.analysis} />
                           </div>
                         </div>
                       )}
