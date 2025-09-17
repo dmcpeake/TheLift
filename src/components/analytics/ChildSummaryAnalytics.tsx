@@ -61,26 +61,26 @@ const MOOD_EMOJIS = {
   5: '😊'
 }
 
-const AVATAR_COLORS = [
-  'bg-blue-500',
-  'bg-green-500',
-  'bg-purple-500',
-  'bg-orange-500',
-  'bg-pink-500',
-  'bg-teal-500',
-  'bg-red-500',
-  'bg-indigo-500',
-  'bg-yellow-500',
-  'bg-cyan-500'
-]
-
-const AVATAR_SHAPES = [
-  'rounded-full',           // circle
-  'rounded-lg',            // square
-  'rounded-lg rotate-45',  // diamond
-  'rounded-full',          // circle variant
-  'rounded-lg',           // square variant
-  'rounded-lg rotate-12'   // tilted square
+// Define avatar styles with proper Tailwind classes
+const AVATAR_STYLES = [
+  { bg: 'bg-blue-500', shape: 'rounded-full' },
+  { bg: 'bg-green-500', shape: 'rounded-lg' },
+  { bg: 'bg-purple-500', shape: 'rounded-full' },
+  { bg: 'bg-orange-500', shape: 'rounded-lg' },
+  { bg: 'bg-pink-500', shape: 'rounded-full' },
+  { bg: 'bg-teal-500', shape: 'rounded-lg' },
+  { bg: 'bg-red-500', shape: 'rounded-full' },
+  { bg: 'bg-indigo-500', shape: 'rounded-lg' },
+  { bg: 'bg-yellow-500', shape: 'rounded-full' },
+  { bg: 'bg-cyan-500', shape: 'rounded-lg' },
+  { bg: 'bg-emerald-500', shape: 'rounded-full' },
+  { bg: 'bg-rose-500', shape: 'rounded-lg' },
+  { bg: 'bg-violet-500', shape: 'rounded-full' },
+  { bg: 'bg-amber-500', shape: 'rounded-lg' },
+  { bg: 'bg-sky-500', shape: 'rounded-full' },
+  { bg: 'bg-lime-500', shape: 'rounded-lg' },
+  { bg: 'bg-fuchsia-500', shape: 'rounded-full' },
+  { bg: 'bg-slate-500', shape: 'rounded-lg' }
 ]
 
 export function ChildSummaryAnalytics() {
@@ -385,9 +385,7 @@ export function ChildSummaryAnalytics() {
   }
 
   const getAvatarStyle = (index: number) => {
-    const color = AVATAR_COLORS[index % AVATAR_COLORS.length]
-    const shape = AVATAR_SHAPES[index % AVATAR_SHAPES.length]
-    return `${color} ${shape}`
+    return AVATAR_STYLES[index % AVATAR_STYLES.length]
   }
 
   const getTrendIcon = (trend?: 'improving' | 'declining' | 'stable') => {
@@ -448,8 +446,8 @@ export function ChildSummaryAnalytics() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   {/* Avatar - Always use generated avatars, ignore database URLs */}
-                  <div className={`w-12 h-12 flex items-center justify-center text-white font-semibold transition-transform hover:scale-105 ${getAvatarStyle(index)}`}>
-                    <span className={AVATAR_SHAPES[index % AVATAR_SHAPES.length].includes('rotate') ? 'transform -rotate-45' : ''}>
+                  <div className={`w-12 h-12 flex items-center justify-center text-white font-semibold transition-transform hover:scale-110 shadow-md ${getAvatarStyle(index).bg} ${getAvatarStyle(index).shape}`}>
+                    <span className="text-sm">
                       {child.initials}
                     </span>
                   </div>
