@@ -447,16 +447,12 @@ export function ChildSummaryAnalytics() {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  {/* Avatar */}
-                  {child.avatar_url ? (
-                    <img src={child.avatar_url} alt={child.name} className="w-12 h-12 rounded-full object-cover" />
-                  ) : (
-                    <div className={`w-12 h-12 flex items-center justify-center text-white font-semibold transition-transform hover:scale-105 ${getAvatarStyle(index)}`}>
-                      <span className={AVATAR_SHAPES[index % AVATAR_SHAPES.length].includes('rotate') ? 'transform -rotate-45' : ''}>
-                        {child.initials}
-                      </span>
-                    </div>
-                  )}
+                  {/* Avatar - Always use generated avatars, ignore database URLs */}
+                  <div className={`w-12 h-12 flex items-center justify-center text-white font-semibold transition-transform hover:scale-105 ${getAvatarStyle(index)}`}>
+                    <span className={AVATAR_SHAPES[index % AVATAR_SHAPES.length].includes('rotate') ? 'transform -rotate-45' : ''}>
+                      {child.initials}
+                    </span>
+                  </div>
 
                   {/* Name and Basic Info */}
                   <div>
