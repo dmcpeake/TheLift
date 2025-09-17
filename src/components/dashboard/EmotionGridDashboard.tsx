@@ -167,30 +167,66 @@ export function EmotionGridDashboard({ selectedOrg = 'all', dateRange = 'week' }
       // Process emotion data
       const processed: EmotionData[] = []
 
-      emotionGridData?.forEach(item => {
-        // For now, use mock data based on item properties
-        // We'll need to understand how feelings are linked to usage
-        const feelings: string[] = ['Happy', 'Excited'] // Placeholder
-        const categories: string[] = ['high-energy-comfortable'] // Placeholder
+      // Process emotion grid data if available, otherwise use mood data
+      if (emotionGridData && emotionGridData.length > 0) {
+        emotionGridData.forEach(item => {
+          // For now, use mock data based on item properties
+          const feelings: string[] = ['Happy', 'Excited'] // Placeholder
+          const categories: string[] = ['high-energy-comfortable'] // Placeholder
 
-        // Find corresponding mood score
-        const mood = moodData?.find(m =>
-          m.child_id === item.child_id &&
-          Math.abs(new Date(m.created_at).getTime() - new Date(item.created_at).getTime()) < 3600000 // Within 1 hour
-        )
+          // Find corresponding mood score
+          const mood = moodData?.find(m =>
+            m.child_id === item.child_id &&
+            Math.abs(new Date(m.created_at).getTime() - new Date(item.created_at).getTime()) < 3600000 // Within 1 hour
+          )
 
-        processed.push({
-          date: new Date(item.created_at).toLocaleDateString(),
-          timestamp: item.created_at,
-          childId: item.child_id,
-          childName: childNames.get(item.child_id) || 'Unknown',
-          feelings,
-          categories,
-          explanation: item.explanation_text,
-          moodScore: mood?.mood_numeric,
-          dominantEmotion: categories[0] // First selected is usually dominant
+          processed.push({
+            date: new Date(item.created_at).toLocaleDateString(),
+            timestamp: item.created_at,
+            childId: item.child_id,
+            childName: childNames.get(item.child_id) || 'Unknown',
+            feelings,
+            categories,
+            explanation: item.explanation_text,
+            moodScore: mood?.mood_numeric,
+            dominantEmotion: categories[0] // First selected is usually dominant
+          })
         })
-      })
+      }
+
+      // Also process mood data as emotion data if no emotion grid data
+      if ((!emotionGridData || emotionGridData.length === 0) && moodData && moodData.length > 0) {
+        moodData.forEach(item => {
+          // Map mood levels to emotion categories
+          const moodToCategory: Record<number, string> = {
+            1: 'low-energy-uncomfortable',
+            2: 'low-energy-uncomfortable',
+            3: 'low-energy-comfortable',
+            4: 'high-energy-comfortable',
+            5: 'high-energy-comfortable'
+          }
+
+          const moodToFeelings: Record<number, string[]> = {
+            1: ['Sad', 'Tired'],
+            2: ['Disappointed', 'Lonely'],
+            3: ['Calm', 'Content'],
+            4: ['Happy', 'Playful'],
+            5: ['Excited', 'Joyful']
+          }
+
+          processed.push({
+            date: new Date(item.created_at).toLocaleDateString(),
+            timestamp: item.created_at,
+            childId: item.child_id,
+            childName: childNames.get(item.child_id) || 'Unknown',
+            feelings: moodToFeelings[item.mood_numeric] || ['Unknown'],
+            categories: [moodToCategory[item.mood_numeric] || 'unknown'],
+            explanation: item.notes,
+            moodScore: item.mood_numeric,
+            dominantEmotion: moodToCategory[item.mood_numeric] || 'unknown'
+          })
+        })
+      }
 
       console.log('Processed emotion data:', {
         count: processed.length,
