@@ -10,6 +10,7 @@ import {
 import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Building2, TrendingUp, Users, Activity, Brain, MessageSquare, AlertCircle, Sparkles, ChevronRight, Heart, AlertTriangle, CheckCircle } from 'lucide-react'
+import { EmotionGridDashboard } from '../dashboard/EmotionGridDashboard'
 
 const supabase = getSupabaseClient()
 
@@ -184,7 +185,7 @@ export function CheckinProgressViz() {
   const [selectedOrg, setSelectedOrg] = useState<string>('all')
   const [sessionData, setSessionData] = useState<SessionData[]>([])
   const [childProgress, setChildProgress] = useState<ChildProgress[]>([])
-  const [viewMode, setViewMode] = useState<'overview' | 'timeline' | 'children' | 'insights' | 'qualitative'>('overview')
+  const [viewMode, setViewMode] = useState<'overview' | 'timeline' | 'children' | 'insights' | 'qualitative' | 'emotions'>('overview')
   const [dateRange, setDateRange] = useState<'week' | 'month' | 'all'>('all')
   const [qualitativeData, setQualitativeData] = useState<any[]>([])
   const [aiAnalysis, setAiAnalysis] = useState<any>(null)
@@ -644,7 +645,7 @@ export function CheckinProgressViz() {
             <div className="flex-1 min-w-[400px]">
               <label className="text-gray-700 text-sm mb-2 block font-medium">View</label>
               <div className="flex gap-2">
-                {(['overview', 'timeline', 'children', 'insights', 'qualitative'] as const).map(mode => (
+                {(['overview', 'timeline', 'children', 'insights', 'qualitative', 'emotions'] as const).map(mode => (
                   <button
                     key={mode}
                     onClick={() => setViewMode(mode)}
@@ -1207,6 +1208,21 @@ export function CheckinProgressViz() {
                   </CardContent>
                 </Card>
               </div>
+            </motion.div>
+          )}
+
+          {viewMode === 'emotions' && (
+            <motion.div
+              key="emotions"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-6"
+            >
+              <EmotionGridDashboard
+                selectedOrg={selectedOrg}
+                dateRange={dateRange}
+              />
             </motion.div>
           )}
         </AnimatePresence>

@@ -13,7 +13,6 @@ import { Checkbox } from '../ui/checkbox'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../ui/breadcrumb'
 import { BulkReassignDialog } from './BulkReassignDialog'
 import { BulkArchiveDialog } from './BulkArchiveDialog'
-import { EmotionGridDashboard } from '../dashboard/EmotionGridDashboard'
 import { 
   Users, 
   UserPlus, 
@@ -788,9 +787,6 @@ export function PractitionerDashboard() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Emotion Grid Dashboard */}
-        <EmotionGridDashboard />
 
         <div className="grid grid-cols-1 gap-6">
           {/* Practitioners Section - Admin Mode Only */}

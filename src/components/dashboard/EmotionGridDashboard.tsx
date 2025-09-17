@@ -62,9 +62,13 @@ interface GroupMood {
   trending: 'up' | 'down' | 'stable'
 }
 
-export function EmotionGridDashboard() {
+interface EmotionGridDashboardProps {
+  selectedOrg?: string
+  dateRange?: 'week' | 'month' | 'all'
+}
+
+export function EmotionGridDashboard({ selectedOrg = 'all', dateRange = 'week' }: EmotionGridDashboardProps) {
   const [loading, setLoading] = useState(true)
-  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'all'>('week')
   const [emotionData, setEmotionData] = useState<EmotionData[]>([])
   const [childTrends, setChildTrends] = useState<ChildTrend[]>([])
   const [groupMood, setGroupMood] = useState<GroupMood | null>(null)
@@ -72,7 +76,7 @@ export function EmotionGridDashboard() {
 
   useEffect(() => {
     loadEmotionData()
-  }, [timeRange])
+  }, [dateRange, selectedOrg])
 
   const loadEmotionData = async () => {
     try {
@@ -82,16 +86,16 @@ export function EmotionGridDashboard() {
       const now = new Date()
       let startDate = new Date()
 
-      if (timeRange === 'week') {
+      if (dateRange === 'week') {
         startDate.setDate(now.getDate() - 7)
-      } else if (timeRange === 'month') {
+      } else if (dateRange === 'month') {
         startDate.setDate(now.getDate() - 30)
       } else {
         startDate.setFullYear(now.getFullYear() - 1)
       }
 
       // Fetch emotion grid data
-      const { data: emotionGridData, error: emotionError } = await supabase
+      let emotionQuery = supabase
         .from('emotion_grid_usage')
         .select(`
           *,
@@ -100,14 +104,26 @@ export function EmotionGridDashboard() {
         .gte('created_at', startDate.toISOString())
         .order('created_at', { ascending: false })
 
+      if (selectedOrg && selectedOrg !== 'all') {
+        emotionQuery = emotionQuery.eq('org_id', selectedOrg)
+      }
+
+      const { data: emotionGridData, error: emotionError } = await emotionQuery
+
       if (emotionError) throw emotionError
 
       // Fetch mood data
-      const { data: moodData, error: moodError } = await supabase
+      let moodQuery = supabase
         .from('mood_meter_usage')
         .select('*')
         .gte('created_at', startDate.toISOString())
         .order('created_at', { ascending: false })
+
+      if (selectedOrg && selectedOrg !== 'all') {
+        moodQuery = moodQuery.eq('org_id', selectedOrg)
+      }
+
+      const { data: moodData, error: moodError } = await moodQuery
 
       if (moodError) throw moodError
 
@@ -322,27 +338,10 @@ export function EmotionGridDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header with Controls */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Emotion & Mood Tracker</h2>
-          <p className="text-gray-600">Real-time emotional wellbeing insights</p>
-        </div>
-        <div className="flex gap-2">
-          {(['week', 'month', 'all'] as const).map(range => (
-            <button
-              key={range}
-              onClick={() => setTimeRange(range)}
-              className={`px-4 py-2 rounded-lg transition-all ${
-                timeRange === range
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {range === 'all' ? 'All Time' : range === 'week' ? 'Week' : 'Month'}
-            </button>
-          ))}
-        </div>
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900">Emotion & Mood Tracker</h2>
+        <p className="text-gray-600">Real-time emotional wellbeing insights</p>
       </div>
 
       {/* Group Mood Overview */}
