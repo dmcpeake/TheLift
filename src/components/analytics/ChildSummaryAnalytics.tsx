@@ -239,6 +239,8 @@ export function ChildSummaryAnalytics() {
     // Check if already loaded
     if (checkInHistory[childId]) return
 
+    console.log(`Loading check-in history for child: ${childId}`)
+
     // Fetch BOTH mood meter data AND emotion grid data
     const [moodResponse, emotionResponse] = await Promise.all([
       // Get mood meter data for the heatmap
@@ -259,8 +261,23 @@ export function ChildSummaryAnalytics() {
         .limit(10)
     ])
 
-    const { data: moodData } = moodResponse
-    const { data: emotionData } = emotionResponse
+    const { data: moodData, error: moodError } = moodResponse
+    const { data: emotionData, error: emotionError } = emotionResponse
+
+    console.log(`Mood data query result for ${childId}:`, {
+      moodDataCount: moodData?.length || 0,
+      moodError: moodError
+    })
+
+    console.log(`Emotion grid data query result for ${childId}:`, {
+      emotionDataCount: emotionData?.length || 0,
+      emotionError: emotionError,
+      sampleData: emotionData?.slice(0, 3)?.map(e => ({
+        id: e.id,
+        created_at: e.created_at,
+        explanation: e.explanation_text?.substring(0, 50) + '...'
+      }))
+    })
 
     // Convert emotion grid data to check-ins (without feelings for now due to join issue)
     const checkIns: CheckIn[] = emotionData?.map(emotion => ({
@@ -272,6 +289,8 @@ export function ChildSummaryAnalytics() {
       feelings: [], // Will need separate query for feelings
       explanation: emotion.explanation_text
     })) || []
+
+    console.log(`Processed ${checkIns.length} check-ins for display`)
 
     // Store mood data separately for heatmap
     const moodHistory = moodData || []
@@ -634,7 +653,7 @@ export function ChildSummaryAnalytics() {
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
                             <Calendar className="h-4 w-4 mr-2" />
-                            Recent Qualitative Check-ins
+                            Latest Check-ins
                           </h4>
 
                           <div className="space-y-3 max-h-64 overflow-y-auto">
@@ -686,7 +705,7 @@ export function ChildSummaryAnalytics() {
                       <div>
                         <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
                           <Sparkles className="h-4 w-4 mr-2" />
-                          AI Insights
+                          Insights
                         </h4>
 
                         {loadingInsights[child.id] ? (
