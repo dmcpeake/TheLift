@@ -247,6 +247,7 @@ serve(async (req) => {
 
       // Replace placeholders with actual child name
       promptTemplate = promptTemplate
+        .replace(/\{child_name\}/g, childFirstName)
         .replace(/\[CHILD'S FIRST NAME\]/g, childFirstName)
         .replace(/\[CHILD'S NAME\]/g, childFirstName)
     } catch (error) {
