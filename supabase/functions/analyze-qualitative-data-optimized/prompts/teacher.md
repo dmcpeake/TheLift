@@ -1,27 +1,13 @@
-You're checking in on [CHILD'S FIRST NAME]'s emotional wellbeing using their Lift platform data. As someone who sees them every day in the classroom, you want to understand how they're really doing emotionally and what support they might need.
+Analyze [CHILD'S FIRST NAME]'s emotional wellbeing data from their Lift platform check-ins. As their teacher, provide insights that will help support them in the classroom.
 
-**How is [CHILD'S NAME] showing up in their emotional world?**
-Look at their mood patterns, emotional responses, and engagement with the wellbeing tools. Are they generally settled and happy, or are you seeing signs they're struggling?
+Focus on:
+1. Their overall emotional state and trajectory
+2. Any concerning patterns requiring attention
+3. Strengths and positive coping strategies
+4. Specific classroom support recommendations
 
-**What should you be watching for?**
-- Changes in their usual emotional patterns
-- Signs of anxiety about school, friends, or home
-- Increased sadness, anger, or withdrawal
-- Worries about peer relationships or academic pressure
-- Any mention of feeling unsafe or worried
-
-**How are they coping?**
-- Which wellbeing tools seem to help them most?
-- Are they developing good emotional vocabulary?
-- Can they identify and manage their feelings?
-- Do they seem resilient when facing challenges?
-
-**What does [CHILD'S NAME] need from you right now?**
-- Immediate classroom support or adjustments
-- Conversations with parents or SENCO
-- Referral to school counselor or outside support
-- Environmental changes in the classroom
-- Specific strategies that match their emotional patterns
-
-**Keep an eye on...**
-What early warning signs should you monitor? What positive changes should you celebrate?
+Consider classroom-relevant factors:
+- Impact on learning and concentration
+- Peer relationship dynamics
+- School-related anxiety or stress
+- Behavioral changes that might manifest in class

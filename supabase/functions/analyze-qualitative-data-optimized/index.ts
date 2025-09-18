@@ -46,13 +46,22 @@ serve(async (req) => {
     let orgType = 'school' // default
     if (orgId) {
       const { data: orgData } = await supabaseClient
-        .from('organizations')
-        .select('org_type')
+        .from('organisations')
+        .select('type')
         .eq('id', orgId)
         .single()
 
-      if (orgData?.org_type) {
-        orgType = orgData.org_type
+      if (orgData?.type) {
+        // Map specific types to general categories
+        if (orgData.type.includes('school')) {
+          orgType = 'school'
+        } else if (orgData.type.includes('clinic')) {
+          orgType = 'clinic'
+        } else if (orgData.type === 'hospital' || orgData.type === 'nhs-trust') {
+          orgType = 'hospital'
+        } else {
+          orgType = 'school' // default
+        }
       }
     } else if (childId) {
       // If only childId is provided, get org type from child's org
@@ -64,13 +73,22 @@ serve(async (req) => {
 
       if (childData?.org_id) {
         const { data: orgData } = await supabaseClient
-          .from('organizations')
-          .select('org_type')
+          .from('organisations')
+          .select('type')
           .eq('id', childData.org_id)
           .single()
 
-        if (orgData?.org_type) {
-          orgType = orgData.org_type
+        if (orgData?.type) {
+          // Map specific types to general categories
+          if (orgData.type.includes('school')) {
+            orgType = 'school'
+          } else if (orgData.type.includes('clinic')) {
+            orgType = 'clinic'
+          } else if (orgData.type === 'hospital' || orgData.type === 'nhs-trust') {
+            orgType = 'hospital'
+          } else {
+            orgType = 'school' // default
+          }
         }
       }
     }
@@ -207,6 +225,9 @@ serve(async (req) => {
     }
 
     // Load org-specific prompt based on orgType
+    console.log(`Organization type: ${orgType}`)
+    console.log(`Child name: ${childFirstName}`)
+
     let promptTemplate = ''
     const promptMap: Record<string, string> = {
       'school': 'teacher',
@@ -215,6 +236,7 @@ serve(async (req) => {
     }
 
     const promptFileName = promptMap[orgType] || 'teacher'
+    console.log(`Using prompt file: ${promptFileName}.md`)
 
     try {
       // Read the appropriate prompt file
@@ -234,18 +256,27 @@ serve(async (req) => {
     }
 
     // OPTIMIZATION 4: Shorter, more focused prompts
-    let systemPrompt = `You are a child wellbeing analyst with expertise in child psychology and mental health. Analyze the provided data and respond using the specified format.`
+    let systemPrompt = `You are a child wellbeing analyst with expertise in child psychology and mental health. You MUST structure your response with clear section headers using **SECTION NAME** format. Each section should contain bullet points or clear paragraphs as specified.`
 
+    // Add structured format instructions to the prompt
     let userPrompt = `${promptTemplate}
 
 Here is the wellbeing data to analyze:
 
-${JSON.stringify(aggregatedData, null, 2)}`
+${JSON.stringify(aggregatedData, null, 2)}
 
-    // Call Claude API with reduced token usage
+IMPORTANT: Structure your response with these exact section headers:
+**EXECUTIVE SUMMARY**
+**RED FLAGS & EARLY WARNING SIGNS**
+**STRENGTHS & PROTECTIVE FACTORS**
+**SUPPORT RECOMMENDATIONS**
+
+Use bullet points (- ) for lists within each section.`
+
+    // Call Claude API with sufficient tokens for structured response
     const message = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307', // Use Haiku for cost efficiency
-      max_tokens: 500, // Limit response length
+      max_tokens: 1000, // Increased for complete structured response
       temperature: 0.7,
       system: systemPrompt,
       messages: [
