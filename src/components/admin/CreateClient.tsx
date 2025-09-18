@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AuthContext } from '../../App'
+import { AuthContext } from '../../utils/auth/context'
 import { getSupabaseClient } from '../../utils/supabase/client'
 import { projectId, publicAnonKey } from '../../utils/supabase/info'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
@@ -51,6 +51,17 @@ export function CreateClient() {
     e.preventDefault()
     setLoading(true)
     setError('')
+
+    // Demo mode - simulate successful creation
+    if (!user) {
+      setTimeout(() => {
+        setSuccess(true)
+        setTimeout(() => {
+          navigate('/admin')
+        }, 2000)
+      }, 1000)
+      return
+    }
 
     try {
       const supabase = getSupabaseClient()

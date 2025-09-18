@@ -27,6 +27,7 @@ export function Stage({
 }: StageProps) {
   const [circleClass, setCircleClass] = useState('')
   const [phaseProgress, setPhaseProgress] = useState(0)
+  const [showBlurredEffects, setShowBlurredEffects] = useState(false)
 
   // Update circle class and transition duration based on phase
   useEffect(() => {
@@ -55,6 +56,20 @@ export function Stage({
         setCircleClass('breathing-circle')
     }
   }, [phase, pace])
+
+  // Show blurred effects after a delay when breathing starts
+  useEffect(() => {
+    if (phase === 'intro' || phase === 'complete') {
+      setShowBlurredEffects(false)
+    } else if (['inhale', 'hold', 'exhale', 'holdAfter'].includes(phase)) {
+      // Delay the blurred effects until after circle and ring have transitioned
+      const timer = setTimeout(() => {
+        setShowBlurredEffects(true)
+      }, 1000) // 1 second delay to let circle/ring transition complete
+
+      return () => clearTimeout(timer)
+    }
+  }, [phase])
 
   // Animate progress within each phase
   useEffect(() => {
@@ -136,7 +151,8 @@ export function Stage({
   // Render technique-specific animation
   const renderAnimation = () => {
     const techniqueId = technique?.id || 'balloon'
-    
+
+
     switch (techniqueId) {
       case 'square':
         return (
@@ -169,16 +185,39 @@ export function Stage({
         // Balloon breathing (default circle animation)
         return (
           <div className="breathing-circle-container">
-            {/* Outer progress ring - always visible */}
-            <svg className="progress-ring" viewBox="0 0 400 400">
+            {/* Dashed outer circle - positioned to match orange progress ring exactly */}
+            <div
+              className="absolute"
+              style={{
+                width: '435px',
+                height: '435px',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 2
+              }}
+            >
+              <div
+                className="opacity-20"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  border: '3px dashed #e6b6b6',
+                  animation: 'spin 120s linear infinite'
+                }}
+              />
+            </div>
+
+            {/* Progress ring for breathing progress */}
+            <svg className="progress-ring" viewBox="0 0 400 400" style={{ animation: 'none' }}>
               <defs>
                 <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="rgba(59, 130, 246, 0.8)" />
-                  <stop offset="50%" stopColor="rgba(147, 51, 234, 0.8)" />
+                  <stop offset="50%" stopColor="rgba(218, 131, 109, 0.8)" />
                   <stop offset="100%" stopColor="rgba(236, 72, 153, 0.8)" />
                 </linearGradient>
               </defs>
-              <circle className="progress-ring-bg" cx="200" cy="200" r="180" />
               <circle
                 className="progress-ring-progress"
                 cx="200"
@@ -227,7 +266,118 @@ export function Stage({
 
   return (
     <div className="breathing-stage">
+      {/* Large animated color shapes radiating from breathing circle center */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          width: '300px',
+          height: '300px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255, 215, 0, 1.0) 0%, rgba(255, 215, 0, 0.6) 70%)',
+          filter: 'blur(30px)',
+          zIndex: 1,
+          animation: 'radiate1 4s ease-in-out infinite',
+          transform: 'translate(-50%, -50%)',
+          opacity: showBlurredEffects ? 1 : 0,
+          transition: 'opacity 2s ease-in-out'
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          width: '375px',
+          height: '225px',
+          borderRadius: '50%',
+          background: 'radial-gradient(ellipse, rgba(255, 140, 0, 0.9) 0%, rgba(255, 140, 0, 0.4) 80%)',
+          filter: 'blur(38px)',
+          zIndex: 2,
+          animation: 'radiate2 5s ease-in-out infinite 1s',
+          transform: 'translate(-50%, -50%)',
+          opacity: showBlurredEffects ? 1 : 0,
+          transition: 'opacity 2s ease-in-out'
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          width: '450px',
+          height: '450px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255, 69, 0, 1.0) 0%, rgba(255, 69, 0, 0.5) 60%)',
+          filter: 'blur(45px)',
+          zIndex: 1,
+          animation: 'radiate3 6s ease-in-out infinite 2s',
+          transform: 'translate(-50%, -50%)',
+          opacity: showBlurredEffects ? 1 : 0,
+          transition: 'opacity 2s ease-in-out'
+        }}
+      />
       {renderAnimation()}
+
+      <style jsx>{`
+        @keyframes radiate1 {
+          0%, 100% {
+            transform: translate(-50%, -50%) scale(0.3) translateX(0px) translateY(0px);
+            opacity: 0.9;
+          }
+          25% {
+            transform: translate(-50%, -50%) scale(0.9) translateX(23px) translateY(-15px);
+            opacity: 0.6;
+          }
+          50% {
+            transform: translate(-50%, -50%) scale(1.5) translateX(-30px) translateY(23px);
+            opacity: 0.3;
+          }
+          75% {
+            transform: translate(-50%, -50%) scale(1.2) translateX(45px) translateY(30px);
+            opacity: 0.5;
+          }
+        }
+
+        @keyframes radiate2 {
+          0%, 100% {
+            transform: translate(-50%, -50%) scale(0.4) translateX(0px) translateY(0px);
+            opacity: 0.8;
+          }
+          30% {
+            transform: translate(-50%, -50%) scale(1.1) translateX(-38px) translateY(23px);
+            opacity: 0.5;
+          }
+          60% {
+            transform: translate(-50%, -50%) scale(1.6) translateX(30px) translateY(-38px);
+            opacity: 0.2;
+          }
+          90% {
+            transform: translate(-50%, -50%) scale(0.9) translateX(53px) translateY(45px);
+            opacity: 0.6;
+          }
+        }
+
+        @keyframes radiate3 {
+          0%, 100% {
+            transform: translate(-50%, -50%) scale(0.2) translateX(0px) translateY(0px);
+            opacity: 1.0;
+          }
+          20% {
+            transform: translate(-50%, -50%) scale(0.8) translateX(45px) translateY(-30px);
+            opacity: 0.7;
+          }
+          40% {
+            transform: translate(-50%, -50%) scale(1.3) translateX(-53px) translateY(45px);
+            opacity: 0.4;
+          }
+          80% {
+            transform: translate(-50%, -50%) scale(1.7) translateX(38px) translateY(60px);
+            opacity: 0.1;
+          }
+        }
+      `}</style>
     </div>
   )
 }

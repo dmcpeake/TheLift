@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Settings } from 'lucide-react'
+import { Settings, SkipForward } from 'lucide-react'
+import Lottie from 'lottie-react'
 import { BreathingCirclesProps, Phase, Pace, BreathingSettings, BreathingTechnique } from './types'
 import { Stage } from './Stage'
 import { Footer } from './Footer'
@@ -11,7 +12,21 @@ import { playAudioCue, preloadAudio } from './audio'
 import { BREATHING_TECHNIQUES, getBreathingTechnique } from './techniques'
 import './breathing.css'
 
-export function BreathingCircles(props: BreathingCirclesProps) {
+export function BreathingCircles(props: BreathingCirclesProps & {
+  embedded?: boolean;
+  externalShowSettings?: boolean;
+  onExternalSettingsChange?: (show: boolean) => void;
+  externalShowTechniqueSelector?: boolean;
+  onExternalTechniqueSelectorChange?: (show: boolean) => void;
+  externalSelectedTechniqueId?: string;
+  onExternalSelectedTechniqueIdChange?: (id: string) => void;
+  externalBreathingStarted?: boolean;
+  onExternalBreathingStartedChange?: (started: boolean) => void;
+  onExternalStart?: (startFn: () => void) => void;
+  onExternalPause?: (pauseFn: () => void) => void;
+  onExternalResume?: (resumeFn: () => void) => void;
+  onExternalRunningChange?: (running: boolean) => void;
+}) {
   const {
     cycles: defaultCycles = 5,
     pace: defaultPace,
@@ -19,6 +34,19 @@ export function BreathingCircles(props: BreathingCirclesProps) {
     captions: initialCaptions = true,
     reducedMotion: initialReducedMotion = false,
     highContrast: initialHighContrast = false,
+    embedded = false,
+    externalShowSettings,
+    onExternalSettingsChange,
+    externalShowTechniqueSelector,
+    onExternalTechniqueSelectorChange,
+    externalSelectedTechniqueId,
+    onExternalSelectedTechniqueIdChange,
+    externalBreathingStarted,
+    onExternalBreathingStartedChange,
+    onExternalStart,
+    onExternalPause,
+    onExternalResume,
+    onExternalRunningChange,
     onProgress,
     onComplete,
     onExit
@@ -30,16 +58,30 @@ export function BreathingCircles(props: BreathingCirclesProps) {
   const [cycle, setCycle] = useState(1)
   const [running, setRunning] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+
+  // Use external settings control when embedded
+  const effectiveShowSettings = embedded && externalShowSettings !== undefined ? externalShowSettings : showSettings
+  const handleSettingsToggle = embedded && onExternalSettingsChange ? onExternalSettingsChange : setShowSettings
+
+  // Use external technique selector control when embedded
+  const effectiveShowTechniqueSelector = embedded && externalShowTechniqueSelector !== undefined ? externalShowTechniqueSelector : showTechniqueSelector
+  const handleTechniqueSelectorToggle = embedded && onExternalTechniqueSelectorChange ? onExternalTechniqueSelectorChange : setShowTechniqueSelector
   const [showTechniqueSelector, setShowTechniqueSelector] = useState(false)
   const [selectedTechniqueId, setSelectedTechniqueId] = useState('balloon')
+
+  // Use external selected technique control when embedded
+  const effectiveSelectedTechniqueId = embedded && externalSelectedTechniqueId !== undefined ? externalSelectedTechniqueId : selectedTechniqueId
+  const handleSelectedTechniqueIdChange = embedded && onExternalSelectedTechniqueIdChange ? onExternalSelectedTechniqueIdChange : setSelectedTechniqueId
   const [sessionId] = useState(() => crypto.randomUUID())
+  const [roseAnimation, setRoseAnimation] = useState(null)
   const startTimeRef = useRef<number>(Date.now())
   const phaseTimerRef = useRef<NodeJS.Timeout>()
 
   // Get current technique
-  const currentTechnique = getBreathingTechnique(selectedTechniqueId) || BREATHING_TECHNIQUES[0]
+  const currentTechnique = getBreathingTechnique(effectiveSelectedTechniqueId) || BREATHING_TECHNIQUES[0]
   const cycles = currentTechnique.cycles || defaultCycles
   const pace = currentTechnique.pace
+
 
   // Settings
   const [settings, setSettings] = useState<BreathingSettings>(() => {
@@ -62,6 +104,14 @@ export function BreathingCircles(props: BreathingCirclesProps) {
   // Preload audio on mount
   useEffect(() => {
     preloadAudio()
+  }, [])
+
+  // Load the Theo Rose animation
+  useEffect(() => {
+    fetch('/theo-rose.json')
+      .then(response => response.json())
+      .then(data => setRoseAnimation(data))
+      .catch(error => console.error('Error loading rose animation:', error))
   }, [])
 
   // Save settings to localStorage
@@ -226,7 +276,39 @@ export function BreathingCircles(props: BreathingCirclesProps) {
     setRunning(true)
   }
 
+  // Expose handleStart to external control when embedded
+  useEffect(() => {
+    if (embedded && onExternalStart) {
+      onExternalStart(handleStart)
+    }
+  }, [embedded, onExternalStart, handleStart])
+
+  // Expose pause/resume functions when embedded
+  useEffect(() => {
+    if (embedded && onExternalPause) {
+      onExternalPause(handlePause)
+    }
+  }, [embedded, onExternalPause])
+
+  useEffect(() => {
+    if (embedded && onExternalResume) {
+      onExternalResume(handleResume)
+    }
+  }, [embedded, onExternalResume])
+
+  // Notify external component about running state changes
+  useEffect(() => {
+    if (embedded && onExternalRunningChange) {
+      onExternalRunningChange(running)
+    }
+  }, [embedded, running, onExternalRunningChange])
+
   const handlePause = () => {
+    // Immediately clear any running timer for instant pause
+    if (phaseTimerRef.current) {
+      clearTimeout(phaseTimerRef.current)
+      phaseTimerRef.current = undefined
+    }
     setRunning(false)
   }
 
@@ -254,53 +336,14 @@ export function BreathingCircles(props: BreathingCirclesProps) {
   }
 
   return (
-    <div className="bg-white min-h-screen" style={{ paddingTop: '140px', position: 'relative', overflow: 'hidden' }}>
-      {/* Large animated color shapes radiating from breathing circle center */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          width: '400px',
-          height: '400px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255, 50, 80, 0.8) 0%, rgba(255, 50, 80, 0.2) 70%)',
-          filter: 'blur(40px)',
-          zIndex: 1,
-          animation: 'radiate1 4s ease-in-out infinite',
-          transform: 'translate(-50%, -50%)'
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          width: '500px',
-          height: '300px',
-          borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(50, 100, 255, 0.7) 0%, rgba(50, 100, 255, 0.15) 80%)',
-          filter: 'blur(50px)',
-          zIndex: 2,
-          animation: 'radiate2 5s ease-in-out infinite 1s',
-          transform: 'translate(-50%, -50%)'
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          width: '600px',
-          height: '600px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(147, 51, 234, 0.6) 0%, rgba(147, 51, 234, 0.1) 60%)',
-          filter: 'blur(60px)',
-          zIndex: 1,
-          animation: 'radiate3 6s ease-in-out infinite 2s',
-          transform: 'translate(-50%, -50%)'
-        }}
-      />
+    <div className="min-h-screen" style={{
+        backgroundColor: 'white',
+        paddingTop: embedded ? '0' : '140px',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+      {/* REMOVED ALL YELLOW BACKGROUNDS FOR DEBUG */}
+
 
       <style jsx>{`
         @keyframes radiate1 {
@@ -309,15 +352,15 @@ export function BreathingCircles(props: BreathingCirclesProps) {
             opacity: 0.9;
           }
           25% {
-            transform: translate(-50%, -50%) scale(1.2) translateX(30px) translateY(-20px);
+            transform: translate(-50%, -50%) scale(0.9) translateX(23px) translateY(-15px);
             opacity: 0.6;
           }
           50% {
-            transform: translate(-50%, -50%) scale(2.0) translateX(-40px) translateY(30px);
+            transform: translate(-50%, -50%) scale(1.5) translateX(-30px) translateY(23px);
             opacity: 0.3;
           }
           75% {
-            transform: translate(-50%, -50%) scale(1.5) translateX(20px) translateY(40px);
+            transform: translate(-50%, -50%) scale(1.1) translateX(15px) translateY(30px);
             opacity: 0.5;
           }
         }
@@ -328,11 +371,11 @@ export function BreathingCircles(props: BreathingCirclesProps) {
             opacity: 0.8;
           }
           33% {
-            transform: translate(-50%, -50%) scale(1.8) rotate(120deg) translateX(-50px) translateY(-30px);
+            transform: translate(-50%, -50%) scale(1.35) rotate(120deg) translateX(-38px) translateY(-23px);
             opacity: 0.4;
           }
           66% {
-            transform: translate(-50%, -50%) scale(2.5) rotate(240deg) translateX(40px) translateY(50px);
+            transform: translate(-50%, -50%) scale(1.9) rotate(240deg) translateX(30px) translateY(38px);
             opacity: 0.2;
           }
         }
@@ -343,62 +386,50 @@ export function BreathingCircles(props: BreathingCirclesProps) {
             opacity: 0.7;
           }
           20% {
-            transform: translate(-50%, -50%) scale(1.0) translateX(-30px) translateY(25px);
+            transform: translate(-50%, -50%) scale(0.75) translateX(-23px) translateY(19px);
             opacity: 0.5;
           }
           40% {
-            transform: translate(-50%, -50%) scale(1.8) translateX(35px) translateY(-40px);
+            transform: translate(-50%, -50%) scale(1.35) translateX(26px) translateY(-30px);
             opacity: 0.3;
           }
           60% {
-            transform: translate(-50%, -50%) scale(2.2) translateX(-25px) translateY(-20px);
+            transform: translate(-50%, -50%) scale(1.65) translateX(-19px) translateY(-15px);
             opacity: 0.2;
           }
           80% {
-            transform: translate(-50%, -50%) scale(1.6) translateX(45px) translateY(35px);
+            transform: translate(-50%, -50%) scale(1.2) translateX(34px) translateY(26px);
             opacity: 0.4;
           }
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto px-6 w-full" style={{ position: 'relative', zIndex: 10 }}>
-        {/* Title positioned exactly like other pages */}
-        <div className="text-center" style={{ marginTop: '40px', marginBottom: '2rem' }}>
-          <h1 className="text-gray-900 mb-2" style={{ fontSize: '40px', fontWeight: 600, letterSpacing: '0.02em' }}>Let's breathe</h1>
-        </div>
+      <div className="max-w-7xl mx-auto px-6 w-full" style={{
+        position: 'relative',
+        zIndex: 10,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        minHeight: embedded ? 'calc(100vh - 200px)' : 'auto',
+        paddingTop: embedded ? '0' : '40px'
+      }}>
 
-        {/* Settings icon positioned 40px above play button */}
-        <button
-          onClick={() => setShowTechniqueSelector(!showTechniqueSelector)}
-          style={{
-            position: 'fixed',
-            bottom: 'calc(2rem + 56px + 40px)', // Footer padding + button height + 40px gap
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            zIndex: 100,
-            transition: 'all 0.3s ease'
-          }}
-          aria-label={showTechniqueSelector ? 'Close settings' : 'Open settings'}
-        >
-          <Settings style={{ width: '24px', height: '24px', color: '#3a7ddc' }} />
-        </button>
 
-        {/* Settings Panel */}
-        <AnimatePresence>
-          {showSettings && (
-            <SettingsPanel
-              settings={settings}
-              onChange={handleSettingsChange}
-              onClose={() => setShowSettings(false)}
-            />
-          )}
-        </AnimatePresence>
+        {/* Settings Panel - Only show when not embedded */}
+        {!embedded && (
+          <AnimatePresence>
+            {effectiveShowSettings && (
+              <SettingsPanel
+                settings={settings}
+                onChange={handleSettingsChange}
+                onClose={() => handleSettingsToggle(false)}
+              />
+            )}
+          </AnimatePresence>
+        )}
 
         {/* Technique Selector - Display cards vertically centered when open */}
-        {showTechniqueSelector && (
+        {effectiveShowTechniqueSelector && (
           <>
             {/* Click outside to close */}
             <div
@@ -410,94 +441,67 @@ export function BreathingCircles(props: BreathingCirclesProps) {
                 bottom: 0,
                 zIndex: 999
               }}
-              onClick={() => setShowTechniqueSelector(false)}
+              onClick={() => handleTechniqueSelectorToggle(false)}
             />
-            <div
-              style={{
-                position: 'fixed',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                zIndex: 1000,
+            <div style={{
+              position: 'fixed',
+              top: '0',
+              left: '0',
+              right: '0',
+              bottom: '0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000
+            }}>
+              <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px',
-                maxWidth: '320px'
-              }}
-            >
-            {BREATHING_TECHNIQUES.map(technique => {
-              const isSelected = technique.id === selectedTechniqueId
-              return (
-                <button
-                  key={technique.id}
-                  onClick={() => {
-                    setSelectedTechniqueId(technique.id)
-                    setShowTechniqueSelector(false)
-                    // Reset when changing technique
-                    if (running) {
-                      setRunning(false)
-                      setPhase('intro')
-                      setCycle(1)
-                    }
-                  }}
-                  style={{
-                    padding: '1rem',
-                    borderRadius: '12px',
-                    border: `2px solid ${isSelected ? '#3b82f6' : 'transparent'}`,
-                    background: isSelected
-                      ? 'rgba(255, 255, 255, 0.9)'
-                      : 'rgba(255, 255, 255, 0.85)',
-                    backdropFilter: 'blur(10px)',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all 0.2s ease',
-                    width: '280px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-                  }}
-                  onMouseEnter={e => {
-                    if (!isSelected) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)'
-                      e.currentTarget.style.transform = 'scale(1.02)'
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (!isSelected) {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.85)'
-                      e.currentTarget.style.transform = 'scale(1)'
-                    }
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-                    <div style={{ flex: 1 }}>
-                      <h3 style={{
-                        fontSize: '1rem',
-                        fontWeight: '600',
-                        color: '#1f2937',
-                        marginBottom: '0.25rem'
-                      }}>
+                gap: '12px'
+              }}>
+                {BREATHING_TECHNIQUES.map(technique => {
+                  const isSelected = technique.id === effectiveSelectedTechniqueId
+                  return (
+                    <button
+                      key={technique.id}
+                      onClick={() => {
+                        handleSelectedTechniqueIdChange(technique.id)
+                        handleTechniqueSelectorToggle(false)
+                        // Reset when changing technique
+                        if (running) {
+                          setRunning(false)
+                          setPhase('intro')
+                          setCycle(1)
+                        }
+                      }}
+                      style={{
+                        padding: '1rem',
+                        borderRadius: '12px',
+                        border: `2px solid ${isSelected ? '#3b82f6' : 'transparent'}`,
+                        background: 'white',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'all 0.2s ease',
+                        width: '280px',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      <div style={{ fontSize: '1rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.25rem' }}>
                         {technique.name}
-                      </h3>
-                      <p style={{
-                        fontSize: '0.875rem',
-                        color: '#6b7280',
-                        lineHeight: '1.4',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                      }}>
+                      </div>
+                      <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
                         {technique.pace.in}s in • {technique.pace.hold}s hold • {technique.pace.out}s out
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              )
-            })}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </>
         )}
 
         {/* Main Stage - Fade out when settings open */}
-        <div style={{ opacity: showTechniqueSelector ? 0 : 1, transition: 'opacity 0.3s ease' }}>
+        <div style={{ opacity: effectiveShowTechniqueSelector ? 0 : 1, transition: 'opacity 0.3s ease' }}>
           <Stage
             phase={phase}
             cycle={cycle}
@@ -511,7 +515,7 @@ export function BreathingCircles(props: BreathingCirclesProps) {
         </div>
 
         {/* Footer Controls - Fade out when settings open */}
-        <div style={{ opacity: showTechniqueSelector ? 0 : 1, transition: 'opacity 0.3s ease' }}>
+        <div style={{ opacity: effectiveShowTechniqueSelector ? 0 : 1, transition: 'opacity 0.3s ease' }}>
           <Footer
             running={running}
             phase={phase}

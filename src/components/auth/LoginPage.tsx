@@ -287,23 +287,89 @@ export function LoginPage() {
 
             <div className="space-y-3">
               <p className="text-sm text-gray-600 text-center">Quick test logins:</p>
-              <div className="grid grid-cols-2 gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+              <div className="grid grid-cols-2 gap-3">
+                <button
                   onClick={() => quickLogin('contact@demoschool.com')}
-                  className="text-xs"
+                  style={{
+                    padding: '1rem',
+                    borderRadius: '12px',
+                    border: '2px solid transparent',
+                    background: 'white',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                  }}
                 >
-                  Group Admin
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                  <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.25rem' }}>
+                    Group Admin
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                    contact@demoschool.com
+                  </div>
+                </button>
+                <button
                   onClick={() => quickLogin('practitioner@demoschool.com')}
-                  className="text-xs"
+                  style={{
+                    padding: '1rem',
+                    borderRadius: '12px',
+                    border: '2px solid transparent',
+                    background: 'white',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                  }}
                 >
-                  Practitioner
-                </Button>
+                  <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.25rem' }}>
+                    Practitioner
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                    practitioner@demoschool.com
+                  </div>
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <button
+                  onClick={() => quickLogin('admin@thelift.com')}
+                  style={{
+                    padding: '1rem',
+                    borderRadius: '12px',
+                    border: '2px solid transparent',
+                    background: 'white',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.25rem' }}>
+                    Admin
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                    admin@thelift.com
+                  </div>
+                </button>
+                <button
+                  onClick={() => quickLogin('child@demoschool.com')}
+                  style={{
+                    padding: '1rem',
+                    borderRadius: '12px',
+                    border: '2px solid transparent',
+                    background: 'white',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.25rem' }}>
+                    Child
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                    child@demoschool.com
+                  </div>
+                </button>
               </div>
             </div>
 

@@ -6,24 +6,19 @@
   100% { background-position: 0% 50%; }
 }
 
-@keyframes floatingOrbs {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  33% { transform: translateY(-20px) rotate(120deg); }
-  66% { transform: translateY(10px) rotate(240deg); }
-}
 
 @keyframes pulseGlow {
-  0%, 100% { 
-    box-shadow: 
+  0%, 100% {
+    box-shadow:
       0 0 20px rgba(255, 255, 255, 0.1),
-      0 0 40px rgba(59, 130, 246, 0.15),
-      0 0 80px rgba(147, 51, 234, 0.1);
+      0 0 40px rgba(255, 165, 0, 0.15),
+      0 0 80px rgba(255, 140, 0, 0.1);
   }
-  50% { 
-    box-shadow: 
+  50% {
+    box-shadow:
       0 0 30px rgba(255, 255, 255, 0.2),
-      0 0 60px rgba(59, 130, 246, 0.25),
-      0 0 120px rgba(147, 51, 234, 0.2);
+      0 0 60px rgba(255, 165, 0, 0.25),
+      0 0 120px rgba(255, 140, 0, 0.2);
   }
 }
 
@@ -149,31 +144,7 @@
   animation: waitingBreath 4s ease-in-out infinite;
 }
 
-/* Floating orbs around the circle */
-.breathing-circle-container::before,
-.breathing-circle-container::after {
-  content: '';
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-  backdrop-filter: blur(10px);
-  animation: floatingOrbs 8s ease-in-out infinite;
-  z-index: 1;
-}
-
-.breathing-circle-container::before {
-  top: 10%;
-  right: 10%;
-  animation-delay: 0s;
-}
-
-.breathing-circle-container::after {
-  bottom: 10%;
-  left: 10%;
-  animation-delay: 4s;
-}
+/* Floating orbs removed */
 
 .breathing-circle {
   width: 280px;
@@ -245,12 +216,13 @@
   transition: opacity 0.5s ease;
 }
 
-.progress-ring-bg {
-  fill: none;
-  stroke: white;
-  stroke-width: 8;
-  stroke-dasharray: 12 6;
-  filter: blur(0.5px);
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .progress-ring-progress {
@@ -264,10 +236,10 @@
 
 .breathing-footer {
   position: fixed;
-  bottom: 0;
+  bottom: 40px;
   left: 0;
   right: 0;
-  padding: 2rem;
+  padding: 0;
   display: flex;
   justify-content: center;
   z-index: 1000;

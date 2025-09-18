@@ -29,6 +29,8 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
   const [finalData, setFinalData] = useState<WheelData | null>(null)
   const [startTime] = useState(Date.now())
+  const [showingTextInput, setShowingTextInput] = useState<string | null>(null)
+  const [isListening, setIsListening] = useState(false)
 
   // Initialize with existing data if available
   useEffect(() => {
@@ -99,7 +101,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
       name: section.name,
       mood_level: mood.level,
       mood_numeric: mood.numeric,
-      notes: ''
+      notes: sections[sectionId]?.notes || '' // Preserve existing notes
     }
 
     setSections(prev => {
@@ -112,20 +114,8 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
     })
     console.log(`🎯 WELLBEING WHEEL SECTION DATA - ${section.name}:`, data)
 
-    // Auto-advance to next section after a brief delay for animation
-    setTimeout(() => {
-      const nextIndex = wheelSections.findIndex(s => s.id === sectionId) + 1
-      if (nextIndex < wheelSections.length) {
-        // Find next unrated section or go to next in sequence
-        let targetIndex = nextIndex
-        while (targetIndex < wheelSections.length && sections[wheelSections[targetIndex].id]) {
-          targetIndex++
-        }
-        if (targetIndex < wheelSections.length) {
-          setCurrentSectionIndex(targetIndex)
-        }
-      }
-    }, 300)
+    // Show text input for this section
+    setShowingTextInput(sectionId)
   }
 
   const editSection = (sectionId: string) => {
@@ -139,6 +129,73 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
     // Make it the current active question
     const index = wheelSections.findIndex(s => s.id === sectionId)
     setCurrentSectionIndex(index)
+    setShowingTextInput(null) // Hide any open text input
+  }
+
+  const updateNotes = (sectionId: string, notes: string) => {
+    setSections(prev => {
+      const currentSection = prev[sectionId]
+      if (currentSection) {
+        return {
+          ...prev,
+          [sectionId]: { ...currentSection, notes }
+        }
+      }
+      return prev
+    })
+  }
+
+  const handleMicrophoneClick = (sectionId: string) => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Speech recognition is not supported in your browser')
+      return
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    const recognition = new SpeechRecognition()
+
+    recognition.continuous = false
+    recognition.interimResults = false
+    recognition.lang = 'en-US'
+
+    recognition.onstart = () => {
+      setIsListening(true)
+    }
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript
+      const currentNotes = sections[sectionId]?.notes || ''
+      const newNotes = currentNotes + (currentNotes ? ' ' : '') + transcript
+      updateNotes(sectionId, newNotes.slice(0, 500))
+    }
+
+    recognition.onerror = () => {
+      setIsListening(false)
+      alert('Speech recognition error. Please try again.')
+    }
+
+    recognition.onend = () => {
+      setIsListening(false)
+    }
+
+    recognition.start()
+  }
+
+  const finishSection = (sectionId: string) => {
+    setShowingTextInput(null)
+
+    // Auto-advance to next section
+    const nextIndex = wheelSections.findIndex(s => s.id === sectionId) + 1
+    if (nextIndex < wheelSections.length) {
+      // Find next unrated section or go to next in sequence
+      let targetIndex = nextIndex
+      while (targetIndex < wheelSections.length && sections[wheelSections[targetIndex].id]) {
+        targetIndex++
+      }
+      if (targetIndex < wheelSections.length) {
+        setCurrentSectionIndex(targetIndex)
+      }
+    }
   }
 
   const completeWheel = () => {
@@ -269,18 +326,115 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                 <h2 className="text-2xl font-semibold text-gray-900">{currentSection.name}</h2>
               </div>
 
-              {/* Mood selection - exactly at chevron level */}
-              <div className="fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex gap-4 justify-center">
-                {moods.map((mood) => (
-                  <button
-                    key={mood.level}
-                    onClick={() => selectMood(currentSection.id, mood)}
-                    className="p-4 rounded-lg transition-all hover:scale-110 bg-gray-100 hover:bg-gray-200"
-                  >
-                    <span className="text-4xl">{mood.emoji}</span>
-                  </button>
-                ))}
-              </div>
+              {/* Show mood selection if not showing text input, or show selected mood if showing text input */}
+              {showingTextInput !== currentSection.id ? (
+                <div className="fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex gap-4 justify-center">
+                  {moods.map((mood) => (
+                    <button
+                      key={mood.level}
+                      onClick={() => selectMood(currentSection.id, mood)}
+                      className="p-4 rounded-lg transition-all hover:scale-110 bg-gray-100 hover:bg-gray-200"
+                    >
+                      <span className="text-4xl">{mood.emoji}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {/* Rating options stay in original position - vertical center */}
+                  <div className="fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex gap-4 justify-center">
+                    {moods.map((mood) => {
+                      const isSelected = sections[currentSection.id]?.mood_level === mood.level
+                      return (
+                        <button
+                          key={mood.level}
+                          onClick={() => selectMood(currentSection.id, mood)}
+                          className={`p-4 rounded-lg transition-all hover:scale-110 ${
+                            isSelected
+                              ? 'bg-blue-500 text-white ring-4 ring-blue-200 scale-110'
+                              : 'bg-gray-100 hover:bg-gray-200'
+                          }`}
+                        >
+                          <span className="text-4xl">{mood.emoji}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  {/* Text input below the ratings */}
+                  <div className="fixed left-1/2 transform -translate-x-1/2" style={{ top: 'calc(50% + 120px)', width: '600px' }}>
+                    <div className="relative">
+                      <textarea
+                        value={sections[currentSection.id]?.notes || ''}
+                        onChange={(e) => updateNotes(currentSection.id, e.target.value.slice(0, 500))}
+                        placeholder="What's going well or could be better in this area? (optional)"
+                        className="w-full p-3 border rounded-lg h-24 resize-none pr-16"
+                        maxLength={500}
+                      />
+                      <button
+                        onClick={() => handleMicrophoneClick(currentSection.id)}
+                        className={`absolute top-1/2 right-3 transform -translate-y-1/2 rounded-full transition-colors ${
+                          isListening ? 'bg-red-500 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                        }`}
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        title="Voice input"
+                        type="button"
+                      >
+                        {isListening ? (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <rect x="6" y="4" width="12" height="16" rx="2"/>
+                          </svg>
+                        ) : (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                            <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-gray-500 text-center mt-2">
+                      {(sections[currentSection.id]?.notes || '').length}/500 characters
+                    </p>
+
+                    {/* Round next arrow button */}
+                    <div className="flex justify-center mt-4">
+                      <button
+                        onClick={() => finishSection(currentSection.id)}
+                        style={{
+                          width: '56px',
+                          height: '56px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '50%',
+                          backgroundColor: '#3a7ddc',
+                          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease',
+                          color: 'white'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
+                        aria-label="Continue"
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9,18 15,12 9,6"></polyline>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </>
           )}
 

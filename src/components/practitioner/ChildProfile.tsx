@@ -91,7 +91,59 @@ export function ChildProfile() {
   }, [id])
 
   const fetchChildProfile = async () => {
-    if (!user || !id) return
+    if (!id) return
+
+    // Demo mode - use mock data when no user is authenticated
+    if (!user) {
+      const mockCheckIns = [
+        {
+          id: 'checkin-1',
+          childId: id,
+          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          startingMood: 7,
+          wheel: { happy: 8, calm: 6, confident: 7, energetic: 5 },
+          wrapUpMood: 8,
+          stickerAwarded: 'star',
+          status: 'fine' as const
+        },
+        {
+          id: 'checkin-2',
+          childId: id,
+          createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+          startingMood: 4,
+          wheel: { happy: 3, calm: 2, confident: 4, energetic: 6 },
+          wrapUpMood: 6,
+          stickerAwarded: 'heart',
+          status: 'needs_attention' as const
+        }
+      ]
+
+      const mockChild = {
+        id: id,
+        name: `Demo Child ${id}`,
+        age: 8,
+        status: 'fine' as const,
+        totalCheckIns: 15,
+        currentStreak: 3,
+        orgId: 'demo-org',
+        practitionerId: 'demo-practitioner',
+        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        aboutMe: {
+          favourites: ['Drawing', 'Playing outside', 'Reading'],
+          notes: 'Enjoys creative activities and outdoor play'
+        },
+        credentials: {
+          username: `demo${id}`,
+          pin: '1234',
+          mode: 'slip'
+        },
+        recentCheckIns: mockCheckIns
+      }
+
+      setChild(mockChild)
+      setLoading(false)
+      return
+    }
 
     try {
       const supabase = getSupabaseClient()
