@@ -72,7 +72,42 @@ export function EditChild() {
   }, [id])
 
   const fetchChildProfile = async () => {
-    if (!user || !id) return
+    if (!id) return
+
+    // Demo mode - use mock data when no user is authenticated
+    if (!user) {
+      const mockChild = {
+        id: id,
+        name: `Demo Child ${id}`,
+        age: 8,
+        aboutMe: {
+          favourites: ['Drawing', 'Playing outside'],
+          notes: 'Loves art and nature activities'
+        },
+        credentials: {
+          username: `demo${id}`,
+          pin: '1234',
+          mode: 'slip'
+        },
+        status: 'active',
+        orgId: 'demo-org',
+        practitionerId: 'demo-practitioner',
+        createdAt: new Date().toISOString()
+      }
+
+      setChild(mockChild)
+      setFormData({
+        name: mockChild.name,
+        favourites: mockChild.aboutMe.favourites.join(', '),
+        notes: mockChild.aboutMe.notes
+      })
+      setCredentials({
+        username: mockChild.credentials.username,
+        pin: mockChild.credentials.pin
+      })
+      setLoading(false)
+      return
+    }
 
     try {
       const supabase = getSupabaseClient()

@@ -1,18 +1,24 @@
 import React, { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Heart, Smile, Compass, TreePine } from 'lucide-react'
 import { BreathingCircles } from '../breathing/BreathingCircles'
 import { MoodMeter } from '../prototypes/MoodMeter'
 import { EmotionGrid } from '../prototypes/EmotionGrid'
 import { WellbeingWheel } from '../prototypes/WellbeingWheel'
 
-type FlowStep = 'breathing' | 'mood' | 'emotions' | 'wellbeing' | 'complete'
+type FlowStep = 'checkin' | 'mood' | 'emotions' | 'wellbeing' | 'garden' | 'complete'
 
 const steps = [
-  { id: 'breathing', name: 'Let\'s breathe', number: 1 },
-  { id: 'mood', name: 'How do you feel today?', number: 2 },
-  { id: 'emotions', name: 'What emotions are you feeling?', number: 3 },
-  { id: 'wellbeing', name: 'Wellbeing Wheel', number: 4 }
+  { id: 'mood', name: 'My emotions', number: 1 },
+  { id: 'emotions', name: 'My emotions', number: 2 },
+  { id: 'wellbeing', name: 'Wellbeing wheel', number: 3 }
+]
+
+// Progress header segments (only 3 segments now)
+const progressSegments = [
+  { name: 'Mood meter', icon: Heart },
+  { name: 'My emotions', icon: Smile },
+  { name: 'Wellbeing wheel', icon: Compass }
 ]
 
 export function CheckInFlow() {
@@ -26,7 +32,7 @@ export function CheckInFlow() {
   const [triggerMoodCompletion, setTriggerMoodCompletion] = useState(false)
   const [triggerWellbeingCompletion, setTriggerWellbeingCompletion] = useState(false)
 
-  const currentStep = (step || 'breathing') as FlowStep
+  const currentStep = (step || 'mood') as FlowStep
   const currentStepIndex = steps.findIndex(s => s.id === currentStep)
 
   // Reset selection state when step changes
@@ -114,7 +120,7 @@ export function CheckInFlow() {
   // Progress bar component
   const ProgressBar = () => {
     const handleBackClick = () => {
-      if (currentStep === 'breathing') {
+      if (currentStep === 'mood') {
         navigate('/checkin/home')
       } else {
         handleNavigateToStep(steps[currentStepIndex - 1].id)
@@ -123,10 +129,7 @@ export function CheckInFlow() {
 
     const handleForwardClick = () => {
       console.log('Forward click - currentStep:', currentStep, 'hasSelection:', currentStepHasSelection)
-      if (currentStep === 'breathing') {
-        // Always allow skipping breathing
-        handleSkip('breathing')
-      } else if (currentStepHasSelection) {
+      if (currentStepHasSelection) {
         // Trigger completion for the current step instead of just navigating
         if (currentStep === 'mood') {
           console.log('Triggering mood completion')
@@ -148,7 +151,7 @@ export function CheckInFlow() {
     }
 
     const canGoBack = true // Always can go back
-    const canGoForward = currentStep === 'breathing' || currentStepHasSelection || (currentStepIndex < steps.length - 1 && canNavigateToStep(steps[currentStepIndex + 1].id, currentStepIndex + 1))
+    const canGoForward = currentStepHasSelection || (currentStepIndex < steps.length - 1 && canNavigateToStep(steps[currentStepIndex + 1].id, currentStepIndex + 1))
 
     return (
       <>
@@ -214,42 +217,90 @@ export function CheckInFlow() {
         </button>
 
         {/* Progress header */}
-        <div className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 p-4">
-          <div className="max-w-7xl mx-auto px-6 w-full">
-            <div className="text-center mb-4">
-              <h1 className="text-xl font-bold text-gray-800">Check-In</h1>
+        <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', padding: '16px 0', borderRadius: '0' }}>
+          <div className="mx-auto px-6" style={{ maxWidth: '600px' }}>
+            {/* Icons row */}
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              {progressSegments.map((segment, index) => {
+                const Icon = segment.icon
+                return (
+                  <div key={segment.name} className="text-center">
+                    <Icon className="h-6 w-6 mx-auto" style={{ color: '#3a7ddc' }} />
+                  </div>
+                )
+              })}
             </div>
-
             {/* Progress bar with separators */}
             <div className="relative w-full bg-gray-200 rounded-full h-2 mb-3">
               <div
                 className="h-2 rounded-full transition-all duration-300"
                 style={{
-                  width: `${((currentStepIndex + 1) / steps.length) * 100}%`,
+                  width: `${(() => {
+                    // Calculate progress including current step
+                    let activeSegments = 0
+
+                    // Mood meter is active/completed when on mood or beyond
+                    if (currentStep === 'mood' || currentStep === 'emotions' || currentStep === 'wellbeing' || currentStep === 'garden') {
+                      activeSegments += 1
+                    }
+                    // My emotions is active/completed when on emotions or beyond
+                    if (currentStep === 'emotions' || currentStep === 'wellbeing' || currentStep === 'garden') {
+                      activeSegments += 1
+                    }
+                    // Wellbeing wheel is active/completed when on wellbeing or beyond
+                    if (currentStep === 'wellbeing' || currentStep === 'garden') {
+                      activeSegments += 1
+                    }
+
+                    return (activeSegments / progressSegments.length) * 100
+                  })()}%`,
                   backgroundColor: '#3a7ddc'
                 }}
               />
               {/* Section separators */}
-              {steps.slice(0, -1).map((_, index) => (
+              {progressSegments.slice(0, -1).map((_, index) => (
                 <div
                   key={index}
                   className="absolute top-0 bottom-0 w-px bg-white"
-                  style={{ left: `${((index + 1) / steps.length) * 100}%` }}
+                  style={{ left: `${((index + 1) / progressSegments.length) * 100}%` }}
                 />
               ))}
             </div>
 
             {/* Step labels - all centered */}
-            <div className="grid grid-cols-4 gap-2">
-              {steps.map((s, index) => (
-                <div key={s.id} className="text-center">
-                  <span className={`text-xs ${index === currentStepIndex ? 'font-bold' : 'text-gray-600'}`} style={{ color: index === currentStepIndex ? '#3a7ddc' : undefined }}>
-                    {s.name}
-                  </span>
-                </div>
-              ))}
+            <div className="grid grid-cols-3 gap-2">
+              {progressSegments.map((segment, index) => {
+                // Highlight both completed and currently active segments
+                let isHighlighted = false
+
+                if (index === 0) {
+                  // Mood meter - highlight if current or completed
+                  if (currentStep === 'mood' || currentStep === 'emotions' || currentStep === 'wellbeing' || currentStep === 'garden') {
+                    isHighlighted = true
+                  }
+                } else if (index === 1) {
+                  // My emotions - highlight if current or completed
+                  if (currentStep === 'emotions' || currentStep === 'wellbeing' || currentStep === 'garden') {
+                    isHighlighted = true
+                  }
+                } else if (index === 2) {
+                  // Wellbeing wheel - highlight if current or completed
+                  if (currentStep === 'wellbeing' || currentStep === 'garden') {
+                    isHighlighted = true
+                  }
+                }
+
+                return (
+                  <div key={segment.name} className="text-center">
+                    <span className={`text-xs ${isHighlighted ? 'font-bold' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : undefined }}>
+                      {segment.name}
+                    </span>
+                  </div>
+                )
+              })}
             </div>
           </div>
+
         </div>
       </>
     )
@@ -295,24 +346,10 @@ export function CheckInFlow() {
 
   return (
     <>
-      {/* Progress bar shows on ALL steps */}
-      <ProgressBar />
+      {/* Progress bar shows on all steps except garden */}
+      {currentStep !== 'garden' && <ProgressBar />}
       
       <div className="min-h-screen">
-        {currentStep === 'breathing' && (
-          <BreathingCircles
-            cycles={5}
-            muted={false}
-            captions={true}
-            onComplete={() => handleStepComplete('breathing', { completed: true, pattern: 'balloon' })}
-            onExit={(reason) => {
-              if (reason === 'skip') {
-                handleSkip('breathing')
-              }
-            }}
-          />
-        )}
-        
         {currentStep === 'mood' && (
           <div className="bg-white min-h-screen" style={{ paddingTop: '140px' }}>
             <div className="max-w-7xl mx-auto px-6 w-full">
@@ -357,6 +394,7 @@ export function CheckInFlow() {
             </div>
           </div>
         )}
+
       </div>
     </>
   )

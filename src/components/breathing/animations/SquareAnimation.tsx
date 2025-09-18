@@ -83,13 +83,14 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
       justifyContent: 'center',
       width: '480px',
       height: '480px',
-      position: 'relative'
+      position: 'relative',
+      zIndex: 10
     }}>
       <svg
         width="480"
         height="480"
         viewBox="0 0 480 480"
-        style={{ position: 'absolute' }}
+        style={{ position: 'absolute', zIndex: 15 }}
       >
         {/* Background white square - animated with breathing */}
         <rect
@@ -98,10 +99,10 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
           width={squareSize}
           height={squareSize}
           rx="20"
-          fill="rgba(255, 255, 255, 0.98)"
+          fill="white"
           stroke="none"
           style={{
-            transformOrigin: 'center',
+            transformOrigin: '240px 240px',
             transform: `scale(${currentScale})`,
             animation: phase === 'intro' ? 'squareWaiting 4s ease-in-out infinite' : 'none',
             transition: phase === 'intro' ? 'none' : `transform ${
@@ -114,7 +115,7 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
           }}
         />
 
-        {/* Dotted outline square - solid white */}
+        {/* Dotted outline square - white dashed */}
         <rect
           x="60"
           y="60"
@@ -123,7 +124,7 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
           rx="30"
           fill="none"
           stroke="white"
-          strokeWidth="8"
+          strokeWidth="6"
           strokeDasharray="12 6"
         />
 
@@ -171,7 +172,7 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
       {/* Center text */}
       <div style={{
         position: 'relative',
-        zIndex: 10,
+        zIndex: 20,
         textAlign: 'center',
         padding: '2rem'
       }}>

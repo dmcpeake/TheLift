@@ -15,10 +15,10 @@ export function Navigation() {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const navigate = useNavigate()
 
-  if (!user) return null
-
-  const isGroupContact = user.profile.role === 'GroupContact'
-  const isAdmin = user.profile.role === 'Account'
+  // Always show navigation for demo mode
+  const isDemo = !user
+  const isGroupContact = user?.profile.role === 'GroupContact' || isDemo
+  const isAdmin = user?.profile.role === 'Account'
 
   return (
     <nav className="bg-white border-b border-gray-200 px-6 py-4">
@@ -105,14 +105,8 @@ export function Navigation() {
                     <span>Profile Settings</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/test/wellbeing" className="flex items-center space-x-2">
-                    <TestTube className="w-4 h-4" />
-                    <span>Wellbeing Tools Test</span>
-                  </Link>
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="flex items-center space-x-2 text-red-600">
+                <DropdownMenuItem onClick={() => navigate('/')} className="flex items-center space-x-2 text-red-600">
                   <LogOut className="w-4 h-4" />
                   <span>Sign Out</span>
                 </DropdownMenuItem>

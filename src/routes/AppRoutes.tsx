@@ -54,6 +54,7 @@ import CheckinProgressViz from '../components/analytics/CheckinProgressViz'
 // Check-in Flow Components
 import { CheckInHome } from '../components/checkin/CheckInHome'
 import { CheckInFlow } from '../components/checkin/CheckInFlow'
+import { GardenPage } from '../pages/GardenPage'
 
 export function AppRoutes() {
   const { user } = React.useContext(AuthContext)
@@ -127,6 +128,7 @@ export function AppRoutes() {
         {/* Check-in Flow Routes - Public access for prototypes */}
         <Route path="/checkin/home" element={<CheckInHome />} />
         <Route path="/checkin/flow/:step" element={<CheckInFlow />} />
+        <Route path="/checkin/garden" element={<GardenPage />} />
 
         {/* Prototypes Route - No authentication required */}
         <Route path="/prototypes" element={<PrototypesPage />} />

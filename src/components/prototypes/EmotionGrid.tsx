@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 interface EmotionData {
   selected_emotions: string[]
   emotion_story: string
+  discussion_preference: string
   step_completed: number
   completed_at: string
   time_to_complete_seconds: number
@@ -21,6 +22,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
   const [currentStep, setCurrentStep] = useState(1)
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([])
   const [emotionStory, setEmotionStory] = useState('')
+  const [discussionPreference, setDiscussionPreference] = useState('')
   const [finalData, setFinalData] = useState<EmotionData | null>(null)
   const [stepData, setStepData] = useState<any>(null)
   const [startTime] = useState(Date.now())
@@ -147,6 +149,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
     const data: EmotionData = {
       selected_emotions: selectedEmotions,
       emotion_story: emotionStory,
+      discussion_preference: discussionPreference,
       step_completed: 2,
       completed_at: new Date().toISOString(),
       time_to_complete_seconds: timeToComplete
@@ -277,6 +280,31 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
             <p className="text-xs text-gray-500 mb-4 text-center">
               {emotionStory.length}/500 characters
             </p>
+          </div>
+
+          {/* Discussion Question */}
+          <div className="w-full max-w-2xl mx-auto mt-6">
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-semibold">Do you want to discuss this with anyone?</h3>
+            </div>
+
+            <div className="flex justify-center gap-3 flex-wrap">
+              {['I\'m good', 'Parent', 'Teacher'].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => setDiscussionPreference(option)}
+                  className="px-6 py-3 rounded-full font-medium transition-all duration-200 hover:scale-105"
+                  style={{
+                    backgroundColor: discussionPreference === option ? '#3a7ddc' : '#f3f4f6',
+                    color: discussionPreference === option ? 'white' : '#374151',
+                    border: `2px solid ${discussionPreference === option ? '#3a7ddc' : 'transparent'}`,
+                    boxShadow: discussionPreference === option ? '0 4px 12px rgba(58, 125, 220, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.1)'
+                  }}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Data Captured for Step 2 */}
