@@ -25,12 +25,16 @@ serve(async (req) => {
   }
 
   try {
+    // Use service role key if available, otherwise fall back to anon key
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_ANON_KEY') || ''
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      supabaseKey,
       {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
         },
       }
     )
