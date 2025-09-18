@@ -79,8 +79,8 @@ serve(async (req) => {
     // Fetch mood data
     let moodQuery = supabaseClient
       .from('mood_meter_usage')
-      .select('created_at, mood_numeric, notes, child_id')
-      .order('created_at', { ascending: false })
+      .select('selected_at, created_at, mood_numeric, notes, child_id')
+      .order('selected_at', { ascending: false })
       .limit(RECORD_LIMIT)
 
     if (childId) {

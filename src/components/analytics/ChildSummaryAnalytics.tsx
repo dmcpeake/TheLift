@@ -171,7 +171,7 @@ export function ChildSummaryAnalytics() {
         .from('mood_meter_usage')
         .select('*')
         .in('child_id', childIds)
-        .order('created_at', { ascending: false })
+        .order('selected_at', { ascending: false })
 
       // Process children with mood data
       const processedChildren: Child[] = childProfiles.map(child => {
@@ -203,8 +203,8 @@ export function ChildSummaryAnalytics() {
           name: child.name || 'Unknown',
           avatar_url: child.avatar_url,
           initials,
-          lastCheckIn: childMoods[0]?.created_at
-            ? new Date(childMoods[0].created_at).toLocaleDateString('en-US', {
+          lastCheckIn: childMoods[0]?.selected_at
+            ? new Date(childMoods[0].selected_at).toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric'
@@ -246,7 +246,7 @@ export function ChildSummaryAnalytics() {
         .from('mood_meter_usage')
         .select('*')
         .eq('child_id', childId)
-        .order('created_at', { ascending: false })
+        .order('selected_at', { ascending: false })
         .limit(30), // Get more for heatmap visualization
 
       // Get emotion grid usage for qualitative check-ins

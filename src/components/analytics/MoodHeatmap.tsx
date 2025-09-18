@@ -6,7 +6,8 @@ const FORCE_COLORS = (
 )
 
 interface MoodData {
-  created_at: string
+  created_at?: string
+  selected_at?: string  // The actual date when mood was selected
   mood_numeric: number
   mood_level?: string
   notes?: string
@@ -22,7 +23,10 @@ export function MoodHeatmap({ moodData, MOOD_EMOJIS }: MoodHeatmapProps) {
   const moodByDate: Record<string, number> = {}
 
   moodData.forEach(mood => {
-    const date = new Date(mood.created_at)
+    // Use selected_at if available (actual mood date), fallback to created_at
+    const dateStr = mood.selected_at || mood.created_at
+    if (!dateStr) return
+    const date = new Date(dateStr)
     const dateKey = date.toISOString().split('T')[0]
     moodByDate[dateKey] = mood.mood_numeric
   })
@@ -30,13 +34,47 @@ export function MoodHeatmap({ moodData, MOOD_EMOJIS }: MoodHeatmapProps) {
   // Debug: Log the mood dates
   console.log('Mood dates in heatmap:', Object.keys(moodByDate))
 
-  // Generate calendar grid for Jan-Apr 2025
-  const months = [
-    { name: 'January', year: 2025, days: 31, startDay: 3 }, // Jan 1, 2025 is Wednesday
-    { name: 'February', year: 2025, days: 28, startDay: 6 }, // Feb 1, 2025 is Saturday
-    { name: 'March', year: 2025, days: 31, startDay: 6 }, // Mar 1, 2025 is Saturday
-    { name: 'April', year: 2025, days: 30, startDay: 2 }, // Apr 1, 2025 is Tuesday
-  ]
+  // Dynamically determine which months to show based on actual data
+  const getMonthsFromData = () => {
+    if (!moodData || moodData.length === 0) {
+      // Default to Jan-Apr 2025 if no data
+      return [
+        { name: 'January', year: 2025, days: 31, startDay: 3 },
+        { name: 'February', year: 2025, days: 28, startDay: 6 },
+        { name: 'March', year: 2025, days: 31, startDay: 6 },
+        { name: 'April', year: 2025, days: 30, startDay: 2 },
+      ]
+    }
+
+    // Find the range of months in the data
+    const dates = moodData.map(m => new Date(m.selected_at || m.created_at || ''))
+    const minDate = new Date(Math.min(...dates.map(d => d.getTime())))
+    const maxDate = new Date(Math.max(...dates.map(d => d.getTime())))
+
+    const months = []
+    const current = new Date(minDate.getFullYear(), minDate.getMonth(), 1)
+    const end = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1)
+
+    while (current <= end && months.length < 4) {
+      const year = current.getFullYear()
+      const month = current.getMonth()
+      const firstDay = new Date(year, month, 1)
+      const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+      months.push({
+        name: firstDay.toLocaleDateString('en-US', { month: 'long' }),
+        year: year,
+        days: daysInMonth,
+        startDay: firstDay.getDay()
+      })
+
+      current.setMonth(current.getMonth() + 1)
+    }
+
+    return months
+  }
+
+  const months = getMonthsFromData()
 
   const getMoodColor = (mood: number | undefined) => {
     if (!mood) return 'bg-gray-100'
@@ -144,7 +182,7 @@ export function MoodHeatmap({ moodData, MOOD_EMOJIS }: MoodHeatmapProps) {
         <span>
           Period: {moodData.length > 0 ?
             (() => {
-              const dates = moodData.map(m => new Date(m.created_at)).sort((a, b) => a.getTime() - b.getTime())
+              const dates = moodData.map(m => new Date(m.selected_at || m.created_at || '')).sort((a, b) => a.getTime() - b.getTime())
               const firstDate = dates[0]
               const lastDate = dates[dates.length - 1]
               return `${firstDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} -
