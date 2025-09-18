@@ -42,6 +42,39 @@ serve(async (req) => {
     const requestData: AnalysisRequest = await req.json()
     const { orgId, childId, dateRange = 'week', analysisType = 'comprehensive' } = requestData
 
+    // Get organization type if we have an orgId
+    let orgType = 'school' // default
+    if (orgId) {
+      const { data: orgData } = await supabaseClient
+        .from('organizations')
+        .select('org_type')
+        .eq('id', orgId)
+        .single()
+
+      if (orgData?.org_type) {
+        orgType = orgData.org_type
+      }
+    } else if (childId) {
+      // If only childId is provided, get org type from child's org
+      const { data: childData } = await supabaseClient
+        .from('profiles')
+        .select('org_id')
+        .eq('id', childId)
+        .single()
+
+      if (childData?.org_id) {
+        const { data: orgData } = await supabaseClient
+          .from('organizations')
+          .select('org_type')
+          .eq('id', childData.org_id)
+          .single()
+
+        if (orgData?.org_type) {
+          orgType = orgData.org_type
+        }
+      }
+    }
+
     // OPTIMIZATION 1: Limit data to most recent entries
     const RECORD_LIMIT = childId ? 30 : 10 // More records for single child, fewer for org
 
@@ -101,20 +134,20 @@ serve(async (req) => {
     if (moodError) throw moodError
 
     // OPTIMIZATION 2: Aggregate data before sending to Claude
-    const aggregatedData = {
+    const aggregatedData: any = {
       summary: {
         totalCheckIns: moodData?.length || 0,
         dateRange,
         avgMood: moodData?.length
-          ? (moodData.reduce((acc, m) => acc + m.mood_numeric, 0) / moodData.length).toFixed(1)
+          ? (moodData.reduce((acc: number, m: any) => acc + m.mood_numeric, 0) / moodData.length).toFixed(1)
           : 'N/A'
       },
       moodTrend: calculateMoodTrend(moodData || []),
       keyThemes: extractKeyThemes(emotionData || [], moodData || []),
       sampleExplanations: (emotionData || [])
-        .filter(e => e.explanation_text)
+        .filter((e: any) => e.explanation_text)
         .slice(0, 5) // Only top 5 explanations
-        .map(e => e.explanation_text),
+        .map((e: any) => e.explanation_text),
       concerningPatterns: identifyConcerns(moodData || [])
     }
 
@@ -159,73 +192,55 @@ serve(async (req) => {
       apiKey: anthropicApiKey,
     })
 
-    // OPTIMIZATION 4: Shorter, more focused prompts
-    let systemPrompt = `You are a child wellbeing analyst providing insights for parents, practitioners, and teachers. Focus on identifying patterns that indicate how this child is "turning up" emotionally and any early mental health indicators requiring attention.`
+    // Get child's first name if available
+    let childFirstName = 'this child'
+    if (childId) {
+      const { data: childProfile } = await supabaseClient
+        .from('profiles')
+        .select('name')
+        .eq('id', childId)
+        .single()
 
-    let userPrompt = ''
-
-    switch (analysisType) {
-      case 'comprehensive':
-      default:
-        userPrompt = `Analyze this aggregated wellbeing data:
-
-${JSON.stringify(aggregatedData, null, 2)}
-
-Summary for [PARENT/PRACTITIONER/TEACHER]. Focus on identifying patterns that indicate how this child is "turning up" emotionally and any early mental health indicators requiring attention.
-
-**EXECUTIVE SUMMARY**
-Provide a 2-3 sentence overview: Is this child thriving, stable, struggling, or in crisis? What's the single most important thing to know about their emotional state?
-
-**EMOTIONAL TRAJECTORY**
-- Overall mood pattern over time (improving/declining/stable/volatile)
-- Frequency and intensity of concerning emotions (anger, sadness, anxiety, frustration)
-- Any significant mood swings or emotional volatility
-- Context-specific patterns (worse at certain times/settings)
-
-**RED FLAGS & EARLY WARNING SIGNS**
-Highlight any patterns suggesting developing mental health concerns:
-- Persistent negative emotions lasting 2+ weeks
-- Increasing emotional volatility or intensity
-- Social withdrawal indicators ("worried friends will avoid me")
-- Health anxiety or somatic concerns
-- Anger/frustration escalation patterns
-- Sleep, appetite, or energy references
-- Self-worth or confidence issues
-
-**STRENGTHS & PROTECTIVE FACTORS**
-- Positive emotional patterns and coping strategies
-- Effective tool usage and engagement
-- Self-awareness and emotional vocabulary development
-- Social connections and support systems
-- Resilience indicators
-
-**IMMEDIATE ACTION REQUIRED**
-- HIGH PRIORITY: Issues needing immediate attention
-- MODERATE: Patterns to monitor closely
-- LOW: General support recommendations
-
-**SUPPORT RECOMMENDATIONS**
-Specific, actionable suggestions:
-- Which tools are most/least effective for this child
-- Environmental modifications needed
-- When to seek additional professional support
-- Family/school communication points
-- Specific intervention strategies
-
-**TREND MONITORING**
-Key metrics to track going forward:
-- Early warning indicators to watch
-- Success indicators to celebrate
-- Optimal check-in frequency
-
-**CONTEXT CONSIDERATIONS**
-- How institutional setting (hospital/school/clinic) influences patterns
-- Age-appropriate emotional development expectations
-- External factors affecting wellbeing
-
-**CONFIDENCE LEVEL**
-Based on data quality and quantity, how confident is this assessment? What additional information would improve accuracy?`
+      if (childProfile?.name) {
+        childFirstName = childProfile.name.split(' ')[0]
+      }
     }
+
+    // Load org-specific prompt based on orgType
+    let promptTemplate = ''
+    const promptMap: Record<string, string> = {
+      'school': 'teacher',
+      'clinic': 'clinic',
+      'hospital': 'hospital'
+    }
+
+    const promptFileName = promptMap[orgType] || 'teacher'
+
+    try {
+      // Read the appropriate prompt file
+      const decoder = new TextDecoder('utf-8')
+      const promptPath = new URL(`./prompts/${promptFileName}.md`, import.meta.url)
+      const promptFile = await Deno.readFile(promptPath)
+      promptTemplate = decoder.decode(promptFile)
+
+      // Replace placeholders with actual child name
+      promptTemplate = promptTemplate
+        .replace(/\[CHILD'S FIRST NAME\]/g, childFirstName)
+        .replace(/\[CHILD'S NAME\]/g, childFirstName)
+    } catch (error) {
+      console.error('Error loading prompt template:', error)
+      // Fallback to generic prompt
+      promptTemplate = `Analyze this child's wellbeing data and provide insights about their emotional state and support needs.`
+    }
+
+    // OPTIMIZATION 4: Shorter, more focused prompts
+    let systemPrompt = `You are a child wellbeing analyst with expertise in child psychology and mental health. Analyze the provided data and respond using the specified format.`
+
+    let userPrompt = `${promptTemplate}
+
+Here is the wellbeing data to analyze:
+
+${JSON.stringify(aggregatedData, null, 2)}`
 
     // Call Claude API with reduced token usage
     const message = await anthropic.messages.create({
