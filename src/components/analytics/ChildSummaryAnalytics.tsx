@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { MoodHeatmap } from './MoodHeatmap'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { projectId, publicAnonKey } from '../../utils/supabase/info.tsx'
@@ -597,99 +598,19 @@ export function ChildSummaryAnalytics() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {/* Check-in History Column */}
                       <div className="space-y-6">
-                        {/* Mood Meter Timeline */}
+                        {/* Mood Meter Heatmap */}
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
                             <Activity className="h-4 w-4 mr-2" />
-                            Mood Journey Timeline
+                            Mood Meter Calendar (Jan - Apr 2025)
                           </h4>
 
                           <div className="bg-white p-4 rounded-lg border border-gray-200">
                             {moodHistory[child.id] && moodHistory[child.id].length > 0 ? (
-                              <div className="space-y-3">
-                                {/* Timeline visualization */}
-                                <div className="relative h-32">
-                                  {/* Mood level indicators on left */}
-                                  <div className="absolute -left-1 top-0 h-full flex flex-col justify-between text-xs">
-                                    <div className="flex items-center"><span className="mr-1">😊</span><span className="text-gray-500">5</span></div>
-                                    <div className="flex items-center"><span className="mr-1">🙂</span><span className="text-gray-500">4</span></div>
-                                    <div className="flex items-center"><span className="mr-1">😐</span><span className="text-gray-500">3</span></div>
-                                    <div className="flex items-center"><span className="mr-1">😕</span><span className="text-gray-500">2</span></div>
-                                    <div className="flex items-center"><span className="mr-1">😢</span><span className="text-gray-500">1</span></div>
-                                  </div>
-
-                                  {/* Chart area */}
-                                  <div className="ml-12 h-full relative">
-                                    {/* Background grid */}
-                                    <div className="absolute inset-0 flex flex-col justify-between">
-                                      {[5, 4, 3, 2, 1].map(level => (
-                                        <div key={level} className="border-b border-gray-100"></div>
-                                      ))}
-                                    </div>
-
-                                    {/* Mood progression line */}
-                                    <svg className="absolute inset-0 w-full h-full">
-                                      {/* Draw connecting line */}
-                                      {moodHistory[child.id] && moodHistory[child.id].length > 1 && (
-                                        <polyline
-                                          points={moodHistory[child.id].slice().reverse().slice(-20).map((mood, idx, arr) => {
-                                            if (!mood.mood_numeric || isNaN(mood.mood_numeric)) return null
-                                            const x = arr.length === 1 ? 50 : (idx / Math.max(1, arr.length - 1)) * 100
-                                            const y = 100 - ((mood.mood_numeric - 1) / 4) * 100
-                                            return `${x}%,${y}%`
-                                          }).filter(Boolean).join(' ')}
-                                          fill="none"
-                                          stroke="#3b82f6"
-                                          strokeWidth="2"
-                                          className="drop-shadow"
-                                        />
-                                      )}
-
-                                      {/* Draw data points */}
-                                      {moodHistory[child.id] && moodHistory[child.id].slice().reverse().slice(-20).map((mood, idx, arr) => {
-                                        if (!mood.mood_numeric || isNaN(mood.mood_numeric)) return null
-                                        const x = arr.length === 1 ? 50 : (idx / Math.max(1, arr.length - 1)) * 100
-                                        const y = 100 - ((mood.mood_numeric - 1) / 4) * 100
-                                        const date = new Date(mood.created_at)
-                                        const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-
-                                        return (
-                                          <g key={idx}>
-                                            <circle
-                                              cx={`${x}%`}
-                                              cy={`${y}%`}
-                                              r="6"
-                                              className={`${
-                                                mood.mood_numeric >= 4 ? 'fill-green-500' :
-                                                mood.mood_numeric === 3 ? 'fill-yellow-500' :
-                                                mood.mood_numeric === 2 ? 'fill-orange-500' :
-                                                'fill-red-500'
-                                              } stroke-white stroke-2 cursor-pointer hover:r-8`}
-                                            >
-                                              <title>{`${dateStr}: ${MOOD_EMOJIS[mood.mood_numeric]} (${mood.mood_numeric}/5)${mood.notes ? ` - ${mood.notes}` : ''}`}</title>
-                                            </circle>
-                                          </g>
-                                        )
-                                      })}
-                                    </svg>
-                                  </div>
-                                </div>
-
-                                {/* Date range indicator */}
-                                <div className="ml-12 flex justify-between text-xs text-gray-500">
-                                  <span>{moodHistory[child.id].length > 0 ?
-                                    new Date(moodHistory[child.id][moodHistory[child.id].length - 1].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}</span>
-                                  <span className="text-center">→ Time Progression →</span>
-                                  <span>{moodHistory[child.id].length > 0 ?
-                                    new Date(moodHistory[child.id][0].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}</span>
-                                </div>
-
-                                {/* Summary stats */}
-                                <div className="pt-2 border-t border-gray-100 text-xs text-gray-600 flex justify-between">
-                                  <span>Total check-ins: {moodHistory[child.id].length}</span>
-                                  <span>Avg mood: {(moodHistory[child.id].reduce((a, m) => a + m.mood_numeric, 0) / moodHistory[child.id].length).toFixed(1)}/5</span>
-                                </div>
-                              </div>
+                              <MoodHeatmap
+                                moodData={moodHistory[child.id]}
+                                MOOD_EMOJIS={MOOD_EMOJIS}
+                              />
                             ) : (
                               <p className="text-sm text-gray-500">No mood data available</p>
                             )}
