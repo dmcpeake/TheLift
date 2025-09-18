@@ -93,6 +93,7 @@ export function ChildSummaryAnalytics() {
   const [children, setChildren] = useState<Child[]>([])
   const [expandedChild, setExpandedChild] = useState<string | null>(null)
   const [checkInHistory, setCheckInHistory] = useState<Record<string, CheckIn[]>>({})
+  const [moodHistory, setMoodHistory] = useState<Record<string, any[]>>({})
   const [aiInsights, setAIInsights] = useState<Record<string, AIInsights>>({})
   const [loading, setLoading] = useState(true)
   const [loadingInsights, setLoadingInsights] = useState<Record<string, boolean>>({})
@@ -233,27 +234,62 @@ export function ChildSummaryAnalytics() {
     // Check if already loaded
     if (checkInHistory[childId]) return
 
-    const { data: moodData } = await supabase
-      .from('mood_meter_usage')
-      .select('*')
-      .eq('child_id', childId)
-      .order('created_at', { ascending: false })
-      .limit(10) // Reduced to 10 most recent
+    // Fetch BOTH mood meter data AND emotion grid data
+    const [moodResponse, emotionResponse] = await Promise.all([
+      // Get mood meter data for the heatmap
+      supabase
+        .from('mood_meter_usage')
+        .select('*')
+        .eq('child_id', childId)
+        .order('created_at', { ascending: false })
+        .limit(30), // Get more for heatmap visualization
 
-    // Only fetch mood data, not emotion data separately to avoid duplication
-    const checkIns: CheckIn[] = moodData?.map(mood => ({
-      id: mood.id,
-      created_at: mood.created_at,
-      mood_numeric: mood.mood_numeric,
-      mood_level: mood.mood_level,
-      notes: mood.notes,
-      feelings: [], // We don't have emotion_grid_feelings yet
-      explanation: null
+      // Get emotion grid usage for qualitative check-ins
+      supabase
+        .from('emotion_grid_usage')
+        .select(`
+          *,
+          emotion_grid_usage_feelings (
+            feeling_id,
+            emotion_grid_feelings (
+              feeling_name,
+              feeling_category
+            )
+          )
+        `)
+        .eq('child_id', childId)
+        .order('created_at', { ascending: false })
+        .limit(10)
+    ])
+
+    const { data: moodData } = moodResponse
+    const { data: emotionData } = emotionResponse
+
+    // Convert emotion grid data to check-ins with actual feelings and explanations
+    const checkIns: CheckIn[] = emotionData?.map(emotion => ({
+      id: emotion.id,
+      created_at: emotion.created_at,
+      mood_numeric: undefined, // Emotion grid doesn't have numeric mood
+      mood_level: undefined,
+      notes: emotion.explanation_text,
+      feelings: emotion.emotion_grid_usage_feelings?.map((f: any) =>
+        f.emotion_grid_feelings?.feeling_name || 'Unknown feeling'
+      ) || [],
+      explanation: emotion.explanation_text
     })) || []
+
+    // Store mood data separately for heatmap
+    const moodHistory = moodData || []
 
     setCheckInHistory(prev => ({
       ...prev,
       [childId]: checkIns
+    }))
+
+    // Store mood data for heatmap (we'll add this state next)
+    setMoodHistory(prev => ({
+      ...prev,
+      [childId]: moodHistory
     }))
   }
 
@@ -569,50 +605,97 @@ export function ChildSummaryAnalytics() {
                 >
                   <div className="p-6 bg-gray-50">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Check-in History */}
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
-                          <Calendar className="h-4 w-4 mr-2" />
-                          Recent Check-ins
-                        </h4>
+                      {/* Check-in History Column */}
+                      <div className="space-y-6">
+                        {/* Mood Meter Heatmap */}
+                        <div>
+                          <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                            <Activity className="h-4 w-4 mr-2" />
+                            Mood Meter History
+                          </h4>
 
-                        <div className="space-y-3 max-h-96 overflow-y-auto">
-                          {checkInHistory[child.id]?.slice(0, 10).map(checkIn => (
-                            <div key={checkIn.id} className="bg-white p-3 rounded-lg border border-gray-200">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <div className="flex items-center space-x-2 mb-1">
-                                    <Clock className="h-3 w-3 text-gray-400" />
-                                    <span className="text-xs text-gray-600">
-                                      {new Date(checkIn.created_at).toLocaleString()}
-                                    </span>
-                                  </div>
-
-                                  {checkIn.feelings && checkIn.feelings.length > 0 && (
-                                    <div className="flex flex-wrap gap-1 mb-2">
-                                      {checkIn.feelings.map((feeling, idx) => (
-                                        <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                                          {feeling}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  )}
-
-                                  {(checkIn.notes || checkIn.explanation) && (
-                                    <p className="text-sm text-gray-700 italic">
-                                      "{checkIn.notes || checkIn.explanation}"
-                                    </p>
-                                  )}
+                          <div className="bg-white p-4 rounded-lg border border-gray-200">
+                            {moodHistory[child.id] && moodHistory[child.id].length > 0 ? (
+                              <div className="space-y-2">
+                                <div className="flex items-center space-x-2 text-xs text-gray-600 mb-3">
+                                  <span>😢 Very Sad</span>
+                                  <span>😕 Sad</span>
+                                  <span>😐 OK</span>
+                                  <span>🙂 Happy</span>
+                                  <span>😊 Very Happy</span>
                                 </div>
 
-                                <div className="ml-3 text-2xl">
-                                  {checkIn.mood_numeric && MOOD_EMOJIS[checkIn.mood_numeric as keyof typeof MOOD_EMOJIS]}
+                                {/* Simple heatmap grid */}
+                                <div className="grid grid-cols-10 gap-1">
+                                  {moodHistory[child.id].slice(0, 30).map((mood, idx) => (
+                                    <div
+                                      key={idx}
+                                      className={`h-6 w-6 rounded ${
+                                        mood.mood_numeric === 1 ? 'bg-red-500' :
+                                        mood.mood_numeric === 2 ? 'bg-orange-500' :
+                                        mood.mood_numeric === 3 ? 'bg-yellow-500' :
+                                        mood.mood_numeric === 4 ? 'bg-green-400' :
+                                        mood.mood_numeric === 5 ? 'bg-green-600' :
+                                        'bg-gray-200'
+                                      }`}
+                                      title={`${new Date(mood.created_at).toLocaleDateString()}: ${mood.mood_level || mood.mood_numeric}/5`}
+                                    />
+                                  ))}
                                 </div>
+
+                                <p className="text-xs text-gray-500 mt-2">
+                                  Last 30 mood check-ins (newest first)
+                                </p>
                               </div>
-                            </div>
-                          )) || (
-                            <p className="text-gray-500 text-sm">No check-in history available</p>
-                          )}
+                            ) : (
+                              <p className="text-sm text-gray-500">No mood data available</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Qualitative Check-ins */}
+                        <div>
+                          <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                            <Calendar className="h-4 w-4 mr-2" />
+                            Recent Qualitative Check-ins
+                          </h4>
+
+                          <div className="space-y-3 max-h-64 overflow-y-auto">
+                            {checkInHistory[child.id] && checkInHistory[child.id].length > 0 ? (
+                              checkInHistory[child.id].slice(0, 5).map(checkIn => (
+                                <div key={checkIn.id} className="bg-white p-3 rounded-lg border border-gray-200">
+                                  <div className="flex items-start">
+                                    <div className="flex-1">
+                                      <div className="flex items-center space-x-2 mb-1">
+                                        <Clock className="h-3 w-3 text-gray-400" />
+                                        <span className="text-xs text-gray-600">
+                                          {new Date(checkIn.created_at).toLocaleString()}
+                                        </span>
+                                      </div>
+
+                                      {checkIn.feelings && checkIn.feelings.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mb-2">
+                                          {checkIn.feelings.map((feeling, idx) => (
+                                            <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                                              {feeling}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      )}
+
+                                      {(checkIn.notes || checkIn.explanation) && (
+                                        <p className="text-sm text-gray-700 italic">
+                                          "{checkIn.notes || checkIn.explanation}"
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-sm text-gray-500">No qualitative check-ins available</p>
+                            )}
+                          </div>
                         </div>
                       </div>
 
