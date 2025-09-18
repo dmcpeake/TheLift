@@ -340,7 +340,9 @@ export function BreathingCircles(props: BreathingCirclesProps & {
         backgroundColor: 'white',
         paddingTop: embedded ? '0' : '140px',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        width: '100%',
+        minHeight: '100vh'
       }}>
       {/* REMOVED ALL YELLOW BACKGROUNDS FOR DEBUG */}
 
@@ -404,14 +406,23 @@ export function BreathingCircles(props: BreathingCirclesProps & {
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto px-6 w-full" style={{
+      {/* Centered title like mood meter */}
+      {!embedded && (
+        <div className="text-center" style={{ marginBottom: '2rem', paddingTop: '40px' }}>
+          <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>Breathing Exercise</h1>
+        </div>
+      )}
+
+      <div className="w-full" style={{
         position: 'relative',
         zIndex: 10,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         minHeight: embedded ? 'calc(100vh - 200px)' : 'auto',
-        paddingTop: embedded ? '0' : '40px'
+        paddingTop: embedded ? '0' : '0',  // Removed padding since title now handles it
+        paddingLeft: embedded ? '0' : '1.5rem',
+        paddingRight: embedded ? '0' : '1.5rem'
       }}>
 
 
@@ -445,10 +456,10 @@ export function BreathingCircles(props: BreathingCirclesProps & {
             />
             <div style={{
               position: 'fixed',
-              top: '0',
-              left: '0',
-              right: '0',
-              bottom: '0',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -457,7 +468,8 @@ export function BreathingCircles(props: BreathingCirclesProps & {
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px'
+                gap: '12px',
+                marginTop: '-90px'
               }}>
                 {BREATHING_TECHNIQUES.map(technique => {
                   const isSelected = technique.id === effectiveSelectedTechniqueId
@@ -472,6 +484,11 @@ export function BreathingCircles(props: BreathingCirclesProps & {
                           setRunning(false)
                           setPhase('intro')
                           setCycle(1)
+                        }
+                        // Reset external states when embedded
+                        if (embedded && onExternalBreathingStartedChange && onExternalRunningChange) {
+                          onExternalBreathingStartedChange(false)
+                          onExternalRunningChange(false)
                         }
                       }}
                       style={{
@@ -500,6 +517,7 @@ export function BreathingCircles(props: BreathingCirclesProps & {
           </>
         )}
 
+
         {/* Main Stage - Fade out when settings open */}
         <div style={{ opacity: effectiveShowTechniqueSelector ? 0 : 1, transition: 'opacity 0.3s ease' }}>
           <Stage
@@ -514,17 +532,19 @@ export function BreathingCircles(props: BreathingCirclesProps & {
           />
         </div>
 
-        {/* Footer Controls - Fade out when settings open */}
-        <div style={{ opacity: effectiveShowTechniqueSelector ? 0 : 1, transition: 'opacity 0.3s ease' }}>
-          <Footer
-            running={running}
-            phase={phase}
-            onStart={handleStart}
-            onPause={handlePause}
-            onResume={handleResume}
-            onContinue={handleContinue}
-          />
-        </div>
+        {/* Footer Controls - Fade out when settings open - Hide when embedded */}
+        {!embedded && (
+          <div style={{ opacity: effectiveShowTechniqueSelector ? 0 : 1, transition: 'opacity 0.3s ease' }}>
+            <Footer
+              running={running}
+              phase={phase}
+              onStart={handleStart}
+              onPause={handlePause}
+              onResume={handleResume}
+              onContinue={handleContinue}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

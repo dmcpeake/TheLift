@@ -95,17 +95,17 @@ export function Stage({
   const getInstructionText = () => {
     switch (phase) {
       case 'intro':
-        return 'Tap play to begin'
+        return { title: "", subtitle: 'Tap play to begin' }
       case 'inhale':
-        return 'Breathe in'
+        return { title: 'Breathe in', subtitle: null }
       case 'hold':
-        return 'Hold'
+        return { title: 'Hold', subtitle: null }
       case 'exhale':
-        return 'Breathe out'
+        return { title: 'Breathe out', subtitle: null }
       case 'complete':
-        return 'Well done!'
+        return { title: 'Well done!', subtitle: null }
       default:
-        return 'Breathe'
+        return { title: 'Breathe', subtitle: null }
     }
   }
 
@@ -253,7 +253,12 @@ export function Stage({
               }}
             >
               <div className="breathing-text">
-                <h2 className="breathing-instruction">{getInstructionText()}</h2>
+                <h2 className="breathing-instruction" style={{ fontSize: getInstructionText().title === "Let's breathe!" ? '20px' : undefined, fontWeight: getInstructionText().title === "Let's breathe!" ? 'bold' : undefined }}>{getInstructionText().title}</h2>
+                {getInstructionText().subtitle && (
+                  <p className="breathing-subtitle" style={{ fontSize: '16px', opacity: 0.8, marginTop: '8px' }}>
+                    {getInstructionText().subtitle}
+                  </p>
+                )}
                 {isBreathingPhase && (
                   <p className="breathing-counter">{cycle} of {totalCycles}</p>
                 )}

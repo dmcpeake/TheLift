@@ -1,55 +1,25 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { X } from 'lucide-react'
 import { BreathingCircles } from './BreathingCircles'
 
-// Progress bar component matching the check-in flow
-const ProgressBar = () => {
-  const steps = [
-    { id: 'breathing', name: 'Breathing Exercise' },
-    { id: 'mood', name: 'Mood Meter' },
-    { id: 'emotions', name: 'Emotion Grid' },
-    { id: 'wellbeing', name: 'Wellbeing Wheel' }
-  ]
-  
-  const currentStep = 0 // Breathing is step 0
-  
+// Simple title header without progress sections
+const TitleHeader = ({ onClose }: { onClose: () => void }) => {
   return (
     <div className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 p-4">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-xl font-bold text-gray-800">Check-In</h1>
-          <span className="text-sm text-gray-600">
-            Step {currentStep + 1} of {steps.length}
-          </span>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold text-gray-800">Title</h1>
+
+          {/* Close button positioned at top right */}
+          <button
+            onClick={onClose}
+            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#1066c2] transition-colors shadow-lg"
+            style={{ backgroundColor: '#147fe3' }}
+          >
+            <X className="h-5 w-5 text-white" />
+          </button>
         </div>
-        
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-          />
-        </div>
-        
-        <div className="flex justify-between mt-2">
-          {steps.map((step, index) => (
-            <div key={step.id} className="flex flex-col items-center">
-              <div className={`w-3 h-3 rounded-full ${
-                index === currentStep ? 'bg-blue-600 ring-2 ring-blue-400' : 
-                index < currentStep ? 'bg-green-600' : 'bg-gray-300'
-              }`} />
-              <span className="text-xs text-gray-600 mt-1 hidden sm:block">{step.name}</span>
-            </div>
-          ))}
-        </div>
-        
-        {/* Skip button positioned at top right */}
-        <button
-          onClick={() => handleExit('skip')}
-          className="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1"
-        >
-          <span>→</span>
-          Skip
-        </button>
       </div>
     </div>
   )
@@ -73,10 +43,19 @@ export function BreathingRouteWithProgress() {
     }
   }
 
+  const handleClose = () => {
+    navigate('/child/home')
+  }
+
   return (
     <>
-      <ProgressBar />
-      <div className="pt-24"> {/* Add padding to account for fixed progress bar */}
+      <TitleHeader onClose={handleClose} />
+      <div className="pt-24"> {/* Add padding to account for fixed header */}
+        {/* Centered title like mood meter */}
+        <div className="text-center" style={{ marginBottom: '2rem' }}>
+          <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>Breathing Exercise</h1>
+        </div>
+
         <BreathingCircles
           cycles={5}
           muted={false} // Default to sound on for child experience

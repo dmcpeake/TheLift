@@ -16,9 +16,10 @@ interface EmotionGridProps {
   hideDebugInfo?: boolean
   triggerCompletion?: boolean
   initialData?: any
+  onStepChange?: (step: number) => void
 }
 
-export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMade, hideDebugInfo = false, triggerCompletion = false, initialData }: EmotionGridProps = {}) {
+export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMade, hideDebugInfo = false, triggerCompletion = false, initialData, onStepChange }: EmotionGridProps = {}) {
   const [currentStep, setCurrentStep] = useState(1)
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([])
   const [emotionStory, setEmotionStory] = useState('')
@@ -50,10 +51,17 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
   }, [triggerCompletion])
 
   const emotions = {
-    happy: ['😊 Joyful', '🤗 Grateful', '😄 Excited', '😌 Content', '🥰 Loved', '😎 Confident', '🤩 Amazed', '😇 Peaceful', '🎉 Celebratory'],
-    sad: ['😢 Sad', '😔 Disappointed', '😟 Worried', '😰 Anxious', '😭 Heartbroken', '😩 Frustrated', '😞 Lonely', '😣 Hurt', '😖 Stressed'],
-    angry: ['😠 Angry', '😤 Annoyed', '🤬 Furious', '😡 Mad', '👿 Vengeful', '😾 Irritated', '🙄 Fed up', '😒 Bitter', '💢 Explosive'],
-    other: ['😴 Tired', '🤔 Confused', '😐 Neutral', '😶 Speechless', '🤒 Sick', '😵 Overwhelmed', '🥱 Bored', '😳 Embarrassed', '🤯 Mind-blown']
+    'High Energy, Uncomfortable': ['😠 Angry', '😤 Frustrated', '😰 Worried', '😬 Anxious', '🤯 Overwhelmed', '😱 Panicked', '😣 Stressed', '😒 Irritated', '😫 Restless'],
+    'Low Energy, Uncomfortable': ['😢 Sad', '😴 Tired', '😔 Lonely', '😑 Bored', '😞 Disappointed', '😕 Confused', '😪 Hurt', '😟 Discouraged', '😰 Hopeless'],
+    'High Energy, Comfortable': ['😄 Happy', '🤩 Excited', '😊 Proud', '😎 Confident', '🤸 Energetic', '😜 Playful', '🧐 Curious', '😯 Amazed', '🥰 Grateful'],
+    'Low Energy, Comfortable': ['😌 Calm', '😊 Content', '😎 Relaxed', '🕊️ Peaceful', '🤗 Cozy', '🥰 Loved', '😌 Safe', '😴 Sleepy', '🤔 Thoughtful']
+  }
+
+  const categorySubtexts = {
+    'High Energy, Uncomfortable': 'These feelings can feel intense and challenging',
+    'Low Energy, Uncomfortable': 'These feelings can feel heavy and draining',
+    'High Energy, Comfortable': 'These feelings can feel energizing and uplifting',
+    'Low Energy, Comfortable': 'These feelings can feel peaceful and restful'
   }
 
   const allEmotions = Object.values(emotions).flat()
@@ -74,10 +82,8 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
       onSelectionMade?.()
     }
 
-    // Auto-advance to step 2 when emotions are selected, go back to step 1 if none selected
-    if (newEmotions.length > 0) {
-      setCurrentStep(2)
-    } else {
+    // Stay on step 1 until user clicks next
+    if (newEmotions.length === 0) {
       setCurrentStep(1)
     }
 
@@ -92,8 +98,14 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
   }
 
   const handleNext = () => {
-    // Complete the grid since step 2 text is optional
-    handleComplete()
+    if (currentStep === 1) {
+      // Move to step 2 to show selected emotions + form
+      setCurrentStep(2)
+      onStepChange?.(2)
+    } else {
+      // Complete the grid
+      handleComplete()
+    }
   }
 
   const updateStory = (story: string) => {
@@ -177,47 +189,74 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
   return (
     <>
       {/* Centered title like breathing exercise */}
-      <div className="text-center" style={{ marginTop: '40px', marginBottom: '1rem' }}>
-        <h1 className="text-gray-900 mb-2" style={{ fontSize: '40px', fontWeight: 600, letterSpacing: '0.02em' }}>What emotions are you feeling?</h1>
+      <div className="text-center" style={{ marginBottom: '1rem' }}>
+        <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>What emotions are you feeling?</h1>
       </div>
 
 
-      {/* Step 1: Select Emotions - Always visible */}
-      {(currentStep === 1 || currentStep === 2 || currentStep === 4) && (
+      {/* Step 1: Select Emotions */}
+      {currentStep === 1 && (
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-6">
-            <h3 className="text-lg font-semibold mb-2">Select up to 3 emotions</h3>
+            <h3 className="text-lg font-semibold mb-2">Select up to 3</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {Object.entries(emotions).map(([category, categoryEmotions]) => (
-              <div key={category} className="space-y-3">
-                <h4 className="text-lg font-semibold text-gray-800 capitalize text-center">
-                  {category}
-                </h4>
-                <div className="grid grid-cols-3 gap-2">
-                  {categoryEmotions.map((emotion) => (
-                    <button
-                      key={emotion}
-                      onClick={() => toggleEmotion(emotion)}
-                      disabled={!selectedEmotions.includes(emotion) && selectedEmotions.length >= 3}
-                      className={`
-                        p-3 rounded-lg text-xs transition-all
-                        ${selectedEmotions.includes(emotion)
-                          ? 'text-white ring-2'
-                          : 'bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed'}
-                      `}
-                      style={{
-                        backgroundColor: selectedEmotions.includes(emotion) ? '#3a7ddc' : undefined,
-                        boxShadow: selectedEmotions.includes(emotion) ? `0 0 0 2px rgba(58, 125, 220, 0.3)` : undefined
-                      }}
-                    >
-                      {emotion}
-                    </button>
-                  ))}
+            {Object.entries(emotions).map(([category, categoryEmotions]) => {
+              // Define category colors
+              const getCategoryColor = (category: string) => {
+                switch (category) {
+                  case 'High Energy, Uncomfortable': return '#fef3e2' // Orange tint
+                  case 'Low Energy, Uncomfortable': return '#e6f2ff' // Blue tint
+                  case 'High Energy, Comfortable': return '#fffbeb' // Yellow tint
+                  case 'Low Energy, Comfortable': return '#f0fdf4' // Green tint
+                  default: return '#f3f4f6'
+                }
+              }
+
+              return (
+                <div key={category} className="space-y-3">
+                  <div className="text-center">
+                    <h4 className="text-lg font-semibold text-gray-800">
+                      {category}
+                    </h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {categorySubtexts[category as keyof typeof categorySubtexts]}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {categoryEmotions.map((emotion) => (
+                      <button
+                        key={emotion}
+                        onClick={() => toggleEmotion(emotion)}
+                        disabled={!selectedEmotions.includes(emotion) && selectedEmotions.length >= 3}
+                        className="flex flex-col items-center gap-2 p-3 text-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{
+                          borderRadius: '4px',
+                          backgroundColor: selectedEmotions.includes(emotion) ? 'white' : getCategoryColor(category),
+                          border: selectedEmotions.includes(emotion) ? '2px solid #3a7ddc' : 'none',
+                          boxShadow: selectedEmotions.includes(emotion) ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' : 'none',
+                          color: selectedEmotions.includes(emotion) ? '#3a7ddc' : '#6b7280',
+                          fontWeight: selectedEmotions.includes(emotion) ? '600' : '400'
+                        }}
+                      >
+                        {/* Emoticon */}
+                        <div style={{ fontSize: '20px' }}>
+                          {emotion.split(' ')[0]}
+                        </div>
+
+                        {/* Text */}
+                        <div className="text-center">
+                          <span style={{ fontSize: '10px', fontWeight: 'inherit' }}>
+                            {emotion.split(' ').slice(1).join(' ')}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
           {/* Data Captured for Step 1 */}
@@ -232,9 +271,50 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
         </div>
       )}
 
-      {/* Step 2: Write Story - Show when emotions selected */}
+      {/* Step 2: Selected Emotions Review + Form */}
       {currentStep === 2 && selectedEmotions.length > 0 && (
         <div className="max-w-4xl mx-auto px-4">
+          {/* Show selected emotions - tappable to edit */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <h3 className="text-lg font-semibold">You selected:</h3>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2 mb-8">
+              {selectedEmotions.map((emotion) => (
+                <button
+                  key={emotion}
+                  onClick={() => {
+                    setCurrentStep(1)
+                    onStepChange?.(1)
+                  }}
+                  className="flex flex-col items-center gap-2 p-3 text-xs transition-all cursor-pointer"
+                  style={{
+                    borderRadius: '4px',
+                    backgroundColor: 'white',
+                    border: '2px solid #3a7ddc',
+                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                    color: '#3a7ddc',
+                    fontWeight: '600',
+                    minWidth: '80px',
+                    width: '80px'
+                  }}
+                >
+                  {/* Emoticon */}
+                  <div style={{ fontSize: '20px' }}>
+                    {emotion.split(' ')[0]}
+                  </div>
+
+                  {/* Text */}
+                  <div className="text-center">
+                    <span style={{ fontSize: '10px', fontWeight: 'inherit' }}>
+                      {emotion.split(' ').slice(1).join(' ')}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="text-center mb-6">
             <h3 className="text-lg font-semibold mb-2">Tell us more (optional)</h3>
           </div>
@@ -244,18 +324,19 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               <textarea
                 value={emotionStory}
                 onChange={(e) => updateStory(e.target.value.slice(0, 500))}
-                placeholder="What made you feel this way? (optional)"
-                className="w-full p-3 border rounded-lg h-32 resize-none"
+                placeholder="What made you feel this way?"
+                className="w-full pr-14 border rounded-lg h-32 resize-none"
+                style={{ paddingTop: '3rem', paddingBottom: '3rem', paddingLeft: '0.75rem', paddingRight: '3.5rem', lineHeight: '1.5' }}
                 maxLength={500}
               />
               <button
                 onClick={handleMicrophoneClick}
-                className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full transition-colors ${
+                className={`absolute top-1/2 right-3 transform -translate-y-1/2 rounded-full transition-colors ${
                   isListening ? 'bg-red-500 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
                 }`}
                 style={{
-                  width: '56px',
-                  height: '56px',
+                  width: '40px',
+                  height: '40px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -283,7 +364,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
           </div>
 
           {/* Discussion Question */}
-          <div className="w-full max-w-2xl mx-auto mt-6">
+          <div className="w-full max-w-2xl mx-auto mt-8">
             <div className="text-center mb-6">
               <h3 className="text-lg font-semibold">Do you want to discuss this with anyone?</h3>
             </div>
@@ -293,14 +374,27 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                 <button
                   key={option}
                   onClick={() => setDiscussionPreference(option)}
-                  className="px-6 py-3 rounded-full font-medium transition-all duration-200 hover:scale-105"
+                  className="px-4 py-3 font-medium transition-all duration-200 flex items-center gap-2"
                   style={{
-                    backgroundColor: discussionPreference === option ? '#3a7ddc' : '#f3f4f6',
-                    color: discussionPreference === option ? 'white' : '#374151',
-                    border: `2px solid ${discussionPreference === option ? '#3a7ddc' : 'transparent'}`,
-                    boxShadow: discussionPreference === option ? '0 4px 12px rgba(58, 125, 220, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.1)'
+                    backgroundColor: 'transparent',
+                    color: '#3a7ddc',
+                    border: 'none',
+                    borderRadius: '4px'
                   }}
                 >
+                  <div
+                    className="w-4 h-4 rounded-full border-2 flex items-center justify-center"
+                    style={{
+                      borderColor: '#3a7ddc'
+                    }}
+                  >
+                    {discussionPreference === option && (
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: '#3a7ddc' }}
+                      />
+                    )}
+                  </div>
                   {option}
                 </button>
               ))}
@@ -319,9 +413,9 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
         </div>
       )}
 
-      {/* Fixed bottom button */}
-      {showNextButton && selectedEmotions.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center z-1000">
+      {/* Fixed bottom button - Step 1 */}
+      {showNextButton && selectedEmotions.length > 0 && currentStep === 1 && (
+        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center" style={{ zIndex: 1000 }}>
           <button
             onClick={handleNext}
             style={{
@@ -349,6 +443,35 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
         </div>
       )}
 
+      {/* Fixed bottom button - Step 2 */}
+      {showNextButton && currentStep === 2 && (
+        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center" style={{ zIndex: 1000 }}>
+          <button
+            onClick={handleNext}
+            style={{
+              width: '56px',
+              height: '56px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '50%',
+              backgroundColor: '#3a7ddc',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              color: 'white'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
+            aria-label="Next"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9,18 15,12 9,6"></polyline>
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Step 4: Show Data */}
       {currentStep === 4 && (
@@ -377,6 +500,33 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
           )}
         </div>
       )}
+
+      {/* Yellow swoosh section at bottom */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '100px',
+          backgroundColor: '#f7d145',
+          zIndex: 999
+        }}
+      >
+        {/* Top wave with depth effect */}
+        <svg style={{
+          position: 'absolute',
+          top: '-80px',
+          left: 0,
+          width: '100%',
+          height: '80px'
+        }} viewBox="0 0 1440 400" preserveAspectRatio="none">
+          {/* Main wave fill */}
+          <path d="M0,200 C480,400 960,0 1440,200 L1440,400 L0,400 Z" fill="#f7d145"/>
+          {/* Border with varied bottom edge only */}
+          <path d="M0,200 C480,400 960,0 1440,200 L1440,400 C1020,-120 400,480 0,360 Z" fill="#fae568" opacity="0.6"/>
+        </svg>
+      </div>
     </>
   )
 }

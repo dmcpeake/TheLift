@@ -1,4 +1,11 @@
 import React, { useState, useEffect } from 'react'
+import Lottie from 'lottie-react'
+
+import BlushingShaded from '../../../public/Blushing_Shaded.json'
+import HappyShaded from '../../../public/Happy_Shaded.json'
+import MehShaded from '../../../public/Meh_Shaded.json'
+import SadTearShaded from '../../../public/Sad_Tear_Shaded.json'
+import CryingShaded from '../../../public/Crying_Shaded.json'
 
 interface MoodData {
   mood_level: string
@@ -11,14 +18,16 @@ interface MoodMeterProps {
   onComplete?: (data: MoodData) => void
   showNextButton?: boolean
   onSelectionMade?: () => void
+  onSelectionRemoved?: () => void
   hideDebugInfo?: boolean
   triggerCompletion?: boolean
   initialData?: any
 }
 
-export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade, hideDebugInfo = false, triggerCompletion = false, initialData }: MoodMeterProps = {}) {
+export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade, onSelectionRemoved, hideDebugInfo = false, triggerCompletion = false, initialData }: MoodMeterProps = {}) {
   const [selectedMood, setSelectedMood] = useState<MoodData | null>(null)
   const [startTime] = useState(Date.now())
+  const [rotationOffset, setRotationOffset] = useState(0)
 
   // Initialize with existing data if available
   useEffect(() => {
@@ -36,14 +45,22 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
   }, [triggerCompletion, selectedMood, onComplete])
 
   const moods = [
-    { emoji: '😢', level: 'very_sad', numeric: 1, color: 'bg-red-500' },
-    { emoji: '😞', level: 'sad', numeric: 2, color: 'bg-orange-500' },
-    { emoji: '😐', level: 'ok', numeric: 3, color: 'bg-yellow-500' },
-    { emoji: '😊', level: 'happy', numeric: 4, color: 'bg-green-500' },
-    { emoji: '😄', level: 'very_happy', numeric: 5, color: 'bg-blue-500' }
+    { animation: BlushingShaded, level: 'very_happy', numeric: 5, color: '#95c5c8' },
+    { animation: HappyShaded, level: 'happy', numeric: 4, color: '#caded0' },
+    { animation: MehShaded, level: 'ok', numeric: 3, color: '#f8d678' },
+    { animation: SadTearShaded, level: 'sad', numeric: 2, color: '#e38d3b' },
+    { animation: CryingShaded, level: 'very_sad', numeric: 1, color: '#e38bac' }
   ]
 
-  const handleMoodSelect = (mood: typeof moods[0]) => {
+  const handleMoodSelect = (mood: typeof moods[0], index: number) => {
+    // If clicking the already selected mood, unselect it
+    if (selectedMood?.mood_level === mood.level) {
+      setSelectedMood(null)
+      setRotationOffset(0) // Reset to default position
+      onSelectionRemoved?.()
+      return
+    }
+
     const timeToSelect = Math.round((Date.now() - startTime) / 1000)
 
     const data: MoodData = {
@@ -55,41 +72,165 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
 
     console.log('🎯 MOOD METER DATA:', data)
     setSelectedMood(data)
+
+    // Calculate rotation to bring selected segment to top
+    const targetRotation = -index * 72 // Each segment is 72 degrees
+    setRotationOffset(targetRotation)
+
     onSelectionMade?.()
   }
 
   return (
     <>
       {/* Centered title like breathing exercise */}
-      <div className="text-center" style={{ marginTop: '40px', marginBottom: '2rem' }}>
-        <h1 className="text-gray-900 mb-2" style={{ fontSize: '40px', fontWeight: 600, letterSpacing: '0.02em' }}>How do you feel today?</h1>
+      <div className="text-center" style={{ marginBottom: '2rem' }}>
+        <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>How would you describe your mood?</h1>
       </div>
 
       <div className="flex flex-col items-center">
         <div className="mb-6 w-full max-w-2xl">
-          <div className="flex gap-4 justify-center">
-            {moods.map((mood) => (
-              <button
-                key={mood.level}
-                onClick={() => handleMoodSelect(mood)}
-                className={`
-                  p-4 rounded-lg transition-all transform hover:scale-110
-                  ${selectedMood?.mood_level === mood.level
-                    ? 'ring-4 ring-offset-2'
-                    : 'bg-gray-100 hover:bg-gray-200'}
-                `}
+          <div className="flex justify-center">
+            {/* Breathing circle container - 480px like breathing circle */}
+            <div className="relative" style={{ width: '480px', height: '480px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+
+              {/* Dashed outer circle - exact same as breathing circle */}
+              <div
+                className="absolute"
                 style={{
-                  backgroundColor: selectedMood?.mood_level === mood.level ? '#3a7ddc' : undefined,
-                  color: selectedMood?.mood_level === mood.level ? 'white' : undefined,
-                  boxShadow: selectedMood?.mood_level === mood.level ? `0 0 0 4px rgba(58, 125, 220, 0.3)` : undefined
+                  width: '435px',
+                  height: '435px',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: 2
                 }}
               >
-                <span className="text-4xl">{mood.emoji}</span>
-                <p className="text-xs mt-2 font-medium">
-                  {mood.level.replace('_', ' ')}
-                </p>
-              </button>
-            ))}
+                <div
+                  className="opacity-20"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    border: '3px dashed #e6b6b6',
+                    animation: 'spin 120s linear infinite'
+                  }}
+                />
+              </div>
+
+              {/* Clean doughnut with 5 segments */}
+              <div style={{ position: 'absolute', left: '50%', top: '50%', transform: `translate(-50%, -50%) rotate(${rotationOffset}deg)`, zIndex: 4, transition: 'transform 0.8s ease-in-out', padding: '30px' }}>
+                <svg width="400" height="400" style={{ overflow: 'visible' }}>
+                  {moods.map((mood, index) => {
+                    const isSelected = selectedMood?.mood_level === mood.level
+                    const centerX = 200
+                    const centerY = 200
+                    const outerRadius = isSelected ? 170 : 165
+                    const innerRadius = isSelected ? 80 : 85
+                    const segmentAngle = 72 // 72 degrees per segment
+                    // Calculate angles with no gaps - offset by half segment to center first segment at top
+                    const startAngle = (index * segmentAngle) - 90 - (segmentAngle / 2)
+                    const endAngle = startAngle + segmentAngle
+
+                    const startAngleRad = (startAngle * Math.PI) / 180
+                    const endAngleRad = (endAngle * Math.PI) / 180
+
+                    // Calculate path points
+                    const x1 = centerX + outerRadius * Math.cos(startAngleRad)
+                    const y1 = centerY + outerRadius * Math.sin(startAngleRad)
+                    const x2 = centerX + outerRadius * Math.cos(endAngleRad)
+                    const y2 = centerY + outerRadius * Math.sin(endAngleRad)
+                    const x3 = centerX + innerRadius * Math.cos(endAngleRad)
+                    const y3 = centerY + innerRadius * Math.sin(endAngleRad)
+                    const x4 = centerX + innerRadius * Math.cos(startAngleRad)
+                    const y4 = centerY + innerRadius * Math.sin(startAngleRad)
+
+                    const pathData = [
+                      `M ${x1} ${y1}`,
+                      `A ${outerRadius} ${outerRadius} 0 0 1 ${x2} ${y2}`,
+                      `L ${x3} ${y3}`,
+                      `A ${innerRadius} ${innerRadius} 0 0 0 ${x4} ${y4}`,
+                      'Z'
+                    ].join(' ')
+
+                    return (
+                      <path
+                        key={mood.level}
+                        d={pathData}
+                        fill={mood.color}
+                        fillOpacity={isSelected ? 1.0 : 0.8}
+                        stroke={isSelected ? `${mood.color}AA` : 'none'}
+                        strokeWidth={isSelected ? 1 : 0}
+                        className="cursor-pointer transition-all duration-300"
+                        style={{
+                          filter: isSelected ? 'drop-shadow(0 5px 10px rgba(0, 0, 0, 0.25))' : undefined
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.fillOpacity = '1.0'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.fillOpacity = isSelected ? '1.0' : '0.8'
+                        }}
+                        onClick={() => handleMoodSelect(mood, index)}
+                      />
+                    )
+                  })}
+
+
+                  {/* Lottie animations positioned on segments */}
+                  {moods.map((mood, index) => {
+                    const segmentAngle = 72
+                    const angle = (index * segmentAngle) - 90 // Center of each segment, with first segment centered at top
+                    const radius = 125 // Middle of the doughnut ring
+                    const x = 200 + radius * Math.cos((angle * Math.PI) / 180)
+                    const y = 200 + radius * Math.sin((angle * Math.PI) / 180)
+
+                    return (
+                      <foreignObject
+                        key={`animation-${mood.level}`}
+                        x={x - 35}
+                        y={y - 35}
+                        width="70"
+                        height="70"
+                        className="cursor-pointer"
+                        onClick={() => handleMoodSelect(mood, index)}
+                        transform={`rotate(${-rotationOffset} ${x} ${y})`}
+                      >
+                        <div style={{ width: '70px', height: '70px', pointerEvents: 'none' }}>
+                          <Lottie
+                            animationData={mood.animation}
+                            loop={true}
+                            autoplay={true}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              filter: 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15))'
+                            }}
+                          />
+                        </div>
+                      </foreignObject>
+                    )
+                  })}
+                </svg>
+              </div>
+
+              {/* Center text that doesn't rotate */}
+              <div
+                className="absolute inset-0 flex items-center justify-center"
+                style={{ pointerEvents: 'none' }}
+              >
+                <div className="text-center transition-opacity duration-300">
+                  {selectedMood ? (
+                    <span className="text-lg font-medium text-gray-800 capitalize">
+                      {selectedMood.mood_level.replace('_', ' ')}
+                    </span>
+                  ) : (
+                    <span className="text-base text-gray-500">
+                      Choose a mood
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -106,8 +247,35 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
         )}
       </div>
 
+      {/* Yellow swoosh section at bottom */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '100px',
+          backgroundColor: '#f7d145',
+          zIndex: 999
+        }}
+      >
+        {/* Top wave with depth effect */}
+        <svg style={{
+          position: 'absolute',
+          top: '-80px',
+          left: 0,
+          width: '100%',
+          height: '80px'
+        }} viewBox="0 0 1440 400" preserveAspectRatio="none">
+          {/* Main wave fill */}
+          <path d="M0,200 C480,400 960,0 1440,200 L1440,400 L0,400 Z" fill="#f7d145"/>
+          {/* Border with varied bottom edge only */}
+          <path d="M0,200 C480,400 960,0 1440,200 L1440,400 C1020,-120 400,480 0,360 Z" fill="#fae568" opacity="0.6"/>
+        </svg>
+      </div>
+
       {selectedMood && showNextButton && (
-        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center z-1000">
+        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center" style={{ zIndex: 1000 }}>
           <button
             onClick={() => onComplete?.(selectedMood)}
             style={{
@@ -124,7 +292,7 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
               transition: 'all 0.3s ease',
               color: 'white'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1066c2'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
             aria-label="Next"
           >
