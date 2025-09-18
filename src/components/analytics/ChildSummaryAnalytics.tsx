@@ -373,6 +373,9 @@ export function ChildSummaryAnalytics() {
     for (const line of lines) {
       const trimmedLine = line.trim()
 
+      // Skip empty lines
+      if (!trimmedLine) continue
+
       // Match lines that start with -, •, *, or numbers
       if (/^[-•*]\s+/.test(trimmedLine)) {
         // Bullet point
@@ -382,9 +385,31 @@ export function ChildSummaryAnalytics() {
         // Numbered item
         const content = trimmedLine.replace(/^\d+\.\s+/, '').trim()
         if (content) bullets.push(content)
+      } else if (/^(HIGH|MODERATE|LOW)\s+PRIORITY:/i.test(trimmedLine)) {
+        // Priority items from IMMEDIATE ACTION section
+        bullets.push(trimmedLine)
       } else if (trimmedLine && bullets.length > 0 && !trimmedLine.includes(':') && !trimmedLine.startsWith('**')) {
         // Continuation of previous bullet (indented or wrapped text)
         bullets[bullets.length - 1] += ' ' + trimmedLine
+      }
+    }
+
+    // If no bullets found, but we have content, convert paragraph to bullet points
+    if (bullets.length === 0 && sectionContent.trim()) {
+      // Split by sentences and create bullet points
+      const sentences = sectionContent.trim().split(/[.!?]/).filter(s => s.trim())
+
+      // For sections like STRENGTHS that might say "no strengths found", only include if meaningful
+      if (section.includes('STRENGTHS') && sectionContent.toLowerCase().includes('does not')) {
+        return undefined
+      }
+
+      // Convert first 3-4 meaningful sentences to bullets
+      for (const sentence of sentences.slice(0, 4)) {
+        const cleaned = sentence.trim()
+        if (cleaned && cleaned.length > 10) {
+          bullets.push(cleaned)
+        }
       }
     }
 
