@@ -66,13 +66,13 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
 
   const getInstructionText = () => {
     switch (phase) {
-      case 'intro': return 'Tap play to begin'
-      case 'inhale': return 'Breathe in'
-      case 'hold': return 'Hold'
-      case 'exhale': return 'Breathe out'
-      case 'holdAfter': return 'Hold'
-      case 'complete': return 'Well done!'
-      default: return 'Breathe'
+      case 'intro': return { title: "", subtitle: 'Tap play to begin' }
+      case 'inhale': return { title: 'Breathe in', subtitle: null }
+      case 'hold': return { title: 'Hold', subtitle: null }
+      case 'exhale': return { title: 'Breathe out', subtitle: null }
+      case 'holdAfter': return { title: 'Hold', subtitle: null }
+      case 'complete': return { title: 'Well done!', subtitle: null }
+      default: return { title: 'Breathe', subtitle: null }
     }
   }
 
@@ -177,13 +177,23 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
         padding: '2rem'
       }}>
         <h2 style={{
-          fontSize: '16px',
-          fontWeight: '400',
+          fontSize: getInstructionText().title === "Let's breathe!" ? '20px' : '16px',
+          fontWeight: getInstructionText().title === "Let's breathe!" ? 'bold' : '400',
           color: '#1f2937',
           marginBottom: '0.5rem'
         }}>
-          {getInstructionText()}
+          {getInstructionText().title}
         </h2>
+        {getInstructionText().subtitle && (
+          <p style={{
+            fontSize: '16px',
+            opacity: 0.8,
+            marginTop: '8px',
+            color: '#1f2937'
+          }}>
+            {getInstructionText().subtitle}
+          </p>
+        )}
         {['inhale', 'hold', 'exhale', 'holdAfter'].includes(phase) && (
           <p style={{
             fontSize: '0.9rem',

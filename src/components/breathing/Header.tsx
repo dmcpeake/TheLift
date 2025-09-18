@@ -19,9 +19,8 @@ export function Header({ onSkip, onSettings, phase, techniqueName }: HeaderProps
   return (
     <>
       {/* Centered title like breathing exercise */}
-      <div className="text-center" style={{ marginTop: '80px', marginBottom: '2rem' }}>
-        <h1 className="text-white mb-2" style={{ fontSize: '40px', fontWeight: 600, letterSpacing: '0.02em' }}>Breathing Exercise</h1>
-        <p className="text-white text-lg opacity-80">Take a moment to breathe</p>
+      <div className="text-center" style={{ marginTop: '40px', marginBottom: '2rem' }}>
+        <h1 className="text-white mb-2" style={{ fontSize: '40px', fontWeight: 600, letterSpacing: '0.02em' }}>Let's breathe!</h1>
       </div>
     </>
   )

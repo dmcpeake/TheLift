@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Heart, Smile, Compass, TreePine } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Heart, Smile, Compass, TreePine, X } from 'lucide-react'
 import { BreathingCircles } from '../breathing/BreathingCircles'
 import { MoodMeter } from '../prototypes/MoodMeter'
 import { EmotionGrid } from '../prototypes/EmotionGrid'
@@ -26,6 +26,7 @@ export function CheckInFlow() {
   const navigate = useNavigate()
   const [completedData, setCompletedData] = useState<Record<string, any>>({})
   const [currentStepHasSelection, setCurrentStepHasSelection] = useState(false)
+  const [emotionGridStep, setEmotionGridStep] = useState(1)
 
   // State to trigger completion in child components
   const [triggerEmotionCompletion, setTriggerEmotionCompletion] = useState(false)
@@ -77,6 +78,10 @@ export function CheckInFlow() {
 
   const handleStepSelectionMade = () => {
     setCurrentStepHasSelection(true)
+  }
+
+  const handleStepSelectionRemoved = () => {
+    setCurrentStepHasSelection(false)
   }
 
   const canNavigateToStep = (stepId: string, index: number) => {
@@ -155,83 +160,61 @@ export function CheckInFlow() {
 
     return (
       <>
-        {/* Left chevron tab */}
-        <button
-          onClick={handleBackClick}
-          className="fixed left-0 top-1/2 -translate-y-1/2 shadow-lg z-50 transition-colors"
-          style={{
-            width: '56px',
-            height: '56px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderTopRightRadius: '4px',
-            borderBottomRightRadius: '4px',
-            backgroundColor: '#3a7ddc'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
-          aria-label="Previous step"
-        >
-          <ChevronLeft
-            className="h-8 w-8"
-            style={{ color: 'white' }}
-          />
-        </button>
-
-        {/* Right chevron tab */}
-        <button
-          onClick={handleForwardClick}
-          disabled={!canGoForward}
-          className="fixed right-0 top-1/2 -translate-y-1/2 z-50 transition-colors"
-          style={{
-            width: '56px',
-            height: '56px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderTopLeftRadius: '4px',
-            borderBottomLeftRadius: '4px',
-            backgroundColor: canGoForward ? '#3a7ddc' : 'rgba(58, 125, 220, 0.2)',
-            cursor: canGoForward ? 'pointer' : 'not-allowed',
-            boxShadow: canGoForward ? '0 4px 20px rgba(0,0,0,0.1)' : 'none'
-          }}
-          onMouseEnter={(e) => {
-            if (canGoForward) {
-              e.currentTarget.style.backgroundColor = '#2e6bc7'
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (canGoForward) {
-              e.currentTarget.style.backgroundColor = '#3a7ddc'
-            }
-          }}
-          aria-label="Next step"
-        >
-          <ChevronRight
-            className="h-8 w-8 transition-colors"
-            style={{
-              color: 'white'
-            }}
-          />
-        </button>
-
         {/* Progress header */}
-        <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', padding: '16px 0', borderRadius: '0' }}>
-          <div className="mx-auto px-6" style={{ maxWidth: '600px' }}>
-            {/* Icons row */}
-            <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', height: '80px', borderRadius: '0' }}>
+          <div className="mx-auto px-6" style={{ maxWidth: '600px', height: '80px', position: 'relative' }}>
+
+            {/* Icons row - positioned at top */}
+            <div className="grid grid-cols-3 gap-2 w-full" style={{ paddingTop: '10px' }}>
               {progressSegments.map((segment, index) => {
                 const Icon = segment.icon
+                const stepId = steps[index]?.id
+                const isCompleted = completedData[stepId] && !completedData[stepId].skipped
+                const isCurrentStep = (() => {
+                  if (index === 0) return currentStep === 'mood'
+                  if (index === 1) return currentStep === 'emotions'
+                  if (index === 2) return currentStep === 'wellbeing'
+                  return false
+                })()
+                // Can navigate if it's completed OR if we're past this step OR if it's the next available step
+                const canNavigate = isCompleted || isCurrentStep || (() => {
+                  if (index === 0) return currentStep === 'emotions' || currentStep === 'wellbeing'
+                  if (index === 1) return currentStep === 'wellbeing'
+                  return false
+                })() || (() => {
+                  // Make next step tappable if current step has selection
+                  if (currentStepHasSelection) {
+                    if (currentStep === 'mood' && index === 1) return true // emotions step
+                  }
+                  // For wellbeing step, only tappable on emotion step 2
+                  if (currentStep === 'emotions' && emotionGridStep === 2 && index === 2) {
+                    return true // wellbeing step
+                  }
+                  return false
+                })()
+
                 return (
                   <div key={segment.name} className="text-center">
-                    <Icon className="h-6 w-6 mx-auto" style={{ color: '#3a7ddc' }} />
+                    {canNavigate ? (
+                      <button
+                        onClick={() => stepId && handleNavigateToStep(stepId)}
+                        className="transition-all cursor-pointer relative"
+                        style={{ background: 'none', border: 'none', padding: '10px', margin: '-10px' }}
+                        aria-label={`Navigate to ${segment.name}`}
+                      >
+                        <Icon className="h-6 w-6 mx-auto" style={{ color: '#3a7ddc' }} />
+                      </button>
+                    ) : (
+                      <Icon className="h-6 w-6 mx-auto" style={{ color: isCompleted ? '#3a7ddc' : '#9ca3af' }} />
+                    )}
                   </div>
                 )
               })}
             </div>
-            {/* Progress bar with separators */}
-            <div className="relative w-full bg-gray-200 rounded-full h-2 mb-3">
+
+            {/* Progress bar with separators - positioned 10px below icons */}
+            <div className="relative w-full bg-gray-200 rounded-full h-2">
+              {/* Main progress bar */}
               <div
                 className="h-2 rounded-full transition-all duration-300"
                 style={{
@@ -257,6 +240,37 @@ export function CheckInFlow() {
                   backgroundColor: '#3a7ddc'
                 }}
               />
+              {/* Next available segment overlay (50% opacity blue) */}
+              {(() => {
+                let showNextSegment = false
+                let nextSegmentIndex = -1
+
+                if (currentStep === 'mood' && currentStepHasSelection) {
+                  showNextSegment = true
+                  nextSegmentIndex = 1 // emotions
+                } else if (currentStep === 'emotions' && emotionGridStep === 2) {
+                  showNextSegment = true
+                  nextSegmentIndex = 2 // wellbeing
+                }
+
+                if (showNextSegment) {
+                  const segmentWidth = 100 / progressSegments.length
+                  const leftPosition = nextSegmentIndex * segmentWidth
+
+                  return (
+                    <div
+                      className="absolute h-2 rounded-full transition-all duration-300"
+                      style={{
+                        left: `${leftPosition}%`,
+                        width: `${segmentWidth}%`,
+                        backgroundColor: 'rgba(58, 125, 220, 0.5)',
+                        top: 0
+                      }}
+                    />
+                  )
+                }
+                return null
+              })()}
               {/* Section separators */}
               {progressSegments.slice(0, -1).map((_, index) => (
                 <div
@@ -267,11 +281,37 @@ export function CheckInFlow() {
               ))}
             </div>
 
-            {/* Step labels - all centered */}
-            <div className="grid grid-cols-3 gap-2">
+            {/* Step labels - positioned 10px below progress bar */}
+            <div className="grid grid-cols-3 gap-2 w-full" style={{ marginTop: '5px' }}>
               {progressSegments.map((segment, index) => {
+                const stepId = steps[index]?.id
+                const isCompleted = completedData[stepId] && !completedData[stepId].skipped
+                const isCurrentStep = (() => {
+                  if (index === 0) return currentStep === 'mood'
+                  if (index === 1) return currentStep === 'emotions'
+                  if (index === 2) return currentStep === 'wellbeing'
+                  return false
+                })()
+                // Can navigate if it's completed OR if we're past this step OR if it's the next available step
+                const canNavigate = isCompleted || isCurrentStep || (() => {
+                  if (index === 0) return currentStep === 'emotions' || currentStep === 'wellbeing'
+                  if (index === 1) return currentStep === 'wellbeing'
+                  return false
+                })() || (() => {
+                  // Make next step tappable if current step has selection
+                  if (currentStepHasSelection) {
+                    if (currentStep === 'mood' && index === 1) return true // emotions step
+                  }
+                  // For wellbeing step, only tappable on emotion step 2
+                  if (currentStep === 'emotions' && emotionGridStep === 2 && index === 2) {
+                    return true // wellbeing step
+                  }
+                  return false
+                })()
+
                 // Highlight both completed and currently active segments
                 let isHighlighted = false
+                let isNextAvailable = false
 
                 if (index === 0) {
                   // Mood meter - highlight if current or completed
@@ -283,24 +323,53 @@ export function CheckInFlow() {
                   if (currentStep === 'emotions' || currentStep === 'wellbeing' || currentStep === 'garden') {
                     isHighlighted = true
                   }
+                  // Check if it's the next available step
+                  if (currentStep === 'mood' && currentStepHasSelection) {
+                    isNextAvailable = true
+                  }
                 } else if (index === 2) {
                   // Wellbeing wheel - highlight if current or completed
                   if (currentStep === 'wellbeing' || currentStep === 'garden') {
                     isHighlighted = true
                   }
+                  // Check if it's the next available step (only on emotion step 2)
+                  if (currentStep === 'emotions' && emotionGridStep === 2) {
+                    isNextAvailable = true
+                  }
                 }
 
                 return (
                   <div key={segment.name} className="text-center">
-                    <span className={`text-xs ${isHighlighted ? 'font-bold' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : undefined }}>
-                      {segment.name}
-                    </span>
+                    {canNavigate ? (
+                      <button
+                        onClick={() => stepId && handleNavigateToStep(stepId)}
+                        className="transition-all cursor-pointer relative"
+                        style={{ background: 'none', border: 'none', padding: '12px 16px', margin: '-12px -16px' }}
+                        aria-label={`Navigate to ${segment.name}`}
+                      >
+                        <span className={`text-xs ${isHighlighted ? 'font-bold' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : (isNextAvailable ? '#3a7ddc' : undefined) }}>
+                          {segment.name}
+                        </span>
+                      </button>
+                    ) : (
+                      <span className={`text-xs ${isHighlighted ? 'font-bold' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : '#9ca3af' }}>
+                        {segment.name}
+                      </span>
+                    )}
                   </div>
                 )
               })}
             </div>
           </div>
 
+          {/* Close button positioned at vertical center right */}
+          <button
+            onClick={() => navigate('/checkin/home')}
+            className="absolute top-1/2 right-4 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#1066c2] transition-colors shadow-lg"
+            style={{ backgroundColor: '#147fe3', transform: 'translateY(-50%)' }}
+          >
+            <X className="h-5 w-5 text-white" />
+          </button>
         </div>
       </>
     )
@@ -357,6 +426,7 @@ export function CheckInFlow() {
                 onComplete={(data) => handleStepComplete('mood', data)}
                 showNextButton={true}
                 onSelectionMade={handleStepSelectionMade}
+                onSelectionRemoved={handleStepSelectionRemoved}
                 hideDebugInfo={true}
                 triggerCompletion={triggerMoodCompletion}
                 initialData={completedData['mood']}
@@ -375,6 +445,7 @@ export function CheckInFlow() {
                 hideDebugInfo={true}
                 triggerCompletion={triggerEmotionCompletion}
                 initialData={completedData['emotions']}
+                onStepChange={setEmotionGridStep}
               />
             </div>
           </div>
