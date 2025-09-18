@@ -296,6 +296,7 @@ export function ChildSummaryAnalytics() {
 
         // Debug: Log the raw AI response
         console.log('Raw AI analysis response:', analysis.substring(0, 500) + '...')
+        console.log('Full AI response for debugging:', analysis)
 
         // Parse the new comprehensive AI response format
         const insights: AIInsights = {
@@ -345,16 +346,28 @@ export function ChildSummaryAnalytics() {
   }
 
   const extractBulletPoints = (text: string, section: string): string[] | undefined => {
-    // Match **SECTION** followed by content until the next ** section
-    const pattern = new RegExp(`\\*\\*${section}\\*\\*\\s*\\n([^\\*]+?)(?=\\n\\*\\*|$)`, 'si')
-    const match = text.match(pattern)
+    // More flexible pattern that handles various section title formats
+    const sectionPatterns = [
+      new RegExp(`\\*\\*${section}\\*\\*[:\\s]*\\n([^\\*]+?)(?=\\n\\*\\*|$)`, 'si'),
+      new RegExp(`\\*\\*${section.replace('&', '\\&')}\\*\\*[:\\s]*\\n([^\\*]+?)(?=\\n\\*\\*|$)`, 'si'),
+      new RegExp(`${section}[:\\s]*\\n([^\\*]+?)(?=\\n\\*\\*|$)`, 'si')
+    ]
 
-    if (!match || !match[1]) return undefined
+    let sectionContent = ''
+    for (const pattern of sectionPatterns) {
+      const match = text.match(pattern)
+      if (match && match[1]) {
+        sectionContent = match[1]
+        break
+      }
+    }
 
-    const sectionContent = match[1]
+    if (!sectionContent) {
+      console.log(`Could not find section: ${section}`)
+      return undefined
+    }
+
     const bullets: string[] = []
-
-    // Split by lines and look for bullet points or numbered items
     const lines = sectionContent.split('\n')
 
     for (const line of lines) {
@@ -369,12 +382,13 @@ export function ChildSummaryAnalytics() {
         // Numbered item
         const content = trimmedLine.replace(/^\d+\.\s+/, '').trim()
         if (content) bullets.push(content)
-      } else if (trimmedLine && bullets.length > 0 && !trimmedLine.includes(':')) {
+      } else if (trimmedLine && bullets.length > 0 && !trimmedLine.includes(':') && !trimmedLine.startsWith('**')) {
         // Continuation of previous bullet (indented or wrapped text)
         bullets[bullets.length - 1] += ' ' + trimmedLine
       }
     }
 
+    console.log(`Extracted ${bullets.length} bullets from ${section}`)
     return bullets.length > 0 ? bullets : undefined
   }
 
