@@ -294,6 +294,9 @@ export function ChildSummaryAnalytics() {
         // Parse the AI response into structured insights
         const analysis = data.analysis || ''
 
+        // Debug: Log the raw AI response
+        console.log('Raw AI analysis response:', analysis.substring(0, 500) + '...')
+
         // Parse the new comprehensive AI response format
         const insights: AIInsights = {
           summary: extractSection(analysis, 'EXECUTIVE SUMMARY') ||
@@ -328,51 +331,47 @@ export function ChildSummaryAnalytics() {
   }
 
   const extractSection = (text: string, section: string): string => {
-    // Try multiple formats: **Section**, Section:, or just Section at start of line
-    const patterns = [
-      new RegExp(`\\*\\*${section}\\*\\*:?\\s*([^\\*\\n]+)`, 'i'),
-      new RegExp(`^${section}:?\\s*([^\\n]+)`, 'im'),
-      new RegExp(`\\n${section}:?\\s*([^\\n]+)`, 'i'),
-      new RegExp(`\\d+\\.\\s*\\*\\*${section}\\*\\*:?\\s*([^\\*\\n]+)`, 'i')
-    ]
+    // Match **SECTION** followed by content until the next ** section or end
+    const pattern = new RegExp(`\\*\\*${section}\\*\\*\\s*\\n([^\\*]+?)(?=\\n\\*\\*|$)`, 'si')
+    const match = text.match(pattern)
 
-    for (const pattern of patterns) {
-      const match = text.match(pattern)
-      if (match && match[1]) {
-        return match[1].trim()
-      }
+    if (match && match[1]) {
+      // Get the first 2-3 sentences for the summary
+      const sentences = match[1].trim().split(/[.!?]/).filter(s => s.trim())
+      return sentences.slice(0, 3).join('. ').trim() + (sentences.length > 0 ? '.' : '')
     }
+
     return ''
   }
 
   const extractBulletPoints = (text: string, section: string): string[] | undefined => {
-    // Try to find the section
-    const patterns = [
-      new RegExp(`\\*\\*${section}\\*\\*:?([^\\*\\*]+?)(?=\\n\\n|\\*\\*|\\d+\\.|$)`, 'is'),
-      new RegExp(`^${section}:?([^\\n]+(?:\\n(?!\\n|\\d+\\.|\\*\\*).*)+)`, 'im'),
-      new RegExp(`\\d+\\.\\s*\\*\\*${section}\\*\\*:?([^\\*\\*]+?)(?=\\n\\n|\\d+\\.|$)`, 'is')
-    ]
+    // Match **SECTION** followed by content until the next ** section
+    const pattern = new RegExp(`\\*\\*${section}\\*\\*\\s*\\n([^\\*]+?)(?=\\n\\*\\*|$)`, 'si')
+    const match = text.match(pattern)
 
-    let sectionContent = ''
-    for (const pattern of patterns) {
-      const match = text.match(pattern)
-      if (match && match[1]) {
-        sectionContent = match[1]
-        break
-      }
-    }
+    if (!match || !match[1]) return undefined
 
-    if (!sectionContent) return undefined
-
-    // Extract bullet points
-    const bulletRegex = /[-•*]\s*([^\n-•*]+)/g
+    const sectionContent = match[1]
     const bullets: string[] = []
-    let match
 
-    while ((match = bulletRegex.exec(sectionContent)) !== null) {
-      const bullet = match[1].trim()
-      if (bullet.length > 0) {
-        bullets.push(bullet)
+    // Split by lines and look for bullet points or numbered items
+    const lines = sectionContent.split('\n')
+
+    for (const line of lines) {
+      const trimmedLine = line.trim()
+
+      // Match lines that start with -, •, *, or numbers
+      if (/^[-•*]\s+/.test(trimmedLine)) {
+        // Bullet point
+        const content = trimmedLine.replace(/^[-•*]\s+/, '').trim()
+        if (content) bullets.push(content)
+      } else if (/^\d+\.\s+/.test(trimmedLine)) {
+        // Numbered item
+        const content = trimmedLine.replace(/^\d+\.\s+/, '').trim()
+        if (content) bullets.push(content)
+      } else if (trimmedLine && bullets.length > 0 && !trimmedLine.includes(':')) {
+        // Continuation of previous bullet (indented or wrapped text)
+        bullets[bullets.length - 1] += ' ' + trimmedLine
       }
     }
 
