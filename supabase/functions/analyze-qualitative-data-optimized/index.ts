@@ -156,7 +156,7 @@ serve(async (req) => {
     })
 
     // OPTIMIZATION 4: Shorter, more focused prompts
-    let systemPrompt = `You are a child wellbeing analyst. Analyze the aggregated data and provide concise, actionable insights.`
+    let systemPrompt = `You are a child wellbeing analyst providing insights for parents, practitioners, and teachers. Focus on identifying patterns that indicate how this child is "turning up" emotionally and any early mental health indicators requiring attention.`
 
     let userPrompt = ''
 
@@ -167,13 +167,60 @@ serve(async (req) => {
 
 ${JSON.stringify(aggregatedData, null, 2)}
 
-Provide:
-1. Executive Summary (2-3 sentences)
-2. Key Concerns (if any, bullet points)
-3. Positive Trends (bullet points)
-4. Top 3 Recommendations
+Summary for [PARENT/PRACTITIONER/TEACHER]. Focus on identifying patterns that indicate how this child is "turning up" emotionally and any early mental health indicators requiring attention.
 
-Keep response under 300 words.`
+**EXECUTIVE SUMMARY**
+Provide a 2-3 sentence overview: Is this child thriving, stable, struggling, or in crisis? What's the single most important thing to know about their emotional state?
+
+**EMOTIONAL TRAJECTORY**
+- Overall mood pattern over time (improving/declining/stable/volatile)
+- Frequency and intensity of concerning emotions (anger, sadness, anxiety, frustration)
+- Any significant mood swings or emotional volatility
+- Context-specific patterns (worse at certain times/settings)
+
+**RED FLAGS & EARLY WARNING SIGNS**
+Highlight any patterns suggesting developing mental health concerns:
+- Persistent negative emotions lasting 2+ weeks
+- Increasing emotional volatility or intensity
+- Social withdrawal indicators ("worried friends will avoid me")
+- Health anxiety or somatic concerns
+- Anger/frustration escalation patterns
+- Sleep, appetite, or energy references
+- Self-worth or confidence issues
+
+**STRENGTHS & PROTECTIVE FACTORS**
+- Positive emotional patterns and coping strategies
+- Effective tool usage and engagement
+- Self-awareness and emotional vocabulary development
+- Social connections and support systems
+- Resilience indicators
+
+**IMMEDIATE ACTION REQUIRED**
+- HIGH PRIORITY: Issues needing immediate attention
+- MODERATE: Patterns to monitor closely
+- LOW: General support recommendations
+
+**SUPPORT RECOMMENDATIONS**
+Specific, actionable suggestions:
+- Which tools are most/least effective for this child
+- Environmental modifications needed
+- When to seek additional professional support
+- Family/school communication points
+- Specific intervention strategies
+
+**TREND MONITORING**
+Key metrics to track going forward:
+- Early warning indicators to watch
+- Success indicators to celebrate
+- Optimal check-in frequency
+
+**CONTEXT CONSIDERATIONS**
+- How institutional setting (hospital/school/clinic) influences patterns
+- Age-appropriate emotional development expectations
+- External factors affecting wellbeing
+
+**CONFIDENCE LEVEL**
+Based on data quality and quantity, how confident is this assessment? What additional information would improve accuracy?`
     }
 
     // Call Claude API with reduced token usage
