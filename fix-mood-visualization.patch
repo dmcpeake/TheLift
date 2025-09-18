@@ -1,0 +1,98 @@
+// Create a more intuitive mood timeline visualization
+// Replace the heatmap grid with a line chart
+
+const MoodTimeline = ({ moodData }) => {
+  // Group moods by week for clearer visualization
+  const groupByWeek = (moods) => {
+    const weeks = {}
+    moods.forEach(mood => {
+      const date = new Date(mood.created_at)
+      const weekKey = `${date.getFullYear()}-W${Math.ceil(date.getDate() / 7)}-${date.getMonth()}`
+      if (!weeks[weekKey]) {
+        weeks[weekKey] = []
+      }
+      weeks[weekKey].push(mood.mood_numeric)
+    })
+
+    // Calculate average per week
+    return Object.entries(weeks).map(([key, values]) => ({
+      week: key,
+      avgMood: values.reduce((a, b) => a + b, 0) / values.length,
+      count: values.length
+    }))
+  }
+
+  const weeklyData = groupByWeek(moodData)
+
+  return (
+    <div className="relative h-48">
+      {/* Y-axis with mood levels */}
+      <div className="absolute left-0 h-full flex flex-col justify-between text-xs">
+        <span>😊 5</span>
+        <span>🙂 4</span>
+        <span>😐 3</span>
+        <span>😕 2</span>
+        <span>😢 1</span>
+      </div>
+
+      {/* Chart area with line graph */}
+      <svg className="ml-8 w-full h-full">
+        {/* Grid lines */}
+        {[1, 2, 3, 4, 5].map(level => (
+          <line
+            key={level}
+            x1="0"
+            y1={`${100 - (level - 1) * 25}%`}
+            x2="100%"
+            y2={`${100 - (level - 1) * 25}%`}
+            stroke="#e5e7eb"
+            strokeWidth="1"
+          />
+        ))}
+
+        {/* Mood line */}
+        <polyline
+          points={weeklyData.map((week, i) => {
+            const x = (i / (weeklyData.length - 1)) * 100
+            const y = 100 - ((week.avgMood - 1) / 4) * 100
+            return `${x}%,${y}%`
+          }).join(' ')}
+          fill="none"
+          stroke="#3b82f6"
+          strokeWidth="3"
+        />
+
+        {/* Data points */}
+        {weeklyData.map((week, i) => {
+          const x = (i / (weeklyData.length - 1)) * 100
+          const y = 100 - ((week.avgMood - 1) / 4) * 100
+          return (
+            <circle
+              key={i}
+              cx={`${x}%`}
+              cy={`${y}%`}
+              r="5"
+              fill={
+                week.avgMood >= 4.5 ? '#10b981' :
+                week.avgMood >= 3.5 ? '#84cc16' :
+                week.avgMood >= 2.5 ? '#eab308' :
+                week.avgMood >= 1.5 ? '#f97316' :
+                '#ef4444'
+              }
+              stroke="white"
+              strokeWidth="2"
+            />
+          )
+        })}
+      </svg>
+
+      {/* X-axis with months */}
+      <div className="ml-8 mt-2 flex justify-between text-xs text-gray-600">
+        <span>Jan</span>
+        <span>Feb</span>
+        <span>Mar</span>
+        <span>Apr</span>
+      </div>
+    </div>
+  )
+}
