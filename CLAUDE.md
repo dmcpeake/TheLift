@@ -108,3 +108,81 @@ The app automatically initializes test users on startup via the `/server/auth/in
 6. **Search for #6b7280**: This specific gray color must be defined somewhere that's overriding the avatars
 
 **Temporary Workaround**: Consider using inline styles or CSS-in-JS for avatar colors until root cause is found.
+
+### Date Handling in Analytics (Fixed 2025-09-18)
+
+**Issue**: Dates in mood/wellbeing data were showing as September 2025 instead of the actual check-in dates (Jan-Apr 2025).
+
+**Root Cause**: The code was using `created_at` field (when record was inserted) instead of `selected_at` field (when mood was actually recorded).
+
+**Solution**: Updated all queries and components to use:
+- `selected_at` for `mood_meter_usage` table
+- `started_at` for `wellbeing_sessions` table
+
+**Files Updated**:
+- `src/components/analytics/ChildSummaryAnalytics.tsx` - Changed queries to order by `selected_at`
+- `src/components/analytics/MoodHeatmap.tsx` - Updated to use `selected_at` for date display
+- `supabase/functions/analyze-qualitative-data-optimized/index.ts` - Fixed date field references
+
+### AI Analysis Organization-Specific Prompts (2025-09-18)
+
+**Implementation**: Created role-specific prompts for AI analysis based on organization type.
+
+**Database Structure**:
+- Table: `organisations` (note British spelling)
+- Column: `type` (values: 'school-primary', 'school-secondary', 'clinic-private', 'hospital', etc.)
+- Organizations must exist in DB for proper org type detection
+
+**Prompt Files**:
+- `supabase/functions/analyze-qualitative-data-optimized/prompts/teacher.md` - For school organizations
+- `supabase/functions/analyze-qualitative-data-optimized/prompts/clinic.md` - For mental health clinics
+- `supabase/functions/analyze-qualitative-data-optimized/prompts/hospital.md` - For medical facilities
+
+**Edge Function Updates**:
+1. Detects org type from `organisations` table
+2. Maps specific types to categories (e.g., 'school-primary' → 'school')
+3. Loads appropriate prompt file based on org type
+4. Replaces `{child_name}` placeholders with actual child's first name
+5. Returns debug info in response for troubleshooting
+
+**Key Implementation Details**:
+- System prompts explicitly instruct AI to use child's name
+- User prompts include reinforcement to avoid generic terms like "the student"
+- Debug info shows: orgType, promptFile, childName, systemPromptType
+
+### Mood Heatmap Color Fix (2025-09-18)
+
+**Issue**: Mood colors showing as gray instead of red-to-green gradient.
+
+**Solution**: Replaced Tailwind classes with inline styles to bypass CSS purging issues.
+
+**Color Mapping**:
+- Mood 1: Red (#ef4444)
+- Mood 2: Orange (#fb923c)
+- Mood 3: Yellow (#fbbf24)
+- Mood 4: Light Green (#34d399)
+- Mood 5: Green (#10b981)
+
+**File**: `src/components/analytics/MoodHeatmap.tsx` - Now uses inline `style` prop instead of Tailwind classes
+
+### Edge Function Deployment
+
+**Important**: Edge function changes require manual deployment to Supabase.
+
+**Deployment Methods**:
+1. Via Supabase Dashboard (Upload through web interface)
+2. Via CLI (requires login):
+   ```bash
+   supabase login
+   npx supabase functions deploy analyze-qualitative-data-optimized
+   ```
+
+**Note**: The `./deploy-optimized-edge-function.sh` script requires authentication and won't work without `supabase login`.
+
+### Test Data Setup
+
+**Organizations Created**:
+- Westfield Primary School (id: '5f910546-8bdc-44ca-b776-fdd5eb5cccd9', type: 'school-primary')
+- St. Mary's Hospital (id: '7eab219a-7c83-406c-a6b2-75ed44de715b', type: 'hospital')
+
+**Important**: Children profiles must have valid `org_id` linking to existing organization for proper analysis.

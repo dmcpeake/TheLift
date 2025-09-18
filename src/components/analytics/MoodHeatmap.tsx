@@ -77,14 +77,15 @@ export function MoodHeatmap({ moodData, MOOD_EMOJIS }: MoodHeatmapProps) {
   const months = getMonthsFromData()
 
   const getMoodColor = (mood: number | undefined) => {
-    if (!mood) return 'bg-gray-100'
+    // Using inline styles to ensure colors work reliably
+    if (!mood) return { backgroundColor: '#f3f4f6' } // gray-100
     switch(mood) {
-      case 5: return 'bg-green-500'
-      case 4: return 'bg-green-400'
-      case 3: return 'bg-yellow-400'
-      case 2: return 'bg-orange-400'
-      case 1: return 'bg-red-500'
-      default: return 'bg-gray-100'
+      case 5: return { backgroundColor: '#10b981' } // green-500
+      case 4: return { backgroundColor: '#34d399' } // green-400
+      case 3: return { backgroundColor: '#fbbf24' } // yellow-400
+      case 2: return { backgroundColor: '#fb923c' } // orange-400
+      case 1: return { backgroundColor: '#ef4444' } // red-500
+      default: return { backgroundColor: '#f3f4f6' } // gray-100
     }
   }
 
@@ -102,23 +103,23 @@ export function MoodHeatmap({ moodData, MOOD_EMOJIS }: MoodHeatmapProps) {
         <div className="flex items-center space-x-3">
           <span className="text-gray-600">Mood Scale:</span>
           <div className="flex items-center space-x-1">
-            <div className="w-4 h-4 bg-red-500 rounded"></div>
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#ef4444' }}></div>
             <span>1 (😢)</span>
           </div>
           <div className="flex items-center space-x-1">
-            <div className="w-4 h-4 bg-orange-400 rounded"></div>
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#fb923c' }}></div>
             <span>2 (😕)</span>
           </div>
           <div className="flex items-center space-x-1">
-            <div className="w-4 h-4 bg-yellow-400 rounded"></div>
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#fbbf24' }}></div>
             <span>3 (😐)</span>
           </div>
           <div className="flex items-center space-x-1">
-            <div className="w-4 h-4 bg-green-400 rounded"></div>
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#34d399' }}></div>
             <span>4 (🙂)</span>
           </div>
           <div className="flex items-center space-x-1">
-            <div className="w-4 h-4 bg-green-500 rounded"></div>
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#10b981' }}></div>
             <span>5 (😊)</span>
           </div>
         </div>
@@ -159,7 +160,8 @@ export function MoodHeatmap({ moodData, MOOD_EMOJIS }: MoodHeatmapProps) {
                 return (
                   <div
                     key={day}
-                    className={`aspect-square rounded-sm flex items-center justify-center text-xs ${getMoodColor(mood)} ${mood ? 'cursor-pointer hover:opacity-80' : ''}`}
+                    className={`aspect-square rounded-sm flex items-center justify-center text-xs ${mood ? 'cursor-pointer hover:opacity-80' : ''}`}
+                    style={getMoodColor(mood)}
                     title={mood ? `${month.name} ${day}: Mood ${mood}/5 ${getMoodEmoji(mood)}` : `${month.name} ${day}: No data`}
                   >
                     {mood ? getMoodEmoji(mood) : day}

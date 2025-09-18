@@ -258,9 +258,9 @@ serve(async (req) => {
 
     // OPTIMIZATION 4: Role-specific system prompt
     const systemPromptMap: Record<string, string> = {
-      'school': 'You are an experienced primary school teacher analyzing a student\'s emotional wellbeing data. Focus on classroom-relevant insights, learning impacts, and practical teaching strategies. Use teacher-appropriate language, not clinical terminology.',
-      'clinic': 'You are a child mental health practitioner reviewing inter-session wellbeing data. Provide clinical insights about emotional regulation, therapeutic progress, and treatment recommendations.',
-      'hospital': 'You are a pediatric physician reviewing a young patient\'s emotional wellbeing during medical treatment. Focus on the medical-psychological connection and how to support emotional healing alongside physical recovery.'
+      'school': `You are an experienced primary school teacher analyzing ${childFirstName}'s emotional wellbeing data. Always refer to the student by name (${childFirstName}) rather than "the student" or "this child". Focus on classroom-relevant insights, learning impacts, and practical teaching strategies. Use teacher-appropriate language, not clinical terminology.`,
+      'clinic': `You are a child mental health practitioner reviewing ${childFirstName}'s inter-session wellbeing data. Always refer to the child by name (${childFirstName}). Provide clinical insights about emotional regulation, therapeutic progress, and treatment recommendations.`,
+      'hospital': `You are a pediatric physician reviewing ${childFirstName}'s emotional wellbeing during medical treatment. Always refer to your patient by name (${childFirstName}). Focus on the medical-psychological connection and how to support emotional healing alongside physical recovery.`
     }
 
     let systemPrompt = systemPromptMap[orgType] || systemPromptMap['school']
@@ -273,13 +273,15 @@ Here is the wellbeing data to analyze:
 
 ${JSON.stringify(aggregatedData, null, 2)}
 
-IMPORTANT: Structure your response with these exact section headers:
-**EXECUTIVE SUMMARY**
-**RED FLAGS & EARLY WARNING SIGNS**
-**STRENGTHS & PROTECTIVE FACTORS**
-**SUPPORT RECOMMENDATIONS**
-
-Use bullet points (- ) for lists within each section.`
+IMPORTANT INSTRUCTIONS:
+1. Always refer to the child by their name (${childFirstName}) throughout your response
+2. Structure your response with these exact section headers:
+   **EXECUTIVE SUMMARY**
+   **RED FLAGS & EARLY WARNING SIGNS**
+   **STRENGTHS & PROTECTIVE FACTORS**
+   **SUPPORT RECOMMENDATIONS**
+3. Use bullet points (- ) for lists within each section
+4. Write as if you're speaking directly about ${childFirstName}, not "the student" or "this child"`
 
     // Call Claude API with sufficient tokens for structured response
     const message = await anthropic.messages.create({
