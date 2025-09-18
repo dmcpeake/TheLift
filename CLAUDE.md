@@ -76,3 +76,35 @@ After login, users are automatically redirected based on their role:
 
 #### Test Data Initialization
 The app automatically initializes test users on startup via the `/server/auth/init-test-users` edge function.
+
+## Known Issues & Debugging Notes
+
+### Avatar Colors Not Displaying (As of 2025-01-17)
+
+**Issue**: Avatar colors in `/test/analytics` (ChildSummaryAnalytics.tsx) display as gray instead of their configured colors.
+
+**Status**: Partially working - only bg-red-500 (6th child) and bg-teal-500 (5th child) show colors, all others render as gray (#6b7280).
+
+**Investigation Summary**:
+1. **Classes are correctly assigned**: Debug logs confirm each avatar gets proper Tailwind classes (bg-blue-500, bg-green-500, etc.)
+2. **Tailwind configuration is correct**:
+   - All color classes are in the safelist in `tailwind.config.js`
+   - Tailwind CSS v3 is properly installed with PostCSS
+3. **Wireframe CSS partially disabled**: Found and commented out wireframe overrides in `src/styles/globals.css` (lines 200-490) but issue persists
+4. **Issue reproduces locally**: Confirmed not a Vercel deployment issue - happens in local build too
+
+**Files Checked**:
+- `src/components/analytics/ChildSummaryAnalytics.tsx` - Avatar rendering logic (lines 456-485)
+- `src/styles/globals.css` - Contains wireframe CSS that may still be applying
+- `tailwind.config.js` - Safelist includes all avatar colors
+- `postcss.config.js` - Properly configured with Tailwind
+
+**Next Debugging Steps**:
+1. **Inspect computed styles in DevTools**: Find which CSS rule is actually applying the gray color
+2. **Check CSS cascade**: Look for other !important rules or higher specificity selectors
+3. **Verify @layer utilities block**: The wireframe CSS uses @layer which may not be fully commented
+4. **Test with inline styles**: Try style={{ backgroundColor: 'rgb(59, 130, 246)' }} to confirm it's CSS issue
+5. **Check build output**: Inspect the actual CSS file generated to see if colors are present
+6. **Search for #6b7280**: This specific gray color must be defined somewhere that's overriding the avatars
+
+**Temporary Workaround**: Consider using inline styles or CSS-in-JS for avatar colors until root cause is found.

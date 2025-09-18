@@ -6811,14 +6811,6 @@
     background-image: none !important;
   }
 
-  [class*="bg-blue-"], [class*="bg-green-"], [class*="bg-purple-"], [class*="bg-pink-"], [class*="bg-yellow-"], [class*="bg-orange-"], [class*="bg-indigo-"], [class*="bg-cyan-"], [class*="bg-teal-"], [class*="bg-lime-"], [class*="bg-emerald-"], [class*="bg-sky-"], [class*="bg-violet-"], [class*="bg-fuchsia-"], [class*="bg-rose-"] {
-    background-color: #f3f4f6 !important;
-  }
-
-  .dark [class*="bg-blue-"], .dark [class*="bg-green-"], .dark [class*="bg-purple-"], .dark [class*="bg-pink-"], .dark [class*="bg-yellow-"], .dark [class*="bg-orange-"], .dark [class*="bg-indigo-"], .dark [class*="bg-cyan-"], .dark [class*="bg-teal-"], .dark [class*="bg-lime-"], .dark [class*="bg-emerald-"], .dark [class*="bg-sky-"], .dark [class*="bg-violet-"], .dark [class*="bg-fuchsia-"], .dark [class*="bg-rose-"] {
-    background-color: #1f2937 !important;
-  }
-
   [class*="text-blue-"], [class*="text-green-"], [class*="text-purple-"], [class*="text-pink-"], [class*="text-yellow-"], [class*="text-orange-"], [class*="text-indigo-"], [class*="text-cyan-"], [class*="text-teal-"], [class*="text-lime-"], [class*="text-emerald-"], [class*="text-sky-"], [class*="text-violet-"], [class*="text-fuchsia-"], [class*="text-rose-"] {
     color: #374151 !important;
   }
@@ -6843,9 +6835,6 @@
     background-color: #9ca3af !important;
   }
 
-  .bg-blue-500, .bg-green-500, .bg-purple-500, .bg-pink-500, .bg-yellow-500, .bg-orange-500, .bg-indigo-500, .bg-cyan-500 {
-    background-color: #6b7280 !important;
-  }
 
   .bg-blue-600, .bg-green-600, .bg-purple-600, .bg-pink-600, .bg-yellow-600, .bg-orange-600 {
     background-color: #374151 !important;
