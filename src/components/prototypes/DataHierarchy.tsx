@@ -20,6 +20,8 @@ export function DataHierarchy() {
   const [copySuccess, setCopySuccess] = useState(false)
   const [organizations, setOrganizations] = useState<any[]>([])
   const [selectedOrg, setSelectedOrg] = useState<string>('all')
+  const [children, setChildren] = useState<any[]>([])
+  const [selectedChild, setSelectedChild] = useState<string>('all')
   const [recordLimit, setRecordLimit] = useState<number>(100)
   const [exportOffset, setExportOffset] = useState<number>(0)
 
@@ -27,6 +29,15 @@ export function DataHierarchy() {
     loadOrganizations()
     loadData()
   }, [])
+
+  useEffect(() => {
+    if (selectedOrg !== 'all') {
+      loadChildren(selectedOrg)
+    } else {
+      setChildren([])
+      setSelectedChild('all')
+    }
+  }, [selectedOrg])
 
   const loadOrganizations = async () => {
     try {
@@ -40,6 +51,23 @@ export function DataHierarchy() {
       }
     } catch (error) {
       console.error('Error loading organizations:', error)
+    }
+  }
+
+  const loadChildren = async (orgId: string) => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, name')
+        .eq('org_id', orgId)
+        .eq('role', 'Child')
+        .order('name')
+
+      if (data) {
+        setChildren(data)
+      }
+    } catch (error) {
+      console.error('Error loading children:', error)
     }
   }
 
@@ -155,6 +183,7 @@ export function DataHierarchy() {
         metadata: {
           exported_at: new Date().toISOString(),
           organization: selectedOrg === 'all' ? 'All Organizations' : organizations.find(o => o.id === selectedOrg)?.name || selectedOrg,
+          child: selectedChild === 'all' ? 'All Children' : children.find(c => c.id === selectedChild)?.name || selectedChild,
           record_limit: recordLimit,
           offset: exportOffset,
           chunk_info: `Records ${exportOffset + 1} to ${exportOffset + recordLimit}`
@@ -170,6 +199,18 @@ export function DataHierarchy() {
           if (selectedOrg !== 'all' && ['profiles', 'checkin_sessions', 'mood_meter_usage',
               'emotion_grid_usage', 'wellbeing_wheel_usage', 'child_profile_scores'].includes(tableName)) {
             query = query.eq('org_id', selectedOrg)
+          }
+
+          // Apply child filter for tables that have child_id
+          if (selectedChild !== 'all' && ['checkin_sessions', 'breathing_tool_usage', 'mood_meter_usage',
+              'emotion_grid_usage', 'emotion_grid_feelings', 'wellbeing_wheel_usage', 'wellbeing_wheel_sections',
+              'child_profile_scores'].includes(tableName)) {
+            query = query.eq('child_id', selectedChild)
+          }
+
+          // Special case for profiles table when filtering by child
+          if (selectedChild !== 'all' && tableName === 'profiles') {
+            query = query.eq('id', selectedChild)
           }
 
           // Apply limit and offset for chunking
@@ -243,7 +284,7 @@ export function DataHierarchy() {
           {/* Export Controls */}
           <div className="bg-gray-800 rounded-lg p-4">
             <h2 className="text-lg font-semibold mb-3">Export Controls</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
               {/* Organization Filter */}
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Organization</label>
@@ -255,6 +296,22 @@ export function DataHierarchy() {
                   <option value="all">All Organizations</option>
                   {organizations.map(org => (
                     <option key={org.id} value={org.id}>{org.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Child Filter */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Child</label>
+                <select
+                  value={selectedChild}
+                  onChange={(e) => setSelectedChild(e.target.value)}
+                  disabled={selectedOrg === 'all'}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <option value="all">All Children</option>
+                  {children.map(child => (
+                    <option key={child.id} value={child.id}>{child.name}</option>
                   ))}
                 </select>
               </div>
@@ -321,6 +378,7 @@ export function DataHierarchy() {
             <div className="mt-3 text-sm text-gray-400">
               Current chunk: Records {exportOffset + 1} to {exportOffset + recordLimit}
               {selectedOrg !== 'all' && ' (filtered by organization)'}
+              {selectedChild !== 'all' && ' (filtered by child)'}
             </div>
           </div>
         </div>
