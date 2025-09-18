@@ -186,3 +186,23 @@ The app automatically initializes test users on startup via the `/server/auth/in
 - St. Mary's Hospital (id: '7eab219a-7c83-406c-a6b2-75ed44de715b', type: 'hospital')
 
 **Important**: Children profiles must have valid `org_id` linking to existing organization for proper analysis.
+
+### Database Schema
+
+**IMPORTANT**: When making decisions about database operations in a new chat, ALWAYS ask for the current schema or reference it from the project. Never assume table structures or constraints.
+
+**Key Schema Details**:
+- The `profiles` table has a foreign key to `auth.users(id)` - this constraint needs to be dropped before importing test data
+- All tables have RLS (Row Level Security) which should be disabled for test data imports
+- Foreign key order: organisations → profiles → checkin_sessions → tool usage tables (mood_meter_usage, breathing_tool_usage, etc.)
+- Child profiles do NOT need corresponding auth.users entries if the foreign key constraint is removed
+
+**For Data Imports**:
+1. First disable all RLS policies and drop the profiles → auth.users constraint
+2. Import in order: organisations → profiles → sessions → tool usage data
+3. Re-enable security after data is populated
+
+**UUID Generation**:
+- ALL UUIDs in SQL files should be generated using `gen_random_uuid()` function
+- Never use hardcoded UUID strings for new records
+- This ensures unique IDs and avoids duplicate key violations
