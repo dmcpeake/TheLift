@@ -22,8 +22,17 @@ export function DataHierarchy() {
   const [selectedOrg, setSelectedOrg] = useState<string>('all')
   const [children, setChildren] = useState<any[]>([])
   const [selectedChild, setSelectedChild] = useState<string>('all')
+  const [selectedTool, setSelectedTool] = useState<string>('all')
   const [recordLimit, setRecordLimit] = useState<number>(100)
   const [exportOffset, setExportOffset] = useState<number>(0)
+
+  const toolTypes = [
+    { value: 'all', label: 'All Tools' },
+    { value: 'breathing', label: 'Breathing Tool' },
+    { value: 'mood_meter', label: 'Mood Meter' },
+    { value: 'emotion_grid', label: 'Emotion Grid' },
+    { value: 'wellbeing_wheel', label: 'Wellbeing Wheel' }
+  ]
 
   useEffect(() => {
     loadOrganizations()
@@ -166,7 +175,7 @@ export function DataHierarchy() {
       setLoading(true)
 
       // Build queries with organization filter and chunking
-      const tableConfigs = [
+      let tableConfigs = [
         'organisations',
         'profiles',
         'checkin_sessions',
@@ -179,11 +188,24 @@ export function DataHierarchy() {
         'child_profile_scores'
       ]
 
+      // Filter tables based on selected tool
+      if (selectedTool !== 'all') {
+        const toolTableMap: Record<string, string[]> = {
+          'breathing': ['breathing_tool_usage', 'checkin_sessions', 'profiles', 'organisations'],
+          'mood_meter': ['mood_meter_usage', 'checkin_sessions', 'profiles', 'organisations'],
+          'emotion_grid': ['emotion_grid_usage', 'emotion_grid_feelings', 'checkin_sessions', 'profiles', 'organisations'],
+          'wellbeing_wheel': ['wellbeing_wheel_usage', 'wellbeing_wheel_sections', 'checkin_sessions', 'profiles', 'organisations']
+        }
+
+        tableConfigs = toolTableMap[selectedTool] || tableConfigs
+      }
+
       const exportObj: any = {
         metadata: {
           exported_at: new Date().toISOString(),
           organization: selectedOrg === 'all' ? 'All Organizations' : organizations.find(o => o.id === selectedOrg)?.name || selectedOrg,
           child: selectedChild === 'all' ? 'All Children' : children.find(c => c.id === selectedChild)?.name || selectedChild,
+          tool: toolTypes.find(t => t.value === selectedTool)?.label || 'All Tools',
           record_limit: recordLimit,
           offset: exportOffset,
           chunk_info: `Records ${exportOffset + 1} to ${exportOffset + recordLimit}`
@@ -284,7 +306,7 @@ export function DataHierarchy() {
           {/* Export Controls */}
           <div className="bg-gray-800 rounded-lg p-4">
             <h2 className="text-lg font-semibold mb-3">Export Controls</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
               {/* Organization Filter */}
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Organization</label>
@@ -312,6 +334,20 @@ export function DataHierarchy() {
                   <option value="all">All Children</option>
                   {children.map(child => (
                     <option key={child.id} value={child.id}>{child.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Tool Filter */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Tool Type</label>
+                <select
+                  value={selectedTool}
+                  onChange={(e) => setSelectedTool(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500"
+                >
+                  {toolTypes.map(tool => (
+                    <option key={tool.value} value={tool.value}>{tool.label}</option>
                   ))}
                 </select>
               </div>
@@ -379,6 +415,7 @@ export function DataHierarchy() {
               Current chunk: Records {exportOffset + 1} to {exportOffset + recordLimit}
               {selectedOrg !== 'all' && ' (filtered by organization)'}
               {selectedChild !== 'all' && ' (filtered by child)'}
+              {selectedTool !== 'all' && ` (showing ${toolTypes.find(t => t.value === selectedTool)?.label} data only)`}
             </div>
           </div>
         </div>
