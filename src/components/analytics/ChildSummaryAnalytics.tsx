@@ -269,9 +269,9 @@ export function ChildSummaryAnalytics() {
       const supabaseUrl = `https://${projectId}.supabase.co`
 
       console.log('Calling AI analysis edge function...')
-      // Call the AI analysis edge function (use original until optimized is deployed)
+      // Call the optimized AI analysis edge function with new comprehensive prompt
       const response = await fetch(
-        `${supabaseUrl}/functions/v1/analyze-qualitative-data`,
+        `${supabaseUrl}/functions/v1/analyze-qualitative-data-optimized`,
         {
           method: 'POST',
           headers: {
@@ -294,21 +294,22 @@ export function ChildSummaryAnalytics() {
         // Parse the AI response into structured insights
         const analysis = data.analysis || ''
 
-        // Better parsing for the AI response
+        // Parse the new comprehensive AI response format
         const insights: AIInsights = {
-          summary: extractSection(analysis, 'Executive Summary') ||
-                   extractSection(analysis, 'Overview') ||
-                   extractSection(analysis, 'Summary') ||
+          summary: extractSection(analysis, 'EXECUTIVE SUMMARY') ||
+                   extractSection(analysis, 'Executive Summary') ||
                    analysis.split('\n')[0] || // First line as fallback
                    'Analysis in progress...',
-          concerns: extractBulletPoints(analysis, 'Key Concerns') ||
-                   extractBulletPoints(analysis, 'Concerns') ||
-                   extractBulletPoints(analysis, 'Areas of Concern'),
-          strengths: extractBulletPoints(analysis, 'Positive Trends') ||
-                    extractBulletPoints(analysis, 'Positive Indicators') ||
-                    extractBulletPoints(analysis, 'Strengths'),
-          recommendations: extractBulletPoints(analysis, 'Recommendations') ||
-                          extractBulletPoints(analysis, 'Top 3 Recommendations'),
+          concerns: extractBulletPoints(analysis, 'RED FLAGS & EARLY WARNING SIGNS') ||
+                   extractBulletPoints(analysis, 'RED FLAGS') ||
+                   extractBulletPoints(analysis, 'IMMEDIATE ACTION REQUIRED') ||
+                   extractBulletPoints(analysis, 'Key Concerns'),
+          strengths: extractBulletPoints(analysis, 'STRENGTHS & PROTECTIVE FACTORS') ||
+                    extractBulletPoints(analysis, 'STRENGTHS') ||
+                    extractBulletPoints(analysis, 'Positive Indicators'),
+          recommendations: extractBulletPoints(analysis, 'SUPPORT RECOMMENDATIONS') ||
+                          extractBulletPoints(analysis, 'Recommendations') ||
+                          extractBulletPoints(analysis, 'IMMEDIATE ACTION REQUIRED'),
           lastAnalyzed: new Date().toLocaleDateString()
         }
 
