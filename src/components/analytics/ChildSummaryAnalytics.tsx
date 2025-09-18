@@ -204,7 +204,11 @@ export function ChildSummaryAnalytics() {
           avatar_url: child.avatar_url,
           initials,
           lastCheckIn: childMoods[0]?.created_at
-            ? new Date(childMoods[0].created_at).toLocaleDateString()
+            ? new Date(childMoods[0].created_at).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              })
             : 'Never',
           moodTrend: trend,
           averageMood: recentAvg,

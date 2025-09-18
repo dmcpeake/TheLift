@@ -1,5 +1,10 @@
 import React from 'react'
 
+// Force Tailwind to include these classes
+const FORCE_COLORS = (
+  <div className="hidden bg-green-500 bg-green-400 bg-yellow-400 bg-orange-400 bg-red-500 bg-gray-100" />
+)
+
 interface MoodData {
   created_at: string
   mood_numeric: number
@@ -21,6 +26,9 @@ export function MoodHeatmap({ moodData, MOOD_EMOJIS }: MoodHeatmapProps) {
     const dateKey = date.toISOString().split('T')[0]
     moodByDate[dateKey] = mood.mood_numeric
   })
+
+  // Debug: Log the mood dates
+  console.log('Mood dates in heatmap:', Object.keys(moodByDate))
 
   // Generate calendar grid for Jan-Apr 2025
   const months = [
@@ -48,8 +56,10 @@ export function MoodHeatmap({ moodData, MOOD_EMOJIS }: MoodHeatmapProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Legend */}
+    <>
+      {FORCE_COLORS}
+      <div className="space-y-4">
+        {/* Legend */}
       <div className="flex items-center justify-between text-xs">
         <div className="flex items-center space-x-3">
           <span className="text-gray-600">Mood Scale:</span>
@@ -103,7 +113,9 @@ export function MoodHeatmap({ moodData, MOOD_EMOJIS }: MoodHeatmapProps) {
               {/* Days of the month */}
               {Array.from({ length: month.days }).map((_, dayIdx) => {
                 const day = dayIdx + 1
-                const dateStr = `${month.year}-${String(monthIdx + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                // Fix: monthIdx starts at 0, so January = 0, we need to add 1
+                const monthNum = months.indexOf(month) + 1
+                const dateStr = `${month.year}-${String(monthNum).padStart(2, '0')}-${String(day).padStart(2, '0')}`
                 const mood = moodByDate[dateStr]
 
                 return (
@@ -131,11 +143,17 @@ export function MoodHeatmap({ moodData, MOOD_EMOJIS }: MoodHeatmapProps) {
         </span>
         <span>
           Period: {moodData.length > 0 ?
-            `${new Date(moodData[moodData.length - 1].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} -
-             ${new Date(moodData[0].created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+            (() => {
+              const dates = moodData.map(m => new Date(m.created_at)).sort((a, b) => a.getTime() - b.getTime())
+              const firstDate = dates[0]
+              const lastDate = dates[dates.length - 1]
+              return `${firstDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} -
+                      ${lastDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+            })()
             : 'No data'}
         </span>
       </div>
     </div>
+    </>
   )
 }
