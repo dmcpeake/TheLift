@@ -245,18 +245,10 @@ export function ChildSummaryAnalytics() {
         .limit(30), // Get more for heatmap visualization
 
       // Get emotion grid usage for qualitative check-ins
+      // Simplified query without nested joins to avoid 400 error
       supabase
         .from('emotion_grid_usage')
-        .select(`
-          *,
-          emotion_grid_usage_feelings (
-            feeling_id,
-            emotion_grid_feelings (
-              feeling_name,
-              feeling_category
-            )
-          )
-        `)
+        .select('*')
         .eq('child_id', childId)
         .order('created_at', { ascending: false })
         .limit(10)
@@ -265,16 +257,14 @@ export function ChildSummaryAnalytics() {
     const { data: moodData } = moodResponse
     const { data: emotionData } = emotionResponse
 
-    // Convert emotion grid data to check-ins with actual feelings and explanations
+    // Convert emotion grid data to check-ins (without feelings for now due to join issue)
     const checkIns: CheckIn[] = emotionData?.map(emotion => ({
       id: emotion.id,
       created_at: emotion.created_at,
       mood_numeric: undefined, // Emotion grid doesn't have numeric mood
       mood_level: undefined,
       notes: emotion.explanation_text,
-      feelings: emotion.emotion_grid_usage_feelings?.map((f: any) =>
-        f.emotion_grid_feelings?.feeling_name || 'Unknown feeling'
-      ) || [],
+      feelings: [], // Will need separate query for feelings
       explanation: emotion.explanation_text
     })) || []
 
@@ -640,21 +630,25 @@ export function ChildSummaryAnalytics() {
                                     {/* Mood progression line */}
                                     <svg className="absolute inset-0 w-full h-full">
                                       {/* Draw connecting line */}
-                                      <polyline
-                                        points={moodHistory[child.id].slice().reverse().slice(-20).map((mood, idx, arr) => {
-                                          const x = (idx / (arr.length - 1)) * 100
-                                          const y = 100 - ((mood.mood_numeric - 1) / 4) * 100
-                                          return `${x}%,${y}%`
-                                        }).join(' ')}
-                                        fill="none"
-                                        stroke="#3b82f6"
-                                        strokeWidth="2"
-                                        className="drop-shadow"
-                                      />
+                                      {moodHistory[child.id] && moodHistory[child.id].length > 1 && (
+                                        <polyline
+                                          points={moodHistory[child.id].slice().reverse().slice(-20).map((mood, idx, arr) => {
+                                            if (!mood.mood_numeric || isNaN(mood.mood_numeric)) return null
+                                            const x = arr.length === 1 ? 50 : (idx / Math.max(1, arr.length - 1)) * 100
+                                            const y = 100 - ((mood.mood_numeric - 1) / 4) * 100
+                                            return `${x}%,${y}%`
+                                          }).filter(Boolean).join(' ')}
+                                          fill="none"
+                                          stroke="#3b82f6"
+                                          strokeWidth="2"
+                                          className="drop-shadow"
+                                        />
+                                      )}
 
                                       {/* Draw data points */}
-                                      {moodHistory[child.id].slice().reverse().slice(-20).map((mood, idx, arr) => {
-                                        const x = (idx / (arr.length - 1)) * 100
+                                      {moodHistory[child.id] && moodHistory[child.id].slice().reverse().slice(-20).map((mood, idx, arr) => {
+                                        if (!mood.mood_numeric || isNaN(mood.mood_numeric)) return null
+                                        const x = arr.length === 1 ? 50 : (idx / Math.max(1, arr.length - 1)) * 100
                                         const y = 100 - ((mood.mood_numeric - 1) / 4) * 100
                                         const date = new Date(mood.created_at)
                                         const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
