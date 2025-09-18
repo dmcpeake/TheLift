@@ -255,8 +255,15 @@ serve(async (req) => {
       promptTemplate = `Analyze this child's wellbeing data and provide insights about their emotional state and support needs.`
     }
 
-    // OPTIMIZATION 4: Shorter, more focused prompts
-    let systemPrompt = `You are a child wellbeing analyst with expertise in child psychology and mental health. You MUST structure your response with clear section headers using **SECTION NAME** format. Each section should contain bullet points or clear paragraphs as specified.`
+    // OPTIMIZATION 4: Role-specific system prompt
+    const systemPromptMap: Record<string, string> = {
+      'school': 'You are an experienced primary school teacher analyzing a student\'s emotional wellbeing data. Focus on classroom-relevant insights, learning impacts, and practical teaching strategies. Use teacher-appropriate language, not clinical terminology.',
+      'clinic': 'You are a child mental health practitioner reviewing inter-session wellbeing data. Provide clinical insights about emotional regulation, therapeutic progress, and treatment recommendations.',
+      'hospital': 'You are a pediatric physician reviewing a young patient\'s emotional wellbeing during medical treatment. Focus on the medical-psychological connection and how to support emotional healing alongside physical recovery.'
+    }
+
+    let systemPrompt = systemPromptMap[orgType] || systemPromptMap['school']
+    systemPrompt += ' You MUST structure your response with clear section headers using **SECTION NAME** format. Each section should contain bullet points.'
 
     // Add structured format instructions to the prompt
     let userPrompt = `${promptTemplate}
@@ -313,6 +320,13 @@ Use bullet points (- ) for lists within each section.`
           dataPoints: aggregatedData.summary.totalCheckIns,
           dateRange,
           analysisType,
+          timestamp: new Date().toISOString()
+        },
+        debug: {
+          orgType,
+          promptFile: promptFileName,
+          childName: childFirstName,
+          systemPromptType: orgType,
           timestamp: new Date().toISOString()
         }
       }),

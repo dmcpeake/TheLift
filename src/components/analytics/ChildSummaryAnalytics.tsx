@@ -322,6 +322,15 @@ export function ChildSummaryAnalytics() {
         const data = await response.json()
         console.log('AI analysis data:', data)
 
+        // Log debug info if available
+        if (data.debug) {
+          console.log('🔍 DEBUG INFO FROM EDGE FUNCTION:')
+          console.log(`  Organization Type: ${data.debug.orgType}`)
+          console.log(`  Prompt File Used: ${data.debug.promptFile}.md`)
+          console.log(`  Child Name: ${data.debug.childName}`)
+          console.log(`  System Prompt Type: ${data.debug.systemPromptType}`)
+        }
+
         // Parse the AI response into structured insights
         const analysis = data.analysis || ''
 
