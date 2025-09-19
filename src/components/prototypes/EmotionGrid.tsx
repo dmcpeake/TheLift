@@ -280,13 +280,15 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               // Define category colors
               const getCategoryColor = (category: string) => {
                 switch (category) {
-                  case 'Upset': return '#fef3e2' // Orange tint
-                  case 'Down': return '#e6f2ff' // Blue tint
-                  case 'Joyful': return '#fffbeb' // Yellow tint
-                  case 'Cool': return '#f0fdf4' // Green tint
-                  default: return '#f3f4f6'
+                  case 'Upset': return { bg: 'rgba(254, 243, 226, 0.9)', border: 'rgba(254, 243, 226, 0.36)' } // Orange tint
+                  case 'Down': return { bg: 'rgba(230, 242, 255, 0.9)', border: 'rgba(230, 242, 255, 0.36)' } // Blue tint
+                  case 'Joyful': return { bg: 'rgba(255, 251, 235, 0.9)', border: 'rgba(255, 251, 235, 0.36)' } // Yellow tint
+                  case 'Cool': return { bg: 'rgba(240, 253, 244, 0.9)', border: 'rgba(240, 253, 244, 0.36)' } // Green tint
+                  default: return { bg: '#f3f4f6', border: 'rgba(243, 244, 246, 0.36)' }
                 }
               }
+
+              const categoryColors = getCategoryColor(category)
 
               return (
                 <div key={category} className="flex-none space-y-3" style={{
@@ -312,8 +314,8 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                         className="flex flex-col items-center gap-2 p-3 text-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{
                           borderRadius: '4px',
-                          backgroundColor: selectedEmotions.includes(emotion) ? 'white' : getCategoryColor(category),
-                          border: selectedEmotions.includes(emotion) ? '2px solid #3a7ddc' : '2px solid transparent',
+                          backgroundColor: selectedEmotions.includes(emotion) ? 'white' : categoryColors.bg,
+                          border: selectedEmotions.includes(emotion) ? '2px solid #3a7ddc' : `1px solid ${categoryColors.border}`,
                           boxShadow: selectedEmotions.includes(emotion) ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' : 'none',
                           color: selectedEmotions.includes(emotion) ? '#3a7ddc' : '#6b7280',
                           fontWeight: selectedEmotions.includes(emotion) ? '600' : '400',
