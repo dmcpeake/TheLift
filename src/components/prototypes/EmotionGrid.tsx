@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface EmotionData {
   selected_emotions: string[]
@@ -29,6 +30,8 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
   const [stepData, setStepData] = useState<any>(null)
   const [startTime] = useState(Date.now())
   const [isListening, setIsListening] = useState(false)
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // Initialize with existing data if available
   useEffect(() => {
@@ -66,6 +69,30 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
   }
 
   const allEmotions = Object.values(emotions).flat()
+  const emotionCategories = Object.entries(emotions)
+  const totalSlides = emotionCategories.length
+
+  const scrollToSlide = (slideIndex: number) => {
+    if (scrollContainerRef.current) {
+      const slideWidth = 320 // 280px category + 40px gap
+      const scrollPosition = slideIndex * slideWidth
+      scrollContainerRef.current.scrollTo({
+        left: scrollPosition,
+        behavior: 'smooth'
+      })
+      setCurrentSlide(slideIndex)
+    }
+  }
+
+  const handlePrevSlide = () => {
+    const newIndex = Math.max(0, currentSlide - 1)
+    scrollToSlide(newIndex)
+  }
+
+  const handleNextSlide = () => {
+    const newIndex = Math.min(totalSlides - 1, currentSlide + 1)
+    scrollToSlide(newIndex)
+  }
 
   const toggleEmotion = (emotion: string) => {
     let newEmotions: string[]
@@ -209,12 +236,40 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                   justify-content: center !important;
                   min-width: auto !important;
                 }
+                .slider-nav {
+                  display: none !important;
+                }
               }
             `}</style>
-            <div className="overflow-x-auto pb-4" style={{
-              scrollbarWidth: 'thin',
-              scrollbarColor: '#cbd5e1 #f1f5f9'
-            }}>
+
+            {/* Left chevron */}
+            <button
+              onClick={handlePrevSlide}
+              className="slider-nav absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50"
+              disabled={currentSlide === 0}
+              style={{ opacity: currentSlide === 0 ? 0.5 : 1 }}
+            >
+              <ChevronLeft className="w-6 h-6 text-gray-600" />
+            </button>
+
+            {/* Right chevron */}
+            <button
+              onClick={handleNextSlide}
+              className="slider-nav absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50"
+              disabled={currentSlide === totalSlides - 1}
+              style={{ opacity: currentSlide === totalSlides - 1 ? 0.5 : 1 }}
+            >
+              <ChevronRight className="w-6 h-6 text-gray-600" />
+            </button>
+
+            <div
+              ref={scrollContainerRef}
+              className="overflow-x-auto pb-4"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#cbd5e1 #f1f5f9'
+              }}
+            >
               <div className="flex emotion-categories" style={{
                 gap: '40px',
                 paddingLeft: '20px',
@@ -246,7 +301,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                       {categorySubtexts[category as keyof typeof categorySubtexts]}
                     </p>
                   </div>
-                  <div className="grid grid-cols-3" style={{ gap: '8px' }}>
+                  <div className="grid grid-cols-3" style={{ gap: '10px' }}>
                     {categoryEmotions.map((emotion) => (
                       <button
                         key={emotion}
@@ -283,6 +338,20 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               )
             })}
               </div>
+            </div>
+
+            {/* Slider dots */}
+            <div className="slider-nav flex justify-center mt-4 gap-2">
+              {Array.from({ length: totalSlides }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToSlide(index)}
+                  className="w-2 h-2 rounded-full transition-colors"
+                  style={{
+                    backgroundColor: index === currentSlide ? '#3a7ddc' : '#cbd5e1'
+                  }}
+                />
+              ))}
             </div>
           </div>
 
