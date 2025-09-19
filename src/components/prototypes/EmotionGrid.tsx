@@ -339,19 +339,6 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                   </div>
                   </div>
 
-                  {/* Divider line after each group (except last) */}
-                  {!isLast && (
-                    <div
-                      style={{
-                        width: '1px',
-                        height: '180px',
-                        borderLeft: '1px dashed #d1d5db',
-                        marginLeft: '20px',
-                        marginRight: '20px',
-                        marginTop: '50px'
-                      }}
-                    />
-                  )}
                 </React.Fragment>
               )
             })}
