@@ -79,7 +79,7 @@ export function CheckInHome() {
   }
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden" style={{ paddingBottom: '120px' }}>
+    <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Garden Cards - 40px from top - hide when breathing */}
       {!showBreathing && (
         <div style={{ position: 'absolute', top: '40px', left: '0', right: '0', zIndex: 10 }}>

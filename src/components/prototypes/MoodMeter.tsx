@@ -82,9 +82,9 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
   }
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', paddingBottom: '120px' }}>
+    <>
       {/* Centered title like breathing exercise */}
-      <div className="text-center" style={{ marginBottom: '2rem' }}>
+      <div className="text-center" style={{ marginBottom: '2rem', paddingTop: '2rem' }}>
         <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>How would you describe your mood?</h1>
       </div>
 
@@ -280,6 +280,6 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
 
       {/* Yellow swoosh section at bottom */}
       <YellowSwoosh />
-    </div>
+    </>
   )
 }
