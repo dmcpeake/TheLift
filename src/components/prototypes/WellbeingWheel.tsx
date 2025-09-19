@@ -792,9 +792,15 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                             onClick={() => selectMood(currentSection.id, mood, index)}
                             onMouseEnter={() => setHoveredMood(mood.level)}
                             onMouseLeave={() => setHoveredMood(null)}
-                            transform={`rotate(${-rotationOffset} ${x} ${y})`}
                           >
-                            <div style={{ width: '70px', height: '70px', pointerEvents: 'none' }}>
+                            <div style={{
+                              width: '70px',
+                              height: '70px',
+                              pointerEvents: 'none',
+                              transform: `rotate(${-rotationOffset}deg)`,
+                              transformOrigin: 'center center',
+                              transition: 'transform 0.8s ease-in-out'
+                            }}>
                               <Lottie
                                 animationData={mood.animation}
                                 loop={true}
