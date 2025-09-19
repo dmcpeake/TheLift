@@ -100,6 +100,9 @@ export function CheckInHome() {
               min-height: auto !important;
               padding-top: 120px !important;
             }
+            .welcome-content-mobile .max-w-2xl {
+              margin-top: 0 !important;
+            }
             .mobile-start-button {
               position: fixed !important;
               bottom: 40px !important;
@@ -339,10 +342,10 @@ export function CheckInHome() {
       {/* Welcome Content */}
       {!showBreathing && (
         <div
-          className="welcome-content-mobile p-4 transition-opacity duration-300"
+          className="welcome-content-mobile flex items-center justify-center p-4 transition-opacity duration-300"
           style={{
             minHeight: 'calc(100vh - 200px)',
-            paddingTop: '120px',
+            paddingTop: '180px',
             opacity: isTransitioning ? 0 : 1
           }}
         >
@@ -557,7 +560,7 @@ export function CheckInHome() {
             className="theo-animation"
             style={{
               position: 'absolute',
-              bottom: '120px',
+              bottom: '20px',
               left: '50%',
               transform: 'translateX(-50%)',
               width: '300px',
