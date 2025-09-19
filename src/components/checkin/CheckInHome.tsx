@@ -116,6 +116,11 @@ export function CheckInHome() {
             .garden-cards-container {
               display: none !important;
             }
+            .logout-button {
+              top: 40px !important;
+              margin-top: 0 !important;
+              transform: none !important;
+            }
           }
         `}</style>
         <div className="max-w-7xl mx-auto md:px-6">
