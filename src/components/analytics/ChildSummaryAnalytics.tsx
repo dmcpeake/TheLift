@@ -3,6 +3,7 @@ import { MoodHeatmap } from './MoodHeatmap'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { projectId, publicAnonKey } from '../../utils/supabase/info.tsx'
+import { LoadingIndicator, DataLoadingIndicator } from '../shared/LoadingIndicator'
 import {
   ChevronDown, ChevronRight, TrendingUp, TrendingDown,
   Calendar, Heart, Brain, MessageSquare, Sparkles,
@@ -98,6 +99,14 @@ export function ChildSummaryAnalytics() {
   const [aiInsights, setAIInsights] = useState<Record<string, AIInsights>>({})
   const [loading, setLoading] = useState(true)
   const [loadingInsights, setLoadingInsights] = useState<Record<string, boolean>>({})
+  const [loadingStages, setLoadingStages] = useState<Array<{ name: string; status: 'pending' | 'loading' | 'complete' | 'error' }>>([
+    { name: 'Loading organizations', status: 'loading' },
+    { name: 'Loading children profiles', status: 'pending' },
+    { name: 'Loading check-in data', status: 'pending' },
+    { name: 'Loading mood history', status: 'pending' },
+    { name: 'Preparing analytics', status: 'pending' }
+  ])
+  const [currentLoadingStage, setCurrentLoadingStage] = useState(0)
 
   useEffect(() => {
     loadOrganizations()
@@ -111,6 +120,10 @@ export function ChildSummaryAnalytics() {
 
   const loadOrganizations = async () => {
     try {
+      setLoadingStages(prev => prev.map((s, i) =>
+        i === 0 ? { ...s, status: 'loading' } : s
+      ))
+
       const { data, error } = await supabase
         .from('organisations')  // Fixed: table name has 's'
         .select('id, name')
@@ -118,11 +131,18 @@ export function ChildSummaryAnalytics() {
 
       if (error) {
         console.error('Error loading organizations:', error)
+        setLoadingStages(prev => prev.map((s, i) =>
+          i === 0 ? { ...s, status: 'error' } : s
+        ))
         // Use a fallback organization if table doesn't exist
         setOrganizations([{ id: 'default', name: 'All Children' }])
         setSelectedOrg('default')
         return
       }
+
+      setLoadingStages(prev => prev.map((s, i) =>
+        i === 0 ? { ...s, status: 'complete' } : s
+      ))
 
       if (data && data.length > 0) {
         setOrganizations(data)
@@ -136,6 +156,9 @@ export function ChildSummaryAnalytics() {
       }
     } catch (error) {
       console.error('Error in loadOrganizations:', error)
+      setLoadingStages(prev => prev.map((s, i) =>
+        i === 0 ? { ...s, status: 'error' } : s
+      ))
       setOrganizations([{ id: 'default', name: 'All Children' }])
       setSelectedOrg('default')
     }
@@ -144,6 +167,11 @@ export function ChildSummaryAnalytics() {
   const loadChildren = async () => {
     try {
       setLoading(true)
+      setCurrentLoadingStage(1)
+      setLoadingStages(prev => prev.map((s, i) => ({
+        ...s,
+        status: i === 0 ? 'complete' : i === 1 ? 'loading' : 'pending'
+      })))
 
       // Load children profiles
       let childQuery = supabase
@@ -164,6 +192,13 @@ export function ChildSummaryAnalytics() {
         return
       }
 
+      // Update loading stage - moving to check-in data
+      setCurrentLoadingStage(2)
+      setLoadingStages(prev => prev.map((s, i) => ({
+        ...s,
+        status: i <= 1 ? 'complete' : i === 2 ? 'loading' : 'pending'
+      })))
+
       // Load all mood data for each child (not just recent)
       const childIds = childProfiles.map(c => c.id)
 
@@ -172,6 +207,13 @@ export function ChildSummaryAnalytics() {
         .select('*')
         .in('child_id', childIds)
         .order('selected_at', { ascending: false })
+
+      // Update loading stage - moving to mood history
+      setCurrentLoadingStage(3)
+      setLoadingStages(prev => prev.map((s, i) => ({
+        ...s,
+        status: i <= 2 ? 'complete' : i === 3 ? 'loading' : 'pending'
+      })))
 
       // Process children with mood data
       const processedChildren: Child[] = childProfiles.map(child => {
@@ -227,9 +269,26 @@ export function ChildSummaryAnalytics() {
         return (a.averageMood || 5) - (b.averageMood || 5)
       })
 
+      // Update loading stage - preparing analytics
+      setCurrentLoadingStage(4)
+      setLoadingStages(prev => prev.map((s, i) => ({
+        ...s,
+        status: i <= 3 ? 'complete' : i === 4 ? 'loading' : 'pending'
+      })))
+
+      // Small delay to show the final stage
+      await new Promise(resolve => setTimeout(resolve, 500))
+
       setChildren(processedChildren)
+
+      // Complete all loading stages
+      setLoadingStages(prev => prev.map(s => ({ ...s, status: 'complete' })))
     } catch (error) {
       console.error('Error loading children:', error)
+      setLoadingStages(prev => prev.map((s, i) => ({
+        ...s,
+        status: s.status === 'loading' ? 'error' : s.status
+      })))
     } finally {
       setLoading(false)
     }
@@ -521,7 +580,10 @@ export function ChildSummaryAnalytics() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+        <DataLoadingIndicator
+          stages={loadingStages}
+          currentStage={currentLoadingStage}
+        />
       </div>
     )
   }
@@ -739,7 +801,12 @@ export function ChildSummaryAnalytics() {
 
                         {loadingInsights[child.id] ? (
                           <div className="flex items-center justify-center py-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent"></div>
+                            <LoadingIndicator
+                              size="small"
+                              message="Analyzing child's wellbeing data..."
+                              variant="spinner"
+                              color="blue"
+                            />
                           </div>
                         ) : aiInsights[child.id] ? (
                           <div className="space-y-4">
