@@ -106,6 +106,9 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
           .mood-meter-doughnut {
             padding: 40px !important;
           }
+          .mood-meter-outer-ring {
+            display: none !important;
+          }
         }
       `}</style>
 
