@@ -354,15 +354,19 @@ export function ChildSummaryAnalytics() {
         if (emotionUsage.data?.explanation_text) notes.push(`Feelings: ${emotionUsage.data.explanation_text}`)
         if (wellbeingUsage.data?.overall_score) notes.push(`Wellbeing score: ${wellbeingUsage.data.overall_score}`)
 
-        checkIns.push({
-          id: session.id,
-          created_at: session.started_at, // Use started_at instead of created_at
-          mood_numeric: moodUsage.data?.mood_numeric,
-          mood_level: moodUsage.data?.mood_level,
-          notes: notes.join(' | ') || 'No notes available',
-          feelings: [],
-          explanation: emotionUsage.data?.explanation_text
-        })
+        // Only add check-in if there are actual notes
+        const combinedNotes = notes.join(' | ')
+        if (combinedNotes && combinedNotes.trim() !== '') {
+          checkIns.push({
+            id: session.id,
+            created_at: session.started_at, // Use started_at instead of created_at
+            mood_numeric: moodUsage.data?.mood_numeric,
+            mood_level: moodUsage.data?.mood_level,
+            notes: combinedNotes,
+            feelings: [],
+            explanation: emotionUsage.data?.explanation_text
+          })
+        }
       }
     }
 
@@ -736,8 +740,13 @@ export function ChildSummaryAnalytics() {
                           </h4>
 
                           <div className="space-y-3 max-h-64 overflow-y-auto">
-                            {checkInHistory[child.id] && checkInHistory[child.id].length > 0 ? (
-                              checkInHistory[child.id].slice(0, 5).map(checkIn => (
+                            {(() => {
+                              const filteredCheckIns = checkInHistory[child.id]?.filter(
+                                checkIn => checkIn.notes && checkIn.notes !== 'No notes available'
+                              ) || []
+
+                              return filteredCheckIns.length > 0 ? (
+                                filteredCheckIns.slice(0, 5).map(checkIn => (
                                 <div key={checkIn.id} className="bg-white p-3 rounded-lg border border-gray-200">
                                   <div className="flex items-start">
                                     <div className="flex-1">
@@ -776,9 +785,9 @@ export function ChildSummaryAnalytics() {
                                         </div>
                                       )}
 
-                                      {(checkIn.notes || checkIn.explanation) && (
+                                      {checkIn.notes && checkIn.notes !== 'No notes available' && (
                                         <p className="text-sm text-gray-700 italic">
-                                          "{checkIn.notes || checkIn.explanation}"
+                                          "{checkIn.notes}"
                                         </p>
                                       )}
                                     </div>
@@ -786,8 +795,9 @@ export function ChildSummaryAnalytics() {
                                 </div>
                               ))
                             ) : (
-                              <p className="text-sm text-gray-500">No qualitative check-ins available</p>
-                            )}
+                              <p className="text-sm text-gray-500">No check-ins with notes available</p>
+                            )
+                            })()}
                           </div>
                         </div>
                       </div>
