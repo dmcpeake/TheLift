@@ -374,13 +374,27 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
             line-height: 1.2 !important;
             margin-top: -20px !important;
           }
+          .wellbeing-title-desktop {
+            display: none !important;
+          }
+          .wellbeing-title-mobile-text {
+            display: block !important;
+          }
+        }
+        @media (min-width: 769px) {
+          .wellbeing-title-mobile-text {
+            display: none !important;
+          }
         }
       `}</style>
 
       {/* Centered title like breathing exercise */}
       <div className="text-center" style={{ marginBottom: '2rem' }}>
-        <h1 className="wellbeing-title-mobile text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+        <h1 className="wellbeing-title-mobile wellbeing-title-desktop text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
           {currentSection ? `How are you feeling about ${currentSection.name}` : 'How do you feel about these areas of your life?'}
+        </h1>
+        <h1 className="wellbeing-title-mobile wellbeing-title-mobile-text text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em', display: 'none' }}>
+          {currentSection ? 'How are you feeling about' : 'How do you feel about these areas of your life?'}
         </h1>
       </div>
 
