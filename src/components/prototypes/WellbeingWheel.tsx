@@ -390,6 +390,13 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
           .yellow-swoosh-mobile-hide {
             display: none !important;
           }
+          .wellbeing-text-input {
+            top: 60px !important;
+          }
+          .wellbeing-text-input .relative {
+            margin-left: 20px !important;
+            margin-right: 20px !important;
+          }
         }
       `}</style>
 
@@ -844,10 +851,16 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                   {/* Text input - fades in when mood is selected */}
                   {sections[currentSection.id]?.mood_level && (
                     <div
-                      className="absolute inset-0 flex items-center justify-center"
+                      className="wellbeing-text-input"
                       style={{
                         opacity: 0,
-                        animation: 'fadeInDelayed 0.3s ease-in-out 1.8s forwards'
+                        animation: 'fadeInDelayed 0.3s ease-in-out 1.8s forwards',
+                        position: 'absolute',
+                        top: '40px',
+                        left: 0,
+                        right: 0,
+                        display: 'flex',
+                        justifyContent: 'center'
                       }}
                     >
                       <div className="w-full max-w-sm">
@@ -862,6 +875,13 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                             className="w-full pr-14 border rounded-lg h-32 resize-none"
                             style={{ paddingTop: '3rem', paddingBottom: '3rem', paddingLeft: '0.75rem', paddingRight: '3.5rem', lineHeight: '1.5' }}
                             maxLength={500}
+                            onFocus={(e) => {
+                              if (window.innerWidth <= 768) {
+                                setTimeout(() => {
+                                  e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                                }, 300)
+                              }
+                            }}
                           />
                           <button
                             onClick={() => handleMicrophoneClick(currentSection.id)}

@@ -230,12 +230,15 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
       `}</style>
 
       {/* Centered title like breathing exercise */}
-      <div className="text-center" style={{ marginBottom: '0.5rem' }}>
+      <div className="text-center" style={{ marginBottom: currentStep === 2 ? '0.5rem' : '0.5rem' }}>
         <h1 className="emotion-title-mobile text-gray-900 mb-1" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
           {currentStep === 1 ? 'What are you feeling?' : 'I am feeling'}
         </h1>
         {currentStep === 1 && (
           <p className="text-gray-600 mb-4" style={{ fontSize: '14px', fontWeight: 'normal' }}>Select up to 3</p>
+        )}
+        {currentStep === 2 && (
+          <div style={{ height: '20px' }} className="md:hidden"></div>
         )}
       </div>
 
@@ -474,9 +477,6 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
             </div>
           </div>
 
-          <div className="text-center mb-6">
-            <h3 className="text-lg font-semibold mb-2">Tell us more (optional)</h3>
-          </div>
 
           <div className="w-full">
             <div className="relative">

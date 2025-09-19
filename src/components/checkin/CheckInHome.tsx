@@ -382,28 +382,6 @@ export function CheckInHome() {
               </p>
             </div>
 
-            {/* Start Button */}
-            <div className="flex justify-center mobile-start-button">
-              <button
-                onClick={handleStartClick}
-                className="font-semibold text-lg transition-all duration-200"
-                style={{
-                  backgroundColor: '#e87e67',
-                  color: 'white',
-                  height: '60px',
-                  borderRadius: '30px',
-                  paddingLeft: '30px',
-                  paddingRight: '30px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
-              >
-                START
-              </button>
-            </div>
           </div>
         </div>
       )}
@@ -566,13 +544,38 @@ export function CheckInHome() {
 
       {/* Yellow swoosh section at bottom */}
       <YellowSwoosh>
+        {/* Start Button */}
+        {!showBreathing && (
+          <div className="flex justify-center mobile-start-button" style={{ position: 'absolute', bottom: '40px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
+            <button
+              onClick={handleStartClick}
+              className="font-semibold text-lg transition-all duration-200"
+              style={{
+                backgroundColor: '#e87e67',
+                color: 'white',
+                height: '60px',
+                borderRadius: '30px',
+                paddingLeft: '30px',
+                paddingRight: '30px',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
+            >
+              START
+            </button>
+          </div>
+        )}
+
         {/* Theo Rose Animation - centered under start button */}
         {roseAnimation && (
           <div
             className="theo-animation"
             style={{
               position: 'absolute',
-              bottom: '20px',
+              bottom: '70px',
               left: '50%',
               transform: 'translateX(-50%)',
               width: '300px',
