@@ -268,7 +268,6 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               }}
             >
               <div className="flex emotion-categories" style={{
-                gap: '40px',
                 paddingLeft: '20px',
                 paddingRight: '20px',
                 minWidth: '1240px'
@@ -289,7 +288,10 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               const isLast = index === Object.entries(emotions).length - 1
 
               return (
-                <div key={category} className="flex items-center">
+                <React.Fragment key={category}>
+                  {/* Add 20px gap before each group (except first) */}
+                  {index > 0 && <div style={{ width: '20px' }} />}
+
                   <div className="flex-none space-y-3" style={{
                     width: '280px',
                     minWidth: '280px'
@@ -337,19 +339,21 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                   </div>
                   </div>
 
-                  {/* Divider line between groups */}
+                  {/* Divider line after each group (except last) */}
                   {!isLast && (
-                    <div
-                      style={{
-                        width: '1px',
-                        height: '200px',
-                        borderLeft: '1px dashed #d1d5db',
-                        marginLeft: '20px',
-                        marginRight: '20px'
-                      }}
-                    />
+                    <>
+                      <div style={{ width: '20px' }} />
+                      <div
+                        style={{
+                          width: '1px',
+                          height: '300px',
+                          borderLeft: '1px dashed #d1d5db',
+                          alignSelf: 'stretch'
+                        }}
+                      />
+                    </>
                   )}
-                </div>
+                </React.Fragment>
               )
             })}
               </div>
