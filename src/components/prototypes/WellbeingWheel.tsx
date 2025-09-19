@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Lottie from 'lottie-react'
+import { YellowSwoosh } from '../shared/YellowSwoosh'
 import BlushingShaded from '../../../public/Blushing_Shaded.json'
 import HappyShaded from '../../../public/Happy_Shaded.json'
 import MehShaded from '../../../public/Meh_Shaded.json'
@@ -254,7 +255,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
   const currentSection = wheelSections[currentSectionIndex]
 
   return (
-    <>
+    <div style={{ position: 'relative', minHeight: '100vh', paddingBottom: '120px' }}>
       {/* Centered title like breathing exercise */}
       <div className="text-center" style={{ marginBottom: '2rem' }}>
         <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>Wellbeing Wheel</h1>
@@ -757,31 +758,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
       )}
 
       {/* Yellow swoosh section at bottom */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '100px',
-          backgroundColor: '#f7d145',
-          zIndex: 999
-        }}
-      >
-        {/* Top wave with depth effect */}
-        <svg style={{
-          position: 'absolute',
-          top: '-80px',
-          left: 0,
-          width: '100%',
-          height: '80px'
-        }} viewBox="0 0 1440 400" preserveAspectRatio="none">
-          {/* Main wave fill */}
-          <path d="M0,200 C480,400 960,0 1440,200 L1440,400 L0,400 Z" fill="#f7d145"/>
-          {/* Border with varied bottom edge only */}
-          <path d="M0,200 C480,400 960,0 1440,200 L1440,400 C1020,-120 400,480 0,360 Z" fill="#fae568" opacity="0.6"/>
-        </svg>
-      </div>
-    </>
+      <YellowSwoosh />
+    </div>
   )
 }
