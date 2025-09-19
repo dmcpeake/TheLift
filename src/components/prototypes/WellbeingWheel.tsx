@@ -574,6 +574,8 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                 </button>
               )
             })}
+            {/* Spacer to add gap after last card */}
+            <div style={{ width: '20px', flexShrink: 0 }}></div>
               </div>
             </div>
 
