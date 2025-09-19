@@ -120,6 +120,12 @@ export function CheckInHome() {
               top: 20px !important;
               margin-top: 0 !important;
               transform: none !important;
+              width: 40px !important;
+              height: 40px !important;
+            }
+            .logout-button .logout-icon {
+              width: 20px !important;
+              height: 20px !important;
             }
           }
         `}</style>
@@ -278,7 +284,7 @@ export function CheckInHome() {
           right: '16px'
         }}
       >
-        <LogOut className="h-6 w-6" style={{ color: '#147fe3' }} />
+        <LogOut className="logout-icon h-6 w-6" style={{ color: '#147fe3' }} />
         </button>
       )}
 
