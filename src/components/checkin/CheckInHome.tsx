@@ -94,11 +94,11 @@ export function CheckInHome() {
               display: none !important;
             }
             .welcome-content-mobile {
-              display: flex !important;
-              align-items: center !important;
-              justify-content: center !important;
-              min-height: 100vh !important;
-              padding-top: 0 !important;
+              display: block !important;
+              align-items: flex-start !important;
+              justify-content: flex-start !important;
+              min-height: auto !important;
+              padding-top: 300px !important;
             }
             .welcome-content-mobile .max-w-2xl {
               margin-top: 0 !important;
