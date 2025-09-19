@@ -111,7 +111,7 @@ export function CheckInHome() {
               z-index: 1000 !important;
             }
             .theo-animation {
-              bottom: 80px !important;
+              bottom: 60px !important;
             }
             .garden-cards-container {
               display: none !important;
