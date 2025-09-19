@@ -188,7 +188,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
   }
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', paddingBottom: '120px' }}>
+    <>
       {/* Centered title like breathing exercise */}
       <div className="text-center" style={{ marginBottom: '1rem' }}>
         <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>What emotions are you feeling?</h1>
@@ -197,7 +197,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
       {/* Step 1: Select Emotions */}
       {currentStep === 1 && (
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4" style={{ paddingBottom: '150px' }}>
           <div className="text-center mb-6">
             <h3 className="text-lg font-semibold mb-2">Select up to 3</h3>
           </div>
@@ -274,7 +274,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
       {/* Step 2: Selected Emotions Review + Form */}
       {currentStep === 2 && selectedEmotions.length > 0 && (
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4" style={{ paddingBottom: '150px' }}>
           {/* Show selected emotions - tappable to edit */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-4 mb-6">
@@ -476,7 +476,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
       {/* Step 4: Show Data */}
       {currentStep === 4 && (
-        <div className="max-w-4xl mx-auto px-4 text-center">
+        <div className="max-w-4xl mx-auto px-4 text-center" style={{ paddingBottom: '150px' }}>
           <h3 className="text-lg font-semibold mb-2">✅ Complete!</h3>
 
           {!hideDebugInfo && finalData && (
@@ -504,6 +504,6 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
       {/* Yellow swoosh section at bottom */}
       <YellowSwoosh />
-    </div>
+    </>
   )
 }

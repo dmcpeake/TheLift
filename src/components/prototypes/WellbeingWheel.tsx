@@ -255,7 +255,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
   const currentSection = wheelSections[currentSectionIndex]
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', paddingBottom: '120px' }}>
+    <>
       {/* Centered title like breathing exercise */}
       <div className="text-center" style={{ marginBottom: '2rem' }}>
         <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>Wellbeing Wheel</h1>
@@ -263,7 +263,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
       </div>
 
       {!finalData ? (
-        <div>
+        <div style={{ paddingBottom: '150px' }}>
           {/* Topic navigation cards */}
           <div className="flex justify-center" style={{ marginBottom: '2rem', gap: '20px' }}>
             {wheelSections.map((section, index) => {
@@ -759,6 +759,6 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
 
       {/* Yellow swoosh section at bottom */}
       <YellowSwoosh />
-    </div>
+    </>
   )
 }

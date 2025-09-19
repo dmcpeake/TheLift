@@ -1,70 +1,23 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
 interface YellowSwooshProps {
-  /** Minimum bottom spacing when using absolute positioning */
-  minBottomOffset?: number
   /** Z-index for the swoosh */
   zIndex?: number
   /** Children to render inside the swoosh */
   children?: React.ReactNode
 }
 
-export function YellowSwoosh({ minBottomOffset = 20, zIndex = 999, children }: YellowSwooshProps) {
-  const [useFixed, setUseFixed] = useState(true)
-
-  useEffect(() => {
-    const checkContentHeight = () => {
-      const documentHeight = document.documentElement.scrollHeight
-      const windowHeight = window.innerHeight
-
-      // Use fixed positioning if content fits in viewport with some buffer
-      // Use absolute positioning if content is taller than viewport
-      setUseFixed(documentHeight <= windowHeight + 100)
-    }
-
-    // Check on mount
-    checkContentHeight()
-
-    // Check on resize
-    window.addEventListener('resize', checkContentHeight)
-
-    // Check when content changes (using MutationObserver)
-    const observer = new MutationObserver(checkContentHeight)
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['style', 'class']
-    })
-
-    return () => {
-      window.removeEventListener('resize', checkContentHeight)
-      observer.disconnect()
-    }
-  }, [])
-
-  const swooshStyle = useFixed
-    ? {
-        position: 'fixed' as const,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: '100px',
-        backgroundColor: '#f7d145',
-        zIndex
-      }
-    : {
-        position: 'absolute' as const,
-        bottom: `-${minBottomOffset}px`,
-        left: 0,
-        right: 0,
-        height: '100px',
-        backgroundColor: '#f7d145',
-        zIndex
-      }
-
+export function YellowSwoosh({ zIndex = 999, children }: YellowSwooshProps) {
   return (
-    <div style={swooshStyle}>
+    <div style={{
+      position: 'fixed',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: '100px',
+      backgroundColor: '#f7d145',
+      zIndex
+    }}>
       {/* Top wave with depth effect */}
       <svg style={{
         position: 'absolute',
