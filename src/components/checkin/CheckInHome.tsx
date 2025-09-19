@@ -274,7 +274,7 @@ export function CheckInHome() {
         style={{
           backgroundColor: 'white',
           border: '1px solid #147fe3',
-          top: '40px',
+          top: '20px',
           right: '16px'
         }}
       >
