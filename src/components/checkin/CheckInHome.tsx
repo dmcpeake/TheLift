@@ -120,12 +120,12 @@ export function CheckInHome() {
               top: 20px !important;
               margin-top: 0 !important;
               transform: none !important;
-              width: 40px !important;
-              height: 40px !important;
+              width: 2.5rem !important;
+              height: 2.5rem !important;
             }
             .logout-button .logout-icon {
-              width: 20px !important;
-              height: 20px !important;
+              width: 1.25rem !important;
+              height: 1.25rem !important;
             }
           }
         `}</style>
