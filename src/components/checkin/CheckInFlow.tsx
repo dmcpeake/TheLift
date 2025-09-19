@@ -437,17 +437,15 @@ export function CheckInFlow() {
         
         {currentStep === 'emotions' && (
           <div className="bg-white min-h-screen" style={{ paddingTop: '140px' }}>
-            <div className="max-w-7xl mx-auto px-6 w-full">
-              <EmotionGrid
-                onComplete={(data) => handleStepComplete('emotions', data)}
-                showNextButton={true}
-                onSelectionMade={handleStepSelectionMade}
-                hideDebugInfo={true}
-                triggerCompletion={triggerEmotionCompletion}
-                initialData={completedData['emotions']}
-                onStepChange={setEmotionGridStep}
-              />
-            </div>
+            <EmotionGrid
+              onComplete={(data) => handleStepComplete('emotions', data)}
+              showNextButton={true}
+              onSelectionMade={handleStepSelectionMade}
+              hideDebugInfo={true}
+              triggerCompletion={triggerEmotionCompletion}
+              initialData={completedData['emotions']}
+              onStepChange={setEmotionGridStep}
+            />
           </div>
         )}
         
