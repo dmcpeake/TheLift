@@ -301,7 +301,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                       {categorySubtexts[category as keyof typeof categorySubtexts]}
                     </p>
                   </div>
-                  <div className="grid grid-cols-3" style={{ gap: '10px' }}>
+                  <div className="grid grid-cols-3 gap-2.5">
                     {categoryEmotions.map((emotion) => (
                       <button
                         key={emotion}
@@ -315,8 +315,6 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                           boxShadow: selectedEmotions.includes(emotion) ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' : 'none',
                           color: selectedEmotions.includes(emotion) ? '#3a7ddc' : '#6b7280',
                           fontWeight: selectedEmotions.includes(emotion) ? '600' : '400',
-                          width: '100px',
-                          minWidth: '100px',
                           maxWidth: '100px'
                         }}
                       >
