@@ -33,4 +33,15 @@ dist-ssr
 # Supabase
 .supabase.next/
 .vercel
+
+# SQL and data generation files
+*.sql
+*.py
+sql-combined/
+sql-chunks/
+
+# Temporary files
+*.txt
+*.patch
+
 # Deployment trigger Wed Sep 10 20:53:39 BST 2025
