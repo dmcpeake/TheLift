@@ -514,9 +514,6 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                 )}
               </button>
             </div>
-            <p className="text-xs text-gray-500 mb-4 text-center">
-              {emotionStory.length}/500 characters
-            </p>
           </div>
 
           {/* Discussion Question */}
