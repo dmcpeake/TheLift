@@ -107,6 +107,9 @@ export function CheckInHome() {
               transform: translateX(-50%) !important;
               z-index: 1000 !important;
             }
+            .theo-animation {
+              bottom: 120px !important;
+            }
           }
         `}</style>
         <div className="max-w-7xl mx-auto md:px-6">
@@ -336,10 +339,10 @@ export function CheckInHome() {
       {/* Welcome Content */}
       {!showBreathing && (
         <div
-          className="welcome-content-mobile flex items-center justify-center p-4 transition-opacity duration-300"
+          className="welcome-content-mobile p-4 transition-opacity duration-300"
           style={{
             minHeight: 'calc(100vh - 200px)',
-            paddingTop: '180px',
+            paddingTop: '120px',
             opacity: isTransitioning ? 0 : 1
           }}
         >
@@ -551,6 +554,7 @@ export function CheckInHome() {
         {/* Theo Rose Animation - centered under start button */}
         {roseAnimation && (
           <div
+            className="theo-animation"
             style={{
               position: 'absolute',
               bottom: '120px',
