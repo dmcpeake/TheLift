@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { YellowSwoosh } from '../shared/YellowSwoosh'
 import Lottie from 'lottie-react'
 import { Settings, SkipForward, Play, Pause, Heart, Smile, Users, Sparkles, Star, Plus, LogOut, X, Compass } from 'lucide-react'
 import { BreathingCircles } from '../breathing/BreathingCircles'
@@ -78,7 +79,7 @@ export function CheckInHome() {
   }
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="min-h-screen bg-white relative overflow-hidden" style={{ paddingBottom: '120px' }}>
       {/* Garden Cards - 40px from top - hide when breathing */}
       {!showBreathing && (
         <div style={{ position: 'absolute', top: '40px', left: '0', right: '0', zIndex: 10 }}>
@@ -533,32 +534,9 @@ export function CheckInHome() {
         </>
       )}
 
-      {/* Curved bottom section with yellow background - 100px height */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '100px',
-          backgroundColor: '#f7d145',
-          zIndex: 999
-        }}
-      >
-        {/* Top wave with depth effect - matching homepage mental health section */}
-        <svg style={{
-          position: 'absolute',
-          top: '-80px',
-          left: 0,
-          width: '100%',
-          height: '80px'
-        }} viewBox="0 0 1440 400" preserveAspectRatio="none">
-          {/* Main wave fill */}
-          <path d="M0,200 C480,400 960,0 1440,200 L1440,400 L0,400 Z" fill="#f7d145"/>
-          {/* Border with varied bottom edge only */}
-          <path d="M0,200 C480,400 960,0 1440,200 L1440,400 C1020,-120 400,480 0,360 Z" fill="#fae568" opacity="0.6"/>
-        </svg>
 
+      {/* Yellow swoosh section at bottom */}
+      <YellowSwoosh>
         {/* Theo Rose Animation - centered under start button */}
         {roseAnimation && (
           <div
@@ -576,16 +554,12 @@ export function CheckInHome() {
           >
             <Lottie
               animationData={roseAnimation}
-              style={{
-                width: '100%',
-                height: '100%'
-              }}
               loop={true}
               autoplay={true}
             />
           </div>
         )}
-      </div>
+      </YellowSwoosh>
     </div>
   )
 }
