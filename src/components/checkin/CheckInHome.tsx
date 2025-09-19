@@ -100,8 +100,10 @@ export function CheckInHome() {
               min-height: auto !important;
               padding-top: 160px !important;
             }
-            .welcome-content-mobile > div {
-              padding-top: 0 !important;
+          }
+          @media (min-width: 769px) {
+            .welcome-content-mobile {
+              padding-top: 180px !important;
             }
             .welcome-content-mobile .max-w-2xl {
               margin-top: 0 !important;
@@ -366,7 +368,6 @@ export function CheckInHome() {
           className="welcome-content-mobile flex items-start justify-center p-4 transition-opacity duration-300"
           style={{
             minHeight: 'auto',
-            paddingTop: '180px',
             opacity: isTransitioning ? 0 : 1
           }}
         >
