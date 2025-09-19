@@ -247,7 +247,8 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                           border: selectedEmotions.includes(emotion) ? '2px solid #3a7ddc' : 'none',
                           boxShadow: selectedEmotions.includes(emotion) ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' : 'none',
                           color: selectedEmotions.includes(emotion) ? '#3a7ddc' : '#6b7280',
-                          fontWeight: selectedEmotions.includes(emotion) ? '600' : '400'
+                          fontWeight: selectedEmotions.includes(emotion) ? '600' : '400',
+                          maxWidth: '100px'
                         }}
                       >
                         {/* Emoticon */}
