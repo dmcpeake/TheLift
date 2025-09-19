@@ -187,7 +187,7 @@ export function Stage({
           <div className="breathing-circle-container">
             {/* Dashed outer circle - positioned to match orange progress ring exactly */}
             <div
-              className="absolute"
+              className="breathing-outer-ring absolute"
               style={{
                 width: '435px',
                 height: '435px',

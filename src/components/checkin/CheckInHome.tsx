@@ -277,11 +277,11 @@ export function CheckInHome() {
       {/* Progress Header - show when breathing */}
       {showBreathing && (
         <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', height: '80px', borderRadius: '0' }}>
-          <div className="mx-auto px-6" style={{ maxWidth: '600px', height: '80px', position: 'relative' }}>
+          <div className="mx-auto px-6" style={{ maxWidth: '300px', height: '80px', position: 'relative' }}>
 
             {/* Icons row - positioned at top */}
             <div className="grid grid-cols-3 gap-2 w-full" style={{ paddingTop: '10px', marginBottom: '6px' }}>
-              {[{ icon: Heart, name: 'Mood meter' }, { icon: Smile, name: 'My emotions' }, { icon: Compass, name: 'Wellbeing wheel' }].map((segment) => {
+              {[{ icon: Heart, name: 'Mood meter' }, { icon: Smile, name: 'My emotions' }, { icon: Compass, name: 'Wellbeing' }].map((segment) => {
                 const Icon = segment.icon
                 return (
                   <div key={segment.name} className="text-center">
@@ -310,7 +310,7 @@ export function CheckInHome() {
 
             {/* Step labels - positioned 10px below progress bar */}
             <div className="grid grid-cols-3 gap-2 w-full" style={{ marginTop: '5px' }}>
-              {[{ name: 'Mood meter' }, { name: 'My emotions' }, { name: 'Wellbeing wheel' }].map((segment) => {
+              {[{ name: 'Mood meter' }, { name: 'My emotions' }, { name: 'Wellbeing' }].map((segment) => {
                 return (
                   <div key={segment.name} className="text-center">
                     <span className="text-xs" style={{ color: '#9ca3af' }}>
@@ -388,9 +388,19 @@ export function CheckInHome() {
 
       {/* Title header for breathing */}
       {showBreathing && (
-        <div className="text-center" style={{ position: 'fixed', top: '90px', left: 0, right: 0, zIndex: 40 }}>
-          <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em', marginTop: '50px' }}>Let's breathe!</h1>
-        </div>
+        <>
+          <style jsx>{`
+            @media (max-width: 768px) {
+              .breathing-title-checkin-mobile {
+                font-size: 28px !important;
+                margin-top: 30px !important;
+              }
+            }
+          `}</style>
+          <div className="text-center" style={{ position: 'fixed', top: '90px', left: 0, right: 0, zIndex: 40 }}>
+            <h1 className="breathing-title-checkin-mobile text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em', marginTop: '50px' }}>Let's breathe!</h1>
+          </div>
+        </>
       )}
 
       {/* Breathing Exercise */}

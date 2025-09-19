@@ -84,20 +84,46 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
 
   return (
     <>
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .mood-meter-title-mobile {
+            font-size: 28px !important;
+            line-height: 1.2 !important;
+            margin-top: -20px !important;
+          }
+          .mood-meter-container {
+            width: calc(100vw - 40px) !important;
+            height: calc(100vw - 40px) !important;
+            max-width: 360px !important;
+            max-height: 360px !important;
+          }
+          .mood-meter-outer-ring {
+            width: calc((100vw - 40px) * 0.90625) !important;
+            height: calc((100vw - 40px) * 0.90625) !important;
+            max-width: 326px !important;
+            max-height: 326px !important;
+          }
+          .mood-meter-doughnut {
+            transform: scale(0.8) !important;
+            transform-origin: 50% 50% !important;
+          }
+        }
+      `}</style>
+
       {/* Centered title like breathing exercise */}
       <div className="text-center" style={{ marginBottom: '1rem' }}>
-        <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>How would you describe your mood?</h1>
+        <h1 className="mood-meter-title-mobile text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>How would you describe your mood?</h1>
       </div>
 
       <div className="flex flex-col items-center">
         <div className="mb-6 w-full max-w-2xl">
           <div className="flex justify-center">
             {/* Breathing circle container - 480px like breathing circle */}
-            <div className="relative" style={{ width: '480px', height: '480px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="mood-meter-container relative" style={{ width: '480px', height: '480px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 
               {/* Dashed outer circle - exact same as breathing circle */}
               <div
-                className="absolute"
+                className="mood-meter-outer-ring absolute"
                 style={{
                   width: '435px',
                   height: '435px',
@@ -120,7 +146,7 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
               </div>
 
               {/* Clean doughnut with 5 segments */}
-              <div style={{ position: 'absolute', left: '50%', top: '50%', transform: `translate(-50%, -50%) rotate(${rotationOffset}deg)`, zIndex: 4, transition: 'transform 0.8s ease-in-out', padding: '30px' }}>
+              <div className="mood-meter-doughnut" style={{ position: 'absolute', left: '50%', top: '50%', transform: `translate(-50%, -50%) rotate(${rotationOffset}deg)`, zIndex: 4, transition: 'transform 0.8s ease-in-out', padding: '30px' }}>
                 <svg width="400" height="400" style={{ overflow: 'visible' }}>
                   {moods.map((mood, index) => {
                     const isSelected = selectedMood?.mood_level === mood.level
