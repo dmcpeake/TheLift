@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface EmotionData {
   selected_emotions: string[]
@@ -220,22 +221,30 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
           .emotion-title-mobile {
             font-size: 28px !important;
             line-height: 1.2 !important;
-            margin-top: -20px !important;
+            margin-top: -35px !important;
+          }
+          .yellow-swoosh-mobile-hide {
+            display: none !important;
           }
         }
       `}</style>
 
       {/* Centered title like breathing exercise */}
-      <div className="text-center" style={{ marginBottom: '0.5rem' }}>
-        <h1 className="emotion-title-mobile text-gray-900 mb-1" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>What emotions are you feeling?</h1>
+      <div className="text-center" style={{ marginBottom: currentStep === 2 ? '0.5rem' : '0.5rem' }}>
+        <h1 className="emotion-title-mobile text-gray-900 mb-1" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+          {currentStep === 1 ? 'What are you feeling?' : 'I am feeling'}
+        </h1>
         {currentStep === 1 && (
           <p className="text-gray-600 mb-4" style={{ fontSize: '14px', fontWeight: 'normal' }}>Select up to 3</p>
+        )}
+        {currentStep === 2 && (
+          <div style={{ height: '20px' }} className="md:hidden"></div>
         )}
       </div>
 
       {/* Step 1: Select Emotions */}
       {currentStep === 1 && (
-        <div style={{ paddingBottom: '150px' }}>
+        <div>
 
           <div className="relative">
             <style>{`
@@ -248,8 +257,32 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                   display: none !important;
                 }
               }
+              @media (max-width: 768px) {
+                .slider-nav {
+                  display: none !important;
+                }
+              }
             `}</style>
 
+            {/* Left chevron */}
+            <button
+              onClick={handlePrevSlide}
+              className="slider-nav absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50"
+              disabled={currentSlide === 0}
+              style={{ opacity: currentSlide === 0 ? 0.5 : 1 }}
+            >
+              <ChevronLeft className="w-6 h-6 text-gray-600" />
+            </button>
+
+            {/* Right chevron */}
+            <button
+              onClick={handleNextSlide}
+              className="slider-nav absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50"
+              disabled={currentSlide === totalSlides - 1}
+              style={{ opacity: currentSlide === totalSlides - 1 ? 0.5 : 1 }}
+            >
+              <ChevronRight className="w-6 h-6 text-gray-600" />
+            </button>
 
             <div
               ref={scrollContainerRef}
@@ -365,6 +398,19 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               </div>
             </div>
 
+            {/* Slider dots */}
+            <div className="slider-nav flex justify-center mt-4 gap-2">
+              {Array.from({ length: totalSlides }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToSlide(index)}
+                  className="w-2 h-2 rounded-full transition-colors"
+                  style={{
+                    backgroundColor: index === currentSlide ? '#3a7ddc' : '#cbd5e1'
+                  }}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Data Captured for Step 1 */}
@@ -381,7 +427,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
       {/* Step 2: Selected Emotions Review + Form */}
       {currentStep === 2 && selectedEmotions.length > 0 && (
-        <div className="max-w-4xl mx-auto px-4" style={{ paddingBottom: '150px' }}>
+        <div className="max-w-4xl mx-auto px-4">
           {/* Show selected emotions - tappable to edit */}
           <div className="text-center mb-8">
             <div className="flex flex-wrap justify-center gap-2 mb-8">
@@ -431,9 +477,6 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
             </div>
           </div>
 
-          <div className="text-center mb-6">
-            <h3 className="text-lg font-semibold mb-2">Tell us more (optional)</h3>
-          </div>
 
           <div className="w-full">
             <div className="relative">
@@ -474,9 +517,6 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                 )}
               </button>
             </div>
-            <p className="text-xs text-gray-500 mb-4 text-center">
-              {emotionStory.length}/500 characters
-            </p>
           </div>
 
           {/* Discussion Question */}
@@ -596,7 +636,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
       {/* Step 4: Show Data */}
       {currentStep === 4 && (
-        <div className="max-w-4xl mx-auto px-4 text-center" style={{ paddingBottom: '150px' }}>
+        <div className="max-w-4xl mx-auto px-4 text-center">
           <h3 className="text-lg font-semibold mb-2">✅ Complete!</h3>
 
           {!hideDebugInfo && finalData && (
@@ -623,7 +663,9 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
       )}
 
       {/* Yellow swoosh section at bottom */}
-      <YellowSwoosh />
+      <div className="yellow-swoosh-mobile-hide">
+        <YellowSwoosh />
+      </div>
     </>
   )
 }

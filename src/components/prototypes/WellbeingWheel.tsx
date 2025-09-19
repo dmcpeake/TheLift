@@ -367,15 +367,51 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
 
   return (
     <>
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .wellbeing-title-mobile {
+            font-size: 28px !important;
+            line-height: 1.2 !important;
+            margin-top: -35px !important;
+          }
+          .wellbeing-title-desktop {
+            display: none !important;
+          }
+          .wellbeing-title-mobile-text {
+            display: block !important;
+          }
+        }
+        @media (min-width: 769px) {
+          .wellbeing-title-mobile-text {
+            display: none !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .yellow-swoosh-mobile-hide {
+            display: none !important;
+          }
+          .wellbeing-text-input {
+            top: 60px !important;
+          }
+          .wellbeing-text-input .relative {
+            margin-left: 20px !important;
+            margin-right: 20px !important;
+          }
+        }
+      `}</style>
+
       {/* Centered title like breathing exercise */}
       <div className="text-center" style={{ marginBottom: '2rem' }}>
-        <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+        <h1 className="wellbeing-title-mobile wellbeing-title-desktop text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
           {currentSection ? `How are you feeling about ${currentSection.name}` : 'How do you feel about these areas of your life?'}
+        </h1>
+        <h1 className="wellbeing-title-mobile wellbeing-title-mobile-text text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em', display: 'none' }}>
+          {currentSection ? 'How are you feeling about' : 'How do you feel about these areas of your life?'}
         </h1>
       </div>
 
       {!finalData ? (
-        <div style={{ paddingBottom: '150px' }}>
+        <div>
           {/* Topic navigation cards */}
           <div className="relative">
             <style>{`
@@ -763,9 +799,15 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                             onClick={() => selectMood(currentSection.id, mood, index)}
                             onMouseEnter={() => setHoveredMood(mood.level)}
                             onMouseLeave={() => setHoveredMood(null)}
-                            transform={`rotate(${-rotationOffset} ${x} ${y})`}
                           >
-                            <div style={{ width: '70px', height: '70px', pointerEvents: 'none' }}>
+                            <div style={{
+                              width: '70px',
+                              height: '70px',
+                              pointerEvents: 'none',
+                              transform: `rotate(${-rotationOffset}deg)`,
+                              transformOrigin: 'center center',
+                              transition: 'transform 0.8s ease-in-out'
+                            }}>
                               <Lottie
                                 animationData={mood.animation}
                                 loop={true}
@@ -809,10 +851,16 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                   {/* Text input - fades in when mood is selected */}
                   {sections[currentSection.id]?.mood_level && (
                     <div
-                      className="absolute inset-0 flex items-center justify-center"
+                      className="wellbeing-text-input"
                       style={{
                         opacity: 0,
-                        animation: 'fadeInDelayed 0.3s ease-in-out 1.8s forwards'
+                        animation: 'fadeInDelayed 0.3s ease-in-out 1.8s forwards',
+                        position: 'absolute',
+                        top: '40px',
+                        left: 0,
+                        right: 0,
+                        display: 'flex',
+                        justifyContent: 'center'
                       }}
                     >
                       <div className="w-full max-w-sm">
@@ -827,6 +875,13 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                             className="w-full pr-14 border rounded-lg h-32 resize-none"
                             style={{ paddingTop: '3rem', paddingBottom: '3rem', paddingLeft: '0.75rem', paddingRight: '3.5rem', lineHeight: '1.5' }}
                             maxLength={500}
+                            onFocus={(e) => {
+                              if (window.innerWidth <= 768) {
+                                setTimeout(() => {
+                                  e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                                }, 300)
+                              }
+                            }}
                           />
                           <button
                             onClick={() => handleMicrophoneClick(currentSection.id)}
@@ -973,7 +1028,9 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
       )}
 
       {/* Yellow swoosh section at bottom */}
-      <YellowSwoosh />
+      <div className="yellow-swoosh-mobile-hide">
+        <YellowSwoosh />
+      </div>
     </>
   )
 }

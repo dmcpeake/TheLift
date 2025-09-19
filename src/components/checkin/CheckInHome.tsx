@@ -82,7 +82,7 @@ export function CheckInHome() {
     <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Garden Cards - 40px from top - hide when breathing */}
       {!showBreathing && (
-        <div style={{ position: 'absolute', top: '40px', left: '0', right: '0', zIndex: 10 }}>
+        <div className="garden-cards-container" style={{ position: 'absolute', top: '40px', left: '0', right: '0', zIndex: 10 }}>
         <style jsx>{`
           .cards-container {
             display: grid;
@@ -91,27 +91,50 @@ export function CheckInHome() {
           }
           @media (max-width: 768px) {
             .cards-container {
-              display: flex;
-              overflow-x: auto;
-              scroll-snap-type: x mandatory;
-              -webkit-overflow-scrolling: touch;
-              padding-left: 1rem;
-              padding-right: 1rem;
-              gap: 0.75rem;
-            }
-            .cards-container::-webkit-scrollbar {
-              display: none;
-            }
-            .card-item {
-              flex: 0 0 200px;
-              scroll-snap-align: start;
+              display: none !important;
             }
             .welcome-content-mobile {
-              display: block !important;
+              display: flex !important;
               align-items: flex-start !important;
-              justify-content: flex-start !important;
+              justify-content: center !important;
               min-height: auto !important;
               padding-top: 160px !important;
+            }
+          }
+          @media (min-width: 769px) {
+            .welcome-content-mobile {
+              padding-top: 180px !important;
+            }
+            .welcome-content-mobile .max-w-2xl {
+              margin-top: 0 !important;
+            }
+            .mobile-start-button {
+              position: fixed !important;
+              bottom: 40px !important;
+              left: 50% !important;
+              transform: translateX(-50%) !important;
+              z-index: 1000 !important;
+            }
+            .theo-animation {
+              bottom: 70px !important;
+            }
+            .garden-cards-container {
+              display: none !important;
+            }
+            .logout-button {
+              top: 20px !important;
+              margin-top: 0 !important;
+              transform: none !important;
+              width: 2.5rem !important;
+              height: 2.5rem !important;
+            }
+            .logout-button .logout-icon {
+              width: 1.25rem !important;
+              height: 1.25rem !important;
+            }
+            .breathing-title-checkin-mobile {
+              font-size: 28px !important;
+              margin-top: 30px !important;
             }
           }
         `}</style>
@@ -262,15 +285,15 @@ export function CheckInHome() {
       {!showBreathing && (
         <button
         onClick={() => navigate('/')}
-        className="fixed w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors z-50 shadow-lg"
+        className="logout-button fixed w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors z-50 shadow-lg"
         style={{
           backgroundColor: 'white',
           border: '1px solid #147fe3',
-          top: '40px',
-          right: '40px'
+          top: '20px',
+          right: '16px'
         }}
       >
-        <LogOut className="h-6 w-6" style={{ color: '#147fe3' }} />
+        <LogOut className="logout-icon h-6 w-6" style={{ color: '#147fe3' }} />
         </button>
       )}
 
@@ -342,10 +365,9 @@ export function CheckInHome() {
       {/* Welcome Content */}
       {!showBreathing && (
         <div
-          className="welcome-content-mobile flex items-center justify-center p-4 transition-opacity duration-300"
+          className="welcome-content-mobile flex items-start justify-center p-4 transition-opacity duration-300"
           style={{
-            minHeight: 'calc(100vh - 200px)',
-            paddingTop: '180px',
+            minHeight: 'auto',
             opacity: isTransitioning ? 0 : 1
           }}
         >
@@ -356,51 +378,19 @@ export function CheckInHome() {
                 Ready for your check in?
               </h1>
               <p className="text-lg text-gray-600 max-w-lg mx-auto">
-                Take a few minutes to explore how you're feeling today.
+                Take a moment to explore how you're feeling.
               </p>
             </div>
 
-            {/* Start Button */}
-            <div className="flex justify-center">
-              <button
-                onClick={handleStartClick}
-                className="font-semibold text-lg transition-all duration-200"
-                style={{
-                  backgroundColor: '#e87e67',
-                  color: 'white',
-                  height: '60px',
-                  borderRadius: '30px',
-                  paddingLeft: '30px',
-                  paddingRight: '30px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
-              >
-                START
-              </button>
-            </div>
           </div>
         </div>
       )}
 
       {/* Title header for breathing */}
       {showBreathing && (
-        <>
-          <style jsx>{`
-            @media (max-width: 768px) {
-              .breathing-title-checkin-mobile {
-                font-size: 28px !important;
-                margin-top: 30px !important;
-              }
-            }
-          `}</style>
-          <div className="text-center" style={{ position: 'fixed', top: '90px', left: 0, right: 0, zIndex: 40 }}>
-            <h1 className="breathing-title-checkin-mobile text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em', marginTop: '50px' }}>Let's breathe!</h1>
-          </div>
-        </>
+        <div className="text-center" style={{ position: 'fixed', top: '90px', left: 0, right: 0, zIndex: 40 }}>
+          <h1 className="breathing-title-checkin-mobile text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em', marginTop: '50px' }}>Let's breathe!</h1>
+        </div>
       )}
 
       {/* Breathing Exercise */}
@@ -554,12 +544,38 @@ export function CheckInHome() {
 
       {/* Yellow swoosh section at bottom */}
       <YellowSwoosh>
+        {/* Start Button */}
+        {!showBreathing && (
+          <div className="flex justify-center mobile-start-button" style={{ position: 'absolute', bottom: '40px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
+            <button
+              onClick={handleStartClick}
+              className="font-semibold text-lg transition-all duration-200"
+              style={{
+                backgroundColor: '#e87e67',
+                color: 'white',
+                height: '60px',
+                borderRadius: '30px',
+                paddingLeft: '30px',
+                paddingRight: '30px',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
+            >
+              START
+            </button>
+          </div>
+        )}
+
         {/* Theo Rose Animation - centered under start button */}
         {roseAnimation && (
           <div
+            className="theo-animation"
             style={{
               position: 'absolute',
-              bottom: '20px',
+              bottom: '70px',
               left: '50%',
               transform: 'translateX(-50%)',
               width: '300px',
