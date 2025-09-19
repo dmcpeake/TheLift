@@ -82,7 +82,7 @@ export function CheckInHome() {
     <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Garden Cards - 40px from top - hide when breathing */}
       {!showBreathing && (
-        <div style={{ position: 'absolute', top: '40px', left: '0', right: '0', zIndex: 10 }}>
+        <div className="garden-cards-container" style={{ position: 'absolute', top: '40px', left: '0', right: '0', zIndex: 10 }}>
         <style jsx>{`
           .cards-container {
             display: grid;
@@ -113,8 +113,8 @@ export function CheckInHome() {
             .theo-animation {
               bottom: 120px !important;
             }
-            .logout-button {
-              top: 40px !important;
+            .garden-cards-container {
+              display: none !important;
             }
           }
         `}</style>
