@@ -372,7 +372,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
           .wellbeing-title-mobile {
             font-size: 28px !important;
             line-height: 1.2 !important;
-            margin-top: -20px !important;
+            margin-top: -40px !important;
           }
           .wellbeing-title-desktop {
             display: none !important;

@@ -89,7 +89,7 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
           .mood-meter-title-mobile {
             font-size: 28px !important;
             line-height: 1.2 !important;
-            margin-top: -20px !important;
+            margin-top: -40px !important;
           }
           .mood-meter-container {
             width: calc(100vw - 40px) !important;

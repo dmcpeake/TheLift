@@ -221,7 +221,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
           .emotion-title-mobile {
             font-size: 28px !important;
             line-height: 1.2 !important;
-            margin-top: -20px !important;
+            margin-top: -40px !important;
           }
         }
       `}</style>
