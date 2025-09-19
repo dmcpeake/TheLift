@@ -341,17 +341,16 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
                   {/* Divider line after each group (except last) */}
                   {!isLast && (
-                    <>
-                      <div style={{ width: '20px' }} />
-                      <div
-                        style={{
-                          width: '1px',
-                          height: '240px', // Height of 3 rows of cards (3 * 80px)
-                          borderLeft: '1px dashed #d1d5db',
-                          marginTop: '40px' // Align with start of card grid
-                        }}
-                      />
-                    </>
+                    <div
+                      style={{
+                        width: '1px',
+                        height: '180px',
+                        borderLeft: '1px dashed #d1d5db',
+                        marginLeft: '20px',
+                        marginRight: '20px',
+                        marginTop: '50px'
+                      }}
+                    />
                   )}
                 </React.Fragment>
               )
