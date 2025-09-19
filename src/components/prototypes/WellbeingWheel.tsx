@@ -386,6 +386,11 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
             display: none !important;
           }
         }
+        @media (max-width: 768px) {
+          .yellow-swoosh-mobile-hide {
+            display: none !important;
+          }
+        }
       `}</style>
 
       {/* Centered title like breathing exercise */}
@@ -997,7 +1002,9 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
       )}
 
       {/* Yellow swoosh section at bottom */}
-      <YellowSwoosh />
+      <div className="yellow-swoosh-mobile-hide">
+        <YellowSwoosh />
+      </div>
     </>
   )
 }

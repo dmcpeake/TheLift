@@ -113,6 +113,11 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
             transform-origin: center !important;
           }
         }
+        @media (max-width: 768px) {
+          .yellow-swoosh-mobile-hide {
+            display: none !important;
+          }
+        }
       `}</style>
 
       {/* Centered title like breathing exercise */}
@@ -325,7 +330,9 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
       )}
 
       {/* Yellow swoosh section at bottom */}
-      <YellowSwoosh />
+      <div className="yellow-swoosh-mobile-hide">
+        <YellowSwoosh />
+      </div>
     </>
   )
 }

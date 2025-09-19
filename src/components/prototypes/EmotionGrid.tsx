@@ -223,6 +223,9 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
             line-height: 1.2 !important;
             margin-top: -35px !important;
           }
+          .yellow-swoosh-mobile-hide {
+            display: none !important;
+          }
         }
       `}</style>
 
@@ -660,7 +663,9 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
       )}
 
       {/* Yellow swoosh section at bottom */}
-      <YellowSwoosh />
+      <div className="yellow-swoosh-mobile-hide">
+        <YellowSwoosh />
+      </div>
     </>
   )
 }
