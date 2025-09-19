@@ -356,10 +356,10 @@ export function CheckInHome() {
       {/* Welcome Content */}
       {!showBreathing && (
         <div
-          className="welcome-content-mobile flex items-center justify-center p-4 transition-opacity duration-300"
+          className="welcome-content-mobile flex items-start justify-center p-4 transition-opacity duration-300"
           style={{
-            minHeight: 'calc(100vh - 200px)',
-            paddingTop: '180px',
+            minHeight: 'auto',
+            paddingTop: '160px',
             opacity: isTransitioning ? 0 : 1
           }}
         >
