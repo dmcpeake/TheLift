@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface EmotionData {
   selected_emotions: string[]
@@ -250,6 +251,25 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               }
             `}</style>
 
+            {/* Left chevron */}
+            <button
+              onClick={handlePrevSlide}
+              className="slider-nav absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50"
+              disabled={currentSlide === 0}
+              style={{ opacity: currentSlide === 0 ? 0.5 : 1 }}
+            >
+              <ChevronLeft className="w-6 h-6 text-gray-600" />
+            </button>
+
+            {/* Right chevron */}
+            <button
+              onClick={handleNextSlide}
+              className="slider-nav absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50"
+              disabled={currentSlide === totalSlides - 1}
+              style={{ opacity: currentSlide === totalSlides - 1 ? 0.5 : 1 }}
+            >
+              <ChevronRight className="w-6 h-6 text-gray-600" />
+            </button>
 
             <div
               ref={scrollContainerRef}
@@ -365,6 +385,19 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               </div>
             </div>
 
+            {/* Slider dots */}
+            <div className="slider-nav flex justify-center mt-4 gap-2">
+              {Array.from({ length: totalSlides }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToSlide(index)}
+                  className="w-2 h-2 rounded-full transition-colors"
+                  style={{
+                    backgroundColor: index === currentSlide ? '#3a7ddc' : '#cbd5e1'
+                  }}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Data Captured for Step 1 */}
