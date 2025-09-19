@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Lottie from 'lottie-react'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
 import BlushingShaded from '../../../public/Blushing_Shaded.json'
@@ -39,6 +39,13 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
   const [showingTextInput, setShowingTextInput] = useState<string | null>(null)
   const [isListening, setIsListening] = useState(false)
   const [rotationOffset, setRotationOffset] = useState(0)
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [startX, setStartX] = useState(0)
+  const [scrollLeft, setScrollLeft] = useState(0)
+  const [hasMovedMouse, setHasMovedMouse] = useState(false)
+  const [hoveredMood, setHoveredMood] = useState<string | null>(null)
 
   // Initialize with existing data if available
   useEffect(() => {
@@ -102,6 +109,81 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
     { animation: SadTearShaded, level: 'sad', numeric: 2, color: '#e38d3b' },
     { animation: CryingShaded, level: 'very_sad', numeric: 1, color: '#e38bac' }
   ]
+
+  const totalSlides = Math.ceil(wheelSections.length / 3) // 3 cards per slide on mobile
+
+  const scrollToSlide = (slideIndex: number) => {
+    if (scrollContainerRef.current) {
+      const slideWidth = 3 * (140 + 10) // 3 cards × (140px width + 10px gap)
+      const scrollPosition = slideIndex * slideWidth
+      scrollContainerRef.current.scrollTo({
+        left: scrollPosition,
+        behavior: 'smooth'
+      })
+      setCurrentSlide(slideIndex)
+    }
+  }
+
+  const handlePrevSlide = () => {
+    const newIndex = Math.max(0, currentSlide - 1)
+    scrollToSlide(newIndex)
+  }
+
+  const handleNextSlide = () => {
+    const newIndex = Math.min(totalSlides - 1, currentSlide + 1)
+    scrollToSlide(newIndex)
+  }
+
+  // Touch/Mouse drag handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true)
+    setHasMovedMouse(false)
+    setStartX(e.pageX - (scrollContainerRef.current?.offsetLeft || 0))
+    setScrollLeft(scrollContainerRef.current?.scrollLeft || 0)
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true)
+    setStartX(e.touches[0].pageX - (scrollContainerRef.current?.offsetLeft || 0))
+    setScrollLeft(scrollContainerRef.current?.scrollLeft || 0)
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return
+    e.preventDefault()
+    setHasMovedMouse(true)
+    const x = e.pageX - (scrollContainerRef.current.offsetLeft || 0)
+    const walk = (x - startX) * 1
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return
+    const x = e.touches[0].pageX - (scrollContainerRef.current.offsetLeft || 0)
+    const walk = (x - startX) * 1
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+    // Only snap to slide if we actually dragged
+    if (hasMovedMouse && scrollContainerRef.current) {
+      const slideWidth = 3 * (140 + 10)
+      const newSlide = Math.round(scrollContainerRef.current.scrollLeft / slideWidth)
+      setCurrentSlide(Math.max(0, Math.min(totalSlides - 1, newSlide)))
+    }
+    setHasMovedMouse(false)
+  }
+
+  const handleTouchEnd = () => {
+    setIsDragging(false)
+    // Snap to nearest slide
+    if (scrollContainerRef.current) {
+      const slideWidth = 3 * (140 + 10)
+      const newSlide = Math.round(scrollContainerRef.current.scrollLeft / slideWidth)
+      setCurrentSlide(Math.max(0, Math.min(totalSlides - 1, newSlide)))
+    }
+  }
 
   const selectMood = (sectionId: string, mood: typeof moods[0], index: number) => {
     // If clicking the already selected mood, unselect it
@@ -203,6 +285,33 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
     recognition.start()
   }
 
+  const scrollToActiveCard = (sectionIndex: number) => {
+    if (scrollContainerRef.current) {
+      const cardWidth = 140 + 10 // card width + gap
+      const containerWidth = scrollContainerRef.current.clientWidth
+      const cardPosition = sectionIndex * cardWidth
+
+      // Calculate if we need to scroll to keep the card in view
+      const currentScroll = scrollContainerRef.current.scrollLeft
+      const cardStart = cardPosition - 20 // Account for padding
+      const cardEnd = cardPosition + 140 + 20 // Card width + padding
+
+      if (cardStart < currentScroll) {
+        // Card is to the left of view, scroll left
+        scrollContainerRef.current.scrollTo({
+          left: cardStart - 60,
+          behavior: 'smooth'
+        })
+      } else if (cardEnd > currentScroll + containerWidth) {
+        // Card is to the right of view, scroll right
+        scrollContainerRef.current.scrollTo({
+          left: cardEnd - containerWidth + 60,
+          behavior: 'smooth'
+        })
+      }
+    }
+  }
+
   const finishSection = (sectionId: string) => {
     setShowingTextInput(null)
 
@@ -216,6 +325,8 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
       }
       if (targetIndex < wheelSections.length) {
         setCurrentSectionIndex(targetIndex)
+        // Auto-scroll to keep the new active card in view
+        setTimeout(() => scrollToActiveCard(targetIndex), 100)
       }
     }
   }
@@ -258,14 +369,57 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
     <>
       {/* Centered title like breathing exercise */}
       <div className="text-center" style={{ marginBottom: '2rem' }}>
-        <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>Wellbeing Wheel</h1>
-        <p className="text-gray-600 text-lg">How are you really feeling about these areas of your life today?</p>
+        <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+          {currentSection ? `How are you feeling about ${currentSection.name}` : 'How do you feel about these areas of your life?'}
+        </h1>
       </div>
 
       {!finalData ? (
         <div style={{ paddingBottom: '150px' }}>
           {/* Topic navigation cards */}
-          <div className="flex justify-center" style={{ marginBottom: '2rem', gap: '20px' }}>
+          <div className="relative">
+            <style>{`
+              @media (min-width: 1280px) {
+                .wellbeing-categories {
+                  justify-content: center !important;
+                  min-width: auto !important;
+                }
+                .wellbeing-slider-nav {
+                  display: none !important;
+                }
+              }
+              @keyframes fadeInDelayed {
+                from { opacity: 0; }
+                to { opacity: 1; }
+              }
+            `}</style>
+
+
+            <div
+              ref={scrollContainerRef}
+              className="wellbeing-scroll-container overflow-x-auto"
+              style={{
+                paddingBottom: '20px',
+                cursor: isDragging ? 'grabbing' : (window.innerWidth >= 1280 ? 'default' : 'grab'),
+                userSelect: window.innerWidth >= 1280 ? 'auto' : 'none',
+                WebkitUserSelect: window.innerWidth >= 1280 ? 'auto' : 'none',
+                msUserSelect: window.innerWidth >= 1280 ? 'auto' : 'none'
+              }}
+              onMouseDown={window.innerWidth >= 1280 ? undefined : handleMouseDown}
+              onMouseMove={window.innerWidth >= 1280 ? undefined : handleMouseMove}
+              onMouseUp={window.innerWidth >= 1280 ? undefined : handleMouseUp}
+              onMouseLeave={window.innerWidth >= 1280 ? undefined : handleMouseUp}
+              onTouchStart={window.innerWidth >= 1280 ? undefined : handleTouchStart}
+              onTouchMove={window.innerWidth >= 1280 ? undefined : handleTouchMove}
+              onTouchEnd={window.innerWidth >= 1280 ? undefined : handleTouchEnd}
+            >
+
+              <div className="flex wellbeing-categories" style={{
+                paddingLeft: '20px',
+                paddingRight: '20px',
+                minWidth: '1000px',
+                gap: '10px'
+              }}>
             {wheelSections.map((section, index) => {
               const isActive = currentSectionIndex === index
               const isCompleted = sections[section.id]?.mood_level
@@ -333,41 +487,71 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
               return (
                 <button
                   key={section.id}
-                  onClick={() => {
-                    if (isCompleted || isActive) {
+                  onClick={(e) => {
+                    // Only handle click if we haven't moved the mouse (not dragging)
+                    if (!hasMovedMouse && (isCompleted || isActive)) {
                       setCurrentSectionIndex(index)
+                      // Auto-scroll to keep the clicked card in view
+                      setTimeout(() => scrollToActiveCard(index), 100)
                       if (isCompleted) {
                         editSection(section.id)
                       }
                     }
                   }}
-                  className={`rounded-lg flex flex-col items-center gap-2 px-3 py-4 text-sm transition-all ${
+                  className={`relative rounded-lg flex flex-col items-center gap-2 px-3 py-4 text-sm transition-all ${
                     isActive ? 'font-medium' :
                     isCompleted ? 'hover:text-blue-700 cursor-pointer' :
                     'cursor-not-allowed'
                   }`}
                   style={{
                     borderRadius: '4px',
-                    width: '100px',
-                    minWidth: '100px',
+                    width: '140px',
+                    minWidth: '140px',
                     backgroundColor: isCompleted && completedMood ? `${completedMood.color}33` :
                                    isActive ? 'white' : '#f3f4f6',
                     border: isCompleted && completedMood || isActive ? `2px solid ${
                       isCompleted && completedMood ? completedMood.color : '#3b82f6'
                     }` : 'none',
                     boxShadow: isCompleted && completedMood || isActive ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' : 'none',
-                    color: isActive || isCompleted ? '#374151' : '#6b7280'
+                    color: isActive && !isCompleted ? '#3b82f6' : '#1f2937',
+                    pointerEvents: isCompleted || isActive ? 'auto' : 'none'
                   }}
                   disabled={!isCompleted && !isActive}
                 >
+                  {/* Reset X icon for completed cards */}
+                  {isCompleted && completedMood && (
+                    <div className="absolute" style={{ top: '5px', right: '5px', zIndex: 10 }}>
+                      <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center"
+                        style={{
+                          fontSize: '14px',
+                          color: 'white',
+                          backgroundColor: completedMood.color,
+                          paddingBottom: '2px'
+                        }}
+                      >
+                        ×
+                      </div>
+                    </div>
+                  )}
+
                   {/* Icon circle */}
                   {isCompleted && completedMood ? (
-                    <div className="rounded-full flex items-center justify-center" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px' }}>
+                    <div className="flex items-center justify-center" style={{
+                      width: '40px',
+                      height: '40px',
+                      minWidth: '40px',
+                      minHeight: '40px'
+                    }}>
                       <Lottie
                         animationData={completedMood.animation}
                         loop={true}
                         autoplay={true}
-                        style={{ width: '40px', height: '40px' }}
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))'
+                        }}
                       />
                     </div>
                   ) : (
@@ -375,9 +559,9 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                       width: '40px',
                       height: '40px',
                       backgroundColor: isActive ? '#3b82f61a' :
-                                     isCompleted && completedMood ? completedMood.color : 'white',
-                      color: isActive ? '#3b82f6' :
-                             isCompleted && completedMood ? 'white' : '#6b7280'
+                                     isCompleted && completedMood ? completedMood.color : 'rgba(0, 0, 0, 0.03)',
+                      color: isActive && !isCompleted ? '#3b82f6' :
+                             isCompleted && completedMood ? 'white' : '#1f2937'
                     }}>
                       {getIcon(section.id)}
                     </div>
@@ -385,11 +569,16 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
 
                   {/* Text */}
                   <div className="text-center">
-                    <span className="font-semibold">{section.name}</span>
+                    <span className="font-semibold" style={{ fontSize: '11px', lineHeight: '1.2' }}>{section.name}</span>
                   </div>
                 </button>
               )
             })}
+            {/* Spacer to add gap after last card */}
+            <div style={{ width: '20px', flexShrink: 0 }}></div>
+              </div>
+            </div>
+
           </div>
 
         <div className="max-w-4xl mx-auto px-4 relative">
@@ -482,176 +671,202 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
           {/* Current question section - properly stacked */}
           {!allCompleted && currentSection && (
             <div className="text-center">
-              {/* Topic title */}
-              <div>
-                <h2 className="text-2xl font-semibold text-gray-900">{currentSection.name}</h2>
-              </div>
 
-              {/* Mood doughnut selector - centered */}
-              <div className="flex justify-center mb-8">
+              {/* Container for mood wheel and text input - same size */}
+              <div className="flex justify-center mb-8" style={{ marginTop: '-20px' }}>
                 <div className="relative" style={{ width: '400px', height: '400px' }}>
-                {/* Mood doughnut selector */}
-                  <div style={{ position: 'absolute', left: '50%', top: '50%', transform: `translate(-50%, -50%) rotate(${rotationOffset}deg)`, zIndex: 4, transition: 'transform 0.8s ease-in-out' }}>
-                  <svg width="400" height="400" style={{ overflow: 'visible' }}>
-                    {moods.map((mood, index) => {
-                      const isSelected = sections[currentSection.id]?.mood_level === mood.level
-                      const centerX = 200
-                      const centerY = 200
-                      const outerRadius = isSelected ? 170 : 165
-                      const innerRadius = isSelected ? 80 : 85
-                      const segmentAngle = 72 // 72 degrees per segment
-                      const startAngle = (index * segmentAngle) - 90 - (segmentAngle / 2)
-                      const endAngle = startAngle + segmentAngle
 
-                      const startAngleRad = (startAngle * Math.PI) / 180
-                      const endAngleRad = (endAngle * Math.PI) / 180
-
-                      // Calculate path points
-                      const x1 = centerX + outerRadius * Math.cos(startAngleRad)
-                      const y1 = centerY + outerRadius * Math.sin(startAngleRad)
-                      const x2 = centerX + outerRadius * Math.cos(endAngleRad)
-                      const y2 = centerY + outerRadius * Math.sin(endAngleRad)
-                      const x3 = centerX + innerRadius * Math.cos(endAngleRad)
-                      const y3 = centerY + innerRadius * Math.sin(endAngleRad)
-                      const x4 = centerX + innerRadius * Math.cos(startAngleRad)
-                      const y4 = centerY + innerRadius * Math.sin(startAngleRad)
-
-                      const pathData = [
-                        `M ${x1} ${y1}`,
-                        `A ${outerRadius} ${outerRadius} 0 0 1 ${x2} ${y2}`,
-                        `L ${x3} ${y3}`,
-                        `A ${innerRadius} ${innerRadius} 0 0 0 ${x4} ${y4}`,
-                        'Z'
-                      ].join(' ')
-
-                      return (
-                        <path
-                          key={mood.level}
-                          d={pathData}
-                          fill={mood.color}
-                          fillOpacity={isSelected ? 1.0 : 0.8}
-                          stroke={isSelected ? `${mood.color}AA` : 'none'}
-                          strokeWidth={isSelected ? 1 : 0}
-                          className="cursor-pointer transition-all duration-300"
-                          style={{
-                            filter: isSelected ? 'drop-shadow(0 5px 10px rgba(0, 0, 0, 0.25))' : undefined
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.fillOpacity = '1.0'
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.fillOpacity = isSelected ? '1.0' : '0.8'
-                          }}
-                          onClick={() => selectMood(currentSection.id, mood, index)}
-                        />
-                      )
-                    })}
-
-                    {/* Lottie animations positioned on segments */}
-                    {moods.map((mood, index) => {
-                      const segmentAngle = 72
-                      const angle = (index * segmentAngle) - 90
-                      const radius = 125
-                      const x = 200 + radius * Math.cos((angle * Math.PI) / 180)
-                      const y = 200 + radius * Math.sin((angle * Math.PI) / 180)
-
-                      return (
-                        <foreignObject
-                          key={`animation-${mood.level}`}
-                          x={x - 35}
-                          y={y - 35}
-                          width="70"
-                          height="70"
-                          className="cursor-pointer"
-                          onClick={() => selectMood(currentSection.id, mood, index)}
-                          transform={`rotate(${-rotationOffset} ${x} ${y})`}
-                        >
-                          <div style={{ width: '70px', height: '70px', pointerEvents: 'none' }}>
-                            <Lottie
-                              animationData={mood.animation}
-                              loop={true}
-                              autoplay={true}
-                              style={{
-                                width: '100%',
-                                height: '100%',
-                                filter: 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15))'
-                              }}
-                            />
-                          </div>
-                        </foreignObject>
-                      )
-                    })}
-                  </svg>
-                  </div>
-
-                  {/* Center text that doesn't rotate */}
+                  {/* Mood doughnut selector - fades out when mood is selected */}
                   <div
-                    className="absolute inset-0 flex items-center justify-center"
-                    style={{ pointerEvents: 'none' }}
+                    className="absolute inset-0 transition-all duration-500"
+                    style={{
+                      opacity: sections[currentSection.id]?.mood_level ? 0 : 1,
+                      transform: sections[currentSection.id]?.mood_level ? 'scale(0.8)' : 'scale(1)',
+                      pointerEvents: sections[currentSection.id]?.mood_level ? 'none' : 'auto',
+                      transitionDelay: sections[currentSection.id]?.mood_level ? '1s' : '0s'
+                    }}
                   >
-                    <div className="text-center">
-                      {sections[currentSection.id]?.mood_level ? (
-                        <span className="text-lg font-medium text-gray-800 capitalize">
-                          {sections[currentSection.id].mood_level.replace('_', ' ')}
-                        </span>
-                      ) : (
-                        <span className="text-base text-gray-500">
-                          Rate low to high
-                        </span>
-                      )}
+                    <div style={{ position: 'absolute', left: '50%', top: '50%', transform: `translate(-50%, -50%) rotate(${rotationOffset}deg)`, zIndex: 4, transition: 'transform 0.8s ease-in-out' }}>
+                    <svg width="400" height="400" style={{ overflow: 'visible' }}>
+                      {moods.map((mood, index) => {
+                        const isSelected = sections[currentSection.id]?.mood_level === mood.level
+                        const centerX = 200
+                        const centerY = 200
+                        const outerRadius = isSelected ? 170 : 165
+                        const innerRadius = isSelected ? 80 : 85
+                        const segmentAngle = 72 // 72 degrees per segment
+                        const startAngle = (index * segmentAngle) - 90 - (segmentAngle / 2)
+                        const endAngle = startAngle + segmentAngle
+
+                        const startAngleRad = (startAngle * Math.PI) / 180
+                        const endAngleRad = (endAngle * Math.PI) / 180
+
+                        // Calculate path points
+                        const x1 = centerX + outerRadius * Math.cos(startAngleRad)
+                        const y1 = centerY + outerRadius * Math.sin(startAngleRad)
+                        const x2 = centerX + outerRadius * Math.cos(endAngleRad)
+                        const y2 = centerY + outerRadius * Math.sin(endAngleRad)
+                        const x3 = centerX + innerRadius * Math.cos(endAngleRad)
+                        const y3 = centerY + innerRadius * Math.sin(endAngleRad)
+                        const x4 = centerX + innerRadius * Math.cos(startAngleRad)
+                        const y4 = centerY + innerRadius * Math.sin(startAngleRad)
+
+                        const pathData = [
+                          `M ${x1} ${y1}`,
+                          `A ${outerRadius} ${outerRadius} 0 0 1 ${x2} ${y2}`,
+                          `L ${x3} ${y3}`,
+                          `A ${innerRadius} ${innerRadius} 0 0 0 ${x4} ${y4}`,
+                          'Z'
+                        ].join(' ')
+
+                        return (
+                          <path
+                            key={mood.level}
+                            d={pathData}
+                            fill={mood.color}
+                            fillOpacity={isSelected ? 1.0 : 0.8}
+                            stroke={isSelected ? `${mood.color}AA` : 'none'}
+                            strokeWidth={isSelected ? 1 : 0}
+                            className="cursor-pointer transition-all duration-300"
+                            style={{
+                              filter: isSelected ? 'drop-shadow(0 5px 10px rgba(0, 0, 0, 0.25))' : undefined
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.fillOpacity = '1.0'
+                              setHoveredMood(mood.level)
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.fillOpacity = isSelected ? '1.0' : '0.8'
+                              setHoveredMood(null)
+                            }}
+                            onClick={() => selectMood(currentSection.id, mood, index)}
+                          />
+                        )
+                      })}
+
+                      {/* Lottie animations positioned on segments */}
+                      {moods.map((mood, index) => {
+                        const segmentAngle = 72
+                        const angle = (index * segmentAngle) - 90
+                        const radius = 125
+                        const x = 200 + radius * Math.cos((angle * Math.PI) / 180)
+                        const y = 200 + radius * Math.sin((angle * Math.PI) / 180)
+
+                        return (
+                          <foreignObject
+                            key={`animation-${mood.level}`}
+                            x={x - 35}
+                            y={y - 35}
+                            width="70"
+                            height="70"
+                            className="cursor-pointer"
+                            onClick={() => selectMood(currentSection.id, mood, index)}
+                            onMouseEnter={() => setHoveredMood(mood.level)}
+                            onMouseLeave={() => setHoveredMood(null)}
+                            transform={`rotate(${-rotationOffset} ${x} ${y})`}
+                          >
+                            <div style={{ width: '70px', height: '70px', pointerEvents: 'none' }}>
+                              <Lottie
+                                animationData={mood.animation}
+                                loop={true}
+                                autoplay={true}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  filter: 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15))'
+                                }}
+                              />
+                            </div>
+                          </foreignObject>
+                        )
+                      })}
+                    </svg>
+                    </div>
+
+                    {/* Center text that doesn't rotate */}
+                    <div
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{ pointerEvents: 'none' }}
+                    >
+                      <div className="text-center">
+                        {hoveredMood ? (
+                          <span className="text-lg font-medium text-gray-800 capitalize">
+                            {hoveredMood.replace('_', ' ')}
+                          </span>
+                        ) : sections[currentSection.id]?.mood_level ? (
+                          <span className="text-lg font-medium text-gray-800 capitalize">
+                            {sections[currentSection.id].mood_level.replace('_', ' ')}
+                          </span>
+                        ) : (
+                          <span className="text-base text-gray-500">
+                            Rate low to high
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
+
+                  {/* Text input - fades in when mood is selected */}
+                  {sections[currentSection.id]?.mood_level && (
+                    <div
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{
+                        opacity: 0,
+                        animation: 'fadeInDelayed 0.3s ease-in-out 1.8s forwards'
+                      }}
+                    >
+                      <div className="w-full max-w-sm">
+                        <h3 className="text-lg font-medium text-gray-800 mb-4 text-center">
+                          Why are you feeling {sections[currentSection.id]?.mood_level?.replace('_', ' ')}?
+                        </h3>
+                        <div className="relative">
+                          <textarea
+                            value={sections[currentSection.id]?.notes || ''}
+                            onChange={(e) => updateNotes(currentSection.id, e.target.value.slice(0, 500))}
+                            placeholder="Note down your thoughts (optional)"
+                            className="w-full pr-14 border rounded-lg h-32 resize-none"
+                            style={{ paddingTop: '3rem', paddingBottom: '3rem', paddingLeft: '0.75rem', paddingRight: '3.5rem', lineHeight: '1.5' }}
+                            maxLength={500}
+                          />
+                          <button
+                            onClick={() => handleMicrophoneClick(currentSection.id)}
+                            className={`absolute top-1/2 right-3 transform -translate-y-1/2 rounded-full transition-colors ${
+                              isListening ? 'bg-red-500 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                            }`}
+                            style={{
+                              width: '40px',
+                              height: '40px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                            title="Voice input"
+                            type="button"
+                          >
+                            {isListening ? (
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <rect x="6" y="4" width="12" height="16" rx="2"/>
+                              </svg>
+                            ) : (
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                                <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+                                <line x1="12" y1="19" x2="12" y2="23"/>
+                                <line x1="8" y1="23" x2="16" y2="23"/>
+                              </svg>
+                            )}
+                          </button>
+                        </div>
+
+                        <p className="text-xs text-gray-500 text-center mt-2">
+                          {(sections[currentSection.id]?.notes || '').length}/500 characters
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                 </div>
               </div>
-
-              {/* Text input below the doughnut when a mood is selected */}
-              {sections[currentSection.id]?.mood_level && (
-                <div className="max-w-2xl mx-auto">
-                    <div className="relative">
-                      <textarea
-                        value={sections[currentSection.id]?.notes || ''}
-                        onChange={(e) => updateNotes(currentSection.id, e.target.value.slice(0, 500))}
-                        placeholder="What's going well or could be better in this area?"
-                        className="w-full pr-14 border rounded-lg h-32 resize-none"
-                        style={{ paddingTop: '3rem', paddingBottom: '3rem', paddingLeft: '0.75rem', paddingRight: '3.5rem', lineHeight: '1.5' }}
-                        maxLength={500}
-                      />
-                      <button
-                        onClick={() => handleMicrophoneClick(currentSection.id)}
-                        className={`absolute top-1/2 right-3 transform -translate-y-1/2 rounded-full transition-colors ${
-                          isListening ? 'bg-red-500 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
-                        }`}
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                        title="Voice input"
-                        type="button"
-                      >
-                        {isListening ? (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <rect x="6" y="4" width="12" height="16" rx="2"/>
-                          </svg>
-                        ) : (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-                            <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-                            <line x1="12" y1="19" x2="12" y2="23"/>
-                            <line x1="8" y1="23" x2="16" y2="23"/>
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-
-                    <p className="text-xs text-gray-500 text-center mt-2">
-                      {(sections[currentSection.id]?.notes || '').length}/500 characters
-                    </p>
-
-                </div>
-              )}
             </div>
           )}
 

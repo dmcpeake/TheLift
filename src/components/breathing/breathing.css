@@ -234,6 +234,31 @@
   transition: stroke-dashoffset linear;
 }
 
+@media (max-width: 768px) {
+  .breathing-circle-container {
+    width: calc(100vw - 40px) !important;
+    height: calc(100vw - 40px) !important;
+    max-width: 360px !important;
+    max-height: 360px !important;
+  }
+  .breathing-outer-ring {
+    width: calc((100vw - 40px) * 0.90625) !important;
+    height: calc((100vw - 40px) * 0.90625) !important;
+    max-width: 326px !important;
+    max-height: 326px !important;
+  }
+  .breathing-circle {
+    width: 224px !important;
+    height: 224px !important;
+  }
+  .breathing-square-container {
+    width: calc(100vw - 40px) !important;
+    height: calc(100vw - 40px) !important;
+    max-width: 360px !important;
+    max-height: 360px !important;
+  }
+}
+
 .breathing-footer {
   position: fixed;
   bottom: 40px;

@@ -18,7 +18,7 @@ const steps = [
 const progressSegments = [
   { name: 'Mood meter', icon: Heart },
   { name: 'My emotions', icon: Smile },
-  { name: 'Wellbeing wheel', icon: Compass }
+  { name: 'Wellbeing', icon: Compass }
 ]
 
 export function CheckInFlow() {
@@ -162,7 +162,7 @@ export function CheckInFlow() {
       <>
         {/* Progress header */}
         <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', height: '80px', borderRadius: '0' }}>
-          <div className="mx-auto px-6" style={{ maxWidth: '600px', height: '80px', position: 'relative' }}>
+          <div className="mx-auto px-6" style={{ maxWidth: '300px', height: '80px', position: 'relative' }}>
 
             {/* Icons row - positioned at top */}
             <div className="grid grid-cols-3 gap-2 w-full" style={{ paddingTop: '10px' }}>
@@ -451,8 +451,7 @@ export function CheckInFlow() {
         
         {currentStep === 'wellbeing' && (
           <div className="bg-white min-h-screen" style={{ paddingTop: '140px' }}>
-            <div className="max-w-7xl mx-auto px-6 w-full">
-              <WellbeingWheel
+            <WellbeingWheel
                 onComplete={(data) => handleStepComplete('wellbeing', data)}
                 showNextButton={true}
                 onSelectionMade={handleStepSelectionMade}
@@ -460,7 +459,6 @@ export function CheckInFlow() {
                 triggerCompletion={triggerWellbeingCompletion}
                 initialData={completedData['wellbeing']}
               />
-            </div>
           </div>
         )}
 

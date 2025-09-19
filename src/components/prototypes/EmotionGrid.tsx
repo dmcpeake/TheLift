@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface EmotionData {
   selected_emotions: string[]
@@ -74,7 +73,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
   const scrollToSlide = (slideIndex: number) => {
     if (scrollContainerRef.current) {
-      const slideWidth = 320 // 280px category + 40px gap
+      const slideWidth = 350 // 290px category + 60px gap (20px margins on each side of divider + 20px divider)
       const scrollPosition = slideIndex * slideWidth
       scrollContainerRef.current.scrollTo({
         left: scrollPosition,
@@ -216,10 +215,22 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
   return (
     <>
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .emotion-title-mobile {
+            font-size: 28px !important;
+            line-height: 1.2 !important;
+            margin-top: -20px !important;
+          }
+        }
+      `}</style>
+
       {/* Centered title like breathing exercise */}
       <div className="text-center" style={{ marginBottom: '0.5rem' }}>
-        <h1 className="text-gray-900 mb-1" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>What emotions are you feeling?</h1>
-        <p className="text-gray-600 mb-4" style={{ fontSize: '14px', fontWeight: 'normal' }}>Select up to 3</p>
+        <h1 className="emotion-title-mobile text-gray-900 mb-1" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>What emotions are you feeling?</h1>
+        {currentStep === 1 && (
+          <p className="text-gray-600 mb-4" style={{ fontSize: '14px', fontWeight: 'normal' }}>Select up to 3</p>
+        )}
       </div>
 
       {/* Step 1: Select Emotions */}
@@ -239,25 +250,6 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               }
             `}</style>
 
-            {/* Left chevron */}
-            <button
-              onClick={handlePrevSlide}
-              className="slider-nav absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50"
-              disabled={currentSlide === 0}
-              style={{ opacity: currentSlide === 0 ? 0.5 : 1 }}
-            >
-              <ChevronLeft className="w-6 h-6 text-gray-600" />
-            </button>
-
-            {/* Right chevron */}
-            <button
-              onClick={handleNextSlide}
-              className="slider-nav absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50"
-              disabled={currentSlide === totalSlides - 1}
-              style={{ opacity: currentSlide === totalSlides - 1 ? 0.5 : 1 }}
-            >
-              <ChevronRight className="w-6 h-6 text-gray-600" />
-            </button>
 
             <div
               ref={scrollContainerRef}
@@ -270,7 +262,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               <div className="flex emotion-categories" style={{
                 paddingLeft: '20px',
                 paddingRight: '20px',
-                minWidth: '1240px'
+                minWidth: '1360px'
               }}>
               {Object.entries(emotions).flatMap(([category, categoryEmotions], index) => {
               // Define category colors
@@ -292,8 +284,8 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               // Group div
               elements.push(
                 <div key={`group-${index}`} className="flex-none space-y-3" style={{
-                  width: '280px',
-                  minWidth: '280px'
+                  width: '290px',
+                  minWidth: '290px'
                 }}>
                   <div className="text-center">
                     <h4 className="text-lg font-semibold text-gray-800">
@@ -302,9 +294,9 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                   </div>
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 80px)',
+                    gridTemplateColumns: 'repeat(3, 90px)',
                     gap: '10px',
-                    width: '260px'
+                    width: '290px'
                   }}>
                     {categoryEmotions.map((emotion) => (
                       <button
@@ -315,15 +307,28 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                         style={{
                           borderRadius: '4px',
                           backgroundColor: selectedEmotions.includes(emotion) ? 'white' : categoryColors.bg,
-                          border: selectedEmotions.includes(emotion) ? '2px solid #3a7ddc' : `1px solid ${categoryColors.border}`,
-                          boxShadow: selectedEmotions.includes(emotion) ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' : 'none',
-                          color: selectedEmotions.includes(emotion) ? '#3a7ddc' : '#6b7280',
-                          fontWeight: selectedEmotions.includes(emotion) ? '600' : '400',
+                          border: selectedEmotions.includes(emotion) ? 'none' : `1px solid ${categoryColors.border}`,
+                          boxShadow: selectedEmotions.includes(emotion)
+                            ? 'inset 0 0 0 2px #3a7ddc, 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                            : 'none',
+                          color: selectedEmotions.includes(emotion) ? '#3a7ddc' : '#1f2937',
+                          fontWeight: '600',
                           boxSizing: 'border-box'
                         }}
                       >
                         {/* Emoticon */}
-                        <div style={{ fontSize: '20px' }}>
+                        <div style={{
+                          width: '40px',
+                          height: '40px',
+                          backgroundColor: selectedEmotions.includes(emotion) ? 'rgba(58, 125, 220, 0.1)' : 'white',
+                          borderRadius: '50%',
+                          border: selectedEmotions.includes(emotion) ? 'none' : `1px solid ${categoryColors.border}`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '20px',
+                          boxSizing: 'border-box'
+                        }}>
                           {emotion.split(' ')[0]}
                         </div>
 
@@ -345,10 +350,10 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                 elements.push(
                   <div key={`line-${index}`} style={{
                     width: '1px',
-                    height: '260px',
+                    height: '270px',
                     borderLeft: '1px dashed #d1d5db',
                     flexShrink: 0,
-                    marginTop: '32px',
+                    marginTop: '37px',
                     marginLeft: '20px',
                     marginRight: '20px'
                   }} />
@@ -360,19 +365,6 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               </div>
             </div>
 
-            {/* Slider dots */}
-            <div className="slider-nav flex justify-center mt-4 gap-2">
-              {Array.from({ length: totalSlides }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => scrollToSlide(index)}
-                  className="w-2 h-2 rounded-full transition-colors"
-                  style={{
-                    backgroundColor: index === currentSlide ? '#3a7ddc' : '#cbd5e1'
-                  }}
-                />
-              ))}
-            </div>
           </div>
 
           {/* Data Captured for Step 1 */}
@@ -392,9 +384,6 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
         <div className="max-w-4xl mx-auto px-4" style={{ paddingBottom: '150px' }}>
           {/* Show selected emotions - tappable to edit */}
           <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-4 mb-6">
-              <h3 className="text-lg font-semibold">You selected:</h3>
-            </div>
             <div className="flex flex-wrap justify-center gap-2 mb-8">
               {selectedEmotions.map((emotion) => (
                 <button
@@ -411,12 +400,23 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                     boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
                     color: '#3a7ddc',
                     fontWeight: '600',
-                    minWidth: '80px',
-                    width: '80px'
+                    minWidth: '90px',
+                    width: '90px'
                   }}
                 >
                   {/* Emoticon */}
-                  <div style={{ fontSize: '20px' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    backgroundColor: 'rgba(58, 125, 220, 0.1)',
+                    borderRadius: '50%',
+                    border: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '20px',
+                    boxSizing: 'border-box'
+                  }}>
                     {emotion.split(' ')[0]}
                   </div>
 
@@ -489,19 +489,24 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               {['I\'m good', 'Parent', 'Teacher'].map((option) => (
                 <button
                   key={option}
-                  onClick={() => setDiscussionPreference(option)}
+                  onClick={() => setDiscussionPreference(discussionPreference === option ? '' : option)}
                   className="px-4 py-3 font-medium transition-all duration-200 flex items-center gap-2"
                   style={{
-                    backgroundColor: 'transparent',
+                    backgroundColor: discussionPreference === option ? 'white' : 'rgba(58, 125, 220, 0.1)',
                     color: '#3a7ddc',
                     border: 'none',
-                    borderRadius: '4px'
+                    borderRadius: '20px',
+                    boxShadow: discussionPreference === option
+                      ? 'inset 0 0 0 2px #3a7ddc, 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                      : 'none',
+                    boxSizing: 'border-box'
                   }}
                 >
                   <div
                     className="w-4 h-4 rounded-full border-2 flex items-center justify-center"
                     style={{
-                      borderColor: '#3a7ddc'
+                      borderColor: '#3a7ddc',
+                      backgroundColor: 'white'
                     }}
                   >
                     {discussionPreference === option && (

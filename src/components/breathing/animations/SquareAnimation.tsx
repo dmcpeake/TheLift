@@ -59,6 +59,7 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
   }, [phase])
 
   const squareSize = 280
+  const mobileSquareSize = 224 // 20% smaller for mobile
   const strokeWidth = 12
   
   // Get total duration for one complete cycle
@@ -87,33 +88,36 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
       zIndex: 10
     }}>
       <svg
+        className="breathing-square-svg"
         width="480"
         height="480"
         viewBox="0 0 480 480"
         style={{ position: 'absolute', zIndex: 15 }}
       >
         {/* Background white square - animated with breathing */}
-        <rect
-          x="100"
-          y="100"
-          width={squareSize}
-          height={squareSize}
-          rx="20"
-          fill="white"
-          stroke="none"
-          style={{
-            transformOrigin: '240px 240px',
-            transform: `scale(${currentScale})`,
-            animation: phase === 'intro' ? 'squareWaiting 4s ease-in-out infinite' : 'none',
-            transition: phase === 'intro' ? 'none' : `transform ${
-              phase === 'inhale' ? pace.in :
-              phase === 'hold' ? 0 :
-              phase === 'exhale' ? pace.out :
-              phase === 'holdAfter' ? 0 :
-              0.5
-            }s linear`
-          }}
-        />
+        <g className="breathing-square-inner">
+          <rect
+            x="100"
+            y="100"
+            width={squareSize}
+            height={squareSize}
+            rx="20"
+            fill="white"
+            stroke="none"
+            style={{
+              transformOrigin: '240px 240px',
+              transform: `scale(${currentScale})`,
+              animation: phase === 'intro' ? 'squareWaiting 4s ease-in-out infinite' : 'none',
+              transition: phase === 'intro' ? 'none' : `transform ${
+                phase === 'inhale' ? pace.in :
+                phase === 'hold' ? 0 :
+                phase === 'exhale' ? pace.out :
+                phase === 'holdAfter' ? 0 :
+                0.5
+              }s linear`
+            }}
+          />
+        </g>
 
         {/* Dotted outline square - white dashed */}
         <rect
@@ -153,6 +157,16 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
 
       {/* CSS Animation */}
       <style jsx>{`
+        @media (max-width: 768px) {
+          .breathing-square-svg {
+            width: 100% !important;
+            height: 100% !important;
+          }
+          .breathing-square-inner {
+            transform-origin: 240px 240px;
+            transform: scale(0.8);
+          }
+        }
         @keyframes traceSquare {
           to {
             stroke-dashoffset: 0;
