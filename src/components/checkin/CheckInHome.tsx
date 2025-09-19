@@ -117,7 +117,7 @@ export function CheckInHome() {
               display: none !important;
             }
             .logout-button {
-              top: 40px !important;
+              top: 20px !important;
               margin-top: 0 !important;
               transform: none !important;
             }
