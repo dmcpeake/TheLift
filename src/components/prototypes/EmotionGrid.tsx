@@ -216,9 +216,19 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
   return (
     <>
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .emotion-title-mobile {
+            font-size: 28px !important;
+            line-height: 1.2 !important;
+            margin-top: -20px !important;
+          }
+        }
+      `}</style>
+
       {/* Centered title like breathing exercise */}
       <div className="text-center" style={{ marginBottom: '0.5rem' }}>
-        <h1 className="text-gray-900 mb-1" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>What emotions are you feeling?</h1>
+        <h1 className="emotion-title-mobile text-gray-900 mb-1" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>What emotions are you feeling?</h1>
         {currentStep === 1 && (
           <p className="text-gray-600 mb-4" style={{ fontSize: '14px', fontWeight: 'normal' }}>Select up to 3</p>
         )}
