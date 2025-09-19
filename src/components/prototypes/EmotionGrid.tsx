@@ -245,6 +245,9 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                   justify-content: center !important;
                   min-width: auto !important;
                 }
+                .slider-nav {
+                  display: none !important;
+                }
               }
               @media (max-width: 768px) {
                 .slider-nav {
