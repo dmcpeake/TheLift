@@ -280,11 +280,11 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               // Define category colors
               const getCategoryColor = (category: string) => {
                 switch (category) {
-                  case 'Upset': return { bg: 'rgba(254, 243, 226, 0.9)', border: 'rgba(254, 243, 226, 0.36)' } // Orange tint
-                  case 'Down': return { bg: 'rgba(230, 242, 255, 0.9)', border: 'rgba(230, 242, 255, 0.36)' } // Blue tint
-                  case 'Joyful': return { bg: 'rgba(255, 251, 235, 0.9)', border: 'rgba(255, 251, 235, 0.36)' } // Yellow tint
-                  case 'Cool': return { bg: 'rgba(240, 253, 244, 0.9)', border: 'rgba(240, 253, 244, 0.36)' } // Green tint
-                  default: return { bg: '#f3f4f6', border: 'rgba(243, 244, 246, 0.36)' }
+                  case 'Upset': return { bg: 'rgba(254, 243, 226, 1.0)', border: 'rgba(251, 191, 36, 0.4)' } // Orange - stronger border
+                  case 'Down': return { bg: 'rgba(230, 242, 255, 1.0)', border: 'rgba(59, 130, 246, 0.4)' } // Blue - stronger border
+                  case 'Joyful': return { bg: 'rgba(255, 251, 235, 1.0)', border: 'rgba(245, 158, 11, 0.4)' } // Yellow - stronger border
+                  case 'Cool': return { bg: 'rgba(240, 253, 244, 1.0)', border: 'rgba(34, 197, 94, 0.4)' } // Green - stronger border
+                  default: return { bg: '#f3f4f6', border: 'rgba(156, 163, 175, 0.4)' }
                 }
               }
 
