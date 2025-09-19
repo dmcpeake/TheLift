@@ -202,8 +202,8 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
             <h3 className="text-lg font-semibold mb-2">Select up to 3</h3>
           </div>
 
-          <div className="flex gap-8 mb-6 overflow-x-auto pb-4 px-4" style={{ scrollSnapType: 'x mandatory' }}>
-            {Object.entries(emotions).map(([category, categoryEmotions]) => {
+          <div className="flex gap-8 mb-6 overflow-x-auto pb-4" style={{ scrollSnapType: 'x mandatory' }}>
+            {Object.entries(emotions).map(([category, categoryEmotions], index) => {
               // Define category colors
               const getCategoryColor = (category: string) => {
                 switch (category) {
@@ -215,8 +215,17 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                 }
               }
 
+              const isFirst = index === 0
+              const isLast = index === Object.entries(emotions).length - 1
+
               return (
-                <div key={category} className="flex-none space-y-3" style={{ scrollSnapAlign: 'start', width: '85vw', minWidth: '320px' }}>
+                <div key={category} className="flex-none space-y-3" style={{
+                  scrollSnapAlign: 'start',
+                  width: '85vw',
+                  minWidth: '320px',
+                  paddingLeft: isFirst ? '1rem' : '0',
+                  paddingRight: isLast ? '1rem' : '0'
+                }}>
                   <div className="text-center">
                     <h4 className="text-lg font-semibold text-gray-800">
                       {category}
