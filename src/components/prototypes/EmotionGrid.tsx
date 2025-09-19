@@ -297,9 +297,6 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                     <h4 className="text-lg font-semibold text-gray-800">
                       {category}
                     </h4>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {categorySubtexts[category as keyof typeof categorySubtexts]}
-                    </p>
                   </div>
                   <div style={{
                     display: 'grid',
