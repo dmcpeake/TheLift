@@ -341,12 +341,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
               // Add separators if not last group
               if (!isLast) {
-                // 20px gap div
-                elements.push(
-                  <div key={`gap-${index}`} style={{ width: '20px', flexShrink: 0 }} />
-                )
-
-                // 1px dashed line div
+                // 1px dashed line div with 20px margins on both sides
                 elements.push(
                   <div key={`line-${index}`} style={{
                     width: '1px',
