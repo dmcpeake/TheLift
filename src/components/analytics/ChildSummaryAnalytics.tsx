@@ -431,7 +431,7 @@ export function ChildSummaryAnalytics() {
         }
 
         // Parse the AI response into structured insights
-        const analysis = data.analysis || ''
+        const analysis = cleanupText(data.analysis || '')
 
         // Debug: Log the raw AI response
         console.log('Raw AI analysis response:', analysis.substring(0, 500) + '...')
@@ -470,6 +470,36 @@ export function ChildSummaryAnalytics() {
     }
   }
 
+  // Helper function to clean up text with underscores
+  const cleanupText = (text: string): string => {
+    // Replace common patterns with underscores with proper text
+    return text
+      .replace(/declining_pattern/gi, 'declining pattern')
+      .replace(/improving_pattern/gi, 'improving pattern')
+      .replace(/stable_pattern/gi, 'stable pattern')
+      .replace(/concerning_pattern/gi, 'concerning pattern')
+      .replace(/positive_pattern/gi, 'positive pattern')
+      .replace(/mood_trend/gi, 'mood trend')
+      .replace(/emotional_state/gi, 'emotional state')
+      .replace(/wellbeing_score/gi, 'wellbeing score')
+      .replace(/check_in/gi, 'check-in')
+      .replace(/follow_up/gi, 'follow-up')
+      .replace(/self_esteem/gi, 'self-esteem')
+      .replace(/peer_relationships/gi, 'peer relationships')
+      .replace(/family_dynamics/gi, 'family dynamics')
+      .replace(/school_performance/gi, 'school performance')
+      .replace(/behavioral_changes/gi, 'behavioral changes')
+      .replace(/risk_factors/gi, 'risk factors')
+      .replace(/protective_factors/gi, 'protective factors')
+      .replace(/mental_health/gi, 'mental health')
+      .replace(/emotional_regulation/gi, 'emotional regulation')
+      .replace(/coping_strategies/gi, 'coping strategies')
+      .replace(/support_system/gi, 'support system')
+      .replace(/warning_signs/gi, 'warning signs')
+      // Generic pattern: replace any remaining word_word patterns
+      .replace(/(\w+)_(\w+)/g, '$1 $2')
+  }
+
   const extractSection = (text: string, section: string): string => {
     // Match **SECTION** followed by content until the next ** section or end
     const pattern = new RegExp(`\\*\\*${section}\\*\\*\\s*\\n([^\\*]+?)(?=\\n\\*\\*|$)`, 'si')
@@ -478,7 +508,8 @@ export function ChildSummaryAnalytics() {
     if (match && match[1]) {
       // Get the first 2-3 sentences for the summary
       const sentences = match[1].trim().split(/[.!?]/).filter(s => s.trim())
-      return sentences.slice(0, 3).join('. ').trim() + (sentences.length > 0 ? '.' : '')
+      const result = sentences.slice(0, 3).join('. ').trim() + (sentences.length > 0 ? '.' : '')
+      return cleanupText(result)
     }
 
     return ''
@@ -519,17 +550,17 @@ export function ChildSummaryAnalytics() {
       if (/^[-•*]\s+/.test(trimmedLine)) {
         // Bullet point
         const content = trimmedLine.replace(/^[-•*]\s+/, '').trim()
-        if (content) bullets.push(content)
+        if (content) bullets.push(cleanupText(content))
       } else if (/^\d+\.\s+/.test(trimmedLine)) {
         // Numbered item
         const content = trimmedLine.replace(/^\d+\.\s+/, '').trim()
-        if (content) bullets.push(content)
+        if (content) bullets.push(cleanupText(content))
       } else if (/^(HIGH|MODERATE|LOW)\s+PRIORITY:/i.test(trimmedLine)) {
         // Priority items from IMMEDIATE ACTION section
-        bullets.push(trimmedLine)
+        bullets.push(cleanupText(trimmedLine))
       } else if (trimmedLine && bullets.length > 0 && !trimmedLine.includes(':') && !trimmedLine.startsWith('**')) {
         // Continuation of previous bullet (indented or wrapped text)
-        bullets[bullets.length - 1] += ' ' + trimmedLine
+        bullets[bullets.length - 1] += ' ' + cleanupText(trimmedLine)
       }
     }
 
@@ -547,7 +578,7 @@ export function ChildSummaryAnalytics() {
       for (const sentence of sentences.slice(0, 4)) {
         const cleaned = sentence.trim()
         if (cleaned && cleaned.length > 10) {
-          bullets.push(cleaned)
+          bullets.push(cleanupText(cleaned))
         }
       }
     }
