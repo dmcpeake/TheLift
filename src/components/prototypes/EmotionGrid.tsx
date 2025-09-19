@@ -340,24 +340,14 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                   {/* Divider line between groups */}
                   {!isLast && (
                     <div
-                      className="flex-none"
                       style={{
                         width: '1px',
                         height: '200px',
+                        borderLeft: '1px dashed #d1d5db',
                         marginLeft: '20px',
-                        marginRight: '20px',
-                        position: 'relative'
+                        marginRight: '20px'
                       }}
-                    >
-                      <div
-                        style={{
-                          width: '1px',
-                          height: '100%',
-                          borderLeft: '1px dashed #d1d5db',
-                          borderImageSource: 'repeating-linear-gradient(to bottom, #d1d5db 0, #d1d5db 4px, transparent 4px, transparent 8px)'
-                        }}
-                      />
-                    </div>
+                    />
                   )}
                 </div>
               )
