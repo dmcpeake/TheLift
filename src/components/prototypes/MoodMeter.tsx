@@ -27,6 +27,7 @@ interface MoodMeterProps {
 
 export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade, onSelectionRemoved, hideDebugInfo = false, triggerCompletion = false, initialData }: MoodMeterProps = {}) {
   const [selectedMood, setSelectedMood] = useState<MoodData | null>(null)
+  const [hoveredMood, setHoveredMood] = useState<string | null>(null)
   const [startTime] = useState(Date.now())
   const [rotationOffset, setRotationOffset] = useState(0)
 
@@ -167,9 +168,11 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.fillOpacity = '1.0'
+                          setHoveredMood(mood.level)
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.fillOpacity = isSelected ? '1.0' : '0.8'
+                          setHoveredMood(null)
                         }}
                         onClick={() => handleMoodSelect(mood, index)}
                       />
@@ -194,6 +197,8 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
                         height="70"
                         className="cursor-pointer"
                         onClick={() => handleMoodSelect(mood, index)}
+                        onMouseEnter={() => setHoveredMood(mood.level)}
+                        onMouseLeave={() => setHoveredMood(null)}
                         transform={`rotate(${-rotationOffset} ${x} ${y})`}
                       >
                         <div style={{ width: '70px', height: '70px', pointerEvents: 'none' }}>
@@ -224,9 +229,13 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
                     <span className="text-lg font-medium text-gray-800 capitalize">
                       {selectedMood.mood_level.replace('_', ' ')}
                     </span>
+                  ) : hoveredMood ? (
+                    <span className="text-lg font-medium text-gray-700 capitalize">
+                      {hoveredMood.replace('_', ' ')}
+                    </span>
                   ) : (
                     <span className="text-base text-gray-500">
-                      Choose a mood
+                      Choose your mood
                     </span>
                   )}
                 </div>
