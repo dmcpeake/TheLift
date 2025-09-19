@@ -238,7 +238,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
       {/* Step 1: Select Emotions */}
       {currentStep === 1 && (
-        <div style={{ paddingBottom: '150px' }}>
+        <div>
 
           <div className="relative">
             <style>{`
@@ -421,7 +421,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
       {/* Step 2: Selected Emotions Review + Form */}
       {currentStep === 2 && selectedEmotions.length > 0 && (
-        <div className="max-w-4xl mx-auto px-4" style={{ paddingBottom: '150px' }}>
+        <div className="max-w-4xl mx-auto px-4">
           {/* Show selected emotions - tappable to edit */}
           <div className="text-center mb-8">
             <div className="flex flex-wrap justify-center gap-2 mb-8">
@@ -633,7 +633,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
       {/* Step 4: Show Data */}
       {currentStep === 4 && (
-        <div className="max-w-4xl mx-auto px-4 text-center" style={{ paddingBottom: '150px' }}>
+        <div className="max-w-4xl mx-auto px-4 text-center">
           <h3 className="text-lg font-semibold mb-2">✅ Complete!</h3>
 
           {!hideDebugInfo && finalData && (
