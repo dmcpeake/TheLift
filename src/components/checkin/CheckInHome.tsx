@@ -94,11 +94,11 @@ export function CheckInHome() {
               display: none !important;
             }
             .welcome-content-mobile {
-              display: flex !important;
-              align-items: center !important;
-              justify-content: center !important;
-              min-height: 100vh !important;
-              padding-top: 0 !important;
+              display: block !important;
+              align-items: flex-start !important;
+              justify-content: flex-start !important;
+              min-height: auto !important;
+              padding-top: 120px !important;
             }
             .mobile-start-button {
               position: fixed !important;
@@ -256,14 +256,15 @@ export function CheckInHome() {
       {!showBreathing && (
         <button
         onClick={() => navigate('/')}
-        className="fixed w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#1066c2] transition-colors shadow-lg z-50"
+        className="fixed w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors z-50 shadow-lg"
         style={{
-          backgroundColor: '#147fe3',
+          backgroundColor: 'white',
+          border: '1px solid #147fe3',
           top: '40px',
           right: '16px'
         }}
       >
-        <LogOut className="h-5 w-5 text-white" />
+        <LogOut className="h-6 w-6" style={{ color: '#147fe3' }} />
         </button>
       )}
 
@@ -552,7 +553,7 @@ export function CheckInHome() {
           <div
             style={{
               position: 'absolute',
-              bottom: '140px',
+              bottom: '120px',
               left: '50%',
               transform: 'translateX(-50%)',
               width: '300px',
