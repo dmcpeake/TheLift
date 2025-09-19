@@ -14,7 +14,7 @@ export function YellowSwoosh({ zIndex = 999, children }: YellowSwooshProps) {
       bottom: 0,
       left: 0,
       right: 0,
-      height: '100px',
+      height: '120px',
       backgroundColor: '#f7d145',
       zIndex
     }}>
