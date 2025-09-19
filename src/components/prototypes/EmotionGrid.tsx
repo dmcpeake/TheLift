@@ -313,10 +313,11 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                         style={{
                           borderRadius: '4px',
                           backgroundColor: selectedEmotions.includes(emotion) ? 'white' : getCategoryColor(category),
-                          border: selectedEmotions.includes(emotion) ? '2px solid #3a7ddc' : 'none',
-                          boxShadow: selectedEmotions.includes(emotion) ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' : 'none',
+                          border: selectedEmotions.includes(emotion) ? '2px solid #3a7ddc' : '2px solid transparent',
+                          boxShadow: selectedEmotions.includes(emotion) ? 'inset 0 0 0 2px #3a7ddc, 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' : 'none',
                           color: selectedEmotions.includes(emotion) ? '#3a7ddc' : '#6b7280',
-                          fontWeight: selectedEmotions.includes(emotion) ? '600' : '400'
+                          fontWeight: selectedEmotions.includes(emotion) ? '600' : '400',
+                          boxSizing: 'border-box'
                         }}
                       >
                         {/* Emoticon */}
