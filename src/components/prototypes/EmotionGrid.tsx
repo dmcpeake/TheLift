@@ -272,7 +272,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                 paddingRight: '20px',
                 minWidth: '1240px'
               }}>
-              {Object.entries(emotions).map(([category, categoryEmotions], index) => {
+              {Object.entries(emotions).flatMap(([category, categoryEmotions], index) => {
               // Define category colors
               const getCategoryColor = (category: string) => {
                 switch (category) {
@@ -287,15 +287,14 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               const categoryColors = getCategoryColor(category)
               const isLast = index === Object.entries(emotions).length - 1
 
-              return (
-                <React.Fragment key={category}>
-                  {/* Add 20px gap before each group (except first) */}
-                  {index > 0 && <div style={{ width: '20px' }} />}
+              const elements = []
 
-                  <div className="flex-none space-y-3" style={{
-                    width: '280px',
-                    minWidth: '280px'
-                  }}>
+              // Group div
+              elements.push(
+                <div key={`group-${index}`} className="flex-none space-y-3" style={{
+                  width: '280px',
+                  minWidth: '280px'
+                }}>
                   <div className="text-center">
                     <h4 className="text-lg font-semibold text-gray-800">
                       {category}
@@ -337,10 +336,34 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                       </button>
                     ))}
                   </div>
-                  </div>
-
-                </React.Fragment>
+                </div>
               )
+
+              // Add separators if not last group
+              if (!isLast) {
+                // 20px gap div
+                elements.push(
+                  <div key={`gap1-${index}`} style={{ width: '20px', flexShrink: 0 }} />
+                )
+
+                // 1px dashed line div
+                elements.push(
+                  <div key={`line-${index}`} style={{
+                    width: '1px',
+                    height: '260px',
+                    borderLeft: '1px dashed #d1d5db',
+                    flexShrink: 0,
+                    marginTop: '32px'
+                  }} />
+                )
+
+                // 20px gap div
+                elements.push(
+                  <div key={`gap2-${index}`} style={{ width: '20px', flexShrink: 0 }} />
+                )
+              }
+
+              return elements
             })}
               </div>
             </div>
