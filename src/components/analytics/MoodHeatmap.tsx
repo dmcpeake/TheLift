@@ -126,13 +126,13 @@ export function MoodHeatmap({ moodData, MOOD_EMOJIS }: MoodHeatmapProps) {
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-2 gap-4">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
         {months.map((month, monthIdx) => (
           <div key={monthIdx} className="bg-white p-3 rounded-lg border border-gray-200">
             <h5 className="font-medium text-sm mb-2 text-gray-700">{month.name} {month.year}</h5>
 
             {/* Day headers */}
-            <div className="grid grid-cols-7 gap-1 text-xs text-gray-500 mb-1">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.25rem', fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
               <div>S</div>
               <div>M</div>
               <div>T</div>
@@ -143,7 +143,7 @@ export function MoodHeatmap({ moodData, MOOD_EMOJIS }: MoodHeatmapProps) {
             </div>
 
             {/* Days grid */}
-            <div className="grid grid-cols-7 gap-1">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.25rem' }}>
               {/* Empty cells for days before month starts */}
               {Array.from({ length: month.startDay }).map((_, i) => (
                 <div key={`empty-${i}`} className="aspect-square"></div>
