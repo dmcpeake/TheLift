@@ -241,56 +241,73 @@ export function ChildSummaryAnalytics() {
 
     console.log(`Loading check-in history for child: ${childId}`)
 
-    // Fetch BOTH mood meter data AND emotion grid data
-    const [moodResponse, emotionResponse] = await Promise.all([
+    // Fetch check-in sessions with notes from various tools
+    const [sessionsResponse, moodResponse] = await Promise.all([
+      // Get recent check-in sessions
+      supabase
+        .from('checkin_sessions')
+        .select('*')
+        .eq('child_id', childId)
+        .order('started_at', { ascending: false })
+        .limit(5),
+
       // Get mood meter data for the heatmap
       supabase
         .from('mood_meter_usage')
         .select('*')
         .eq('child_id', childId)
         .order('selected_at', { ascending: false })
-        .limit(30), // Get more for heatmap visualization
-
-      // Get emotion grid usage for qualitative check-ins
-      // Simplified query without nested joins to avoid 400 error
-      supabase
-        .from('emotion_grid_usage')
-        .select('*')
-        .eq('child_id', childId)
-        .order('created_at', { ascending: false })
-        .limit(10)
+        .limit(30)
     ])
 
+    const { data: sessionsData, error: sessionsError } = sessionsResponse
     const { data: moodData, error: moodError } = moodResponse
-    const { data: emotionData, error: emotionError } = emotionResponse
 
-    console.log(`Mood data query result for ${childId}:`, {
-      moodDataCount: moodData?.length || 0,
-      moodError: moodError
-    })
+    // For each session, fetch associated tool notes
+    const checkIns: CheckIn[] = []
 
-    console.log(`Emotion grid data query result for ${childId}:`, {
-      emotionDataCount: emotionData?.length || 0,
-      emotionError: emotionError,
-      sampleData: emotionData?.slice(0, 3)?.map(e => ({
-        id: e.id,
-        created_at: e.created_at,
-        explanation: e.explanation_text?.substring(0, 50) + '...'
-      }))
-    })
+    if (sessionsData) {
+      for (const session of sessionsData) {
+        // Fetch all tool usage data for this session
+        const [moodUsage, emotionUsage, wellbeingUsage] = await Promise.all([
+          supabase
+            .from('mood_meter_usage')
+            .select('mood_level, mood_numeric, notes')
+            .eq('session_id', session.id)
+            .single(),
 
-    // Convert emotion grid data to check-ins (without feelings for now due to join issue)
-    const checkIns: CheckIn[] = emotionData?.map(emotion => ({
-      id: emotion.id,
-      created_at: emotion.created_at,
-      mood_numeric: undefined, // Emotion grid doesn't have numeric mood
-      mood_level: undefined,
-      notes: emotion.explanation_text,
-      feelings: [], // Will need separate query for feelings
-      explanation: emotion.explanation_text
-    })) || []
+          supabase
+            .from('emotion_grid_usage')
+            .select('explanation_text')
+            .eq('session_id', session.id)
+            .single(),
 
-    console.log(`Processed ${checkIns.length} check-ins for display`)
+          supabase
+            .from('wellbeing_wheel_usage')
+            .select('overall_score')
+            .eq('session_id', session.id)
+            .single()
+        ])
+
+        // Combine all notes and information
+        const notes = []
+        if (moodUsage.data?.notes) notes.push(`Mood: ${moodUsage.data.notes}`)
+        if (emotionUsage.data?.explanation_text) notes.push(`Feelings: ${emotionUsage.data.explanation_text}`)
+        if (wellbeingUsage.data?.overall_score) notes.push(`Wellbeing score: ${wellbeingUsage.data.overall_score}`)
+
+        checkIns.push({
+          id: session.id,
+          created_at: session.started_at, // Use started_at instead of created_at
+          mood_numeric: moodUsage.data?.mood_numeric,
+          mood_level: moodUsage.data?.mood_level,
+          notes: notes.join(' | ') || 'No notes available',
+          feelings: [],
+          explanation: emotionUsage.data?.explanation_text
+        })
+      }
+    }
+
+    console.log(`Processed ${checkIns.length} check-ins with notes`)
 
     // Store mood data separately for heatmap
     const moodHistory = moodData || []
@@ -674,6 +691,18 @@ export function ChildSummaryAnalytics() {
                                           })}
                                         </span>
                                       </div>
+
+                                      {checkIn.mood_level && (
+                                        <div className="flex items-center space-x-2 mb-2">
+                                          <span className="text-sm font-medium text-gray-600">Mood:</span>
+                                          <span className="px-2 py-1 text-xs rounded-full" style={{
+                                            backgroundColor: MOOD_COLORS[checkIn.mood_numeric || 3] + '20',
+                                            color: MOOD_COLORS[checkIn.mood_numeric || 3]
+                                          }}>
+                                            {MOOD_EMOJIS[checkIn.mood_numeric || 3]} {checkIn.mood_level}
+                                          </span>
+                                        </div>
+                                      )}
 
                                       {checkIn.feelings && checkIn.feelings.length > 0 && (
                                         <div className="flex flex-wrap gap-1 mb-2">
