@@ -91,27 +91,21 @@ export function CheckInHome() {
           }
           @media (max-width: 768px) {
             .cards-container {
-              display: flex;
-              overflow-x: auto;
-              scroll-snap-type: x mandatory;
-              -webkit-overflow-scrolling: touch;
-              padding-left: 1rem;
-              padding-right: 1rem;
-              gap: 0.75rem;
-            }
-            .cards-container::-webkit-scrollbar {
-              display: none;
-            }
-            .card-item {
-              flex: 0 0 200px;
-              scroll-snap-align: start;
+              display: none !important;
             }
             .welcome-content-mobile {
-              display: block !important;
-              align-items: flex-start !important;
-              justify-content: flex-start !important;
-              min-height: auto !important;
-              padding-top: 160px !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              min-height: 100vh !important;
+              padding-top: 0 !important;
+            }
+            .mobile-start-button {
+              position: fixed !important;
+              bottom: 40px !important;
+              left: 50% !important;
+              transform: translateX(-50%) !important;
+              z-index: 1000 !important;
             }
           }
         `}</style>
@@ -356,12 +350,12 @@ export function CheckInHome() {
                 Ready for your check in?
               </h1>
               <p className="text-lg text-gray-600 max-w-lg mx-auto">
-                Take a few minutes to explore how you're feeling today.
+                Take a moment to explore how you're feeling.
               </p>
             </div>
 
             {/* Start Button */}
-            <div className="flex justify-center">
+            <div className="flex justify-center mobile-start-button">
               <button
                 onClick={handleStartClick}
                 className="font-semibold text-lg transition-all duration-200"
