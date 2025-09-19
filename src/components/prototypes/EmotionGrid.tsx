@@ -202,8 +202,9 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
             <h3 className="text-lg font-semibold mb-2">Select up to 3</h3>
           </div>
 
-          <div className="flex mb-6 overflow-x-auto pb-4 justify-center" style={{ scrollSnapType: 'x mandatory', gap: '40px' }}>
-            {Object.entries(emotions).map(([category, categoryEmotions], index) => {
+          <div className="overflow-x-auto pb-4">
+            <div className="flex" style={{ gap: '40px', minWidth: 'fit-content', paddingLeft: '20px', paddingRight: '20px' }}>
+              {Object.entries(emotions).map(([category, categoryEmotions], index) => {
               // Define category colors
               const getCategoryColor = (category: string) => {
                 switch (category) {
@@ -215,15 +216,10 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                 }
               }
 
-              const isFirst = index === 0
-              const isLast = index === Object.entries(emotions).length - 1
-
               return (
                 <div key={category} className="flex-none space-y-3" style={{
-                  scrollSnapAlign: 'start',
-                  width: '240px',
-                  paddingLeft: isFirst ? '1rem' : '0',
-                  paddingRight: isLast ? '1rem' : '0'
+                  width: '280px',
+                  minWidth: '280px'
                 }}>
                   <div className="text-center">
                     <h4 className="text-lg font-semibold text-gray-800">
@@ -247,6 +243,8 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                           boxShadow: selectedEmotions.includes(emotion) ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' : 'none',
                           color: selectedEmotions.includes(emotion) ? '#3a7ddc' : '#6b7280',
                           fontWeight: selectedEmotions.includes(emotion) ? '600' : '400',
+                          width: '100px',
+                          minWidth: '100px',
                           maxWidth: '100px'
                         }}
                       >
@@ -267,6 +265,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                 </div>
               )
             })}
+            </div>
           </div>
 
           {/* Data Captured for Step 1 */}
