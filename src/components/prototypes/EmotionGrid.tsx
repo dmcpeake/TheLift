@@ -300,7 +300,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                   </div>
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 90px)',
+                    gridTemplateColumns: 'repeat(3, 80px)',
                     gap: '10px',
                     width: '100%'
                   }}>
