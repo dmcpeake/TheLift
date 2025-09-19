@@ -104,8 +104,7 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
             max-height: 326px !important;
           }
           .mood-meter-doughnut {
-            transform: scale(0.8) !important;
-            transform-origin: 50% 50% !important;
+            padding: 40px !important;
           }
         }
       `}</style>
