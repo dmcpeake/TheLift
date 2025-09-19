@@ -221,7 +221,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               return (
                 <div key={category} className="flex-none space-y-3" style={{
                   scrollSnapAlign: 'start',
-                  width: '300px',
+                  width: '240px',
                   paddingLeft: isFirst ? '1rem' : '0',
                   paddingRight: isLast ? '1rem' : '0'
                 }}>
