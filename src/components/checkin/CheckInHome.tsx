@@ -113,6 +113,9 @@ export function CheckInHome() {
             .theo-animation {
               bottom: 120px !important;
             }
+            .logout-button {
+              top: 40px !important;
+            }
           }
         `}</style>
         <div className="max-w-7xl mx-auto md:px-6">
@@ -262,7 +265,7 @@ export function CheckInHome() {
       {!showBreathing && (
         <button
         onClick={() => navigate('/')}
-        className="fixed w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors z-50 shadow-lg"
+        className="logout-button fixed w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors z-50 shadow-lg"
         style={{
           backgroundColor: 'white',
           border: '1px solid #147fe3',
