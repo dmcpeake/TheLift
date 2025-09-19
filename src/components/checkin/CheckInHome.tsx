@@ -98,7 +98,7 @@ export function CheckInHome() {
               align-items: flex-start !important;
               justify-content: flex-start !important;
               min-height: auto !important;
-              padding-top: 300px !important;
+              padding-top: 160px !important;
             }
             .welcome-content-mobile .max-w-2xl {
               margin-top: 0 !important;
