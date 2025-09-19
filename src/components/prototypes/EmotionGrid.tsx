@@ -343,7 +343,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               if (!isLast) {
                 // 20px gap div
                 elements.push(
-                  <div key={`gap1-${index}`} style={{ width: '20px', flexShrink: 0 }} />
+                  <div key={`gap-${index}`} style={{ width: '20px', flexShrink: 0 }} />
                 )
 
                 // 1px dashed line div
@@ -353,13 +353,10 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                     height: '260px',
                     borderLeft: '1px dashed #d1d5db',
                     flexShrink: 0,
-                    marginTop: '32px'
+                    marginTop: '32px',
+                    marginLeft: '20px',
+                    marginRight: '20px'
                   }} />
-                )
-
-                // 20px gap div
-                elements.push(
-                  <div key={`gap2-${index}`} style={{ width: '20px', flexShrink: 0 }} />
                 )
               }
 
