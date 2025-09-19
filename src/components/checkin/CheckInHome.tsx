@@ -256,15 +256,14 @@ export function CheckInHome() {
       {!showBreathing && (
         <button
         onClick={() => navigate('/')}
-        className="fixed w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors z-50 shadow-lg"
+        className="fixed w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#1066c2] transition-colors shadow-lg z-50"
         style={{
-          backgroundColor: 'white',
-          border: '1px solid #147fe3',
+          backgroundColor: '#147fe3',
           top: '40px',
-          right: '40px'
+          right: '16px'
         }}
       >
-        <LogOut className="h-6 w-6" style={{ color: '#147fe3' }} />
+        <LogOut className="h-5 w-5 text-white" />
         </button>
       )}
 
@@ -553,7 +552,7 @@ export function CheckInHome() {
           <div
             style={{
               position: 'absolute',
-              bottom: '20px',
+              bottom: '140px',
               left: '50%',
               transform: 'translateX(-50%)',
               width: '300px',
