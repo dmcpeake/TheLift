@@ -304,7 +304,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                     display: 'grid',
                     gridTemplateColumns: 'repeat(3, 80px)',
                     gap: '10px',
-                    width: '100%'
+                    width: '260px'
                   }}>
                     {categoryEmotions.map((emotion) => (
                       <button
