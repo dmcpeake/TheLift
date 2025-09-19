@@ -100,6 +100,9 @@ export function CheckInHome() {
               min-height: auto !important;
               padding-top: 160px !important;
             }
+            .welcome-content-mobile > div {
+              padding-top: 0 !important;
+            }
             .welcome-content-mobile .max-w-2xl {
               margin-top: 0 !important;
             }
@@ -126,6 +129,10 @@ export function CheckInHome() {
             .logout-button .logout-icon {
               width: 1.25rem !important;
               height: 1.25rem !important;
+            }
+            .breathing-title-checkin-mobile {
+              font-size: 28px !important;
+              margin-top: 30px !important;
             }
           }
         `}</style>
@@ -359,7 +366,7 @@ export function CheckInHome() {
           className="welcome-content-mobile flex items-start justify-center p-4 transition-opacity duration-300"
           style={{
             minHeight: 'auto',
-            paddingTop: window.innerWidth <= 768 ? '160px' : '180px',
+            paddingTop: '180px',
             opacity: isTransitioning ? 0 : 1
           }}
         >
@@ -402,19 +409,9 @@ export function CheckInHome() {
 
       {/* Title header for breathing */}
       {showBreathing && (
-        <>
-          <style jsx>{`
-            @media (max-width: 768px) {
-              .breathing-title-checkin-mobile {
-                font-size: 28px !important;
-                margin-top: 30px !important;
-              }
-            }
-          `}</style>
-          <div className="text-center" style={{ position: 'fixed', top: '90px', left: 0, right: 0, zIndex: 40 }}>
-            <h1 className="breathing-title-checkin-mobile text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em', marginTop: '50px' }}>Let's breathe!</h1>
-          </div>
-        </>
+        <div className="text-center" style={{ position: 'fixed', top: '90px', left: 0, right: 0, zIndex: 40 }}>
+          <h1 className="breathing-title-checkin-mobile text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em', marginTop: '50px' }}>Let's breathe!</h1>
+        </div>
       )}
 
       {/* Breathing Exercise */}
