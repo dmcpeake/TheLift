@@ -346,9 +346,9 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                       <div
                         style={{
                           width: '1px',
-                          height: '300px',
+                          height: '240px', // Height of 3 rows of cards (3 * 80px)
                           borderLeft: '1px dashed #d1d5db',
-                          alignSelf: 'stretch'
+                          marginTop: '40px' // Align with start of card grid
                         }}
                       />
                     </>
