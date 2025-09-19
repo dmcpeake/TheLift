@@ -399,7 +399,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
       </div>
 
       {!finalData ? (
-        <div style={{ paddingBottom: '150px' }}>
+        <div>
           {/* Topic navigation cards */}
           <div className="relative">
             <style>{`
