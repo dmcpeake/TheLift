@@ -55,10 +55,10 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
   }, [triggerCompletion])
 
   const emotions = {
-    'High Energy, Uncomfortable': ['😠 Angry', '😤 Frustrated', '😰 Worried', '😬 Anxious', '🤯 Overwhelmed', '😱 Panicked', '😣 Stressed', '😒 Irritated', '😫 Restless'],
-    'Low Energy, Uncomfortable': ['😢 Sad', '😴 Tired', '😔 Lonely', '😑 Bored', '😞 Disappointed', '😕 Confused', '😪 Hurt', '😟 Discouraged', '😰 Hopeless'],
-    'High Energy, Comfortable': ['😄 Happy', '🤩 Excited', '😊 Proud', '😎 Confident', '🤸 Energetic', '😜 Playful', '🧐 Curious', '😯 Amazed', '🥰 Grateful'],
-    'Low Energy, Comfortable': ['😌 Calm', '😊 Content', '😎 Relaxed', '🕊️ Peaceful', '🤗 Cozy', '🥰 Loved', '😌 Safe', '😴 Sleepy', '🤔 Thoughtful']
+    'Upset': ['😠 Angry', '😤 Frustrated', '😰 Worried', '😬 Anxious', '🤯 Overwhelmed', '😱 Panicked', '😣 Stressed', '😒 Irritated', '😫 Restless'],
+    'Down': ['😢 Sad', '😴 Tired', '😔 Lonely', '😑 Bored', '😞 Disappointed', '😕 Confused', '😪 Hurt', '😟 Discouraged', '😰 Hopeless'],
+    'Joyful': ['😄 Happy', '🤩 Excited', '😊 Proud', '😎 Confident', '🤸 Energetic', '😜 Playful', '🧐 Curious', '😯 Amazed', '🥰 Grateful'],
+    'Cool': ['😌 Calm', '😊 Content', '😎 Relaxed', '🕊️ Peaceful', '🤗 Cozy', '🥰 Loved', '😌 Safe', '😴 Sleepy', '🤔 Thoughtful']
   }
 
   const categorySubtexts = {
@@ -280,10 +280,10 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               // Define category colors
               const getCategoryColor = (category: string) => {
                 switch (category) {
-                  case 'High Energy, Uncomfortable': return '#fef3e2' // Orange tint
-                  case 'Low Energy, Uncomfortable': return '#e6f2ff' // Blue tint
-                  case 'High Energy, Comfortable': return '#fffbeb' // Yellow tint
-                  case 'Low Energy, Comfortable': return '#f0fdf4' // Green tint
+                  case 'Upset': return '#fef3e2' // Orange tint
+                  case 'Down': return '#e6f2ff' // Blue tint
+                  case 'Joyful': return '#fffbeb' // Yellow tint
+                  case 'Cool': return '#f0fdf4' // Green tint
                   default: return '#f3f4f6'
                 }
               }
