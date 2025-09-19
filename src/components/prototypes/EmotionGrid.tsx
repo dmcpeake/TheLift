@@ -286,12 +286,14 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               }
 
               const categoryColors = getCategoryColor(category)
+              const isLast = index === Object.entries(emotions).length - 1
 
               return (
-                <div key={category} className="flex-none space-y-3" style={{
-                  width: '280px',
-                  minWidth: '280px'
-                }}>
+                <div key={category} className="flex items-center">
+                  <div className="flex-none space-y-3" style={{
+                    width: '280px',
+                    minWidth: '280px'
+                  }}>
                   <div className="text-center">
                     <h4 className="text-lg font-semibold text-gray-800">
                       {category}
@@ -333,6 +335,30 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                       </button>
                     ))}
                   </div>
+                  </div>
+
+                  {/* Divider line between groups */}
+                  {!isLast && (
+                    <div
+                      className="flex-none"
+                      style={{
+                        width: '1px',
+                        height: '200px',
+                        marginLeft: '20px',
+                        marginRight: '20px',
+                        position: 'relative'
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '1px',
+                          height: '100%',
+                          borderLeft: '1px dashed #d1d5db',
+                          borderImageSource: 'repeating-linear-gradient(to bottom, #d1d5db 0, #d1d5db 4px, transparent 4px, transparent 8px)'
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               )
             })}
