@@ -94,9 +94,9 @@ export function CheckInHome() {
               display: none !important;
             }
             .welcome-content-mobile {
-              display: block !important;
+              display: flex !important;
               align-items: flex-start !important;
-              justify-content: flex-start !important;
+              justify-content: center !important;
               min-height: auto !important;
               padding-top: 160px !important;
             }
@@ -359,7 +359,7 @@ export function CheckInHome() {
           className="welcome-content-mobile flex items-start justify-center p-4 transition-opacity duration-300"
           style={{
             minHeight: 'auto',
-            paddingTop: '160px',
+            paddingTop: window.innerWidth <= 768 ? '160px' : '180px',
             opacity: isTransitioning ? 0 : 1
           }}
         >
