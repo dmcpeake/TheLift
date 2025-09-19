@@ -109,6 +109,9 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
           .mood-meter-outer-ring {
             display: none !important;
           }
+          .mood-meter-doughnut foreignObject {
+            transform-origin: center !important;
+          }
         }
       `}</style>
 
