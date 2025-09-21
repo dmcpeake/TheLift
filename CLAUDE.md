@@ -206,3 +206,58 @@ The app automatically initializes test users on startup via the `/server/auth/in
 - ALL UUIDs in SQL files should be generated using `gen_random_uuid()` function
 - Never use hardcoded UUID strings for new records
 - This ensures unique IDs and avoids duplicate key violations
+
+### Current Child Distribution (2025-09-19)
+
+**Actual Children in Database**:
+- **St. Mary's Hospital (3):** Aisha Patel, Emma Thompson, Sophia Chen
+- **Wellmind Children's Clinic (3):** Charlie Brown, Maya Rodriguez, Sebastian Clarke
+- **Westfield Primary School (3):** Ava Davis, Lucas Williams, Oliver Johnson
+
+**Note**: The synthetic data generator creates different child names than originally expected. The current 3-3-3 distribution was achieved by moving Sophia Chen from Westfield to St. Mary's Hospital.
+
+### Recent UI Improvements (2025-09-19)
+
+#### Dynamic Loading Indicators
+- **Created LoadingIndicator component** (`src/components/shared/LoadingIndicator.tsx`)
+  - Multiple variants: spinner, progress bar, animated dots, pulse
+  - Real progress tracking with percentage display
+  - Size options (small, medium, large) and customizable colors
+  - Auto-incremented progress when actual progress isn't available
+
+- **DataLoadingIndicator** for multi-stage loading
+  - Shows individual loading stages with status indicators
+  - Visual checkmarks for completed stages
+  - Used in ChildSummaryAnalytics for tracking data fetch progress
+
+- **Updated components** to use new loading system:
+  - ChildSummaryAnalytics: Shows detailed loading stages (organizations → profiles → check-ins → mood history → analytics)
+  - EmotionGridDashboard: Uses animated dots variant
+  - PractitionerDashboard: Large spinner with context messages
+
+#### Analytics Improvements
+
+##### Check-in History Filtering
+- **Latest Check-ins section** now filters out entries with "No notes available"
+- Only displays check-ins with actual qualitative data (mood notes, feelings explanations, wellbeing scores)
+- Shows "No check-ins with notes available" when all entries lack meaningful notes
+- Implementation in `loadCheckInHistory` function and display logic in `ChildSummaryAnalytics.tsx`
+
+##### AI Insights Text Formatting
+- **Created cleanupText function** to fix underscore-separated strings from AI responses
+- Automatically converts technical strings to readable text:
+  - `declining_pattern` → `declining pattern`
+  - `emotional_state` → `emotional state`
+  - `check_in` → `check-in`
+  - `self_esteem` → `self-esteem`
+  - `peer_relationships` → `peer relationships`
+  - `family_dynamics` → `family dynamics`
+  - `school_performance` → `school performance`
+  - `mental_health` → `mental health`
+  - Generic pattern catches any `word_word` → `word word`
+- Applied to all AI analysis text: summaries, bullet points, and recommendations
+- Implementation in `src/components/analytics/ChildSummaryAnalytics.tsx`
+
+#### Test Pages
+- **Loading Indicators Demo**: `/test/loading-indicators` - showcases all loading variants and animations
+- **Analytics Test**: `/test/analytics` - demonstrates child summary analytics with AI insights
