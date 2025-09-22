@@ -630,7 +630,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
             }}
             aria-label="Choose emotions"
           >
-            CHOOSE
+            WHY?
           </button>
 
           {/* Skip Button */}
