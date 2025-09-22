@@ -184,17 +184,17 @@ export function ChildRadarComparison({ children, moodHistory }: ChildRadarCompar
 
   return (
     <div className="w-full">
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <div className="mb-4">
+        <h3 className="text-base font-semibold text-gray-900 mb-1">
           Wellbeing Profile Comparison
         </h3>
-        <p className="text-sm text-gray-600">
+        <p className="text-xs text-gray-600">
           Comparing {children.length} {children.length === 1 ? 'child' : 'children'} across six wellbeing dimensions
         </p>
       </div>
 
-      <ResponsiveContainer width="100%" height={400}>
-        <RadarChart data={radarData} margin={{ top: 20, right: 80, bottom: 20, left: 80 }}>
+      <ResponsiveContainer width="100%" height={350}>
+        <RadarChart data={radarData} margin={{ top: 10, right: 40, bottom: 10, left: 40 }}>
           <PolarGrid stroke="#E5E7EB" />
           <PolarAngleAxis
             dataKey="dimension"
@@ -223,41 +223,41 @@ export function ChildRadarComparison({ children, moodHistory }: ChildRadarCompar
           <Tooltip content={<CustomTooltip />} />
 
           <Legend
-            verticalAlign="bottom"
-            height={36}
+            verticalAlign="top"
+            height={24}
             wrapperStyle={{
-              paddingTop: '20px',
-              fontSize: '14px',
+              paddingTop: '10px',
+              fontSize: '12px',
             }}
           />
         </RadarChart>
       </ResponsiveContainer>
 
       {/* Dimension Explanations */}
-      <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-        <div className="bg-blue-50 rounded-lg p-3">
-          <span className="font-medium text-blue-900">Emotional Wellbeing:</span>
-          <span className="text-blue-700 ml-1">Overall mood levels</span>
+      <div className="mt-4 grid grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
+        <div className="bg-blue-50 rounded-lg p-2">
+          <div className="font-medium text-blue-900">Emotional Wellbeing</div>
+          <div className="text-blue-700 text-[10px]">Overall mood levels</div>
         </div>
-        <div className="bg-green-50 rounded-lg p-3">
-          <span className="font-medium text-green-900">Engagement:</span>
-          <span className="text-green-700 ml-1">Check-in frequency</span>
+        <div className="bg-green-50 rounded-lg p-2">
+          <div className="font-medium text-green-900">Engagement</div>
+          <div className="text-green-700 text-[10px]">Check-in frequency</div>
         </div>
-        <div className="bg-purple-50 rounded-lg p-3">
-          <span className="font-medium text-purple-900">Consistency:</span>
-          <span className="text-purple-700 ml-1">Mood stability</span>
+        <div className="bg-purple-50 rounded-lg p-2">
+          <div className="font-medium text-purple-900">Consistency</div>
+          <div className="text-purple-700 text-[10px]">Mood stability</div>
         </div>
-        <div className="bg-orange-50 rounded-lg p-3">
-          <span className="font-medium text-orange-900">Emotional Expression:</span>
-          <span className="text-orange-700 ml-1">Range of feelings</span>
+        <div className="bg-orange-50 rounded-lg p-2">
+          <div className="font-medium text-orange-900">Emotional Expression</div>
+          <div className="text-orange-700 text-[10px]">Range of feelings</div>
         </div>
-        <div className="bg-pink-50 rounded-lg p-3">
-          <span className="font-medium text-pink-900">Positive Experiences:</span>
-          <span className="text-pink-700 ml-1">Frequency of positive moods</span>
+        <div className="bg-pink-50 rounded-lg p-2">
+          <div className="font-medium text-pink-900">Positive Experiences</div>
+          <div className="text-pink-700 text-[10px]">Frequency of positive moods</div>
         </div>
-        <div className="bg-teal-50 rounded-lg p-3">
-          <span className="font-medium text-teal-900">Resilience:</span>
-          <span className="text-teal-700 ml-1">Recovery from challenges</span>
+        <div className="bg-teal-50 rounded-lg p-2">
+          <div className="font-medium text-teal-900">Resilience</div>
+          <div className="text-teal-700 text-[10px]">Recovery from challenges</div>
         </div>
       </div>
     </div>
