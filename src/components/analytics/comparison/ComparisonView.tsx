@@ -1,8 +1,11 @@
 import { useState } from 'react'
-import { X, Users } from 'lucide-react'
+import { X, Users, BarChart3, Grid3x3, ScatterChart, TrendingUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChildSelector } from './ChildSelector'
 import { ChildRadarComparison } from './ChildRadarComparison'
+import { ChildHeatMapComparison } from './ChildHeatMapComparison'
+import { ChildScatterComparison } from './ChildScatterComparison'
+import { ChildLineComparison } from './ChildLineComparison'
 
 interface Child {
   id: string
@@ -19,6 +22,8 @@ interface ComparisonViewProps {
   onClose: () => void
 }
 
+type VisualizationType = 'radar' | 'heatmap' | 'scatter' | 'timeline'
+
 export function ComparisonView({
   children,
   moodHistory,
@@ -26,10 +31,18 @@ export function ComparisonView({
   onClose
 }: ComparisonViewProps) {
   const [selectedChildren, setSelectedChildren] = useState<string[]>([])
+  const [activeVisualization, setActiveVisualization] = useState<VisualizationType>('radar')
 
   const selectedChildData = children.filter(child =>
     selectedChildren.includes(child.id)
   )
+
+  const visualizationTabs = [
+    { id: 'radar', label: 'Profile', icon: BarChart3 },
+    { id: 'heatmap', label: 'Heat Map', icon: Grid3x3 },
+    { id: 'scatter', label: 'Correlation', icon: ScatterChart },
+    { id: 'timeline', label: 'Timeline', icon: TrendingUp }
+  ]
 
   return (
     <motion.div
@@ -75,10 +88,68 @@ export function ComparisonView({
           {/* Right Column - Comparison Chart */}
           <div>
             {selectedChildren.length >= 2 ? (
-              <ChildRadarComparison
-                children={selectedChildData}
-                moodHistory={moodHistory}
-              />
+              <>
+                {/* Visualization Tabs */}
+                <div className="flex space-x-1 mb-4 p-1 bg-gray-100 rounded-lg">
+                  {visualizationTabs.map((tab) => {
+                    const Icon = tab.icon
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveVisualization(tab.id as VisualizationType)}
+                        className={`
+                          flex items-center space-x-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all
+                          ${activeVisualization === tab.id
+                            ? 'bg-white text-gray-900 shadow-sm'
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                          }
+                        `}
+                      >
+                        <Icon className="h-4 w-4" />
+                        <span>{tab.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Active Visualization */}
+                <div className="bg-white rounded-lg border border-gray-200 p-4">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeVisualization}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {activeVisualization === 'radar' && (
+                        <ChildRadarComparison
+                          children={selectedChildData}
+                          moodHistory={moodHistory}
+                        />
+                      )}
+                      {activeVisualization === 'heatmap' && (
+                        <ChildHeatMapComparison
+                          children={selectedChildData}
+                          moodHistory={moodHistory}
+                        />
+                      )}
+                      {activeVisualization === 'scatter' && (
+                        <ChildScatterComparison
+                          children={selectedChildData}
+                          moodHistory={moodHistory}
+                        />
+                      )}
+                      {activeVisualization === 'timeline' && (
+                        <ChildLineComparison
+                          children={selectedChildData}
+                          moodHistory={moodHistory}
+                        />
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </>
             ) : (
               <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 p-8">
                 <div className="text-center">
@@ -99,25 +170,92 @@ export function ComparisonView({
         {selectedChildren.length >= 2 && (
           <div className="mt-6 bg-blue-50 rounded-lg p-4">
             <h4 className="text-sm font-medium text-blue-900 mb-2">
-              How to interpret this comparison
+              How to interpret {activeVisualization === 'radar' ? 'this comparison' :
+                              activeVisualization === 'heatmap' ? 'the heat map' :
+                              activeVisualization === 'scatter' ? 'the correlation' :
+                              'the timeline'}
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-blue-800">
-              <div className="flex items-start">
-                <span className="mr-2">•</span>
-                <span>Larger areas indicate stronger wellbeing in those dimensions</span>
-              </div>
-              <div className="flex items-start">
-                <span className="mr-2">•</span>
-                <span>Each child has unique strengths - celebrate these differences</span>
-              </div>
-              <div className="flex items-start">
-                <span className="mr-2">•</span>
-                <span>Use this to identify where additional support might be beneficial</span>
-              </div>
-              <div className="flex items-start">
-                <span className="mr-2">•</span>
-                <span>Remember that wellbeing fluctuates - this is a snapshot in time</span>
-              </div>
+              {activeVisualization === 'radar' && (
+                <>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Larger areas indicate stronger wellbeing in those dimensions</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Each child has unique strengths - celebrate these differences</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Use this to identify where additional support might be beneficial</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Remember that wellbeing fluctuates - this is a snapshot in time</span>
+                  </div>
+                </>
+              )}
+              {activeVisualization === 'heatmap' && (
+                <>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Greener cells show higher wellbeing scores for that week</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Children are ranked by their average wellbeing score</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Look for patterns across weeks to identify trends</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Gray cells indicate weeks with no check-in data</span>
+                  </div>
+                </>
+              )}
+              {activeVisualization === 'scatter' && (
+                <>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Position shows the relationship between two wellbeing metrics</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Top-right quadrant indicates strength in both areas</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Use the dropdown to explore different metric correlations</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Identify children who may need targeted support</span>
+                  </div>
+                </>
+              )}
+              {activeVisualization === 'timeline' && (
+                <>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Lines show daily mood trends over the last 30 days</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Upward trends indicate improving wellbeing</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Look for patterns and responses to interventions</span>
+                  </div>
+                  <div className="flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>Compare trajectories to understand individual progress</span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
