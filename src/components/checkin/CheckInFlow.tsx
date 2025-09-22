@@ -165,7 +165,7 @@ export function CheckInFlow() {
           <div className="mx-auto px-6" style={{ maxWidth: '300px', height: '80px', position: 'relative' }}>
 
             {/* Icons row - positioned at top */}
-            <div className="flex w-full" style={{ paddingTop: '10px', gap: '1px' }}>
+            <div className="flex w-full justify-center" style={{ paddingTop: '10px', gap: '1px' }}>
               {progressSegments.map((segment, index) => {
                 const Icon = segment.icon
                 const stepId = steps[index]?.id
@@ -213,7 +213,7 @@ export function CheckInFlow() {
             </div>
 
             {/* Progress bar with discrete segments - positioned 10px below icons */}
-            <div className="relative w-full h-2 flex" style={{ gap: '1px' }}>
+            <div className="relative w-full h-2 flex justify-center" style={{ gap: '1px' }}>
               {progressSegments.map((_, index) => {
                 // Calculate segment states
                 let isCompleted = false
@@ -256,7 +256,7 @@ export function CheckInFlow() {
             </div>
 
             {/* Step labels - positioned 10px below progress bar */}
-            <div className="flex w-full" style={{ marginTop: '5px', gap: '1px' }}>
+            <div className="flex w-full justify-center" style={{ marginTop: '5px', gap: '1px' }}>
               {progressSegments.map((segment, index) => {
                 const stepId = steps[index]?.id
                 const isCompleted = completedData[stepId] && !completedData[stepId].skipped
