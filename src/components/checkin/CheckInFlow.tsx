@@ -194,7 +194,7 @@ export function CheckInFlow() {
                 })()
 
                 return (
-                  <div key={segment.name} className="text-center" style={{ width: 'calc((100% - 2px) / 3 - 10px)' }}>
+                  <div key={segment.name} className="text-center" style={{ width: 'calc((100% - 2px) / 3 - 20px)' }}>
                     {canNavigate ? (
                       <button
                         onClick={() => stepId && handleNavigateToStep(stepId)}
@@ -248,7 +248,7 @@ export function CheckInFlow() {
                       backgroundColor: isCompleted ? '#3a7ddc' : isNext ? 'rgba(58, 125, 220, 0.5)' : '#e5e7eb',
                       borderRadius: index === 0 ? '4px 0 0 4px' :
                                    index === progressSegments.length - 1 ? '0 4px 4px 0' : '0',
-                      width: 'calc((100% - 2px) / 3 - 10px)'
+                      width: 'calc((100% - 2px) / 3 - 20px)'
                     }}
                   />
                 )
@@ -313,7 +313,7 @@ export function CheckInFlow() {
                 }
 
                 return (
-                  <div key={segment.name} className="text-center" style={{ width: 'calc((100% - 2px) / 3 - 10px)' }}>
+                  <div key={segment.name} className="text-center" style={{ width: 'calc((100% - 2px) / 3 - 20px)' }}>
                     {canNavigate ? (
                       <button
                         onClick={() => stepId && handleNavigateToStep(stepId)}
