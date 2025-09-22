@@ -50,16 +50,33 @@ const calculateTrend = (moods: any[]): number => {
 export function ChildHeatMapComparison({ children, moodHistory }: ChildHeatMapComparisonProps) {
   // Prepare heat map data with weekly breakdowns
   const heatMapData = useMemo(() => {
+    // First, find the date range across all children
+    let earliestDate: Date | null = null
+    let latestDate: Date | null = null
+
+    children.forEach(child => {
+      const childMoods = moodHistory[child.id] || []
+      childMoods.forEach(mood => {
+        const moodDate = new Date(mood.selected_at)
+        if (!earliestDate || moodDate < earliestDate) earliestDate = moodDate
+        if (!latestDate || moodDate > latestDate) latestDate = moodDate
+      })
+    })
+
+    // If no data, use current date as reference
+    if (!latestDate) latestDate = new Date()
+    if (!earliestDate) earliestDate = new Date()
+
     return children.map(child => {
       const childMoods = moodHistory[child.id] || []
 
-      // Group moods by week for the last 12 weeks
+      // Group moods by week for the last 12 weeks with data
       const weeklyScores: { [key: string]: number } = {}
-      const today = new Date()
 
+      // Start from the latest date with data
       for (let i = 0; i < 12; i++) {
-        const weekStart = new Date(today)
-        weekStart.setDate(today.getDate() - (i * 7))
+        const weekStart = new Date(latestDate)
+        weekStart.setDate(latestDate.getDate() - (i * 7))
         const weekEnd = new Date(weekStart)
         weekEnd.setDate(weekStart.getDate() - 7)
 
@@ -117,7 +134,7 @@ export function ChildHeatMapComparison({ children, moodHistory }: ChildHeatMapCo
           Wellbeing Heat Map
         </h3>
         <p className="text-xs text-gray-600">
-          Weekly mood patterns over the last 12 weeks (ranked by average wellbeing)
+          Weekly mood patterns over 12 weeks (ranked by average wellbeing)
         </p>
       </div>
 
