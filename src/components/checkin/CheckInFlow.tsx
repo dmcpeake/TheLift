@@ -212,73 +212,44 @@ export function CheckInFlow() {
               })}
             </div>
 
-            {/* Progress bar with separators - positioned 10px below icons */}
-            <div className="relative w-full bg-gray-200 rounded-full h-2">
-              {/* Main progress bar */}
-              <div
-                className="h-2 rounded-full transition-all duration-300"
-                style={{
-                  width: `${(() => {
-                    // Calculate progress including current step
-                    let activeSegments = 0
+            {/* Progress bar with discrete segments - positioned 10px below icons */}
+            <div className="relative w-full h-2 flex" style={{ gap: '10px' }}>
+              {progressSegments.map((_, index) => {
+                // Calculate segment states
+                let isCompleted = false
+                let isNext = false
 
-                    // Mood meter is active/completed when on mood or beyond
-                    if (currentStep === 'mood' || currentStep === 'emotions' || currentStep === 'wellbeing' || currentStep === 'garden') {
-                      activeSegments += 1
-                    }
-                    // My emotions is active/completed when on emotions or beyond
-                    if (currentStep === 'emotions' || currentStep === 'wellbeing' || currentStep === 'garden') {
-                      activeSegments += 1
-                    }
-                    // Wellbeing wheel is active/completed when on wellbeing or beyond
-                    if (currentStep === 'wellbeing' || currentStep === 'garden') {
-                      activeSegments += 1
-                    }
-
-                    return (activeSegments / progressSegments.length) * 100
-                  })()}%`,
-                  backgroundColor: '#3a7ddc'
-                }}
-              />
-              {/* Next available segment overlay (50% opacity blue) */}
-              {(() => {
-                let showNextSegment = false
-                let nextSegmentIndex = -1
-
-                if (currentStep === 'mood' && currentStepHasSelection) {
-                  showNextSegment = true
-                  nextSegmentIndex = 1 // emotions
-                } else if (currentStep === 'emotions' && emotionGridStep === 2) {
-                  showNextSegment = true
-                  nextSegmentIndex = 2 // wellbeing
+                // Mood meter is completed when on emotions or beyond
+                if (index === 0 && (currentStep === 'emotions' || currentStep === 'wellbeing' || currentStep === 'garden')) {
+                  isCompleted = true
+                }
+                // Emotions is completed when on wellbeing or beyond
+                if (index === 1 && (currentStep === 'wellbeing' || currentStep === 'garden')) {
+                  isCompleted = true
+                }
+                // Wellbeing is completed when on garden
+                if (index === 2 && currentStep === 'garden') {
+                  isCompleted = true
                 }
 
-                if (showNextSegment) {
-                  const segmentWidth = 100 / progressSegments.length
-                  const leftPosition = nextSegmentIndex * segmentWidth
-
-                  return (
-                    <div
-                      className="absolute h-2 rounded-full transition-all duration-300"
-                      style={{
-                        left: `${leftPosition}%`,
-                        width: `${segmentWidth}%`,
-                        backgroundColor: 'rgba(58, 125, 220, 0.5)',
-                        top: 0
-                      }}
-                    />
-                  )
+                // Next available segment logic
+                if (index === 1 && currentStep === 'mood' && currentStepHasSelection) {
+                  isNext = true
                 }
-                return null
-              })()}
-              {/* Section separators */}
-              {progressSegments.slice(0, -1).map((_, index) => (
-                <div
-                  key={index}
-                  className="absolute top-0 bottom-0 w-px bg-white"
-                  style={{ left: `${((index + 1) / progressSegments.length) * 100}%` }}
-                />
-              ))}
+                if (index === 2 && currentStep === 'emotions' && emotionGridStep === 2) {
+                  isNext = true
+                }
+
+                return (
+                  <div
+                    key={index}
+                    className="flex-1 h-2 rounded-full transition-all duration-300"
+                    style={{
+                      backgroundColor: isCompleted ? '#3a7ddc' : isNext ? 'rgba(58, 125, 220, 0.5)' : '#e5e7eb'
+                    }}
+                  />
+                )
+              })}
             </div>
 
             {/* Step labels - positioned 10px below progress bar */}
