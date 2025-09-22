@@ -737,40 +737,42 @@ export function ChildSummaryAnalytics() {
                 </div>
 
                 {/* Status Indicators - Minimal Design */}
-                <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-8">
                   {/* Current Mood */}
-                  <div className="flex flex-col items-center">
-                    <span className="text-2xl">
-                      {child.recentMood ? MOOD_EMOJIS[child.recentMood as keyof typeof MOOD_EMOJIS] : '—'}
-                    </span>
-                    <span className="text-[10px] text-gray-500 mt-1">CURRENT</span>
+                  <div className="flex flex-col items-center min-w-[60px]">
+                    <div className="h-6 flex items-center justify-center">
+                      <span className="text-2xl leading-none">
+                        {child.recentMood ? MOOD_EMOJIS[child.recentMood as keyof typeof MOOD_EMOJIS] : '—'}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-gray-500 mt-2 tracking-wider">CURRENT</span>
                   </div>
 
                   {/* Average Mood */}
-                  <div className="flex flex-col items-center">
-                    <div className="flex items-center">
+                  <div className="flex flex-col items-center min-w-[60px]">
+                    <div className="h-6 flex items-center justify-center">
                       <Heart className="h-5 w-5 mr-1" style={{
                         color: child.averageMood ? MOOD_COLORS[Math.round(child.averageMood) as keyof typeof MOOD_COLORS] : '#9CA3AF',
                         fill: child.averageMood ? MOOD_COLORS[Math.round(child.averageMood) as keyof typeof MOOD_COLORS] : 'none',
                         fillOpacity: 0.15
                       }} />
-                      <span className="text-lg font-medium text-gray-700">
+                      <span className="text-base font-medium text-gray-700">
                         {child.averageMood ? child.averageMood.toFixed(1) : '—'}
                       </span>
                     </div>
-                    <span className="text-[10px] text-gray-500 mt-1">AVERAGE</span>
+                    <span className="text-[10px] text-gray-500 mt-2 tracking-wider">AVERAGE</span>
                   </div>
 
                   {/* Trend */}
-                  <div className="flex flex-col items-center">
-                    <div className="h-5 flex items-center">
+                  <div className="flex flex-col items-center min-w-[60px]">
+                    <div className="h-6 flex items-center justify-center">
                       {getTrendIcon(child.moodTrend)}
                     </div>
-                    <span className="text-[10px] text-gray-500 mt-1">TREND</span>
+                    <span className="text-[10px] text-gray-500 mt-2 tracking-wider">TREND</span>
                   </div>
 
                   {/* Expand Icon */}
-                  <div className="ml-2">
+                  <div className="ml-4">
                     {expandedChild === child.id ? (
                       <ChevronDown className="h-5 w-5 text-gray-400" />
                     ) : (
