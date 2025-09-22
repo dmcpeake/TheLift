@@ -193,45 +193,59 @@ export function ChildRadarComparison({ children, moodHistory }: ChildRadarCompar
         </p>
       </div>
 
-      <ResponsiveContainer width="100%" height={350}>
-        <RadarChart data={radarData} margin={{ top: 10, right: 40, bottom: 10, left: 40 }}>
-          <PolarGrid stroke="#E5E7EB" />
-          <PolarAngleAxis
-            dataKey="dimension"
-            tick={{ fill: '#6B7280', fontSize: 11 }}
-            className="text-xs"
-          />
-          <PolarRadiusAxis
-            angle={90}
-            domain={[0, 100]}
-            tick={{ fill: '#9CA3AF', fontSize: 10 }}
-            tickCount={5}
-          />
+      <div className="flex gap-4">
+        {/* Legend on the left side */}
+        <div className="flex-shrink-0">
+          <div className="bg-gray-50 rounded-lg p-3">
+            <p className="text-xs font-medium text-gray-700 mb-2">Children:</p>
+            <div className="space-y-1.5">
+              {children.map((child, index) => (
+                <div key={child.id} className="flex items-center gap-2">
+                  <div
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: CHILD_COLORS[index] }}
+                  />
+                  <span className="text-xs text-gray-700">{child.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-          {children.map((child, index) => (
-            <Radar
-              key={`child_${index}`}
-              name={child.name}
-              dataKey={`child_${index}`}
-              stroke={CHILD_COLORS[index]}
-              fill={CHILD_COLORS[index]}
-              fillOpacity={0.15}
-              strokeWidth={2}
-            />
-          ))}
+        {/* Chart on the right */}
+        <div className="flex-grow">
+          <ResponsiveContainer width="100%" height={350}>
+            <RadarChart data={radarData} margin={{ top: 20, right: 40, bottom: 10, left: 40 }}>
+              <PolarGrid stroke="#E5E7EB" />
+              <PolarAngleAxis
+                dataKey="dimension"
+                tick={{ fill: '#6B7280', fontSize: 10 }}
+                className="text-xs"
+              />
+              <PolarRadiusAxis
+                angle={90}
+                domain={[0, 100]}
+                tick={{ fill: '#9CA3AF', fontSize: 9 }}
+                tickCount={5}
+              />
 
-          <Tooltip content={<CustomTooltip />} />
+              {children.map((child, index) => (
+                <Radar
+                  key={`child_${index}`}
+                  name={child.name}
+                  dataKey={`child_${index}`}
+                  stroke={CHILD_COLORS[index]}
+                  fill={CHILD_COLORS[index]}
+                  fillOpacity={0.15}
+                  strokeWidth={2}
+                />
+              ))}
 
-          <Legend
-            verticalAlign="top"
-            height={24}
-            wrapperStyle={{
-              paddingTop: '10px',
-              fontSize: '12px',
-            }}
-          />
-        </RadarChart>
-      </ResponsiveContainer>
+              <Tooltip content={<CustomTooltip />} />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
       {/* Dimension Explanations */}
       <div className="mt-4 grid grid-cols-2 lg:grid-cols-3 gap-2 text-xs">

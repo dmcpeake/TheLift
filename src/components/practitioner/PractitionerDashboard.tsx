@@ -13,7 +13,7 @@ import { Checkbox } from '../ui/checkbox'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../ui/breadcrumb'
 import { BulkReassignDialog } from './BulkReassignDialog'
 import { BulkArchiveDialog } from './BulkArchiveDialog'
-import { LoadingIndicator } from '../shared/LoadingIndicator'
+import { PageLoader } from '../shared/LottieLoader'
 import { 
   Users, 
   UserPlus, 
@@ -674,17 +674,7 @@ export function PractitionerDashboard() {
     .map(child => child.name)
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingIndicator
-          variant="spinner"
-          size="large"
-          message="Loading dashboard..."
-          subMessage="Fetching your organization data"
-          color="blue"
-        />
-      </div>
-    )
+    return <PageLoader message="Loading dashboard..." />
   }
 
   return (

@@ -51,6 +51,7 @@ import { WaitlistManagement } from '../components/admin/WaitlistManagement'
 import { PrototypesPage } from '../components/prototypes/PrototypesPage'
 import { DataHierarchy } from '../components/prototypes/DataHierarchy'
 import CheckinProgressViz from '../components/analytics/CheckinProgressViz'
+import { LottieLoaderDemo } from '../pages/test/LottieLoaderDemo'
 
 // Check-in Flow Components
 import { CheckInHome } from '../components/checkin/CheckInHome'
@@ -136,6 +137,7 @@ export function AppRoutes() {
         <Route path="/prototypes" element={<PrototypesPage />} />
         <Route path="/test/data-hierarchy" element={<DataHierarchy />} />
         <Route path="/test/analytics" element={<CheckinProgressViz />} />
+        <Route path="/test/lottie-loader" element={<LottieLoaderDemo />} />
 
         {/* Unauthorized route */}
         <Route path="/unauthorized" element={

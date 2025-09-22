@@ -3,7 +3,7 @@ import { MoodHeatmap } from './MoodHeatmap'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { projectId, publicAnonKey } from '../../utils/supabase/info.tsx'
-import { LoadingIndicator, DataLoadingIndicator } from '../shared/LoadingIndicator'
+import { PageLoader } from '../shared/LottieLoader'
 import { ComparisonView } from './comparison/ComparisonView'
 import { CriticalSupportAlert } from './CriticalSupportAlert'
 import {
@@ -494,10 +494,10 @@ export function ChildSummaryAnalytics() {
 
         // Parse the new comprehensive AI response format
         const insights: AIInsights = {
-          summary: extractSection(analysis, 'EXECUTIVE SUMMARY') ||
+          summary: cleanupText(extractSection(analysis, 'EXECUTIVE SUMMARY') ||
                    extractSection(analysis, 'Executive Summary') ||
                    analysis.split('\n')[0] || // First line as fallback
-                   'Analysis in progress...',
+                   'Analysis in progress...'),
           concerns: extractBulletPoints(analysis, 'RED FLAGS & EARLY WARNING SIGNS') ||
                    extractBulletPoints(analysis, 'RED FLAGS') ||
                    extractBulletPoints(analysis, 'IMMEDIATE ACTION REQUIRED') ||
@@ -534,10 +534,10 @@ export function ChildSummaryAnalytics() {
     }
   }
 
-  // Helper function to clean up text with underscores
+  // Helper function to clean up text with underscores and fix capitalization
   const cleanupText = (text: string): string => {
     // Replace common patterns with underscores with proper text
-    return text
+    let cleaned = text
       .replace(/declining_pattern/gi, 'developing pattern')
       .replace(/improving_pattern/gi, 'strengthening pattern')
       .replace(/stable_pattern/gi, 'consistent pattern')
@@ -573,10 +573,41 @@ export function ChildSummaryAnalytics() {
       .replace(/"?supportNeeds"?/g, 'support needs')
       // Remove quotes around technical field names
       .replace(/["']([a-zA-Z_]+)["']/g, '$1')
-      // Handle generic camelCase to space conversion
-      .replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()
+      // Handle generic camelCase to space conversion (without lowercasing everything)
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
       // Generic pattern: replace any remaining word_word patterns
       .replace(/(\w+)_(\w+)/g, '$1 $2')
+
+    // Fix sentence capitalization
+    // First, capitalize the first letter of the entire string
+    if (cleaned.length > 0) {
+      cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1)
+    }
+
+    // Capitalize first letter after sentence endings (. ! ?)
+    cleaned = cleaned.replace(/([.!?])\s+([a-z])/g, (match, p1, p2) => {
+      return p1 + ' ' + p2.toUpperCase()
+    })
+
+    // Capitalize proper nouns (children's names)
+    const childNames = ['Sophia', 'Emma', 'Aisha', 'Lucas', 'Oliver', 'Ava', 'Maya', 'Charlie', 'Sebastian', 'Jayden', 'Liam', 'Noah', 'Ethan', 'Mason', 'Olivia', 'Isabella', 'Mia', 'Charlotte']
+    childNames.forEach(name => {
+      const regex = new RegExp(`\\b${name.toLowerCase()}\\b`, 'gi')
+      cleaned = cleaned.replace(regex, name)
+    })
+
+    // Fix spacing issues around decimals (like "3. 5" -> "3.5")
+    cleaned = cleaned.replace(/(\d)\s+\.\s+(\d)/g, '$1.$2')
+
+    // Capitalize 'I' when it stands alone
+    cleaned = cleaned.replace(/\bi\b/g, 'I')
+
+    // Ensure bullet points start with capital letters
+    cleaned = cleaned.replace(/^(•|-)\s*([a-z])/gm, (match, bullet, letter) => {
+      return bullet + ' ' + letter.toUpperCase()
+    })
+
+    return cleaned
   }
 
   const extractSection = (text: string, section: string): string => {
@@ -732,14 +763,7 @@ export function ChildSummaryAnalytics() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <DataLoadingIndicator
-          stages={loadingStages}
-          currentStage={currentLoadingStage}
-        />
-      </div>
-    )
+    return <PageLoader message="Loading analytics data..." />
   }
 
   return (
@@ -1078,6 +1102,7 @@ export function ChildSummaryAnalytics() {
                             loadingInsights[child.id] ? 'filter blur-[3px] scale-[0.98]' : 'filter blur-0 scale-100'
                           }`}>
                             {/* Summary */}
+                            {aiInsights[child.id] && (
                             <div className="bg-white p-4 rounded-lg border border-gray-200">
                               <h5 className="font-medium text-gray-900 mb-2 flex items-center">
                                 <Brain className="h-4 w-4 mr-2" />
@@ -1147,9 +1172,10 @@ export function ChildSummaryAnalytics() {
                                 return <p className="text-sm text-gray-700">{summary}</p>
                               })()}
                             </div>
+                            )}
 
                             {/* Concerns */}
-                            {aiInsights[child.id].concerns && aiInsights[child.id].concerns!.length > 0 && (
+                            {aiInsights[child.id] && aiInsights[child.id].concerns && aiInsights[child.id].concerns!.length > 0 && (
                               <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
                                 <h5 className="font-medium text-amber-900 mb-2 flex items-center">
                                   <AlertCircle className="h-4 w-4 mr-2" />
@@ -1167,7 +1193,7 @@ export function ChildSummaryAnalytics() {
                             )}
 
                             {/* Strengths */}
-                            {aiInsights[child.id].strengths && aiInsights[child.id].strengths!.length > 0 && (
+                            {aiInsights[child.id] && aiInsights[child.id].strengths && aiInsights[child.id].strengths!.length > 0 && (
                               <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                                 <h5 className="font-medium text-green-900 mb-2 flex items-center">
                                   <Activity className="h-4 w-4 mr-2" />
@@ -1185,7 +1211,7 @@ export function ChildSummaryAnalytics() {
                             )}
 
                             {/* Recommendations */}
-                            {aiInsights[child.id].recommendations && aiInsights[child.id].recommendations!.length > 0 && (
+                            {aiInsights[child.id] && aiInsights[child.id].recommendations && aiInsights[child.id].recommendations!.length > 0 && (
                               <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                 <h5 className="font-medium text-blue-900 mb-2 flex items-center">
                                   <MessageSquare className="h-4 w-4 mr-2" />
@@ -1202,9 +1228,11 @@ export function ChildSummaryAnalytics() {
                               </div>
                             )}
 
+                            {aiInsights[child.id] && (
                             <p className="text-xs text-gray-500 text-right">
                               Last analyzed: {aiInsights[child.id].lastAnalyzed}
                             </p>
+                            )}
                           </div>
 
                           {/* Loading Overlay - subtle blur effect */}
