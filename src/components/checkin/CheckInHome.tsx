@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
+import { ProgressHeader } from '../shared/ProgressHeader'
 import Lottie from 'lottie-react'
-import { Settings, SkipForward, Play, Pause, Heart, Smile, Users, Sparkles, Star, Plus, LogOut, X, Compass } from 'lucide-react'
+import { Settings, SkipForward, Play, Pause, Users, Sparkles, Star, Plus, LogOut, X } from 'lucide-react'
 import { BreathingCircles } from '../breathing/BreathingCircles'
 
 // Force deployment refresh
@@ -310,68 +311,32 @@ export function CheckInHome() {
 
       {/* Progress Header - show when breathing */}
       {showBreathing && (
-        <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', height: '80px', borderRadius: '0' }}>
-          <div className="mx-auto px-6" style={{ maxWidth: '300px', height: '80px', position: 'relative' }}>
-
-            {/* Icons row - positioned at top */}
-            <div className="flex w-full justify-center" style={{ paddingTop: '10px', gap: '1px' }}>
-              {[{ icon: Heart, name: 'Mood' }, { icon: Smile, name: 'Emotions' }, { icon: Compass, name: 'Wellbeing' }].map((segment) => {
-                const Icon = segment.icon
-                return (
-                  <div key={segment.name} className="text-center" style={{ width: 'calc((100% - 2px) / 3 - 20px)' }}>
-                    <div style={{ padding: '10px', margin: '-10px' }}>
-                      <Icon className="h-6 w-6 mx-auto" style={{ color: '#9ca3af' }} />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Progress bar with discrete segments - positioned 10px below icons */}
-            <div className="relative w-full h-2 flex justify-center" style={{ gap: '1px' }}>
-              {[0, 1, 2].map((index) => (
-                <div
-                  key={index}
-                  className="h-2 transition-all duration-300"
-                  style={{
-                    backgroundColor: '#e5e7eb',
-                    borderRadius: index === 0 ? '4px 0 0 4px' :
-                                 index === 2 ? '0 4px 4px 0' : '0',
-                    width: 'calc((100% - 2px) / 3 - 20px)'
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* Step labels - positioned 10px below progress bar */}
-            <div className="flex w-full justify-center" style={{ marginTop: '5px', gap: '1px' }}>
-              {[{ name: 'Mood' }, { name: 'Emotions' }, { name: 'Wellbeing' }].map((segment) => {
-                return (
-                  <div key={segment.name} className="text-center" style={{ width: 'calc((100% - 2px) / 3 - 20px)' }}>
-                    <span className="text-xs" style={{ color: '#9ca3af' }}>
-                      {segment.name}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+        <>
+          <ProgressHeader
+            currentStep="breathing"
+            completedData={{}}
+            currentStepHasSelection={false}
+            emotionGridStep={1}
+            // No navigation on breathing page
+          />
 
           {/* Close button positioned at vertical center right */}
-          <button
-            onClick={() => {
-              setShowBreathing(false)
-              setIsTransitioning(false)
-              setBreathingStarted(false)
-              setIsBreathingRunning(false)
-              setShowTechniqueSelector(false)
-            }}
-            className="absolute top-1/2 right-4 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#1066c2] transition-colors shadow-lg"
-            style={{ backgroundColor: '#147fe3', transform: 'translateY(-50%)' }}
-          >
-            <X className="h-5 w-5 text-white" />
-          </button>
-        </div>
+          <div className="fixed top-0 right-4 z-50 flex items-center" style={{ height: '80px' }}>
+            <button
+              onClick={() => {
+                setShowBreathing(false)
+                setIsTransitioning(false)
+                setBreathingStarted(false)
+                setIsBreathingRunning(false)
+                setShowTechniqueSelector(false)
+              }}
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#1066c2] transition-colors shadow-lg"
+              style={{ backgroundColor: '#147fe3' }}
+            >
+              <X className="h-5 w-5 text-white" />
+            </button>
+          </div>
+        </>
       )}
 
       {/* Welcome Content */}
