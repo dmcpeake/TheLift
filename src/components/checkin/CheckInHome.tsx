@@ -581,16 +581,20 @@ export function CheckInHome() {
           <div className="flex justify-center mobile-start-button" style={{ position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
             <button
               onClick={handleStartClick}
-              className="font-semibold text-lg transition-all duration-200"
+              className="transition-all duration-200"
               style={{
                 backgroundColor: '#e87e67',
                 color: 'white',
-                height: '60px',
-                borderRadius: '30px',
-                paddingLeft: '30px',
-                paddingRight: '30px',
+                width: '100px',
+                height: '56px',
+                borderRadius: '28px',
                 border: 'none',
                 cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
