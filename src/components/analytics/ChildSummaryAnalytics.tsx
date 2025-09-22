@@ -99,6 +99,7 @@ export function ChildSummaryAnalytics() {
   const [aiInsights, setAIInsights] = useState<Record<string, AIInsights>>({})
   const [loading, setLoading] = useState(true)
   const [loadingInsights, setLoadingInsights] = useState<Record<string, boolean>>({})
+  const [aiAnalysisProgress, setAiAnalysisProgress] = useState<Record<string, number>>({})
   const [loadingStages, setLoadingStages] = useState<Array<{ name: string; status: 'pending' | 'loading' | 'complete' | 'error' }>>([
     { name: 'Loading organizations', status: 'loading' },
     { name: 'Loading children profiles', status: 'pending' },
@@ -393,6 +394,20 @@ export function ChildSummaryAnalytics() {
 
     console.log('Loading AI insights for child:', childId)
     setLoadingInsights(prev => ({ ...prev, [childId]: true }))
+    setAiAnalysisProgress(prev => ({ ...prev, [childId]: 0 }))
+
+    // Simulate progress updates
+    const progressInterval = setInterval(() => {
+      setAiAnalysisProgress(prev => {
+        const currentProgress = prev[childId] || 0
+        if (currentProgress >= 90) {
+          return prev
+        }
+        // Increment by 10-20% each time
+        const increment = Math.floor(Math.random() * 10) + 10
+        return { ...prev, [childId]: Math.min(currentProgress + increment, 90) }
+      })
+    }, 500)
 
     try {
       // Use the correct Supabase URL and key
@@ -458,6 +473,10 @@ export function ChildSummaryAnalytics() {
 
         console.log('Parsed insights:', insights)
 
+        // Set progress to 100% when complete
+        clearInterval(progressInterval)
+        setAiAnalysisProgress(prev => ({ ...prev, [childId]: 100 }))
+
         setAIInsights(prev => ({
           ...prev,
           [childId]: insights
@@ -465,8 +484,13 @@ export function ChildSummaryAnalytics() {
       }
     } catch (error) {
       console.error('Error loading AI insights:', error)
+      clearInterval(progressInterval)
+      setAiAnalysisProgress(prev => ({ ...prev, [childId]: 0 }))
     } finally {
-      setLoadingInsights(prev => ({ ...prev, [childId]: false }))
+      setTimeout(() => {
+        setLoadingInsights(prev => ({ ...prev, [childId]: false }))
+        setAiAnalysisProgress(prev => ({ ...prev, [childId]: 0 }))
+      }, 500) // Small delay to show 100% briefly
     }
   }
 
@@ -843,10 +867,11 @@ export function ChildSummaryAnalytics() {
                         {loadingInsights[child.id] ? (
                           <div className="flex items-center justify-center py-8">
                             <LoadingIndicator
-                              size="small"
+                              size="medium"
                               message="Analyzing child's wellbeing data..."
-                              variant="spinner"
+                              variant="progress"
                               color="blue"
+                              progress={aiAnalysisProgress[child.id] || 0}
                             />
                           </div>
                         ) : aiInsights[child.id] ? (
