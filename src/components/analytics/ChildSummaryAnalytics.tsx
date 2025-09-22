@@ -102,7 +102,7 @@ export function ChildSummaryAnalytics() {
   const [aiInsights, setAIInsights] = useState<Record<string, AIInsights>>({})
   const [loading, setLoading] = useState(true)
   const [loadingInsights, setLoadingInsights] = useState<Record<string, boolean>>({})
-  const [aiAnalysisProgress, setAiAnalysisProgress] = useState<Record<string, number>>({})
+  // Removed aiAnalysisProgress to prevent excessive re-renders
   const [loadingStages, setLoadingStages] = useState<Array<{ name: string; status: 'pending' | 'loading' | 'complete' | 'error' }>>([
     { name: 'Loading organizations', status: 'loading' },
     { name: 'Loading children profiles', status: 'pending' },
@@ -437,20 +437,7 @@ export function ChildSummaryAnalytics() {
       console.log('🔵 Setting loadingInsights to TRUE for child:', childId)
       return { ...prev, [childId]: true }
     })
-    setAiAnalysisProgress(prev => ({ ...prev, [childId]: 0 }))
-
-    // Simulate progress updates
-    const progressInterval = setInterval(() => {
-      setAiAnalysisProgress(prev => {
-        const currentProgress = prev[childId] || 0
-        if (currentProgress >= 90) {
-          return prev
-        }
-        // Increment by 10-20% each time
-        const increment = Math.floor(Math.random() * 10) + 10
-        return { ...prev, [childId]: Math.min(currentProgress + increment, 90) }
-      })
-    }, 500)
+    // Removed progress animation to prevent excessive re-renders
 
     try {
       // Use the correct Supabase URL and key
@@ -516,9 +503,7 @@ export function ChildSummaryAnalytics() {
 
         console.log('Parsed insights:', insights)
 
-        // Set progress to 100% when complete
-        clearInterval(progressInterval)
-        setAiAnalysisProgress(prev => ({ ...prev, [childId]: 100 }))
+        // AI analysis complete
 
         setAIInsights(prev => ({
           ...prev,
@@ -527,13 +512,11 @@ export function ChildSummaryAnalytics() {
       }
     } catch (error) {
       console.error('Error loading AI insights:', error)
-      clearInterval(progressInterval)
-      setAiAnalysisProgress(prev => ({ ...prev, [childId]: 0 }))
+      // Error handling
     } finally {
       setTimeout(() => {
         console.log('🔵 Setting loadingInsights to FALSE for child:', childId)
         setLoadingInsights(prev => ({ ...prev, [childId]: false }))
-        setAiAnalysisProgress(prev => ({ ...prev, [childId]: 0 }))
       }, 500) // Small delay to show 100% briefly
     }
   }
@@ -622,22 +605,32 @@ export function ChildSummaryAnalytics() {
     if (match && match[1]) {
       let content = match[1].trim()
 
+      // Check if content has markdown bullets (lines starting with -)
+      const lines = content.split('\n')
+      const bulletLines = lines.filter(line => line.trim().startsWith('-'))
+
+      if (bulletLines.length > 0) {
+        // Join all bullet points with line breaks to preserve the full summary
+        const bullets = bulletLines.map(line =>
+          line.trim().replace(/^-\s*/, '').trim()
+        ).filter(b => b)
+
+        // Return all bullets joined as the summary
+        return cleanupText(bullets.join('\n'))
+      }
+
       // Check if content contains inline bullets (text with - embedded)
       if (content.includes(' - ')) {
         // Format inline bullets as a proper list
         const parts = content.split(' - ')
         if (parts.length > 1) {
-          // First part is the intro, rest are bullet points
-          const intro = parts[0].trim()
-          const bullets = parts.slice(1).map(b => b.trim()).filter(b => b)
-          return cleanupText(intro)
+          // Join all parts for the summary
+          return cleanupText(content)
         }
       }
 
-      // Otherwise, get the first 2-3 sentences for the summary
-      const sentences = content.split(/[.!?]/).filter(s => s.trim())
-      const result = sentences.slice(0, 3).join('. ').trim() + (sentences.length > 0 ? '.' : '')
-      return cleanupText(result)
+      // Return the full content for the summary
+      return cleanupText(content)
     }
 
     return ''
@@ -1241,14 +1234,7 @@ export function ChildSummaryAnalytics() {
 
                           {/* Loading Overlay with Lottie animation */}
                           {loadingInsights[child.id] && (
-                            <div
-                              className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-lg z-10"
-                              style={{ border: '2px solid red' }}
-                            >
-                              {console.log(`🔴 DEBUG: Rendering AI Insights loader for child ${child.id} at`, new Date().toISOString())}
-                              <div className="bg-yellow-200 p-2 rounded absolute top-2 left-2 text-xs z-50">
-                                DEBUG: Loader Position
-                              </div>
+                            <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-lg z-10">
                               <LottieLoader
                                 loading={true}
                                 size="small"
