@@ -966,7 +966,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
 
       {/* Fixed bottom button - always show to allow proceeding without completing all sections */}
       {!finalData && (
-        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center items-center gap-5" style={{ zIndex: 1000 }}>
+        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center items-center" style={{ zIndex: 1000, gap: '20px' }}>
           {/* Back Button */}
           <button
             onClick={() => {
