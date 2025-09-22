@@ -1078,6 +1078,7 @@ export function ChildSummaryAnalytics() {
                             loadingInsights[child.id] ? 'filter blur-[3px] scale-[0.98]' : 'filter blur-0 scale-100'
                           }`}>
                             {/* Summary */}
+                            {aiInsights[child.id] && (
                             <div className="bg-white p-4 rounded-lg border border-gray-200">
                               <h5 className="font-medium text-gray-900 mb-2 flex items-center">
                                 <Brain className="h-4 w-4 mr-2" />
@@ -1147,9 +1148,10 @@ export function ChildSummaryAnalytics() {
                                 return <p className="text-sm text-gray-700">{summary}</p>
                               })()}
                             </div>
+                            )}
 
                             {/* Concerns */}
-                            {aiInsights[child.id].concerns && aiInsights[child.id].concerns!.length > 0 && (
+                            {aiInsights[child.id] && aiInsights[child.id].concerns && aiInsights[child.id].concerns!.length > 0 && (
                               <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
                                 <h5 className="font-medium text-amber-900 mb-2 flex items-center">
                                   <AlertCircle className="h-4 w-4 mr-2" />
@@ -1167,7 +1169,7 @@ export function ChildSummaryAnalytics() {
                             )}
 
                             {/* Strengths */}
-                            {aiInsights[child.id].strengths && aiInsights[child.id].strengths!.length > 0 && (
+                            {aiInsights[child.id] && aiInsights[child.id].strengths && aiInsights[child.id].strengths!.length > 0 && (
                               <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                                 <h5 className="font-medium text-green-900 mb-2 flex items-center">
                                   <Activity className="h-4 w-4 mr-2" />
@@ -1185,7 +1187,7 @@ export function ChildSummaryAnalytics() {
                             )}
 
                             {/* Recommendations */}
-                            {aiInsights[child.id].recommendations && aiInsights[child.id].recommendations!.length > 0 && (
+                            {aiInsights[child.id] && aiInsights[child.id].recommendations && aiInsights[child.id].recommendations!.length > 0 && (
                               <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                 <h5 className="font-medium text-blue-900 mb-2 flex items-center">
                                   <MessageSquare className="h-4 w-4 mr-2" />
@@ -1202,9 +1204,11 @@ export function ChildSummaryAnalytics() {
                               </div>
                             )}
 
+                            {aiInsights[child.id] && (
                             <p className="text-xs text-gray-500 text-right">
                               Last analyzed: {aiInsights[child.id].lastAnalyzed}
                             </p>
+                            )}
                           </div>
 
                           {/* Loading Overlay - subtle blur effect */}
