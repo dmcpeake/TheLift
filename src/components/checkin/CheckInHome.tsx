@@ -314,11 +314,11 @@ export function CheckInHome() {
           <div className="mx-auto px-6" style={{ maxWidth: '300px', height: '80px', position: 'relative' }}>
 
             {/* Icons row - positioned at top */}
-            <div className="grid grid-cols-3 gap-2 w-full" style={{ paddingTop: '10px', marginBottom: '6px' }}>
-              {[{ icon: Heart, name: 'Mood meter' }, { icon: Smile, name: 'My emotions' }, { icon: Compass, name: 'Wellbeing' }].map((segment) => {
+            <div className="flex w-full justify-center" style={{ paddingTop: '10px', gap: '1px' }}>
+              {[{ icon: Heart, name: 'Mood' }, { icon: Smile, name: 'Emotions' }, { icon: Compass, name: 'Wellbeing' }].map((segment) => {
                 const Icon = segment.icon
                 return (
-                  <div key={segment.name} className="text-center">
+                  <div key={segment.name} className="text-center" style={{ width: 'calc((100% - 2px) / 3 - 20px)' }}>
                     <div style={{ padding: '10px', margin: '-10px' }}>
                       <Icon className="h-6 w-6 mx-auto" style={{ color: '#9ca3af' }} />
                     </div>
@@ -327,26 +327,27 @@ export function CheckInHome() {
               })}
             </div>
 
-            {/* Progress bar with separators - positioned 10px below icons */}
-            <div className="relative w-full bg-gray-200 rounded-full h-2">
-              {/* Main progress bar - 0% since no steps started */}
-              <div
-                className="h-2 rounded-full transition-all duration-300"
-                style={{
-                  width: '0%',
-                  backgroundColor: '#3a7ddc'
-                }}
-              />
-              {/* Section separators */}
-              <div className="absolute top-0 bottom-0 w-px bg-white" style={{ left: '33.33%' }} />
-              <div className="absolute top-0 bottom-0 w-px bg-white" style={{ left: '66.66%' }} />
+            {/* Progress bar with discrete segments - positioned 10px below icons */}
+            <div className="relative w-full h-2 flex justify-center" style={{ gap: '1px' }}>
+              {[0, 1, 2].map((index) => (
+                <div
+                  key={index}
+                  className="h-2 transition-all duration-300"
+                  style={{
+                    backgroundColor: '#e5e7eb',
+                    borderRadius: index === 0 ? '4px 0 0 4px' :
+                                 index === 2 ? '0 4px 4px 0' : '0',
+                    width: 'calc((100% - 2px) / 3 - 20px)'
+                  }}
+                />
+              ))}
             </div>
 
             {/* Step labels - positioned 10px below progress bar */}
-            <div className="grid grid-cols-3 gap-2 w-full" style={{ marginTop: '5px' }}>
-              {[{ name: 'Mood meter' }, { name: 'My emotions' }, { name: 'Wellbeing' }].map((segment) => {
+            <div className="flex w-full justify-center" style={{ marginTop: '5px', gap: '1px' }}>
+              {[{ name: 'Mood' }, { name: 'Emotions' }, { name: 'Wellbeing' }].map((segment) => {
                 return (
-                  <div key={segment.name} className="text-center">
+                  <div key={segment.name} className="text-center" style={{ width: 'calc((100% - 2px) / 3 - 20px)' }}>
                     <span className="text-xs" style={{ color: '#9ca3af' }}>
                       {segment.name}
                     </span>
