@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { projectId, publicAnonKey } from '../../utils/supabase/info.tsx'
 import { LoadingIndicator, DataLoadingIndicator } from '../shared/LoadingIndicator'
-import { ComparisonModal } from './comparison/ComparisonModal'
+import { ComparisonView } from './comparison/ComparisonView'
 import {
   ChevronDown, ChevronRight, TrendingUp, TrendingDown,
   Calendar, Heart, Brain, MessageSquare, Sparkles,
@@ -688,7 +688,7 @@ export function ChildSummaryAnalytics() {
           ))}
         </select>
 
-        {children.length >= 2 && (
+        {children.length >= 2 && !showComparison && (
           <button
             onClick={() => setShowComparison(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
@@ -698,6 +698,22 @@ export function ChildSummaryAnalytics() {
           </button>
         )}
       </div>
+
+      {/* Comparison View - Appears inline when active */}
+      <AnimatePresence>
+        {showComparison && (
+          <ComparisonView
+            children={children}
+            moodHistory={moodHistory}
+            organizationName={
+              selectedOrg === 'all'
+                ? 'All Organizations'
+                : organizations.find(org => org.id === selectedOrg)?.name
+            }
+            onClose={() => setShowComparison(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Children List */}
       <div className="space-y-4">
@@ -1003,19 +1019,6 @@ export function ChildSummaryAnalytics() {
           <p className="text-gray-500">No children found in this organization</p>
         </div>
       )}
-
-      {/* Comparison Modal */}
-      <ComparisonModal
-        isOpen={showComparison}
-        onClose={() => setShowComparison(false)}
-        children={children}
-        moodHistory={moodHistory}
-        organizationName={
-          selectedOrg === 'all'
-            ? 'All Organizations'
-            : organizations.find(org => org.id === selectedOrg)?.name
-        }
-      />
     </div>
   )
 }
