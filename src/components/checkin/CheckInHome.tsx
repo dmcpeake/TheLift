@@ -478,7 +478,7 @@ export function CheckInHome() {
           {/* Button Container */}
           <div style={{
             position: 'fixed',
-            bottom: '40px',
+            bottom: '32px',
             left: '50%',
             transform: 'translateX(-50%)',
             display: 'flex',
