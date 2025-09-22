@@ -303,10 +303,11 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
       </div>
 
 
-      {selectedMood && showNextButton && (
+      {showNextButton && (
         <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center" style={{ zIndex: 1000 }}>
           <button
-            onClick={() => onComplete?.(selectedMood)}
+            onClick={() => selectedMood && onComplete?.(selectedMood)}
+            disabled={!selectedMood}
             style={{
               width: '100px',
               height: '56px',
@@ -314,17 +315,25 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: '28px',
-              backgroundColor: '#3a7ddc',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              backgroundColor: selectedMood ? '#3a7ddc' : 'rgba(255, 255, 255, 0.2)',
+              boxShadow: selectedMood ? '0 8px 32px rgba(0, 0, 0, 0.1)' : 'none',
               border: 'none',
-              cursor: 'pointer',
+              cursor: selectedMood ? 'pointer' : 'not-allowed',
               transition: 'all 0.3s ease',
-              color: 'white',
+              color: selectedMood ? 'white' : 'rgba(255, 255, 255, 0.5)',
               fontSize: '16px',
               fontWeight: '600'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1066c2'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
+            onMouseEnter={(e) => {
+              if (selectedMood) {
+                e.currentTarget.style.backgroundColor = '#1066c2'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (selectedMood) {
+                e.currentTarget.style.backgroundColor = '#3a7ddc'
+              }
+            }}
             aria-label="Next"
           >
             NEXT
