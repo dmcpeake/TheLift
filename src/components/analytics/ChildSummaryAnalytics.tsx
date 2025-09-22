@@ -1096,11 +1096,18 @@ export function ChildSummaryAnalytics() {
                           Support Insights
                         </h4>
 
-                        <div className="relative min-h-[300px]">
-                          {/* Content - shows through blur when loading */}
-                          <div className={`space-y-4 transition-all duration-700 ${
-                            loadingInsights[child.id] ? 'filter blur-[3px] scale-[0.98]' : 'filter blur-0 scale-100'
-                          }`}>
+                        <div className="relative min-h-[300px] overflow-hidden">
+                          {/* Show loader if loading, otherwise show content */}
+                          {loadingInsights[child.id] ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-lg">
+                              <LottieLoader
+                                loading={true}
+                                size="small"
+                                message="Analyzing wellbeing patterns..."
+                              />
+                            </div>
+                          ) : (
+                          <div className="space-y-4">
                             {/* Summary */}
                             {aiInsights[child.id] && (
                             <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -1234,16 +1241,6 @@ export function ChildSummaryAnalytics() {
                             </p>
                             )}
                           </div>
-
-                          {/* Loading Overlay with Lottie animation */}
-                          {loadingInsights[child.id] && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-lg">
-                              <LottieLoader
-                                loading={true}
-                                size="small"
-                                message="Analyzing wellbeing patterns..."
-                              />
-                            </div>
                           )}
                         </div>
                       </div>
