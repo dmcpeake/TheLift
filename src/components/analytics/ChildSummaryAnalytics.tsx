@@ -5,10 +5,12 @@ import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { projectId, publicAnonKey } from '../../utils/supabase/info.tsx'
 import { LoadingIndicator, DataLoadingIndicator } from '../shared/LoadingIndicator'
 import { ComparisonView } from './comparison/ComparisonView'
+import { CriticalSupportAlert } from './CriticalSupportAlert'
 import {
   ChevronDown, ChevronRight, TrendingUp, TrendingDown,
   Calendar, Heart, Brain, MessageSquare, Sparkles,
-  User, Activity, AlertCircle, Clock, Minus, BarChart3
+  User, Activity, AlertCircle, Clock, Minus, BarChart3,
+  AlertTriangle
 } from 'lucide-react'
 
 const supabase = getSupabaseClient()
@@ -272,11 +274,23 @@ export function ChildSummaryAnalytics() {
 
       // Sort by those needing attention first
       processedChildren.sort((a, b) => {
-        // Prioritize children with developing trends (needing additional support)
+        // CRITICAL: Children with average mood < 2.5 always come first
+        const aCritical = (a.averageMood || 5) < 2.5
+        const bCritical = (b.averageMood || 5) < 2.5
+
+        if (aCritical && !bCritical) return -1
+        if (!aCritical && bCritical) return 1
+
+        // Among critical cases, sort by severity (lowest mood first)
+        if (aCritical && bCritical) {
+          return (a.averageMood || 5) - (b.averageMood || 5)
+        }
+
+        // Then prioritize children with developing trends
         if (a.moodTrend === 'developing' && b.moodTrend !== 'developing') return -1
         if (b.moodTrend === 'developing' && a.moodTrend !== 'developing') return 1
 
-        // Then by lowest average mood
+        // Finally by lowest average mood
         return (a.averageMood || 5) - (b.averageMood || 5)
       })
 
@@ -723,15 +737,84 @@ export function ChildSummaryAnalytics() {
         )}
       </AnimatePresence>
 
+      {/* Critical Support Summary Banner */}
+      {(() => {
+        const criticalChildren = children.filter(child => (child.averageMood || 5) < 2.5)
+        if (criticalChildren.length > 0) {
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-red-50 border-2 border-red-300 rounded-lg p-4 mb-6 flex items-center justify-between"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-red-400 rounded-full animate-ping opacity-75"></div>
+                  <AlertTriangle className="relative h-6 w-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-red-900">
+                    {criticalChildren.length} {criticalChildren.length === 1 ? 'child requires' : 'children require'} urgent wellbeing support
+                  </h3>
+                  <p className="text-sm text-red-700">
+                    Average mood scores below 2.5 indicate immediate intervention is needed
+                  </p>
+                </div>
+              </div>
+              <button
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm"
+                onClick={() => {
+                  // Scroll to first critical child
+                  const firstCritical = criticalChildren[0]
+                  if (firstCritical && expandedChild !== firstCritical.id) {
+                    toggleChildExpansion(firstCritical.id)
+                  }
+                }}
+              >
+                Review Now
+              </button>
+            </motion.div>
+          )
+        }
+        return null
+      })()}
+
       {/* Children List */}
       <div className="space-y-4">
-        {children.map((child, index) => (
-          <motion.div
-            key={child.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+        {children.map((child, index) => {
+          const isCritical = (child.averageMood || 5) < 2.5
+          const criticalMoodCount = moodHistory[child.id]?.filter(m => m.mood_numeric <= 2).length || 0
+
+          return (
+            <motion.div
+              key={child.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+            >
+              {/* Show Critical Support Alert for children with average mood < 2.5 */}
+              {isCritical && (
+                <CriticalSupportAlert
+                  childName={child.name}
+                  averageMood={child.averageMood || 0}
+                  lastCheckIn={child.lastCheckIn || 'Never'}
+                  checkInCount={child.checkInCount || 0}
+                  criticalCheckIns={criticalMoodCount}
+                  onViewDetails={() => toggleChildExpansion(child.id)}
+                  onContactSupport={() => {
+                    // TODO: Implement contact support functionality
+                    alert('Contact support feature coming soon')
+                  }}
+                  onGenerateReport={() => {
+                    // TODO: Implement report generation
+                    alert('Report generation feature coming soon')
+                  }}
+                />
+              )}
+
+              <div className={`bg-white rounded-lg shadow-sm overflow-hidden ${
+                isCritical ? 'border-2 border-red-400' : 'border border-gray-200'
+              }`}
           >
             {/* Child Summary Row */}
             <div
@@ -758,7 +841,14 @@ export function ChildSummaryAnalytics() {
 
                   {/* Name and Basic Info */}
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 text-lg">{child.name}</h3>
+                    <div className="flex items-center space-x-2">
+                      <h3 className="font-semibold text-gray-900 text-lg">{child.name}</h3>
+                      {isCritical && (
+                        <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-bold rounded-full uppercase">
+                          Urgent Support
+                        </span>
+                      )}
+                    </div>
                     <div className="flex items-center space-x-3 mt-1">
                       <span className="flex items-center text-sm text-gray-600">
                         <Calendar className="h-3 w-3 mr-2" />
@@ -1017,8 +1107,10 @@ export function ChildSummaryAnalytics() {
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.div>
-        ))}
+              </div>
+            </motion.div>
+          )
+        })}
       </div>
 
       {children.length === 0 && (
