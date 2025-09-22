@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { projectId, publicAnonKey } from '../../utils/supabase/info.tsx'
 import { LoadingIndicator, DataLoadingIndicator } from '../shared/LoadingIndicator'
+import { ComparisonModal } from './comparison/ComparisonModal'
 import {
   ChevronDown, ChevronRight, TrendingUp, TrendingDown,
   Calendar, Heart, Brain, MessageSquare, Sparkles,
-  User, Activity, AlertCircle, Clock, Minus
+  User, Activity, AlertCircle, Clock, Minus, BarChart3
 } from 'lucide-react'
 
 const supabase = getSupabaseClient()
@@ -108,6 +109,7 @@ export function ChildSummaryAnalytics() {
     { name: 'Preparing analytics', status: 'pending' }
   ])
   const [currentLoadingStage, setCurrentLoadingStage] = useState(0)
+  const [showComparison, setShowComparison] = useState(false)
 
   useEffect(() => {
     loadOrganizations()
@@ -674,8 +676,8 @@ export function ChildSummaryAnalytics() {
         <p className="text-gray-600">View each child's wellbeing journey and personalized support insights</p>
       </div>
 
-      {/* Organization Filter */}
-      <div className="mb-6">
+      {/* Organization Filter and Compare Button */}
+      <div className="mb-6 flex items-center justify-between">
         <select
           value={selectedOrg}
           onChange={(e) => setSelectedOrg(e.target.value)}
@@ -685,6 +687,16 @@ export function ChildSummaryAnalytics() {
             <option key={org.id} value={org.id}>{org.name}</option>
           ))}
         </select>
+
+        {children.length >= 2 && (
+          <button
+            onClick={() => setShowComparison(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span>Compare Children</span>
+          </button>
+        )}
       </div>
 
       {/* Children List */}
@@ -991,6 +1003,19 @@ export function ChildSummaryAnalytics() {
           <p className="text-gray-500">No children found in this organization</p>
         </div>
       )}
+
+      {/* Comparison Modal */}
+      <ComparisonModal
+        isOpen={showComparison}
+        onClose={() => setShowComparison(false)}
+        children={children}
+        moodHistory={moodHistory}
+        organizationName={
+          selectedOrg === 'all'
+            ? 'All Organizations'
+            : organizations.find(org => org.id === selectedOrg)?.name
+        }
+      />
     </div>
   )
 }
