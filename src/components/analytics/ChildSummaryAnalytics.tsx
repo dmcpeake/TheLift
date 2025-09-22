@@ -3,7 +3,7 @@ import { MoodHeatmap } from './MoodHeatmap'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { projectId, publicAnonKey } from '../../utils/supabase/info.tsx'
-import { PageLoader } from '../shared/LottieLoader'
+import { PageLoader, LottieLoader } from '../shared/LottieLoader'
 import { ComparisonView } from './comparison/ComparisonView'
 import { CriticalSupportAlert } from './CriticalSupportAlert'
 import {
@@ -1235,60 +1235,15 @@ export function ChildSummaryAnalytics() {
                             )}
                           </div>
 
-                          {/* Loading Overlay - subtle blur effect */}
+                          {/* Loading Overlay with Lottie animation */}
                           {loadingInsights[child.id] && (
-                            <motion.div
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-white/40 via-white/50 to-white/40 backdrop-blur-[1px] rounded-lg"
-                            >
-                              <motion.div
-                                initial={{ scale: 0.9, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                transition={{ duration: 0.3 }}
-                                className="bg-white/95 backdrop-blur-md rounded-xl shadow-xl p-5 border border-gray-100"
-                              >
-                                <div className="flex flex-col items-center space-y-3">
-                                  {/* Smooth pulsing dots */}
-                                  <div className="flex space-x-1.5">
-                                    <motion.div
-                                      className="w-2 h-2 bg-indigo-500 rounded-full"
-                                      animate={{
-                                        scale: [1, 1.5, 1],
-                                        opacity: [0.3, 1, 0.3]
-                                      }}
-                                      transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
-                                    />
-                                    <motion.div
-                                      className="w-2 h-2 bg-indigo-500 rounded-full"
-                                      animate={{
-                                        scale: [1, 1.5, 1],
-                                        opacity: [0.3, 1, 0.3]
-                                      }}
-                                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
-                                    />
-                                    <motion.div
-                                      className="w-2 h-2 bg-indigo-500 rounded-full"
-                                      animate={{
-                                        scale: [1, 1.5, 1],
-                                        opacity: [0.3, 1, 0.3]
-                                      }}
-                                      transition={{ duration: 1.5, repeat: Infinity, delay: 1 }}
-                                    />
-                                  </div>
-                                  <p className="text-sm font-medium text-gray-700">Analyzing wellbeing patterns</p>
-                                  {/* Smooth progress indicator */}
-                                  <div className="w-32 h-1 bg-gray-200 rounded-full overflow-hidden">
-                                    <motion.div
-                                      className="h-full bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-full"
-                                      animate={{ x: ["-100%", "200%"] }}
-                                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                    />
-                                  </div>
-                                </div>
-                              </motion.div>
-                            </motion.div>
+                            <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-lg">
+                              <LottieLoader
+                                loading={true}
+                                size="small"
+                                message="Analyzing wellbeing patterns..."
+                              />
+                            </div>
                           )}
                         </div>
                       </div>
