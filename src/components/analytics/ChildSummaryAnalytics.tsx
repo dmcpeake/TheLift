@@ -534,10 +534,10 @@ export function ChildSummaryAnalytics() {
     }
   }
 
-  // Helper function to clean up text with underscores
+  // Helper function to clean up text with underscores and fix capitalization
   const cleanupText = (text: string): string => {
     // Replace common patterns with underscores with proper text
-    return text
+    let cleaned = text
       .replace(/declining_pattern/gi, 'developing pattern')
       .replace(/improving_pattern/gi, 'strengthening pattern')
       .replace(/stable_pattern/gi, 'consistent pattern')
@@ -577,6 +577,37 @@ export function ChildSummaryAnalytics() {
       .replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()
       // Generic pattern: replace any remaining word_word patterns
       .replace(/(\w+)_(\w+)/g, '$1 $2')
+
+    // Fix sentence capitalization
+    // First, capitalize the first letter of the entire string
+    if (cleaned.length > 0) {
+      cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1)
+    }
+
+    // Capitalize first letter after sentence endings (. ! ?)
+    cleaned = cleaned.replace(/([.!?])\s+([a-z])/g, (match, p1, p2) => {
+      return p1 + ' ' + p2.toUpperCase()
+    })
+
+    // Capitalize proper nouns (children's names)
+    const childNames = ['Sophia', 'Emma', 'Aisha', 'Lucas', 'Oliver', 'Ava', 'Maya', 'Charlie', 'Sebastian', 'Jayden', 'Liam', 'Noah', 'Ethan', 'Mason', 'Olivia', 'Isabella', 'Mia', 'Charlotte']
+    childNames.forEach(name => {
+      const regex = new RegExp(`\\b${name.toLowerCase()}\\b`, 'gi')
+      cleaned = cleaned.replace(regex, name)
+    })
+
+    // Fix spacing issues around decimals (like "3. 5" -> "3.5")
+    cleaned = cleaned.replace(/(\d)\s+\.\s+(\d)/g, '$1.$2')
+
+    // Capitalize 'I' when it stands alone
+    cleaned = cleaned.replace(/\bi\b/g, 'I')
+
+    // Ensure bullet points start with capital letters
+    cleaned = cleaned.replace(/^(•|-)\s*([a-z])/gm, (match, bullet, letter) => {
+      return bullet + ' ' + letter.toUpperCase()
+    })
+
+    return cleaned
   }
 
   const extractSection = (text: string, section: string): string => {
