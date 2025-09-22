@@ -403,7 +403,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
       {/* Centered title like breathing exercise */}
       <div className="text-center" style={{ marginBottom: '2rem' }}>
         <h1 className="wellbeing-title-mobile wellbeing-title-desktop text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-          {currentSection ? `How are you feeling about ${currentSection.name}` : 'How do you feel about these areas of your life?'}
+          {currentSection ? `How are you feeling about your ${currentSection.name}` : 'How do you feel about these areas of your life?'}
         </h1>
         <h1 className="wellbeing-title-mobile wellbeing-title-mobile-text text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em', display: 'none' }}>
           {currentSection ? 'How are you feeling about' : 'How do you feel about these areas of your life?'}
@@ -525,7 +525,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                   key={section.id}
                   onClick={(e) => {
                     // Only handle click if we haven't moved the mouse (not dragging)
-                    if (!hasMovedMouse && (isCompleted || isActive)) {
+                    if (!hasMovedMouse) {
                       setCurrentSectionIndex(index)
                       // Auto-scroll to keep the clicked card in view
                       setTimeout(() => scrollToActiveCard(index), 100)
@@ -537,22 +537,21 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                   className={`relative rounded-lg flex flex-col items-center gap-2 px-3 py-4 text-sm transition-all ${
                     isActive ? 'font-medium' :
                     isCompleted ? 'hover:text-blue-700 cursor-pointer' :
-                    'cursor-not-allowed'
+                    'hover:text-blue-700 cursor-pointer'
                   }`}
                   style={{
                     borderRadius: '4px',
                     width: '140px',
                     minWidth: '140px',
-                    backgroundColor: isCompleted && completedMood ? `${completedMood.color}33` :
-                                   isActive ? 'white' : '#f3f4f6',
-                    border: isCompleted && completedMood || isActive ? `2px solid ${
-                      isCompleted && completedMood ? completedMood.color : '#3b82f6'
-                    }` : 'none',
-                    boxShadow: isCompleted && completedMood || isActive ? '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' : 'none',
-                    color: isActive && !isCompleted ? '#3b82f6' : '#1f2937',
-                    pointerEvents: isCompleted || isActive ? 'auto' : 'none'
+                    backgroundColor: isCompleted && completedMood ? `${completedMood.color}33` : 'white',
+                    border: isCompleted && completedMood ? `2px solid ${completedMood.color}` :
+                           isActive ? '2px solid #e87e67' : '2px solid #3b82f6',
+                    boxShadow: isActive ? '0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06)' :
+                              '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                    color: isCompleted ? '#1f2937' : isActive ? '#e87e67' : '#3b82f6',
+                    pointerEvents: 'auto'
                   }}
-                  disabled={!isCompleted && !isActive}
+                  disabled={false}
                 >
                   {/* Reset X icon for completed cards */}
                   {isCompleted && completedMood && (
@@ -594,10 +593,8 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                     <div className="rounded-full flex items-center justify-center transition-all" style={{
                       width: '40px',
                       height: '40px',
-                      backgroundColor: isActive ? '#3b82f61a' :
-                                     isCompleted && completedMood ? completedMood.color : 'rgba(0, 0, 0, 0.03)',
-                      color: isActive && !isCompleted ? '#3b82f6' :
-                             isCompleted && completedMood ? 'white' : '#1f2937'
+                      backgroundColor: isActive ? '#e87e671a' : '#3b82f61a',
+                      color: isActive ? '#e87e67' : '#3b82f6'
                     }}>
                       {getIcon(section.id)}
                     </div>
@@ -605,7 +602,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
 
                   {/* Text */}
                   <div className="text-center">
-                    <span className="font-semibold" style={{ fontSize: '11px', lineHeight: '1.2' }}>{section.name}</span>
+                    <span className="font-semibold" style={{ fontSize: '11px', lineHeight: '1.2', color: isCompleted ? '#1f2937' : isActive ? '#e87e67' : '#3b82f6' }}>{section.name}</span>
                   </div>
                 </button>
               )
@@ -967,38 +964,108 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
         </div>
       )}
 
-      {/* Fixed bottom button - show when current section has mood selected */}
-      {!finalData && currentSection && sections[currentSection.id]?.mood_level && (
-        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center" style={{ zIndex: 1000 }}>
+      {/* Fixed bottom button - always show to allow proceeding without completing all sections */}
+      {!finalData && (
+        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center items-center gap-5" style={{ zIndex: 1000 }}>
+          {/* Back Button */}
           <button
-            onClick={() => finishSection(currentSection.id)}
+            onClick={() => {
+              // Navigate back to emotions page
+              window.history.back()
+            }}
             style={{
+              background: 'rgba(255, 255, 255, 0.5)',
+              border: 'none',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               width: '56px',
+              height: '56px'
+            }}
+            aria-label="Go back to emotions"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+              <polyline points="15,18 9,12 15,6"></polyline>
+            </svg>
+          </button>
+
+          {/* Next Button */}
+          <button
+            onClick={() => {
+              // If we have completed any sections, complete the wheel
+              // Otherwise, just trigger completion with empty data
+              if (Object.keys(sections).length > 0) {
+                completeWheel()
+              } else {
+                onComplete?.({
+                  sections: [],
+                  overall_score: 0,
+                  completed_sections: 0,
+                  completed_at: new Date().toISOString(),
+                  time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
+                })
+              }
+            }}
+            style={{
+              width: '100px',
               height: '56px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: '50%',
+              borderRadius: '28px',
               backgroundColor: '#3a7ddc',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              color: 'white'
+              color: 'white',
+              fontSize: '16px',
+              fontWeight: '600'
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
             aria-label="Continue"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9,18 15,12 9,6"></polyline>
+            NEXT
+          </button>
+
+          {/* Skip Button */}
+          <button
+            onClick={() => {
+              // Skip to success page - complete with empty data
+              onComplete?.({
+                sections: [],
+                overall_score: 0,
+                completed_sections: 0,
+                completed_at: new Date().toISOString(),
+                time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
+              })
+            }}
+            style={{
+              background: 'rgba(255, 255, 255, 0.5)',
+              border: 'none',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '56px',
+              height: '56px'
+            }}
+            aria-label="Skip to completion"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+              <polygon points="5,4 15,12 5,20"></polygon>
+              <line x1="19" y1="5" x2="19" y2="19"></line>
             </svg>
           </button>
         </div>
       )}
 
-      {/* Fixed bottom button - only show when all 7 areas completed */}
-      {!finalData && allCompleted && (
+      {/* Remove the old completion button since we merged the logic above */}
+      {false && !finalData && allCompleted && (
         <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center" style={{ zIndex: 1000 }}>
           <button
             onClick={completeWheel}

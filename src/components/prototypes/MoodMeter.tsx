@@ -308,26 +308,26 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
           <button
             onClick={() => onComplete?.(selectedMood)}
             style={{
-              width: '56px',
+              width: '100px',
               height: '56px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: '50%',
+              borderRadius: '28px',
               backgroundColor: '#3a7ddc',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              color: 'white'
+              color: 'white',
+              fontSize: '16px',
+              fontWeight: '600'
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1066c2'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
             aria-label="Next"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9,18 15,12 9,6"></polyline>
-            </svg>
+            NEXT
           </button>
         </div>
       )}

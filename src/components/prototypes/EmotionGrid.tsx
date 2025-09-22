@@ -232,11 +232,8 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
       {/* Centered title like breathing exercise */}
       <div className="text-center" style={{ marginBottom: currentStep === 2 ? '0.5rem' : '0.5rem' }}>
         <h1 className="emotion-title-mobile text-gray-900 mb-1" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-          {currentStep === 1 ? 'What are you feeling?' : 'I am feeling'}
+          {currentStep === 1 ? 'How are you feeling?' : 'I am feeling'}
         </h1>
-        {currentStep === 1 && (
-          <p className="text-gray-600 mb-4" style={{ fontSize: '14px', fontWeight: 'normal' }}>Select up to 3</p>
-        )}
         {currentStep === 2 && (
           <div style={{ height: '20px' }} className="md:hidden"></div>
         )}
@@ -580,26 +577,26 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
           <button
             onClick={handleNext}
             style={{
-              width: '56px',
+              width: '100px',
               height: '56px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: '50%',
+              borderRadius: '28px',
               backgroundColor: '#3a7ddc',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              color: 'white'
+              color: 'white',
+              fontSize: '16px',
+              fontWeight: '600'
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
             aria-label="Next"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9,18 15,12 9,6"></polyline>
-            </svg>
+            CHOOSE
           </button>
         </div>
       )}
@@ -610,26 +607,26 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
           <button
             onClick={handleNext}
             style={{
-              width: '56px',
+              width: '100px',
               height: '56px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: '50%',
+              borderRadius: '28px',
               backgroundColor: '#3a7ddc',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              color: 'white'
+              color: 'white',
+              fontSize: '16px',
+              fontWeight: '600'
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
             aria-label="Next"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9,18 15,12 9,6"></polyline>
-            </svg>
+            NEXT
           </button>
         </div>
       )}
