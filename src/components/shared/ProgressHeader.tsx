@@ -1,5 +1,7 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Heart, Smile, Compass } from 'lucide-react'
+import Lottie from 'lottie-react'
+import { GuideModal } from './GuideModal'
 
 interface ProgressHeaderProps {
   currentStep: string
@@ -28,14 +30,92 @@ export function ProgressHeader({
   emotionGridStep,
   onNavigateToStep
 }: ProgressHeaderProps) {
+  const [theoAnimation, setTheoAnimation] = useState(null)
+  const [isGuideModalOpen, setIsGuideModalOpen] = useState(false)
+
+  useEffect(() => {
+    fetch('/theo-waving.json')
+      .then(response => response.json())
+      .then(data => setTheoAnimation(data))
+      .catch(error => console.error('Error loading Theo animation:', error))
+  }, [])
+
   const handleNavigateToStep = (stepId: string) => {
     if (onNavigateToStep) {
       onNavigateToStep(stepId)
     }
   }
 
+  const getCurrentSection = () => {
+    // Map current step to section for guide modal
+    const sectionMapping = {
+      'breathing': 'breathing',
+      'mood': 'mood',
+      'emotions': 'emotions',
+      'wellbeing': 'wellbeing'
+    }
+    return sectionMapping[currentStep] || 'breathing'
+  }
+
+  const handleGuideClick = () => {
+    setIsGuideModalOpen(true)
+  }
+
   return (
     <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', height: '80px', borderRadius: '0' }}>
+      {/* Theo Avatar in top left */}
+      {theoAnimation && (
+        <>
+          <button
+            onClick={handleGuideClick}
+            className="cursor-pointer transition-all hover:opacity-80"
+            style={{
+              position: 'absolute',
+              left: '16px',
+              top: '10px',
+              width: '60px',
+              height: '60px',
+              zIndex: 51,
+              border: '2px dashed #3a7ddc',
+              borderRadius: '50%',
+              padding: '1px',
+              boxSizing: 'border-box',
+              background: 'none'
+            }}
+            aria-label="Open guide"
+          >
+            <Lottie
+              animationData={theoAnimation}
+              loop={true}
+              autoplay={true}
+              style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
+            />
+          </button>
+
+          {/* "My guide" text - hidden on mobile */}
+          <button
+            onClick={handleGuideClick}
+            className="hidden md:block cursor-pointer transition-all hover:opacity-80"
+            style={{
+              position: 'absolute',
+              left: '86px', // 16px (circle left) + 60px (circle width) + 10px (gap)
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 51,
+              fontSize: '14px',
+              color: '#3a7ddc',
+              fontWeight: '500',
+              background: 'none',
+              border: 'none',
+              padding: '8px'
+            }}
+            aria-label="Open guide"
+          >
+            My guide
+          </button>
+        </>
+      )}
+
       <div className="mx-auto px-6" style={{ maxWidth: '300px', height: '80px', position: 'relative' }}>
 
         {/* Icons row - positioned at top */}
@@ -45,10 +125,13 @@ export function ProgressHeader({
             const stepId = steps[index]?.id
             const isCompleted = completedData[stepId] && !completedData[stepId].skipped
             const isCurrentStep = (() => {
-              if (index === 0) return currentStep === 'mood'
-              if (index === 1) return currentStep === 'emotions'
-              if (index === 2) return currentStep === 'wellbeing'
-              return false
+              // Very explicit mapping to avoid any confusion
+              const stepMapping = {
+                0: 'mood',     // Heart icon
+                1: 'emotions', // Smile icon
+                2: 'wellbeing' // Compass icon
+              }
+              return currentStep === stepMapping[index]
             })()
             // Can navigate if it's completed OR if we're past this step OR if it's the next available step
             const canNavigate = isCompleted || isCurrentStep || (() => {
@@ -76,10 +159,16 @@ export function ProgressHeader({
                     style={{ background: 'none', border: 'none', padding: '10px', margin: '-10px' }}
                     aria-label={`Navigate to ${segment.name}`}
                   >
-                    <Icon className="h-6 w-6 mx-auto" style={{ color: '#3a7ddc' }} />
+                    <Icon className="h-6 w-6 mx-auto" style={{ color: (isCompleted || isCurrentStep) ? '#3a7ddc' : '#9ca3af' }} />
                   </button>
                 ) : (
-                  <Icon className="h-6 w-6 mx-auto" style={{ color: isCompleted ? '#3a7ddc' : '#9ca3af' }} />
+                  <Icon
+                    className="h-6 w-6 mx-auto"
+                    style={{
+                      color: isCompleted ? '#3a7ddc' : '#9ca3af',
+                      marginBottom: currentStep === 'breathing' ? '6px' : '0'
+                    }}
+                  />
                 )}
               </div>
             )
@@ -89,37 +178,18 @@ export function ProgressHeader({
         {/* Progress bar with discrete segments - positioned 10px below icons */}
         <div className="relative w-full h-2 flex justify-center" style={{ gap: '1px' }}>
           {progressSegments.map((_, index) => {
-            // Calculate segment states
-            let isCompleted = false
-            let isNext = false
-
-            // Mood meter is completed when on emotions or beyond
-            if (index === 0 && (currentStep === 'emotions' || currentStep === 'wellbeing' || currentStep === 'garden')) {
-              isCompleted = true
-            }
-            // Emotions is completed when on wellbeing or beyond
-            if (index === 1 && (currentStep === 'wellbeing' || currentStep === 'garden')) {
-              isCompleted = true
-            }
-            // Wellbeing is completed when on garden
-            if (index === 2 && currentStep === 'garden') {
-              isCompleted = true
-            }
-
-            // Next available segment logic
-            if (index === 1 && currentStep === 'mood' && currentStepHasSelection) {
-              isNext = true
-            }
-            if (index === 2 && currentStep === 'emotions' && emotionGridStep === 2) {
-              isNext = true
-            }
+            const stepId = steps[index]?.id
+            // Check if this step has been completed based on completedData
+            const isCompleted = completedData[stepId] && !completedData[stepId].skipped
+            // Check if this is the current step
+            const isCurrent = stepId === currentStep
 
             return (
               <div
                 key={index}
                 className="h-2 transition-all duration-300"
                 style={{
-                  backgroundColor: isCompleted ? '#3a7ddc' : isNext ? 'rgba(58, 125, 220, 0.5)' : '#e5e7eb',
+                  backgroundColor: (isCompleted || isCurrent) ? '#3a7ddc' : '#e5e7eb',
                   borderRadius: index === 0 ? '4px 0 0 4px' :
                                index === progressSegments.length - 1 ? '0 4px 4px 0' : '0',
                   width: 'calc((100% - 2px) / 3 - 20px)'
@@ -135,56 +205,23 @@ export function ProgressHeader({
             const stepId = steps[index]?.id
             const isCompleted = completedData[stepId] && !completedData[stepId].skipped
             const isCurrentStep = (() => {
-              if (index === 0) return currentStep === 'mood'
-              if (index === 1) return currentStep === 'emotions'
-              if (index === 2) return currentStep === 'wellbeing'
-              return false
+              // Very explicit mapping to avoid any confusion
+              const stepMapping = {
+                0: 'mood',     // Heart icon
+                1: 'emotions', // Smile icon
+                2: 'wellbeing' // Compass icon
+              }
+              return currentStep === stepMapping[index]
             })()
-            // Can navigate if it's completed OR if we're past this step OR if it's the next available step
+            // Can navigate if it's completed OR if we're past this step
             const canNavigate = isCompleted || isCurrentStep || (() => {
               if (index === 0) return currentStep === 'emotions' || currentStep === 'wellbeing'
               if (index === 1) return currentStep === 'wellbeing'
               return false
-            })() || (() => {
-              // Make next step tappable if current step has selection
-              if (currentStepHasSelection) {
-                if (currentStep === 'mood' && index === 1) return true // emotions step
-              }
-              // For wellbeing step, only tappable on emotion step 2
-              if (currentStep === 'emotions' && emotionGridStep === 2 && index === 2) {
-                return true // wellbeing step
-              }
-              return false
             })()
 
-            // Highlight both completed and currently active segments
-            let isHighlighted = false
-            let isNextAvailable = false
-
-            if (index === 0) {
-              // Mood meter - highlight if current or completed
-              if (currentStep === 'mood' || currentStep === 'emotions' || currentStep === 'wellbeing' || currentStep === 'garden') {
-                isHighlighted = true
-              }
-            } else if (index === 1) {
-              // My emotions - highlight if current or completed
-              if (currentStep === 'emotions' || currentStep === 'wellbeing' || currentStep === 'garden') {
-                isHighlighted = true
-              }
-              // Check if it's the next available step
-              if (currentStep === 'mood' && currentStepHasSelection) {
-                isNextAvailable = true
-              }
-            } else if (index === 2) {
-              // Wellbeing wheel - highlight if current or completed
-              if (currentStep === 'wellbeing' || currentStep === 'garden') {
-                isHighlighted = true
-              }
-              // Check if it's the next available step
-              if (currentStep === 'emotions' && emotionGridStep === 2) {
-                isNextAvailable = true
-              }
-            }
+            // Highlight if completed OR current
+            const isHighlighted = isCompleted || isCurrentStep
 
             return (
               <div key={segment.name} className="text-center" style={{ width: 'calc((100% - 2px) / 3 - 20px)' }}>
@@ -195,7 +232,7 @@ export function ProgressHeader({
                     style={{ background: 'none', border: 'none', padding: '12px 16px', margin: '-12px -16px' }}
                     aria-label={`Navigate to ${segment.name}`}
                   >
-                    <span className={`text-xs ${isHighlighted ? '' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : (isNextAvailable ? '#3a7ddc' : undefined) }}>
+                    <span className={`text-xs ${isHighlighted ? '' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : undefined }}>
                       {segment.name}
                     </span>
                   </button>
@@ -209,6 +246,13 @@ export function ProgressHeader({
           })}
         </div>
       </div>
+
+      {/* Guide Modal */}
+      <GuideModal
+        isOpen={isGuideModalOpen}
+        onClose={() => setIsGuideModalOpen(false)}
+        section={getCurrentSection()}
+      />
     </div>
   )
 }

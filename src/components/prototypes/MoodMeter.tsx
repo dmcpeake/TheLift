@@ -35,9 +35,17 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
   useEffect(() => {
     if (initialData && !selectedMood) {
       setSelectedMood(initialData)
+
+      // Restore the rotation to position the selected mood at the top
+      const moodIndex = moods.findIndex(mood => mood.level === initialData.mood_level)
+      if (moodIndex !== -1) {
+        const targetRotation = -moodIndex * 72 // Each segment is 72 degrees
+        setRotationOffset(targetRotation)
+      }
+
       onSelectionMade?.()
     }
-  }, [initialData, onSelectionMade])
+  }, [initialData, onSelectionMade, selectedMood])
 
   // Handle external trigger for completion
   useEffect(() => {
@@ -55,7 +63,7 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
   ]
 
   const handleMoodSelect = (mood: typeof moods[0], index: number) => {
-    // If clicking the already selected mood, unselect it
+    // If clicking the already selected mood, unselect it (allow changing choice)
     if (selectedMood?.mood_level === mood.level) {
       setSelectedMood(null)
       setRotationOffset(0) // Reset to default position
@@ -270,13 +278,13 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
                 style={{ pointerEvents: 'none' }}
               >
                 <div className="text-center transition-opacity duration-300">
-                  {selectedMood ? (
-                    <span className="text-lg font-medium text-gray-800 capitalize">
-                      {selectedMood.mood_level.replace('_', ' ')}
-                    </span>
-                  ) : hoveredMood ? (
+                  {hoveredMood ? (
                     <span className="text-lg font-medium text-gray-700 capitalize">
                       {hoveredMood.replace('_', ' ')}
+                    </span>
+                  ) : selectedMood ? (
+                    <span className="text-lg font-medium text-gray-800 capitalize">
+                      {selectedMood.mood_level.replace('_', ' ')}
                     </span>
                   ) : (
                     <span className="text-base text-gray-500">
