@@ -578,7 +578,7 @@ export function CheckInHome() {
       <YellowSwoosh>
         {/* Start Button */}
         {!showBreathing && (
-          <div className="flex justify-center mobile-start-button" style={{ position: 'absolute', bottom: '40px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
+          <div className="flex justify-center mobile-start-button" style={{ position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
             <button
               onClick={handleStartClick}
               className="font-semibold text-lg transition-all duration-200"
