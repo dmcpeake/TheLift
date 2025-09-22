@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react'
 import Lottie from 'lottie-react'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
 
-import BlushingShaded from '../../../public/Blushing_Shaded.json'
-import HappyShaded from '../../../public/Happy_Shaded.json'
-import MehShaded from '../../../public/Meh_Shaded.json'
-import SadTearShaded from '../../../public/Sad_Tear_Shaded.json'
-import CryingShaded from '../../../public/Crying_Shaded.json'
+import BlushingShaded from '../../assets/animations/Blushing_Shaded.json'
+import HappyShaded from '../../assets/animations/Happy_Shaded.json'
+import MehShaded from '../../assets/animations/Meh_Shaded.json'
+import SadTearShaded from '../../assets/animations/Sad_Tear_Shaded.json'
+import CryingShaded from '../../assets/animations/Crying_Shaded.json'
 
 interface MoodData {
   mood_level: string

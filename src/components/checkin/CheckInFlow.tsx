@@ -15,8 +15,6 @@ const steps = [
   { id: 'wellbeing', name: 'Wellbeing wheel', number: 3 }
 ]
 
-// Progress segments are now defined in the shared ProgressHeader component
-
 export function CheckInFlow() {
   const { step } = useParams<{ step: string }>()
   const navigate = useNavigate()
@@ -80,35 +78,10 @@ export function CheckInFlow() {
     setCurrentStepHasSelection(false)
   }
 
-  const canNavigateToStep = (stepId: string, index: number) => {
-    // Can always go back to completed steps
-    if (completedData[stepId]) {
-      return true
-    }
-
-    // Can always navigate to breathing (first step)
-    if (stepId === 'breathing') {
-      return true
-    }
-
-    // For mood step, can navigate if breathing was completed or skipped
-    if (stepId === 'mood') {
-      return completedData['breathing']
-    }
-
-    // For other steps, must have completed previous step (not skipped)
-    if (index > 0) {
-      const previousStep = steps[index - 1]
-      return completedData[previousStep.id] && !completedData[previousStep.id].skipped
-    }
-
-    return false
-  }
-
   const handleSkip = (stepId: string) => {
     // Mark as skipped and move to next step
     setCompletedData(prev => ({ ...prev, [stepId]: { skipped: true } }))
-    
+
     const nextStepIndex = currentStepIndex + 1
     if (nextStepIndex < steps.length) {
       const nextStep = steps[nextStepIndex]
@@ -120,40 +93,6 @@ export function CheckInFlow() {
 
   // Progress bar component
   const ProgressBar = () => {
-    const handleBackClick = () => {
-      if (currentStep === 'mood') {
-        navigate('/checkin/home')
-      } else {
-        handleNavigateToStep(steps[currentStepIndex - 1].id)
-      }
-    }
-
-    const handleForwardClick = () => {
-      console.log('Forward click - currentStep:', currentStep, 'hasSelection:', currentStepHasSelection)
-      if (currentStepHasSelection) {
-        // Trigger completion for the current step instead of just navigating
-        if (currentStep === 'mood') {
-          console.log('Triggering mood completion')
-          setTriggerMoodCompletion(true)
-          // Reset trigger after a brief delay to allow component to process it
-          setTimeout(() => setTriggerMoodCompletion(false), 100)
-        } else if (currentStep === 'emotions') {
-          console.log('Triggering emotion completion')
-          setTriggerEmotionCompletion(true)
-          // Reset trigger after a brief delay to allow component to process it
-          setTimeout(() => setTriggerEmotionCompletion(false), 100)
-        } else if (currentStep === 'wellbeing') {
-          console.log('Triggering wellbeing completion')
-          setTriggerWellbeingCompletion(true)
-          // Reset trigger after a brief delay to allow component to process it
-          setTimeout(() => setTriggerWellbeingCompletion(false), 100)
-        }
-      }
-    }
-
-    const canGoBack = true // Always can go back
-    const canGoForward = currentStepHasSelection || (currentStepIndex < steps.length - 1 && canNavigateToStep(steps[currentStepIndex + 1].id, currentStepIndex + 1))
-
     return (
       <>
         {/* Progress header */}
@@ -221,7 +160,7 @@ export function CheckInFlow() {
     <>
       {/* Progress bar shows on all steps except garden */}
       {currentStep !== 'garden' && <ProgressBar />}
-      
+
       <div className="min-h-screen">
         {currentStep === 'mood' && (
           <div className="bg-white min-h-screen" style={{ paddingTop: '140px' }}>
@@ -238,7 +177,7 @@ export function CheckInFlow() {
             </div>
           </div>
         )}
-        
+
         {currentStep === 'emotions' && (
           <div className="bg-white min-h-screen" style={{ paddingTop: '140px' }}>
             <EmotionGrid
@@ -252,7 +191,7 @@ export function CheckInFlow() {
             />
           </div>
         )}
-        
+
         {currentStep === 'wellbeing' && (
           <div className="bg-white min-h-screen" style={{ paddingTop: '140px' }}>
             <WellbeingWheel
