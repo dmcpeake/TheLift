@@ -33,6 +33,42 @@ const CHILD_COLORS = [
   '#14B8A6', // Teal
 ]
 
+// Mood emoticons mapping
+const MOOD_EMOJIS: Record<number, string> = {
+  1: '😢',
+  2: '😟',
+  3: '😐',
+  4: '😊',
+  5: '😄'
+}
+
+const MOOD_LABELS: Record<number, string> = {
+  1: 'Very Sad',
+  2: 'Sad',
+  3: 'Okay',
+  4: 'Happy',
+  5: 'Very Happy'
+}
+
+// Custom Y-axis tick component to show emoticons
+const CustomYAxisTick = ({ x, y, payload }: any) => {
+  const emoji = MOOD_EMOJIS[payload.value] || payload.value
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        x={0}
+        y={0}
+        dy={4}
+        textAnchor="end"
+        fill="#6B7280"
+        fontSize={18}
+      >
+        {emoji}
+      </text>
+    </g>
+  )
+}
+
 export function ChildLineComparison({ children, moodHistory }: ChildLineComparisonProps) {
   // Prepare time series data
   const lineData = useMemo(() => {
@@ -112,16 +148,27 @@ export function ChildLineComparison({ children, moodHistory }: ChildLineComparis
       return (
         <div className="bg-white border border-gray-200 rounded-lg p-3 shadow-lg">
           <p className="font-semibold text-gray-900 mb-2">{label}</p>
-          {payload.map((entry: any) => (
-            <div key={entry.name} className="flex items-center space-x-2 text-sm">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: entry.color }}
-              />
-              <span className="text-gray-700">{entry.name}:</span>
-              <span className="font-medium">{entry.value || '—'}</span>
-            </div>
-          ))}
+          {payload.map((entry: any) => {
+            if (!entry.value) return null
+            const emoji = MOOD_EMOJIS[Math.round(entry.value)] || ''
+            const moodLabel = MOOD_LABELS[Math.round(entry.value)] || ''
+            return (
+              <div key={entry.name} className="flex items-center justify-between space-x-3">
+                <div className="flex items-center space-x-2">
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: entry.color }}
+                  />
+                  <span className="text-gray-700">{entry.name}:</span>
+                </div>
+                <span className="font-medium flex items-center gap-1">
+                  <span className="text-base">{emoji}</span>
+                  <span className="text-sm">{entry.value.toFixed(1)}</span>
+                  <span className="text-xs text-gray-500">({moodLabel})</span>
+                </span>
+              </div>
+            )
+          })}
         </div>
       )
     }
@@ -164,13 +211,8 @@ export function ChildLineComparison({ children, moodHistory }: ChildLineComparis
           <YAxis
             domain={[1, 5]}
             ticks={[1, 2, 3, 4, 5]}
-            tick={{ fontSize: 11, fill: '#6B7280' }}
-            label={{
-              value: 'Mood Level',
-              angle: -90,
-              position: 'insideLeft',
-              style: { fontSize: 12, fill: '#4B5563' }
-            }}
+            tick={<CustomYAxisTick />}
+            width={45}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend
