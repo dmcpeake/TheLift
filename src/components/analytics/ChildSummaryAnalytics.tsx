@@ -494,10 +494,10 @@ export function ChildSummaryAnalytics() {
 
         // Parse the new comprehensive AI response format
         const insights: AIInsights = {
-          summary: extractSection(analysis, 'EXECUTIVE SUMMARY') ||
+          summary: cleanupText(extractSection(analysis, 'EXECUTIVE SUMMARY') ||
                    extractSection(analysis, 'Executive Summary') ||
                    analysis.split('\n')[0] || // First line as fallback
-                   'Analysis in progress...',
+                   'Analysis in progress...'),
           concerns: extractBulletPoints(analysis, 'RED FLAGS & EARLY WARNING SIGNS') ||
                    extractBulletPoints(analysis, 'RED FLAGS') ||
                    extractBulletPoints(analysis, 'IMMEDIATE ACTION REQUIRED') ||
@@ -573,8 +573,8 @@ export function ChildSummaryAnalytics() {
       .replace(/"?supportNeeds"?/g, 'support needs')
       // Remove quotes around technical field names
       .replace(/["']([a-zA-Z_]+)["']/g, '$1')
-      // Handle generic camelCase to space conversion
-      .replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()
+      // Handle generic camelCase to space conversion (without lowercasing everything)
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
       // Generic pattern: replace any remaining word_word patterns
       .replace(/(\w+)_(\w+)/g, '$1 $2')
 
