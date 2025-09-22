@@ -644,11 +644,11 @@ export function ChildSummaryAnalytics() {
   const getTrendIcon = (trend?: 'improving' | 'developing' | 'stable') => {
     switch (trend) {
       case 'improving':
-        return <TrendingUp className="h-5 w-5 text-green-600" />
+        return <TrendingUp className="h-4 w-4 text-green-600" />
       case 'developing':
-        return <TrendingDown className="h-5 w-5 text-amber-600" />
+        return <TrendingDown className="h-4 w-4 text-amber-600" />
       default:
-        return <Minus className="h-5 w-5 text-gray-400" />
+        return <Minus className="h-4 w-4 text-gray-400" />
     }
   }
 
@@ -736,39 +736,37 @@ export function ChildSummaryAnalytics() {
                   </div>
                 </div>
 
-                {/* Status Indicators - Minimal Design */}
-                <div className="flex items-center space-x-8">
-                  {/* Current Mood */}
-                  <div className="flex flex-col items-center min-w-[60px]">
-                    <div className="h-6 flex items-center justify-center">
-                      <span className="text-2xl leading-none">
-                        {child.recentMood ? MOOD_EMOJIS[child.recentMood as keyof typeof MOOD_EMOJIS] : '—'}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-gray-500 mt-2 tracking-wider">CURRENT</span>
+                {/* Status Indicators - Inline Design */}
+                <div className="flex items-center space-x-2">
+                  {/* Current */}
+                  <div className="flex items-center space-x-1">
+                    <span className="text-xl">
+                      {child.recentMood ? MOOD_EMOJIS[child.recentMood as keyof typeof MOOD_EMOJIS] : '—'}
+                    </span>
+                    <span className="text-sm text-gray-600">Current</span>
                   </div>
 
-                  {/* Average Mood */}
-                  <div className="flex flex-col items-center min-w-[60px]">
-                    <div className="h-6 flex items-center justify-center">
-                      <Heart className="h-5 w-5 mr-1" style={{
-                        color: child.averageMood ? MOOD_COLORS[Math.round(child.averageMood) as keyof typeof MOOD_COLORS] : '#9CA3AF',
-                        fill: child.averageMood ? MOOD_COLORS[Math.round(child.averageMood) as keyof typeof MOOD_COLORS] : 'none',
-                        fillOpacity: 0.15
-                      }} />
-                      <span className="text-base font-medium text-gray-700">
-                        {child.averageMood ? child.averageMood.toFixed(1) : '—'}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-gray-500 mt-2 tracking-wider">AVERAGE</span>
+                  <span className="text-gray-400">•</span>
+
+                  {/* Average */}
+                  <div className="flex items-center space-x-1">
+                    <Heart className="h-4 w-4" style={{
+                      color: child.averageMood ? MOOD_COLORS[Math.round(child.averageMood) as keyof typeof MOOD_COLORS] : '#9CA3AF',
+                      fill: child.averageMood ? MOOD_COLORS[Math.round(child.averageMood) as keyof typeof MOOD_COLORS] : 'none',
+                      fillOpacity: 0.15
+                    }} />
+                    <span className="text-sm font-medium text-gray-700">
+                      {child.averageMood ? child.averageMood.toFixed(1) : '—'}
+                    </span>
+                    <span className="text-sm text-gray-600">Average</span>
                   </div>
+
+                  <span className="text-gray-400">•</span>
 
                   {/* Trend */}
-                  <div className="flex flex-col items-center min-w-[60px]">
-                    <div className="h-6 flex items-center justify-center">
-                      {getTrendIcon(child.moodTrend)}
-                    </div>
-                    <span className="text-[10px] text-gray-500 mt-2 tracking-wider">TREND</span>
+                  <div className="flex items-center space-x-1">
+                    {getTrendIcon(child.moodTrend)}
+                    <span className="text-sm text-gray-600">Trend</span>
                   </div>
 
                   {/* Expand Icon */}
