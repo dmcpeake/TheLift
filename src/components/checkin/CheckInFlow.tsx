@@ -321,12 +321,12 @@ export function CheckInFlow() {
                         style={{ background: 'none', border: 'none', padding: '12px 16px', margin: '-12px -16px' }}
                         aria-label={`Navigate to ${segment.name}`}
                       >
-                        <span className={`text-xs ${isHighlighted ? 'font-bold' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : (isNextAvailable ? '#3a7ddc' : undefined) }}>
+                        <span className={`text-xs ${isHighlighted ? '' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : (isNextAvailable ? '#3a7ddc' : undefined) }}>
                           {segment.name}
                         </span>
                       </button>
                     ) : (
-                      <span className={`text-xs ${isHighlighted ? 'font-bold' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : '#9ca3af' }}>
+                      <span className={`text-xs ${isHighlighted ? '' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : '#9ca3af' }}>
                         {segment.name}
                       </span>
                     )}
