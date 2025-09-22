@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -22,6 +23,7 @@ interface EmotionGridProps {
 }
 
 export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMade, hideDebugInfo = false, triggerCompletion = false, initialData, onStepChange }: EmotionGridProps = {}) {
+  const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState(1)
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([])
   const [emotionStory, setEmotionStory] = useState('')
@@ -33,12 +35,26 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
   const [currentSlide, setCurrentSlide] = useState(0)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  // Initialize with existing data if available
+  // Reset to step 1 when component mounts (navigation occurs)
+  useEffect(() => {
+    setCurrentStep(1)
+    setSelectedEmotions([])
+    setEmotionStory('')
+    setDiscussionPreference('')
+    setFinalData(null)
+    setStepData(null)
+  }, []) // Empty dependency array - runs only on mount (when navigating to this component)
+
+  // Initialize with existing data if available, but only restore to step 2 if we have complete data
   useEffect(() => {
     if (initialData && selectedEmotions.length === 0) {
       if (initialData.selected_emotions) {
         setSelectedEmotions(initialData.selected_emotions)
-        setCurrentStep(2)
+        // Only go to step 2 if we have both emotions AND story data (complete data)
+        // This prevents auto-advancing to step 2 when just coming back from wellbeing
+        if (initialData.emotion_story && initialData.emotion_story.trim() !== '') {
+          setCurrentStep(2)
+        }
         onSelectionMade?.()
       }
       if (initialData.emotion_story) {
@@ -578,7 +594,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
           <button
             onClick={() => {
               // Navigate back to mood page
-              window.history.back()
+              navigate('/checkin/flow/mood')
             }}
             style={{
               background: 'rgba(255, 255, 255, 0.5)',

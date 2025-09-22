@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Lottie from 'lottie-react'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
-import BlushingShaded from '../../../public/Blushing_Shaded.json'
-import HappyShaded from '../../../public/Happy_Shaded.json'
-import MehShaded from '../../../public/Meh_Shaded.json'
-import SadTearShaded from '../../../public/Sad_Tear_Shaded.json'
-import CryingShaded from '../../../public/Crying_Shaded.json'
+import BlushingShaded from '../../assets/animations/Blushing_Shaded.json'
+import HappyShaded from '../../assets/animations/Happy_Shaded.json'
+import MehShaded from '../../assets/animations/Meh_Shaded.json'
+import SadTearShaded from '../../assets/animations/Sad_Tear_Shaded.json'
+import CryingShaded from '../../assets/animations/Crying_Shaded.json'
 
 interface SectionData {
   name: string
@@ -32,6 +33,7 @@ interface WellbeingWheelProps {
 }
 
 export function WellbeingWheel({ onComplete, showNextButton = false, onSelectionMade, hideDebugInfo = false, triggerCompletion = false, initialData }: WellbeingWheelProps = {}) {
+  const navigate = useNavigate()
   const [sections, setSections] = useState<Record<string, SectionData>>({})
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
   const [finalData, setFinalData] = useState<WheelData | null>(null)
@@ -970,8 +972,8 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
           {/* Back Button */}
           <button
             onClick={() => {
-              // Navigate back to emotions page
-              window.history.back()
+              // Navigate back to emotions page (step 1)
+              navigate('/checkin/flow/emotions')
             }}
             style={{
               background: 'rgba(255, 255, 255, 0.5)',
@@ -994,18 +996,41 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
           {/* Next Button */}
           <button
             onClick={() => {
-              // If we have completed any sections, complete the wheel
-              // Otherwise, just trigger completion with empty data
-              if (Object.keys(sections).length > 0) {
-                completeWheel()
+              // Check if current section is completed (has rating)
+              const currentSection = wheelSections[currentSectionIndex]
+              const isCurrentSectionCompleted = sections[currentSection?.id]?.mood_level
+
+              if (isCurrentSectionCompleted) {
+                // Current section is rated, advance to next unrated section
+                const nextIndex = currentSectionIndex + 1
+                let targetIndex = nextIndex
+
+                // Find next unrated section
+                while (targetIndex < wheelSections.length && sections[wheelSections[targetIndex].id]) {
+                  targetIndex++
+                }
+
+                if (targetIndex < wheelSections.length) {
+                  // Advance to next unrated section
+                  setCurrentSectionIndex(targetIndex)
+                  setTimeout(() => scrollToActiveCard(targetIndex), 100)
+                } else {
+                  // All sections complete, finish the wheel
+                  completeWheel()
+                }
               } else {
-                onComplete?.({
-                  sections: [],
-                  overall_score: 0,
-                  completed_sections: 0,
-                  completed_at: new Date().toISOString(),
-                  time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
-                })
+                // Current section not rated, but allow proceeding anyway
+                if (Object.keys(sections).length > 0) {
+                  completeWheel()
+                } else {
+                  onComplete?.({
+                    sections: [],
+                    overall_score: 0,
+                    completed_sections: 0,
+                    completed_at: new Date().toISOString(),
+                    time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
+                  })
+                }
               }
             }}
             style={{

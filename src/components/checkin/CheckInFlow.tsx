@@ -32,12 +32,20 @@ export function CheckInFlow() {
 
   // Reset selection state when step changes
   React.useEffect(() => {
-    setCurrentStepHasSelection(false)
+    // Check if current step has completed data
+    const hasCompletedData = completedData[currentStep] && !completedData[currentStep].skipped
+    setCurrentStepHasSelection(hasCompletedData)
+
+    // Reset emotion grid step to 1 when navigating back to emotions
+    if (currentStep === 'emotions') {
+      setEmotionGridStep(1)
+    }
+
     // Reset all trigger states when step changes
     setTriggerEmotionCompletion(false)
     setTriggerMoodCompletion(false)
     setTriggerWellbeingCompletion(false)
-  }, [currentStep])
+  }, [currentStep, completedData])
 
   // Auto-redirect after 4 seconds on completion
   React.useEffect(() => {
@@ -66,7 +74,9 @@ export function CheckInFlow() {
   }
 
   const handleNavigateToStep = (stepId: string) => {
-    setCurrentStepHasSelection(false) // Reset selection state when navigating
+    // Check if the step we're navigating to has completed data
+    const hasCompletedData = completedData[stepId] && !completedData[stepId].skipped
+    setCurrentStepHasSelection(hasCompletedData) // Set selection state based on completed data
     navigate(`/checkin/flow/${stepId}`)
   }
 
