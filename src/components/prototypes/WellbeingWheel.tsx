@@ -21,6 +21,8 @@ interface WheelData {
   completed_sections: number
   completed_at: string
   time_to_complete_seconds: number
+  skipped?: boolean
+  hasCompletedSections?: boolean
 }
 
 interface WellbeingWheelProps {
@@ -236,6 +238,8 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
     const index = wheelSections.findIndex(s => s.id === sectionId)
     setCurrentSectionIndex(index)
     setShowingTextInput(null) // Hide any open text input
+    // Reset rotation since the section is now unrated
+    setRotationOffset(0)
   }
 
   const updateNotes = (sectionId: string, notes: string) => {
@@ -327,6 +331,8 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
       }
       if (targetIndex < wheelSections.length) {
         setCurrentSectionIndex(targetIndex)
+        // Reset rotation for unrated section
+        setRotationOffset(0)
         // Auto-scroll to keep the new active card in view
         setTimeout(() => scrollToActiveCard(targetIndex), 100)
       }
@@ -531,6 +537,12 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                       setCurrentSectionIndex(index)
                       // Auto-scroll to keep the clicked card in view
                       setTimeout(() => scrollToActiveCard(index), 100)
+
+                      // Reset rotation if switching to an unrated section
+                      if (!isCompleted) {
+                        setRotationOffset(0)
+                      }
+
                       if (isCompleted) {
                         editSection(section.id)
                       }
@@ -1013,6 +1025,8 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                 if (targetIndex < wheelSections.length) {
                   // Advance to next unrated section
                   setCurrentSectionIndex(targetIndex)
+                  // Reset rotation for unrated section
+                  setRotationOffset(0)
                   setTimeout(() => scrollToActiveCard(targetIndex), 100)
                 } else {
                   // All sections complete, finish the wheel
@@ -1028,7 +1042,9 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                     overall_score: 0,
                     completed_sections: 0,
                     completed_at: new Date().toISOString(),
-                    time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
+                    time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000),
+                    skipped: true,
+                    hasCompletedSections: false
                   })
                 }
               }
@@ -1059,13 +1075,16 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
           {/* Skip Button */}
           <button
             onClick={() => {
-              // Skip to success page - complete with empty data
+              // If user has completed any sections, send those; otherwise send empty data with skip flag
+              const completedSections = Object.values(sections)
               onComplete?.({
-                sections: [],
-                overall_score: 0,
-                completed_sections: 0,
+                sections: completedSections,
+                overall_score: completedSections.length > 0 ? completedSections.reduce((sum, s) => sum + s.mood_numeric, 0) / completedSections.length : 0,
+                completed_sections: completedSections.length,
                 completed_at: new Date().toISOString(),
-                time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
+                time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000),
+                skipped: true,
+                hasCompletedSections: completedSections.length > 0
               })
             }}
             style={{
