@@ -62,6 +62,28 @@ export function CheckInFlow() {
     // Store the completed data
     setCompletedData(prev => ({ ...prev, [stepId]: data }))
 
+    // Special handling for wellbeing completion
+    if (stepId === 'wellbeing') {
+      // Check if this was a skip with no completed sections
+      if (data.skipped && !data.hasCompletedSections) {
+        // User completed nothing and tapped skip - go to "Success! Check in complete" page
+        navigate('/checkin/flow/complete')
+        return
+      } else if (data.skipped && data.hasCompletedSections) {
+        // User has added some topics and clicked skip - go to radial graph page
+        navigate('/child/check-in/success', {
+          state: { sections: data.sections }
+        })
+        return
+      } else {
+        // Normal completion - go to success page
+        navigate('/child/check-in/success', {
+          state: { sections: data.sections }
+        })
+        return
+      }
+    }
+
     // Navigate to next step
     const nextStepIndex = currentStepIndex + 1
     if (nextStepIndex < steps.length) {

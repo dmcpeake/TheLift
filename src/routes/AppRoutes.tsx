@@ -33,6 +33,7 @@ import { ChildHome } from '../components/child/ChildHome'
 import { ChildOnboarding } from '../components/child/ChildOnboarding'
 import { BreathingRoute } from '../components/breathing/BreathingRoute'
 import { WellbeingWheel } from '../components/child/WellbeingWheel'
+import { WellbeingSuccessPage } from '../pages/WellbeingSuccessPage'
 import { MyGarden } from '../components/child/MyGarden'
 import { WrapUp } from '../components/child/WrapUp'
 import { StickerBook } from '../components/child/StickerBook'
@@ -110,6 +111,7 @@ export function AppRoutes() {
         <Route path="/child/home" element={<ChildHome />} />
         <Route path="/child/breathing" element={<BreathingRoute />} />
         <Route path="/child/check-in/wheel" element={<WellbeingWheel />} />
+        <Route path="/child/check-in/success" element={<WellbeingSuccessPage />} />
         <Route path="/child/check-in/garden" element={<MyGarden />} />
         <Route path="/child/check-in/wrap-up" element={<WrapUp />} />
         <Route path="/child/stickers" element={<StickerBook />} />
