@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
 import { ProgressHeader } from '../shared/ProgressHeader'
 import Lottie from 'lottie-react'
-import { Settings, SkipForward, Play, Pause, Users, Sparkles, Star, Plus, LogOut, X } from 'lucide-react'
+import { Settings, SkipForward, Play, Pause, Users, Sparkles, Star, Plus, LogOut, X, Heart, Smile } from 'lucide-react'
 import { BreathingCircles } from '../breathing/BreathingCircles'
 
 // Force deployment refresh
