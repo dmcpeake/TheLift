@@ -193,9 +193,9 @@ export function ChildRadarComparison({ children, moodHistory }: ChildRadarCompar
         </p>
       </div>
 
-      <div className="flex gap-4">
+      <div className="grid grid-cols-[auto_1fr] gap-4">
         {/* Legend on the left side */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 min-w-[140px]">
           <div className="bg-gray-50 rounded-lg p-3">
             <p className="text-xs font-medium text-gray-700 mb-2">Children:</p>
             <div className="space-y-1.5">
@@ -213,7 +213,7 @@ export function ChildRadarComparison({ children, moodHistory }: ChildRadarCompar
         </div>
 
         {/* Chart on the right */}
-        <div className="flex-grow">
+        <div className="w-full min-w-0">
           <ResponsiveContainer width="100%" height={350}>
             <RadarChart data={radarData} margin={{ top: 20, right: 40, bottom: 10, left: 40 }}>
               <PolarGrid stroke="#E5E7EB" />
