@@ -560,6 +560,21 @@ export function ChildSummaryAnalytics() {
       .replace(/coping_strategies/gi, 'coping strategies')
       .replace(/support_system/gi, 'support system')
       .replace(/warning_signs/gi, 'warning signs')
+      // Clean up camelCase field names from AI responses
+      .replace(/"?moodTrend"?/g, 'mood trend')
+      .replace(/"?averageMood"?/g, 'average mood')
+      .replace(/"?checkInCount"?/g, 'check-in count')
+      .replace(/"?lastCheckIn"?/g, 'last check-in')
+      .replace(/"?recentMood"?/g, 'recent mood')
+      .replace(/"?concerningPatterns?"?/g, 'areas for additional support')
+      .replace(/"?positivePatterns?"?/g, 'positive indicators')
+      .replace(/"?emotionalState"?/g, 'emotional state')
+      .replace(/"?wellbeingScore"?/g, 'wellbeing score')
+      .replace(/"?supportNeeds"?/g, 'support needs')
+      // Remove quotes around technical field names
+      .replace(/["']([a-zA-Z_]+)["']/g, '$1')
+      // Handle generic camelCase to space conversion
+      .replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()
       // Generic pattern: replace any remaining word_word patterns
       .replace(/(\w+)_(\w+)/g, '$1 $2')
   }
@@ -1077,15 +1092,45 @@ export function ChildSummaryAnalytics() {
                               </h5>
                               {(() => {
                                 const summary = aiInsights[child.id].summary
-                                // Check if summary contains inline bullets (text with - embedded)
-                                if (summary.includes(' - ')) {
-                                  const parts = summary.split(' - ')
-                                  const intro = parts[0].trim()
-                                  const bullets = parts.slice(1).map(b => {
-                                    // Clean up each bullet, removing trailing text
-                                    let bulletText = b.trim()
+                                // Check if summary contains inline bullets (with various formats)
+                                if (summary.includes(' - ') || summary.includes('- ') || summary.match(/^-\s+/m)) {
+                                  let bullets: string[] = []
+                                  let intro = ''
+
+                                  // Handle different bullet formats
+                                  if (summary.includes('- ')) {
+                                    // Split on "- " pattern (hyphen with space after)
+                                    const firstBullet = summary.indexOf('- ')
+                                    if (firstBullet > 0) {
+                                      intro = summary.substring(0, firstBullet).trim()
+                                      const bulletText = summary.substring(firstBullet)
+                                      // Split by "- " but keep the content
+                                      bullets = bulletText.split(/\s*-\s+/)
+                                        .filter(b => b.trim())
+                                        .map(b => cleanupText(b.trim()))
+                                    } else {
+                                      // Bullets start at beginning
+                                      bullets = summary.split(/\s*-\s+/)
+                                        .filter(b => b.trim())
+                                        .map(b => cleanupText(b.trim()))
+                                    }
+                                  } else if (summary.includes(' - ')) {
+                                    // Original format with space-hyphen-space
+                                    const parts = summary.split(' - ')
+                                    intro = parts[0].trim()
+                                    bullets = parts.slice(1).map(b => cleanupText(b.trim()))
+                                  }
+
+                                  // Clean up bullets
+                                  bullets = bullets.map(b => {
                                     // Remove any text after "Overall" or similar concluding words
-                                    bulletText = bulletText.replace(/\s+(Overall|Based on|In summary|However|Additionally).*$/i, '').trim()
+                                    let bulletText = b.replace(/\s+(Overall|Based on|In summary|However|Additionally|Which).*$/i, '').trim()
+                                    // Remove trailing punctuation if it's incomplete
+                                    bulletText = bulletText.replace(/[,;]$/, '')
+                                    // Ensure bullet ends with period if it doesn't have one
+                                    if (bulletText && !bulletText.match(/[.!?]$/)) {
+                                      bulletText += '.'
+                                    }
                                     return bulletText
                                   }).filter(b => b && b.length > 10)
 
