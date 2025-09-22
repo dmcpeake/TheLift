@@ -3,7 +3,7 @@ import { MoodHeatmap } from './MoodHeatmap'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { projectId, publicAnonKey } from '../../utils/supabase/info.tsx'
-import { LoadingIndicator, DataLoadingIndicator } from '../shared/LoadingIndicator'
+import { PageLoader } from '../shared/LottieLoader'
 import { ComparisonView } from './comparison/ComparisonView'
 import { CriticalSupportAlert } from './CriticalSupportAlert'
 import {
@@ -763,14 +763,7 @@ export function ChildSummaryAnalytics() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <DataLoadingIndicator
-          stages={loadingStages}
-          currentStage={currentLoadingStage}
-        />
-      </div>
-    )
+    return <PageLoader message="Loading analytics data..." />
   }
 
   return (

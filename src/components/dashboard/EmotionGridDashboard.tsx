@@ -7,7 +7,7 @@ import {
 } from 'recharts'
 import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { LoadingIndicator } from '../shared/LoadingIndicator'
+import { DataLoader } from '../shared/LottieLoader'
 import {
   TrendingUp, TrendingDown, AlertCircle, Heart,
   Smile, Frown, Meh, Sparkles, Users, Activity,
@@ -400,12 +400,7 @@ export function EmotionGridDashboard({ selectedOrg = 'all', dateRange = 'week' }
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <LoadingIndicator
-          variant="dots"
-          size="medium"
-          message="Loading emotion data..."
-          color="blue"
-        />
+        <DataLoader message="Loading emotion data..." />
       </div>
     )
   }
