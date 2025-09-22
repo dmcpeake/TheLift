@@ -572,10 +572,36 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
       )}
 
       {/* Fixed bottom button - Step 1 */}
-      {showNextButton && selectedEmotions.length > 0 && currentStep === 1 && (
-        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center" style={{ zIndex: 1000 }}>
+      {showNextButton && currentStep === 1 && (
+        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center items-center" style={{ zIndex: 1000, gap: '20px' }}>
+          {/* Back Button */}
           <button
-            onClick={handleNext}
+            onClick={() => {
+              // Navigate back to mood page
+              window.history.back()
+            }}
+            style={{
+              background: 'rgba(255, 255, 255, 0.5)',
+              border: 'none',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '56px',
+              height: '56px'
+            }}
+            aria-label="Go back to mood"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+              <polyline points="15,18 9,12 15,6"></polyline>
+            </svg>
+          </button>
+
+          {/* Choose Button */}
+          <button
+            onClick={() => selectedEmotions.length > 0 && handleNext()}
+            disabled={selectedEmotions.length === 0}
             style={{
               width: '100px',
               height: '56px',
@@ -583,27 +609,93 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: '28px',
-              backgroundColor: '#3a7ddc',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              backgroundColor: selectedEmotions.length > 0 ? '#3a7ddc' : 'rgba(255, 255, 255, 0.3)',
+              boxShadow: selectedEmotions.length > 0 ? '0 8px 32px rgba(0, 0, 0, 0.1)' : 'none',
               border: 'none',
-              cursor: 'pointer',
+              cursor: selectedEmotions.length > 0 ? 'pointer' : 'not-allowed',
               transition: 'all 0.3s ease',
-              color: 'white',
+              color: selectedEmotions.length > 0 ? 'white' : 'rgba(255, 255, 255, 0.5)',
               fontSize: '16px',
               fontWeight: '600'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
-            aria-label="Next"
+            onMouseEnter={(e) => {
+              if (selectedEmotions.length > 0) {
+                e.currentTarget.style.backgroundColor = '#2e6bc7'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (selectedEmotions.length > 0) {
+                e.currentTarget.style.backgroundColor = '#3a7ddc'
+              }
+            }}
+            aria-label="Choose emotions"
           >
             CHOOSE
+          </button>
+
+          {/* Skip Button */}
+          <button
+            onClick={() => {
+              // Skip to next page - proceed without selecting emotions
+              const data: EmotionData = {
+                selected_emotions: [],
+                emotion_story: '',
+                discussion_preference: '',
+                step_completed: 1,
+                completed_at: new Date().toISOString(),
+                time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
+              }
+              onComplete?.(data)
+            }}
+            style={{
+              background: 'rgba(255, 255, 255, 0.5)',
+              border: 'none',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '56px',
+              height: '56px'
+            }}
+            aria-label="Skip emotions selection"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+              <polygon points="5,4 15,12 5,20"></polygon>
+              <line x1="19" y1="5" x2="19" y2="19"></line>
+            </svg>
           </button>
         </div>
       )}
 
       {/* Fixed bottom button - Step 2 */}
       {showNextButton && currentStep === 2 && (
-        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center" style={{ zIndex: 1000 }}>
+        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center items-center" style={{ zIndex: 1000, gap: '20px' }}>
+          {/* Back Button */}
+          <button
+            onClick={() => {
+              // Navigate back to step 1
+              setCurrentStep(1)
+            }}
+            style={{
+              background: 'rgba(255, 255, 255, 0.5)',
+              border: 'none',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '56px',
+              height: '56px'
+            }}
+            aria-label="Go back to emotion selection"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+              <polyline points="15,18 9,12 15,6"></polyline>
+            </svg>
+          </button>
+
+          {/* Next Button */}
           <button
             onClick={handleNext}
             style={{
@@ -627,6 +719,39 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
             aria-label="Next"
           >
             NEXT
+          </button>
+
+          {/* Skip Button */}
+          <button
+            onClick={() => {
+              // Skip to next page - complete with current selections but skip story/discussion
+              const data: EmotionData = {
+                selected_emotions: selectedEmotions,
+                emotion_story: '',
+                discussion_preference: '',
+                step_completed: 2,
+                completed_at: new Date().toISOString(),
+                time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
+              }
+              onComplete?.(data)
+            }}
+            style={{
+              background: 'rgba(255, 255, 255, 0.5)',
+              border: 'none',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '56px',
+              height: '56px'
+            }}
+            aria-label="Skip story section"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+              <polygon points="5,4 15,12 5,20"></polygon>
+              <line x1="19" y1="5" x2="19" y2="19"></line>
+            </svg>
           </button>
         </div>
       )}
