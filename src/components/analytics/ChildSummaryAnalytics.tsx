@@ -570,8 +570,22 @@ export function ChildSummaryAnalytics() {
     const match = text.match(pattern)
 
     if (match && match[1]) {
-      // Get the first 2-3 sentences for the summary
-      const sentences = match[1].trim().split(/[.!?]/).filter(s => s.trim())
+      let content = match[1].trim()
+
+      // Check if content contains inline bullets (text with - embedded)
+      if (content.includes(' - ')) {
+        // Format inline bullets as a proper list
+        const parts = content.split(' - ')
+        if (parts.length > 1) {
+          // First part is the intro, rest are bullet points
+          const intro = parts[0].trim()
+          const bullets = parts.slice(1).map(b => b.trim()).filter(b => b)
+          return cleanupText(intro)
+        }
+      }
+
+      // Otherwise, get the first 2-3 sentences for the summary
+      const sentences = content.split(/[.!?]/).filter(s => s.trim())
       const result = sentences.slice(0, 3).join('. ').trim() + (sentences.length > 0 ? '.' : '')
       return cleanupText(result)
     }
@@ -602,29 +616,55 @@ export function ChildSummaryAnalytics() {
     }
 
     const bullets: string[] = []
-    const lines = sectionContent.split('\n')
 
-    for (const line of lines) {
-      const trimmedLine = line.trim()
+    // First check if content has inline bullets (text with - embedded)
+    if (sectionContent.includes(' - ')) {
+      const parts = sectionContent.split(' - ')
+      if (parts.length > 1) {
+        // Skip the first part (intro text) and extract bullets
+        for (let i = 1; i < parts.length; i++) {
+          // Extract the bullet text up to the next line break or end
+          let bulletText = parts[i].trim()
+          // Remove any trailing text that's not part of this bullet
+          const lineEnd = bulletText.indexOf('\n')
+          if (lineEnd > -1 && i < parts.length - 1) {
+            bulletText = bulletText.substring(0, lineEnd).trim()
+          }
+          // Clean up the bullet text, removing any partial sentence at the end
+          bulletText = bulletText.replace(/\s+(Overall|Based on|In summary|However|Additionally).*$/i, '').trim()
+          if (bulletText && bulletText.length > 10) {
+            bullets.push(cleanupText(bulletText))
+          }
+        }
+      }
+    }
 
-      // Skip empty lines
-      if (!trimmedLine) continue
+    // If no inline bullets found, check for traditional markdown bullets
+    if (bullets.length === 0) {
+      const lines = sectionContent.split('\n')
 
-      // Match lines that start with -, •, *, or numbers
-      if (/^[-•*]\s+/.test(trimmedLine)) {
-        // Bullet point
-        const content = trimmedLine.replace(/^[-•*]\s+/, '').trim()
-        if (content) bullets.push(cleanupText(content))
-      } else if (/^\d+\.\s+/.test(trimmedLine)) {
-        // Numbered item
-        const content = trimmedLine.replace(/^\d+\.\s+/, '').trim()
-        if (content) bullets.push(cleanupText(content))
-      } else if (/^(HIGH|MODERATE|LOW)\s+PRIORITY:/i.test(trimmedLine)) {
-        // Priority items from IMMEDIATE ACTION section
-        bullets.push(cleanupText(trimmedLine))
-      } else if (trimmedLine && bullets.length > 0 && !trimmedLine.includes(':') && !trimmedLine.startsWith('**')) {
-        // Continuation of previous bullet (indented or wrapped text)
-        bullets[bullets.length - 1] += ' ' + cleanupText(trimmedLine)
+      for (const line of lines) {
+        const trimmedLine = line.trim()
+
+        // Skip empty lines
+        if (!trimmedLine) continue
+
+        // Match lines that start with -, •, *, or numbers
+        if (/^[-•*]\s+/.test(trimmedLine)) {
+          // Bullet point
+          const content = trimmedLine.replace(/^[-•*]\s+/, '').trim()
+          if (content) bullets.push(cleanupText(content))
+        } else if (/^\d+\.\s+/.test(trimmedLine)) {
+          // Numbered item
+          const content = trimmedLine.replace(/^\d+\.\s+/, '').trim()
+          if (content) bullets.push(cleanupText(content))
+        } else if (/^(HIGH|MODERATE|LOW)\s+PRIORITY:/i.test(trimmedLine)) {
+          // Priority items from IMMEDIATE ACTION section
+          bullets.push(cleanupText(trimmedLine))
+        } else if (trimmedLine && bullets.length > 0 && !trimmedLine.includes(':') && !trimmedLine.startsWith('**')) {
+          // Continuation of previous bullet (indented or wrapped text)
+          bullets[bullets.length - 1] += ' ' + cleanupText(trimmedLine)
+        }
       }
     }
 
@@ -1035,7 +1075,39 @@ export function ChildSummaryAnalytics() {
                                 <Brain className="h-4 w-4 mr-2" />
                                 Wellbeing Overview
                               </h5>
-                              <p className="text-sm text-gray-700">{aiInsights[child.id].summary}</p>
+                              {(() => {
+                                const summary = aiInsights[child.id].summary
+                                // Check if summary contains inline bullets (text with - embedded)
+                                if (summary.includes(' - ')) {
+                                  const parts = summary.split(' - ')
+                                  const intro = parts[0].trim()
+                                  const bullets = parts.slice(1).map(b => {
+                                    // Clean up each bullet, removing trailing text
+                                    let bulletText = b.trim()
+                                    // Remove any text after "Overall" or similar concluding words
+                                    bulletText = bulletText.replace(/\s+(Overall|Based on|In summary|However|Additionally).*$/i, '').trim()
+                                    return bulletText
+                                  }).filter(b => b && b.length > 10)
+
+                                  return (
+                                    <div className="space-y-2">
+                                      {intro && <p className="text-sm text-gray-700">{intro}:</p>}
+                                      {bullets.length > 0 && (
+                                        <ul className="space-y-1 ml-2">
+                                          {bullets.map((bullet, idx) => (
+                                            <li key={idx} className="text-sm text-gray-700 flex items-start">
+                                              <span className="mr-2 text-gray-400">•</span>
+                                              <span>{bullet}</span>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      )}
+                                    </div>
+                                  )
+                                }
+                                // If no inline bullets, display as regular paragraph
+                                return <p className="text-sm text-gray-700">{summary}</p>
+                              })()}
                             </div>
 
                             {/* Concerns */}
