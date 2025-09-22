@@ -432,8 +432,11 @@ export function ChildSummaryAnalytics() {
     // Check if already loading or loaded
     if (loadingInsights[childId] || aiInsights[childId]) return
 
-    console.log('Loading AI insights for child:', childId)
-    setLoadingInsights(prev => ({ ...prev, [childId]: true }))
+    console.log('🔵 STARTING AI insights loading for child:', childId)
+    setLoadingInsights(prev => {
+      console.log('🔵 Setting loadingInsights to TRUE for child:', childId)
+      return { ...prev, [childId]: true }
+    })
     setAiAnalysisProgress(prev => ({ ...prev, [childId]: 0 }))
 
     // Simulate progress updates
@@ -528,6 +531,7 @@ export function ChildSummaryAnalytics() {
       setAiAnalysisProgress(prev => ({ ...prev, [childId]: 0 }))
     } finally {
       setTimeout(() => {
+        console.log('🔵 Setting loadingInsights to FALSE for child:', childId)
         setLoadingInsights(prev => ({ ...prev, [childId]: false }))
         setAiAnalysisProgress(prev => ({ ...prev, [childId]: 0 }))
       }, 500) // Small delay to show 100% briefly
@@ -1237,7 +1241,14 @@ export function ChildSummaryAnalytics() {
 
                           {/* Loading Overlay with Lottie animation */}
                           {loadingInsights[child.id] && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-lg z-10">
+                            <div
+                              className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-lg z-10"
+                              style={{ border: '2px solid red' }}
+                            >
+                              {console.log(`🔴 DEBUG: Rendering AI Insights loader for child ${child.id} at`, new Date().toISOString())}
+                              <div className="bg-yellow-200 p-2 rounded absolute top-2 left-2 text-xs z-50">
+                                DEBUG: Loader Position
+                              </div>
                               <LottieLoader
                                 loading={true}
                                 size="small"
