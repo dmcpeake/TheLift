@@ -641,14 +641,15 @@ export function ChildSummaryAnalytics() {
     return AVATAR_STYLES[index % AVATAR_STYLES.length]
   }
 
-  const getTrendIcon = (trend?: 'improving' | 'developing' | 'stable') => {
+  const getTrendIcon = (trend?: 'improving' | 'developing' | 'stable', size: 'small' | 'large' = 'small') => {
+    const sizeClass = size === 'large' ? 'h-7 w-7' : 'h-4 w-4'
     switch (trend) {
       case 'improving':
-        return <TrendingUp className="h-4 w-4 text-green-600" />
+        return <TrendingUp className={`${sizeClass} text-green-600`} />
       case 'developing':
-        return <TrendingDown className="h-4 w-4 text-amber-600" />
+        return <TrendingDown className={`${sizeClass} text-amber-600`} />
       default:
-        return <Minus className="h-4 w-4 text-gray-400" />
+        return <Minus className={`${sizeClass} text-gray-400`} />
     }
   }
 
@@ -700,71 +701,110 @@ export function ChildSummaryAnalytics() {
             {/* Child Summary Row */}
             <div
               onClick={() => toggleChildExpansion(child.id)}
-              className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+              className="p-5 cursor-pointer hover:bg-gradient-to-r hover:from-gray-50 hover:to-white transition-all duration-200"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   {/* Avatar - Always use generated avatars, ignore database URLs */}
                   {(() => {
                     const style = getAvatarStyle(index)
-                    const baseClasses = "w-12 h-12 flex items-center justify-center text-white font-semibold transition-transform hover:scale-110 shadow-md"
+                    const baseClasses = "w-14 h-14 flex items-center justify-center text-white font-semibold transition-all duration-200 hover:scale-110 shadow-lg hover:shadow-xl"
                     const avatarClassName = `${baseClasses} ${style.bg} ${style.shape}`
 
 
                     return (
-                      <div className={avatarClassName} data-child-index={index}>
-                        <span className="text-sm">
-                          {child.initials}
-                        </span>
+                      <div className="relative">
+                        <div className={avatarClassName} data-child-index={index}>
+                          <span className="text-base font-bold">
+                            {child.initials}
+                          </span>
+                        </div>
+                        {/* Activity indicator */}
+                        {child.recentMood && child.recentMood >= 4 && (
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
+                        )}
                       </div>
                     )
                   })()}
 
                   {/* Name and Basic Info */}
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{child.name}</h3>
-                    <p className="text-sm text-gray-600">
-                      Last check-in: {child.lastCheckIn} • {child.checkInCount} check-ins
-                    </p>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 text-lg">{child.name}</h3>
+                    <div className="flex items-center space-x-3 mt-1">
+                      <span className="flex items-center text-sm text-gray-600">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {child.lastCheckIn}
+                      </span>
+                      <span className="text-gray-400">•</span>
+                      <span className="text-sm font-medium text-gray-600">
+                        {child.checkInCount} check-ins
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Status Indicators */}
-                <div className="flex items-center space-x-6">
-                  {/* Current Mood */}
-                  <div className="text-center">
-                    <div className="text-2xl mb-1">
-                      {child.recentMood ? MOOD_EMOJIS[child.recentMood as keyof typeof MOOD_EMOJIS] : '—'}
-                    </div>
-                    <p className="text-xs text-gray-600">Current</p>
-                  </div>
-
-                  {/* Average Mood */}
-                  <div className="text-center">
-                    <div className="flex items-center space-x-1">
-                      <Heart className="h-5 w-5" style={{
-                        color: child.averageMood ? MOOD_COLORS[Math.round(child.averageMood) as keyof typeof MOOD_COLORS] : '#6B7280'
-                      }} />
-                      <span className="font-semibold">
-                        {child.averageMood ? child.averageMood.toFixed(1) : '—'}
+                {/* Status Indicators - Redesigned */}
+                <div className="flex items-center space-x-4">
+                  {/* Current Mood Card */}
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-3 min-w-[80px] border border-blue-100">
+                    <div className="flex flex-col items-center">
+                      <span className="text-3xl mb-1">
+                        {child.recentMood ? MOOD_EMOJIS[child.recentMood as keyof typeof MOOD_EMOJIS] : '—'}
                       </span>
+                      <span className="text-[10px] font-medium text-blue-700 uppercase tracking-wider">Current</span>
                     </div>
-                    <p className="text-xs text-gray-600">Average</p>
                   </div>
 
-                  {/* Trend */}
-                  <div className="text-center">
-                    {getTrendIcon(child.moodTrend)}
-                    <p className="text-xs text-gray-600">Trend</p>
+                  {/* Average Mood Card */}
+                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-3 min-w-[80px] border border-purple-100">
+                    <div className="flex flex-col items-center">
+                      <div className="flex items-center justify-center mb-1">
+                        <div className="relative">
+                          <Heart className="h-7 w-7" style={{
+                            color: child.averageMood ? MOOD_COLORS[Math.round(child.averageMood) as keyof typeof MOOD_COLORS] : '#6B7280',
+                            fill: child.averageMood ? MOOD_COLORS[Math.round(child.averageMood) as keyof typeof MOOD_COLORS] : 'none',
+                            fillOpacity: 0.2
+                          }} />
+                          <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-700">
+                            {child.averageMood ? child.averageMood.toFixed(1) : '—'}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-medium text-purple-700 uppercase tracking-wider">Average</span>
+                    </div>
                   </div>
 
-                  {/* Expand Icon */}
-                  <div>
-                    {expandedChild === child.id ? (
-                      <ChevronDown className="h-5 w-5 text-gray-400" />
-                    ) : (
-                      <ChevronRight className="h-5 w-5 text-gray-400" />
-                    )}
+                  {/* Trend Card */}
+                  <div className={`rounded-xl p-3 min-w-[80px] border ${
+                    child.moodTrend === 'improving'
+                      ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-100'
+                      : child.moodTrend === 'developing'
+                      ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-100'
+                      : 'bg-gradient-to-br from-gray-50 to-slate-50 border-gray-200'
+                  }`}>
+                    <div className="flex flex-col items-center">
+                      <div className="mb-1">
+                        {getTrendIcon(child.moodTrend, 'large')}
+                      </div>
+                      <span className={`text-[10px] font-medium uppercase tracking-wider ${
+                        child.moodTrend === 'improving'
+                          ? 'text-green-700'
+                          : child.moodTrend === 'developing'
+                          ? 'text-amber-700'
+                          : 'text-gray-600'
+                      }`}>Trend</span>
+                    </div>
+                  </div>
+
+                  {/* Expand Icon - Styled Button */}
+                  <div className="ml-2">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors flex items-center justify-center">
+                      {expandedChild === child.id ? (
+                        <ChevronDown className="h-5 w-5 text-gray-600" />
+                      ) : (
+                        <ChevronRight className="h-5 w-5 text-gray-600" />
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
