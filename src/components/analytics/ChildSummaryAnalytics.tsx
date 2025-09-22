@@ -1072,18 +1072,11 @@ export function ChildSummaryAnalytics() {
                           Support Insights
                         </h4>
 
-                        {loadingInsights[child.id] ? (
-                          <div className="flex items-center justify-center py-8">
-                            <LoadingIndicator
-                              size="medium"
-                              message="Understanding wellbeing patterns..."
-                              variant="progress"
-                              color="blue"
-                              progress={aiAnalysisProgress[child.id] || 0}
-                            />
-                          </div>
-                        ) : aiInsights[child.id] ? (
-                          <div className="space-y-4">
+                        <div className="relative">
+                          {/* Content with blur effect when loading */}
+                          <div className={`space-y-4 transition-all duration-500 ${
+                            loadingInsights[child.id] ? 'blur-md opacity-40' : 'blur-0 opacity-100'
+                          }`}>
                             {/* Summary */}
                             <div className="bg-white p-4 rounded-lg border border-gray-200">
                               <h5 className="font-medium text-gray-900 mb-2 flex items-center">
@@ -1213,11 +1206,32 @@ export function ChildSummaryAnalytics() {
                               Last analyzed: {aiInsights[child.id].lastAnalyzed}
                             </p>
                           </div>
-                        ) : (
-                          <div className="bg-gray-100 p-4 rounded-lg text-center">
-                            <p className="text-sm text-gray-600">AI insights will load shortly...</p>
-                          </div>
-                        )}
+
+                          {/* Loading Overlay */}
+                          {loadingInsights[child.id] && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-white/30 backdrop-blur-[2px] rounded-lg">
+                              <div className="bg-white rounded-xl shadow-lg p-6 max-w-sm">
+                                <div className="flex flex-col items-center space-y-3">
+                                  {/* Animated dots */}
+                                  <div className="flex space-x-2">
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                  </div>
+                                  <p className="text-sm font-medium text-gray-700">Understanding wellbeing patterns</p>
+                                  {/* Progress bar */}
+                                  <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                    <div
+                                      className="bg-blue-500 h-1.5 rounded-full transition-all duration-500"
+                                      style={{ width: `${aiAnalysisProgress[child.id] || 0}%` }}
+                                    ></div>
+                                  </div>
+                                  <p className="text-xs text-gray-500">{aiAnalysisProgress[child.id] || 0}% complete</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
