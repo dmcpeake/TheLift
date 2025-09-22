@@ -725,7 +725,7 @@ export function ChildSummaryAnalytics() {
                     <h3 className="font-semibold text-gray-900 text-lg">{child.name}</h3>
                     <div className="flex items-center space-x-3 mt-1">
                       <span className="flex items-center text-sm text-gray-600">
-                        <Calendar className="h-3 w-3 mr-1" />
+                        <Calendar className="h-3 w-3 mr-2" />
                         {child.lastCheckIn}
                       </span>
                       <span className="text-gray-400">•</span>
