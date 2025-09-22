@@ -213,7 +213,7 @@ export function CheckInFlow() {
             </div>
 
             {/* Progress bar with discrete segments - positioned 10px below icons */}
-            <div className="relative w-full h-2 flex" style={{ gap: '10px' }}>
+            <div className="relative w-full h-2 flex" style={{ gap: '1px' }}>
               {progressSegments.map((_, index) => {
                 // Calculate segment states
                 let isCompleted = false
