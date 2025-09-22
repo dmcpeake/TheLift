@@ -50,20 +50,20 @@ const MOOD_LABELS: Record<number, string> = {
   5: 'Very Happy'
 }
 
-// Custom Y-axis tick component to show emoticons
+// Custom Y-axis tick component to show number and emoticon
 const CustomYAxisTick = ({ x, y, payload }: any) => {
-  const emoji = MOOD_EMOJIS[payload.value] || payload.value
+  const emoji = MOOD_EMOJIS[payload.value] || ''
   return (
     <g transform={`translate(${x},${y})`}>
       <text
-        x={0}
+        x={-5}
         y={0}
         dy={4}
         textAnchor="end"
         fill="#6B7280"
-        fontSize={18}
+        fontSize={13}
       >
-        {emoji}
+        {payload.value} {emoji}
       </text>
     </g>
   )
@@ -198,7 +198,7 @@ export function ChildLineComparison({ children, moodHistory }: ChildLineComparis
       <ResponsiveContainer width="100%" height={350}>
         <LineChart
           data={lineData}
-          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
           <XAxis
@@ -212,7 +212,7 @@ export function ChildLineComparison({ children, moodHistory }: ChildLineComparis
             domain={[1, 5]}
             ticks={[1, 2, 3, 4, 5]}
             tick={<CustomYAxisTick />}
-            width={45}
+            width={50}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend
