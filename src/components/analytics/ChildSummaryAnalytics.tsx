@@ -1072,10 +1072,10 @@ export function ChildSummaryAnalytics() {
                           Support Insights
                         </h4>
 
-                        <div className="relative">
-                          {/* Content with blur effect when loading */}
-                          <div className={`space-y-4 transition-all duration-500 ${
-                            loadingInsights[child.id] ? 'blur-md opacity-40' : 'blur-0 opacity-100'
+                        <div className="relative min-h-[300px]">
+                          {/* Content - shows through blur when loading */}
+                          <div className={`space-y-4 transition-all duration-700 ${
+                            loadingInsights[child.id] ? 'filter blur-[3px] scale-[0.98]' : 'filter blur-0 scale-100'
                           }`}>
                             {/* Summary */}
                             <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -1207,29 +1207,60 @@ export function ChildSummaryAnalytics() {
                             </p>
                           </div>
 
-                          {/* Loading Overlay */}
+                          {/* Loading Overlay - subtle blur effect */}
                           {loadingInsights[child.id] && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-white/30 backdrop-blur-[2px] rounded-lg">
-                              <div className="bg-white rounded-xl shadow-lg p-6 max-w-sm">
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-white/40 via-white/50 to-white/40 backdrop-blur-[1px] rounded-lg"
+                            >
+                              <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ duration: 0.3 }}
+                                className="bg-white/95 backdrop-blur-md rounded-xl shadow-xl p-5 border border-gray-100"
+                              >
                                 <div className="flex flex-col items-center space-y-3">
-                                  {/* Animated dots */}
-                                  <div className="flex space-x-2">
-                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                  {/* Smooth pulsing dots */}
+                                  <div className="flex space-x-1.5">
+                                    <motion.div
+                                      className="w-2 h-2 bg-indigo-500 rounded-full"
+                                      animate={{
+                                        scale: [1, 1.5, 1],
+                                        opacity: [0.3, 1, 0.3]
+                                      }}
+                                      transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
+                                    />
+                                    <motion.div
+                                      className="w-2 h-2 bg-indigo-500 rounded-full"
+                                      animate={{
+                                        scale: [1, 1.5, 1],
+                                        opacity: [0.3, 1, 0.3]
+                                      }}
+                                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+                                    />
+                                    <motion.div
+                                      className="w-2 h-2 bg-indigo-500 rounded-full"
+                                      animate={{
+                                        scale: [1, 1.5, 1],
+                                        opacity: [0.3, 1, 0.3]
+                                      }}
+                                      transition={{ duration: 1.5, repeat: Infinity, delay: 1 }}
+                                    />
                                   </div>
-                                  <p className="text-sm font-medium text-gray-700">Understanding wellbeing patterns</p>
-                                  {/* Progress bar */}
-                                  <div className="w-full bg-gray-200 rounded-full h-1.5">
-                                    <div
-                                      className="bg-blue-500 h-1.5 rounded-full transition-all duration-500"
-                                      style={{ width: `${aiAnalysisProgress[child.id] || 0}%` }}
-                                    ></div>
+                                  <p className="text-sm font-medium text-gray-700">Analyzing wellbeing patterns</p>
+                                  {/* Smooth progress indicator */}
+                                  <div className="w-32 h-1 bg-gray-200 rounded-full overflow-hidden">
+                                    <motion.div
+                                      className="h-full bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-full"
+                                      animate={{ x: ["-100%", "200%"] }}
+                                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                    />
                                   </div>
-                                  <p className="text-xs text-gray-500">{aiAnalysisProgress[child.id] || 0}% complete</p>
                                 </div>
-                              </div>
-                            </div>
+                              </motion.div>
+                            </motion.div>
                           )}
                         </div>
                       </div>
