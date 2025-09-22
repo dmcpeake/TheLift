@@ -16,8 +16,8 @@ const steps = [
 
 // Progress header segments (only 3 segments now)
 const progressSegments = [
-  { name: 'Mood meter', icon: Heart },
-  { name: 'My emotions', icon: Smile },
+  { name: 'Mood', icon: Heart },
+  { name: 'Emotions', icon: Smile },
   { name: 'Wellbeing', icon: Compass }
 ]
 
