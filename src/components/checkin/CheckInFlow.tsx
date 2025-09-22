@@ -243,9 +243,11 @@ export function CheckInFlow() {
                 return (
                   <div
                     key={index}
-                    className="flex-1 h-2 rounded-full transition-all duration-300"
+                    className="flex-1 h-2 transition-all duration-300"
                     style={{
-                      backgroundColor: isCompleted ? '#3a7ddc' : isNext ? 'rgba(58, 125, 220, 0.5)' : '#e5e7eb'
+                      backgroundColor: isCompleted ? '#3a7ddc' : isNext ? 'rgba(58, 125, 220, 0.5)' : '#e5e7eb',
+                      borderRadius: index === 0 ? '4px 0 0 4px' :
+                                   index === progressSegments.length - 1 ? '0 4px 4px 0' : '0'
                     }}
                   />
                 )
