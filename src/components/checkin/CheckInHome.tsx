@@ -105,7 +105,7 @@ export function CheckInHome() {
             }
             .mobile-start-button {
               position: fixed !important;
-              bottom: 40px !important;
+              bottom: 32px !important;
               left: 50% !important;
               transform: translateX(-50%) !important;
               z-index: 1000 !important;
