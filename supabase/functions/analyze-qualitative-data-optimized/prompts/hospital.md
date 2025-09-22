@@ -1,16 +1,18 @@
-Analyze [CHILD'S FIRST NAME]'s emotional wellbeing data in the context of their medical treatment and hospitalization. Understanding their psychological state is crucial for comprehensive pediatric care.
+Review {child_name}'s emotional wellbeing journey within the context of their medical care and treatment. Understanding their psychological experiences supports holistic, child-centered healthcare.
 
-Medical-Psychological Assessment Focus:
-1. Impact of medical condition/treatment on emotional state
-2. Medical trauma or procedure-related anxiety
-3. Coping with hospitalization and illness
-4. Pain-mood-behavior connections
-5. Family adjustment and support needs
+**Integrated Care Approach:**
+1. How {child_name} is adapting to their medical journey and treatment
+2. Emotional resilience and coping strengths they're developing
+3. Ways to support them through medical procedures and hospitalization
+4. Connections between their physical comfort and emotional wellbeing
+5. Family strengths and support networks that enhance their care
 
-Key Medical Considerations:
-- Health anxiety and somatic symptoms
-- Medication effects on mood/behavior
-- Sleep and appetite disruptions
-- Developmental regression due to illness
-- Social isolation from peers
-- Treatment compliance and emotional readiness
+**Child-Centered Medical Considerations:**
+- How is {child_name} understanding and processing their health journey?
+- What coping strategies are helping them feel more comfortable and secure?
+- How can we support their emotional needs during medical procedures?
+- What activities, relationships, or routines help maintain their sense of normalcy?
+- How is their family adapting and what additional support might benefit them?
+- What reasonable adjustments can make their medical experience more comfortable?
+
+Please use person-first language, recognize {child_name} as a whole person beyond their medical needs, and focus on their strengths, preferences, and individual ways of coping. Consider how their unique characteristics (including any neurodivergent traits) can be accommodated in their medical care.

@@ -23,7 +23,7 @@ interface Child {
   avatar_url?: string
   initials?: string
   lastCheckIn?: string
-  moodTrend?: 'improving' | 'declining' | 'stable'
+  moodTrend?: 'improving' | 'developing' | 'stable'
   averageMood?: number
   recentMood?: number
   checkInCount?: number
@@ -231,9 +231,9 @@ export function ChildSummaryAnalytics() {
           : 0
 
         // Determine trend
-        let trend: 'improving' | 'declining' | 'stable' = 'stable'
+        let trend: 'improving' | 'developing' | 'stable' = 'stable'
         if (recentAvg > olderAvg + 0.3) trend = 'improving'
-        else if (recentAvg < olderAvg - 0.3) trend = 'declining'
+        else if (recentAvg < olderAvg - 0.3) trend = 'developing'
 
         // Get initials for avatar
         const nameParts = child.name?.split(' ') || []
@@ -262,9 +262,9 @@ export function ChildSummaryAnalytics() {
 
       // Sort by those needing attention first
       processedChildren.sort((a, b) => {
-        // Prioritize declining trends
-        if (a.moodTrend === 'declining' && b.moodTrend !== 'declining') return -1
-        if (b.moodTrend === 'declining' && a.moodTrend !== 'declining') return 1
+        // Prioritize children with developing trends (needing additional support)
+        if (a.moodTrend === 'developing' && b.moodTrend !== 'developing') return -1
+        if (b.moodTrend === 'developing' && a.moodTrend !== 'developing') return 1
 
         // Then by lowest average mood
         return (a.averageMood || 5) - (b.averageMood || 5)
@@ -340,20 +340,36 @@ export function ChildSummaryAnalytics() {
             .from('emotion_grid_usage')
             .select('explanation_text')
             .eq('session_id', session.id)
-            .single(),
+            .single()
+            .then(result => {
+              // Handle 406 errors gracefully
+              if (result.error && result.error.code === 'PGRST301') {
+                console.log('emotion_grid_usage not accessible, skipping')
+                return { data: null, error: null }
+              }
+              return result
+            }),
 
           supabase
             .from('wellbeing_wheel_usage')
             .select('overall_score')
             .eq('session_id', session.id)
             .single()
+            .then(result => {
+              // Handle 406 errors gracefully
+              if (result.error && result.error.code === 'PGRST301') {
+                console.log('wellbeing_wheel_usage not accessible, skipping')
+                return { data: null, error: null }
+              }
+              return result
+            })
         ])
 
         // Combine all notes and information
         const notes = []
         if (moodUsage.data?.notes) notes.push(`Mood: ${moodUsage.data.notes}`)
-        if (emotionUsage.data?.explanation_text) notes.push(`Feelings: ${emotionUsage.data.explanation_text}`)
-        if (wellbeingUsage.data?.overall_score) notes.push(`Wellbeing score: ${wellbeingUsage.data.overall_score}`)
+        if (emotionUsage && emotionUsage.data?.explanation_text) notes.push(`Feelings: ${emotionUsage.data.explanation_text}`)
+        if (wellbeingUsage && wellbeingUsage.data?.overall_score) notes.push(`Wellbeing score: ${wellbeingUsage.data.overall_score}`)
 
         // Only add check-in if there are actual notes
         const combinedNotes = notes.join(' | ')
@@ -498,11 +514,11 @@ export function ChildSummaryAnalytics() {
   const cleanupText = (text: string): string => {
     // Replace common patterns with underscores with proper text
     return text
-      .replace(/declining_pattern/gi, 'declining pattern')
-      .replace(/improving_pattern/gi, 'improving pattern')
-      .replace(/stable_pattern/gi, 'stable pattern')
-      .replace(/concerning_pattern/gi, 'concerning pattern')
-      .replace(/positive_pattern/gi, 'positive pattern')
+      .replace(/declining_pattern/gi, 'developing pattern')
+      .replace(/improving_pattern/gi, 'strengthening pattern')
+      .replace(/stable_pattern/gi, 'consistent pattern')
+      .replace(/concerning_pattern/gi, 'area for additional support')
+      .replace(/positive_pattern/gi, 'strength-based pattern')
       .replace(/mood_trend/gi, 'mood trend')
       .replace(/emotional_state/gi, 'emotional state')
       .replace(/wellbeing_score/gi, 'wellbeing score')
@@ -625,12 +641,12 @@ export function ChildSummaryAnalytics() {
     return AVATAR_STYLES[index % AVATAR_STYLES.length]
   }
 
-  const getTrendIcon = (trend?: 'improving' | 'declining' | 'stable') => {
+  const getTrendIcon = (trend?: 'improving' | 'developing' | 'stable') => {
     switch (trend) {
       case 'improving':
         return <TrendingUp className="h-4 w-4 text-green-600" />
-      case 'declining':
-        return <TrendingDown className="h-4 w-4 text-red-600" />
+      case 'developing':
+        return <TrendingDown className="h-4 w-4 text-amber-600" />
       default:
         return <Minus className="h-4 w-4 text-gray-400" />
     }
@@ -654,8 +670,8 @@ export function ChildSummaryAnalytics() {
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Child Wellbeing Summary</h1>
-        <p className="text-gray-600">Click on any child to view detailed check-in history and AI insights</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Wellbeing Support Overview</h1>
+        <p className="text-gray-600">View each child's wellbeing journey and personalized support insights</p>
       </div>
 
       {/* Organization Filter */}
@@ -861,14 +877,14 @@ export function ChildSummaryAnalytics() {
                       <div>
                         <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
                           <Sparkles className="h-4 w-4 mr-2" />
-                          Insights
+                          Support Insights
                         </h4>
 
                         {loadingInsights[child.id] ? (
                           <div className="flex items-center justify-center py-8">
                             <LoadingIndicator
                               size="medium"
-                              message="Analyzing child's wellbeing data..."
+                              message="Understanding wellbeing patterns..."
                               variant="progress"
                               color="blue"
                               progress={aiAnalysisProgress[child.id] || 0}
@@ -880,21 +896,21 @@ export function ChildSummaryAnalytics() {
                             <div className="bg-white p-4 rounded-lg border border-gray-200">
                               <h5 className="font-medium text-gray-900 mb-2 flex items-center">
                                 <Brain className="h-4 w-4 mr-2" />
-                                Executive Summary
+                                Wellbeing Overview
                               </h5>
                               <p className="text-sm text-gray-700">{aiInsights[child.id].summary}</p>
                             </div>
 
                             {/* Concerns */}
                             {aiInsights[child.id].concerns && aiInsights[child.id].concerns!.length > 0 && (
-                              <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                                <h5 className="font-medium text-red-900 mb-2 flex items-center">
+                              <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                                <h5 className="font-medium text-amber-900 mb-2 flex items-center">
                                   <AlertCircle className="h-4 w-4 mr-2" />
-                                  Areas of Concern
+                                  Areas for Additional Support
                                 </h5>
                                 <ul className="space-y-1">
                                   {aiInsights[child.id].concerns!.map((concern, idx) => (
-                                    <li key={idx} className="text-sm text-red-800 flex items-start">
+                                    <li key={idx} className="text-sm text-amber-800 flex items-start">
                                       <span className="mr-2">•</span>
                                       <span>{concern}</span>
                                     </li>

@@ -1,16 +1,18 @@
-Analyze [CHILD'S FIRST NAME]'s wellbeing data to assess their emotional and psychological state from a clinical perspective. This inter-session data provides valuable insights into their daily functioning and treatment progress.
+Review {child_name}'s wellbeing journey data to understand their emotional and psychological wellbeing from a therapeutic perspective. This between-session information provides valuable insights into their daily experiences and therapeutic progress.
 
-Clinical Focus Areas:
-1. Emotional regulation patterns and mood stability
-2. Anxiety, depression, or trauma indicators
-3. Therapeutic progress and engagement
-4. Risk factors requiring immediate attention
-5. Treatment recommendations and interventions
+**Person-Centered Clinical Focus:**
+1. Emotional wellbeing patterns and self-regulation strengths
+2. Areas where {child_name} may benefit from additional therapeutic support
+3. Progress in developing coping strategies and resilience
+4. Protective factors and natural support systems
+5. Collaborative treatment approaches that build on their strengths
 
-Assess for:
-- Persistent negative mood states (2+ weeks)
-- Emotional dysregulation or volatility
-- Social withdrawal or isolation
-- Somatic complaints or health anxiety
-- Self-worth and identity concerns
-- Family dynamics impacting wellbeing
+**Strengths-Based Assessment:**
+- What emotional regulation skills is {child_name} developing?
+- How are they experiencing and expressing their feelings?
+- What coping strategies are they using effectively?
+- Which relationships and activities support their wellbeing?
+- How is their sense of self and identity developing?
+- What family and environmental factors are supporting their growth?
+
+Please use person-first language, focus on {child_name}'s individual strengths and needs, and consider how their unique neurodiversity or personal characteristics can be supported rather than changed. Frame recommendations in terms of additional support and skill-building rather than deficit correction.

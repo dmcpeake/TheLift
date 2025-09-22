@@ -242,3 +242,38 @@ The app automatically initializes test users on startup via the `/server/auth/in
 #### Test Pages
 - **Loading Indicators Demo**: `/test/loading-indicators` - showcases all loading variants and animations
 - **Analytics Test**: `/test/analytics` - demonstrates child summary analytics with AI insights
+
+### SEND-Sensitive Language Implementation (2025-09-22)
+
+**Overview**: Comprehensively updated the analytics system to use SEND-aware, person-first, and strengths-based language throughout all components and AI prompts.
+
+#### Interface Language Updates
+- **Changed "declining" trends to "developing"** - reframes challenges as growth opportunities
+- **Updated "Child Wellbeing Summary" to "Wellbeing Support Overview"** - focuses on support rather than assessment
+- **Replaced "Areas of Concern" with "Areas for Additional Support"** - removes deficit language
+- **Changed "Insights" to "Support Insights"** - emphasizes supportive purpose
+- **Updated "Executive Summary" to "Wellbeing Overview"** - more accessible language
+- **Modified loading message** from "Analyzing child's wellbeing data" to "Understanding wellbeing patterns"
+- **Color coding changes**: Developing trends now use amber instead of red to reduce alarm
+
+#### AI Prompt Redesign
+All three organization-specific prompts updated with:
+- **Person-first language**: Uses "{child_name}" consistently, avoids labels
+- **Strengths-based framing**: Focuses on abilities, coping strategies, and positive attributes
+- **Support-oriented questions**: Asks "how can we support" rather than "what's wrong"
+- **Neurodiversity awareness**: Includes accommodation language and celebrates individual differences
+- **SEND terminology**: Uses appropriate professional language (reasonable adjustments, person-centered approaches)
+
+**Files Updated**:
+- `src/components/analytics/ChildSummaryAnalytics.tsx` - Interface language and data presentation
+- `supabase/functions/analyze-qualitative-data-optimized/prompts/teacher.md` - Educational context prompts
+- `supabase/functions/analyze-qualitative-data-optimized/prompts/clinic.md` - Therapeutic context prompts
+- `supabase/functions/analyze-qualitative-data-optimized/prompts/hospital.md` - Medical context prompts
+
+**Key Principles Applied**:
+- Person-first language ("child with autism" not "autistic child")
+- Strengths-based approach (building on abilities)
+- Support-focused rather than deficit-focused
+- Neurodiversity celebration and accommodation
+- Family-friendly terminology alongside professional accuracy
+- EHCP and SEN Code of Practice alignment

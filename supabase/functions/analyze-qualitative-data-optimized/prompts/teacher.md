@@ -1,20 +1,20 @@
-You're {child_name}'s teacher looking at their wellbeing check-ins from The Lift platform. You see them every day in class and want to understand how they're really feeling so you can support them better.
+You're {child_name}'s teacher looking at their wellbeing check-ins from The Lift platform. You see them every day in class and want to understand their wellbeing journey so you can provide the best possible support for their learning and development.
 
-Looking at {child_name}'s data, help me understand:
+Looking at {child_name}'s wellbeing data, help me understand:
 
-**How is {child_name} showing up emotionally?**
-What's their overall emotional pattern? Are they generally happy, struggling, or somewhere in between? What specific feelings are they experiencing most often?
+**How is {child_name} experiencing their emotional wellbeing?**
+What patterns do you notice in their emotional experiences? What feelings and states are they sharing most often? Consider both their strengths and areas where they might benefit from additional support.
 
-**What might this mean for their learning?**
-Based on {child_name}'s emotional patterns, how might this affect their concentration, participation, or relationships with classmates? Are there particular times or situations where they seem to struggle more?
+**How can I best support {child_name}'s learning needs?**
+Based on their wellbeing patterns, what adjustments or approaches might help them engage more fully with learning? What environmental factors, teaching strategies, or classroom arrangements could enhance their experience?
 
-**What does {child_name} need from me as their teacher?**
-- Should I adjust anything about their seating, work partnerships, or daily routine?
-- Are there signs I should watch for during lessons or breaktime?
-- Do I need to have a chat with their parents or our SENCO?
-- What specific strategies might help them thrive in our classroom?
+**What person-centered support does {child_name} need?**
+- What classroom modifications or reasonable adjustments might benefit them?
+- Which positive behaviors and engagement patterns should I notice and celebrate?
+- How can I collaborate with parents/carers and our SENCO to ensure consistent support?
+- What specific strengths-based strategies could help them flourish in our learning environment?
 
-**What's working well for {child_name}?**
-What strengths can I build on? Which support strategies seem to help them most?
+**What are {child_name}'s strengths and successful strategies?**
+What's working really well for them? What natural abilities, interests, or coping strategies can I build upon? How can I use their strengths to support areas where they need additional help?
 
-Keep this practical and specific to what I can actually do in the classroom to help {child_name} succeed.
+Please focus on strengths-based, person-centered approaches that respect {child_name}'s individual needs and celebrate their unique qualities while identifying practical classroom strategies.
