@@ -276,4 +276,137 @@ All three organization-specific prompts updated with:
 - Support-focused rather than deficit-focused
 - Neurodiversity celebration and accommodation
 - Family-friendly terminology alongside professional accuracy
+
+## Recent Updates (2025-09-22)
+
+### 1. Added Critical Support Alert System
+- Children with average mood < 2.5 are flagged with red alerts
+- Three severity levels: CRITICAL (≤1.5), SEVERE (1.5-2.0), HIGH (2.0-2.5)
+- Visual indicators include red borders, pulsing icons, and "URGENT SUPPORT" badges
+- Critical children automatically sorted to top of lists
+- Component: `src/components/analytics/CriticalSupportAlert.tsx`
+
+### 2. Enhanced Comparison Visualizations
+- **Radar Chart**: Moved legend to left side with vertical layout
+- **Timeline Chart**: Added mood emoticons on Y-axis (1😢 2😟 3😐 4😊 5😄)
+- **Heatmap**: Fixed date range to show actual data period instead of future dates
+- All visualizations now properly load mood history for all children
+
+### 3. AI Insights Improvements
+- **Text Formatting**: Fixed bullet point detection for various formats ("- ", " - ")
+- **Field Name Cleanup**: Converts technical names (moodTrend → mood trend)
+- **Sentence Capitalization**: Properly capitalizes sentences and children's names
+- **Executive Summary**: Now displays ALL bullet points, not just partial content
+
+### 4. Lottie Loader Implementation
+- Installed `@lottiefiles/dotlottie-react` package
+- Created `src/components/shared/LottieLoader.tsx` with multiple variants
+- Deployed across all major loading states in the app
+- Fixed duplicate loader issue by removing progress animation state updates
+
+### 5. Adding New Test Children to Database (IMPORTANT PROCESS)
+
+**Example: Jayden Martinez Addition**
+
+#### Step 1: JSON Data Structure
+When you have child data in JSON format, it should include:
+```json
+{
+  "profile": {
+    "name": "Jayden Martinez",
+    "org_id": "61f8c1e3-29f1-4e3c-af8b-ffaff5c3a455",
+    "initials": "JM",
+    "grade": "Year 5",
+    "teacher": "Mrs. Davis"
+  },
+  "sessions": [
+    {
+      "started_at": "2025-01-09T09:15:00Z",
+      "completed_at": "2025-01-09T09:25:00Z",
+      "mood": {
+        "numeric": 1,
+        "label": "Very Sad",
+        "notes": "i feel like nobody understands me"
+      },
+      "wellbeing": {...}
+    }
+  ]
+}
+```
+
+#### Step 2: SQL Conversion Process
+Convert JSON to SQL using this template (`sql-combined/jayden_martinez_data_final.sql`):
+
+```sql
+DO $$
+DECLARE
+    v_child_id UUID;
+    v_session_id UUID;
+BEGIN
+    -- Create child profile
+    INSERT INTO profiles (
+        id, name, role, created_at, updated_at,
+        initials, grade, teacher, org_id
+    )
+    VALUES (
+        gen_random_uuid(),
+        'Jayden Martinez',
+        'child',
+        NOW() - INTERVAL '4 months',
+        NOW(),
+        'JM',
+        'Year 5',
+        'Mrs. Davis',
+        '61f8c1e3-29f1-4e3c-af8b-ffaff5c3a455'::UUID
+    )
+    RETURNING id INTO v_child_id;
+
+    -- Create check-in session
+    INSERT INTO checkin_sessions (
+        id, child_id, started_at, completed_at,
+        status, wants_adult_conversation
+    )
+    VALUES (
+        gen_random_uuid(),
+        v_child_id,
+        '2025-01-09 09:15:00+00',
+        '2025-01-09 09:25:00+00',
+        'completed',
+        true
+    )
+    RETURNING id INTO v_session_id;
+
+    -- Add mood data
+    INSERT INTO mood_meter_usage (
+        id, session_id, child_id, selected_at,
+        mood_numeric, mood_label, explanation_text
+    )
+    VALUES (
+        gen_random_uuid(),
+        v_session_id,
+        v_child_id,
+        '2025-01-09 09:16:00+00',
+        1,
+        'Very Sad',
+        'i feel like nobody understands me'
+    );
+
+    -- Add wellbeing scores (if applicable)
+    INSERT INTO wellbeing_sessions (...)
+END $$;
+```
+
+#### Step 3: Import to Database
+1. Ensure RLS is disabled: `ALTER TABLE profiles DISABLE ROW LEVEL SECURITY;`
+2. Drop foreign key constraint if needed: `ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_id_fkey;`
+3. Run the SQL file
+4. Re-enable security after import
+
+#### Key Points for Adding Test Data:
+- **ALWAYS use `gen_random_uuid()`** for all UUID fields
+- **Use DO blocks** for complex inserts with dependencies
+- **Organization IDs must exist** (check organisations table)
+- **Correct org_id for Westfield Primary**: `61f8c1e3-29f1-4e3c-af8b-ffaff5c3a455`
+- **Session IDs link** mood_meter_usage → checkin_sessions → profiles
+- **Timestamps should be realistic** (past dates for test data)
 - EHCP and SEN Code of Practice alignment
