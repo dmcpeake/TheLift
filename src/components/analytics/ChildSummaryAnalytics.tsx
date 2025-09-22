@@ -218,9 +218,17 @@ export function ChildSummaryAnalytics() {
         status: i <= 2 ? 'complete' : i === 3 ? 'loading' : 'pending'
       })))
 
+      // Store mood history for all children (for comparison views)
+      const allMoodHistory: Record<string, any[]> = {}
+      childProfiles.forEach(child => {
+        const childMoods = moodData?.filter(m => m.child_id === child.id) || []
+        allMoodHistory[child.id] = childMoods
+      })
+      setMoodHistory(allMoodHistory)
+
       // Process children with mood data
       const processedChildren: Child[] = childProfiles.map(child => {
-        const childMoods = moodData?.filter(m => m.child_id === child.id) || []
+        const childMoods = allMoodHistory[child.id] || []
         const recentMoods = childMoods.slice(0, 10)
         const olderMoods = childMoods.slice(10, 20)
 

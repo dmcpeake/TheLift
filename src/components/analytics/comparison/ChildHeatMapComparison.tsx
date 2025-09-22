@@ -50,6 +50,14 @@ const calculateTrend = (moods: any[]): number => {
 export function ChildHeatMapComparison({ children, moodHistory }: ChildHeatMapComparisonProps) {
   // Prepare heat map data with weekly breakdowns
   const heatMapData = useMemo(() => {
+    // Debug: Log what data we're receiving
+    console.log('HeatMap - Children:', children.map(c => ({ id: c.id, name: c.name })))
+    console.log('HeatMap - MoodHistory keys:', Object.keys(moodHistory))
+    children.forEach(child => {
+      const childMoods = moodHistory[child.id] || []
+      console.log(`HeatMap - ${child.name} (${child.id}): ${childMoods.length} moods`)
+    })
+
     // First, find the date range across all children
     let earliestDate: Date | null = null
     let latestDate: Date | null = null
