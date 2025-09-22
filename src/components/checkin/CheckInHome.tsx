@@ -100,26 +100,37 @@ export function CheckInHome() {
               min-height: auto !important;
               padding-top: 160px !important;
             }
-          }
-          @media (min-width: 769px) {
-            .welcome-content-mobile {
-              padding-top: 180px !important;
-            }
             .welcome-content-mobile .max-w-2xl {
               margin-top: 0 !important;
             }
             .mobile-start-button {
               position: fixed !important;
-              bottom: 40px !important;
+              bottom: 32px !important;
               left: 50% !important;
               transform: translateX(-50%) !important;
               z-index: 1000 !important;
+            }
+            .desktop-start-button {
+              display: none !important;
             }
             .theo-animation {
               bottom: 70px !important;
             }
             .garden-cards-container {
               display: none !important;
+            }
+          }
+          @media (min-width: 769px) {
+            .welcome-content-mobile {
+              padding-top: 0 !important;
+              min-height: calc(100vh - 200px) !important;
+              align-items: center !important;
+            }
+            .mobile-start-button {
+              display: none !important;
+            }
+            .desktop-start-button {
+              display: flex !important;
             }
             .logout-button {
               top: 20px !important;
@@ -382,6 +393,29 @@ export function CheckInHome() {
               </p>
             </div>
 
+            {/* Start Button - desktop only */}
+            <div className="flex justify-center desktop-start-button">
+              <button
+                onClick={handleStartClick}
+                className="font-semibold text-lg transition-all duration-200"
+                style={{
+                  backgroundColor: '#e87e67',
+                  color: 'white',
+                  height: '60px',
+                  borderRadius: '30px',
+                  paddingLeft: '30px',
+                  paddingRight: '30px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
+              >
+                START
+              </button>
+            </div>
+
           </div>
         </div>
       )}
@@ -444,7 +478,7 @@ export function CheckInHome() {
           {/* Button Container */}
           <div style={{
             position: 'fixed',
-            bottom: '40px',
+            bottom: '32px',
             left: '50%',
             transform: 'translateX(-50%)',
             display: 'flex',
@@ -498,10 +532,12 @@ export function CheckInHome() {
                 background: '#3a7ddc',
                 color: 'white',
                 border: 'none',
-                borderRadius: '50%',
+                borderRadius: '28px',
                 cursor: 'pointer',
-                width: '56px',
+                width: '100px',
                 height: '56px',
+                fontSize: '16px',
+                fontWeight: '600',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -509,11 +545,7 @@ export function CheckInHome() {
               }}
               aria-label={!breathingStarted ? "Start breathing" : isBreathingRunning ? "Pause breathing" : "Resume breathing"}
             >
-              {breathingStarted && isBreathingRunning ? (
-                <Pause style={{ width: '24px', height: '24px', color: 'white' }} />
-              ) : (
-                <Play style={{ width: '24px', height: '24px', color: 'white' }} />
-              )}
+              {breathingStarted && isBreathingRunning ? 'PAUSE' : 'PLAY'}
             </button>
 
             {/* Skip Button */}
@@ -546,19 +578,23 @@ export function CheckInHome() {
       <YellowSwoosh>
         {/* Start Button */}
         {!showBreathing && (
-          <div className="flex justify-center mobile-start-button" style={{ position: 'absolute', bottom: '40px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
+          <div className="flex justify-center mobile-start-button" style={{ position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
             <button
               onClick={handleStartClick}
-              className="font-semibold text-lg transition-all duration-200"
+              className="transition-all duration-200"
               style={{
                 backgroundColor: '#e87e67',
                 color: 'white',
-                height: '60px',
-                borderRadius: '30px',
-                paddingLeft: '30px',
-                paddingRight: '30px',
+                width: '100px',
+                height: '56px',
+                borderRadius: '28px',
                 border: 'none',
                 cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}

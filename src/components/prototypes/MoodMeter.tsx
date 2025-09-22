@@ -303,31 +303,40 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
       </div>
 
 
-      {selectedMood && showNextButton && (
+      {showNextButton && (
         <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center" style={{ zIndex: 1000 }}>
           <button
-            onClick={() => onComplete?.(selectedMood)}
+            onClick={() => selectedMood && onComplete?.(selectedMood)}
+            disabled={!selectedMood}
             style={{
-              width: '56px',
+              width: '100px',
               height: '56px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: '50%',
-              backgroundColor: '#3a7ddc',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              borderRadius: '28px',
+              backgroundColor: selectedMood ? '#3a7ddc' : 'rgba(255, 255, 255, 0.3)',
+              boxShadow: selectedMood ? '0 8px 32px rgba(0, 0, 0, 0.1)' : 'none',
               border: 'none',
-              cursor: 'pointer',
+              cursor: selectedMood ? 'pointer' : 'not-allowed',
               transition: 'all 0.3s ease',
-              color: 'white'
+              color: selectedMood ? 'white' : 'rgba(255, 255, 255, 0.5)',
+              fontSize: '16px',
+              fontWeight: '600'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1066c2'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
+            onMouseEnter={(e) => {
+              if (selectedMood) {
+                e.currentTarget.style.backgroundColor = '#1066c2'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (selectedMood) {
+                e.currentTarget.style.backgroundColor = '#3a7ddc'
+              }
+            }}
             aria-label="Next"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9,18 15,12 9,6"></polyline>
-            </svg>
+            NEXT
           </button>
         </div>
       )}

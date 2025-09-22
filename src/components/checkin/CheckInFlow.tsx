@@ -16,8 +16,8 @@ const steps = [
 
 // Progress header segments (only 3 segments now)
 const progressSegments = [
-  { name: 'Mood meter', icon: Heart },
-  { name: 'My emotions', icon: Smile },
+  { name: 'Mood', icon: Heart },
+  { name: 'Emotions', icon: Smile },
   { name: 'Wellbeing', icon: Compass }
 ]
 
@@ -165,7 +165,7 @@ export function CheckInFlow() {
           <div className="mx-auto px-6" style={{ maxWidth: '300px', height: '80px', position: 'relative' }}>
 
             {/* Icons row - positioned at top */}
-            <div className="grid grid-cols-3 gap-2 w-full" style={{ paddingTop: '10px' }}>
+            <div className="flex w-full justify-center" style={{ paddingTop: '10px', gap: '1px' }}>
               {progressSegments.map((segment, index) => {
                 const Icon = segment.icon
                 const stepId = steps[index]?.id
@@ -194,7 +194,7 @@ export function CheckInFlow() {
                 })()
 
                 return (
-                  <div key={segment.name} className="text-center">
+                  <div key={segment.name} className="text-center" style={{ width: 'calc((100% - 2px) / 3 - 20px)' }}>
                     {canNavigate ? (
                       <button
                         onClick={() => stepId && handleNavigateToStep(stepId)}
@@ -212,77 +212,51 @@ export function CheckInFlow() {
               })}
             </div>
 
-            {/* Progress bar with separators - positioned 10px below icons */}
-            <div className="relative w-full bg-gray-200 rounded-full h-2">
-              {/* Main progress bar */}
-              <div
-                className="h-2 rounded-full transition-all duration-300"
-                style={{
-                  width: `${(() => {
-                    // Calculate progress including current step
-                    let activeSegments = 0
+            {/* Progress bar with discrete segments - positioned 10px below icons */}
+            <div className="relative w-full h-2 flex justify-center" style={{ gap: '1px' }}>
+              {progressSegments.map((_, index) => {
+                // Calculate segment states
+                let isCompleted = false
+                let isNext = false
 
-                    // Mood meter is active/completed when on mood or beyond
-                    if (currentStep === 'mood' || currentStep === 'emotions' || currentStep === 'wellbeing' || currentStep === 'garden') {
-                      activeSegments += 1
-                    }
-                    // My emotions is active/completed when on emotions or beyond
-                    if (currentStep === 'emotions' || currentStep === 'wellbeing' || currentStep === 'garden') {
-                      activeSegments += 1
-                    }
-                    // Wellbeing wheel is active/completed when on wellbeing or beyond
-                    if (currentStep === 'wellbeing' || currentStep === 'garden') {
-                      activeSegments += 1
-                    }
-
-                    return (activeSegments / progressSegments.length) * 100
-                  })()}%`,
-                  backgroundColor: '#3a7ddc'
-                }}
-              />
-              {/* Next available segment overlay (50% opacity blue) */}
-              {(() => {
-                let showNextSegment = false
-                let nextSegmentIndex = -1
-
-                if (currentStep === 'mood' && currentStepHasSelection) {
-                  showNextSegment = true
-                  nextSegmentIndex = 1 // emotions
-                } else if (currentStep === 'emotions' && emotionGridStep === 2) {
-                  showNextSegment = true
-                  nextSegmentIndex = 2 // wellbeing
+                // Mood meter is completed when on emotions or beyond
+                if (index === 0 && (currentStep === 'emotions' || currentStep === 'wellbeing' || currentStep === 'garden')) {
+                  isCompleted = true
+                }
+                // Emotions is completed when on wellbeing or beyond
+                if (index === 1 && (currentStep === 'wellbeing' || currentStep === 'garden')) {
+                  isCompleted = true
+                }
+                // Wellbeing is completed when on garden
+                if (index === 2 && currentStep === 'garden') {
+                  isCompleted = true
                 }
 
-                if (showNextSegment) {
-                  const segmentWidth = 100 / progressSegments.length
-                  const leftPosition = nextSegmentIndex * segmentWidth
-
-                  return (
-                    <div
-                      className="absolute h-2 rounded-full transition-all duration-300"
-                      style={{
-                        left: `${leftPosition}%`,
-                        width: `${segmentWidth}%`,
-                        backgroundColor: 'rgba(58, 125, 220, 0.5)',
-                        top: 0
-                      }}
-                    />
-                  )
+                // Next available segment logic
+                if (index === 1 && currentStep === 'mood' && currentStepHasSelection) {
+                  isNext = true
                 }
-                return null
-              })()}
-              {/* Section separators */}
-              {progressSegments.slice(0, -1).map((_, index) => (
-                <div
-                  key={index}
-                  className="absolute top-0 bottom-0 w-px bg-white"
-                  style={{ left: `${((index + 1) / progressSegments.length) * 100}%` }}
-                />
-              ))}
+                if (index === 2 && currentStep === 'emotions' && emotionGridStep === 2) {
+                  isNext = true
+                }
+
+                return (
+                  <div
+                    key={index}
+                    className="h-2 transition-all duration-300"
+                    style={{
+                      backgroundColor: isCompleted ? '#3a7ddc' : isNext ? 'rgba(58, 125, 220, 0.5)' : '#e5e7eb',
+                      borderRadius: index === 0 ? '4px 0 0 4px' :
+                                   index === progressSegments.length - 1 ? '0 4px 4px 0' : '0',
+                      width: 'calc((100% - 2px) / 3 - 20px)'
+                    }}
+                  />
+                )
+              })}
             </div>
 
             {/* Step labels - positioned 10px below progress bar */}
-            <div className="grid grid-cols-3 gap-2 w-full" style={{ marginTop: '5px' }}>
+            <div className="flex w-full justify-center" style={{ marginTop: '5px', gap: '1px' }}>
               {progressSegments.map((segment, index) => {
                 const stepId = steps[index]?.id
                 const isCompleted = completedData[stepId] && !completedData[stepId].skipped
@@ -339,7 +313,7 @@ export function CheckInFlow() {
                 }
 
                 return (
-                  <div key={segment.name} className="text-center">
+                  <div key={segment.name} className="text-center" style={{ width: 'calc((100% - 2px) / 3 - 20px)' }}>
                     {canNavigate ? (
                       <button
                         onClick={() => stepId && handleNavigateToStep(stepId)}
@@ -347,12 +321,12 @@ export function CheckInFlow() {
                         style={{ background: 'none', border: 'none', padding: '12px 16px', margin: '-12px -16px' }}
                         aria-label={`Navigate to ${segment.name}`}
                       >
-                        <span className={`text-xs ${isHighlighted ? 'font-bold' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : (isNextAvailable ? '#3a7ddc' : undefined) }}>
+                        <span className={`text-xs ${isHighlighted ? '' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : (isNextAvailable ? '#3a7ddc' : undefined) }}>
                           {segment.name}
                         </span>
                       </button>
                     ) : (
-                      <span className={`text-xs ${isHighlighted ? 'font-bold' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : '#9ca3af' }}>
+                      <span className={`text-xs ${isHighlighted ? '' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : '#9ca3af' }}>
                         {segment.name}
                       </span>
                     )}
