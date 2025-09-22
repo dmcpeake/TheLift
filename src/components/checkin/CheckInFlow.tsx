@@ -165,7 +165,7 @@ export function CheckInFlow() {
           <div className="mx-auto px-6" style={{ maxWidth: '300px', height: '80px', position: 'relative' }}>
 
             {/* Icons row - positioned at top */}
-            <div className="grid grid-cols-3 gap-2 w-full" style={{ paddingTop: '10px' }}>
+            <div className="flex w-full" style={{ paddingTop: '10px', gap: '1px' }}>
               {progressSegments.map((segment, index) => {
                 const Icon = segment.icon
                 const stepId = steps[index]?.id
@@ -194,7 +194,7 @@ export function CheckInFlow() {
                 })()
 
                 return (
-                  <div key={segment.name} className="text-center">
+                  <div key={segment.name} className="text-center" style={{ width: 'calc((100% - 2px) / 3 - 10px)' }}>
                     {canNavigate ? (
                       <button
                         onClick={() => stepId && handleNavigateToStep(stepId)}
@@ -256,7 +256,7 @@ export function CheckInFlow() {
             </div>
 
             {/* Step labels - positioned 10px below progress bar */}
-            <div className="grid grid-cols-3 gap-2 w-full" style={{ marginTop: '5px' }}>
+            <div className="flex w-full" style={{ marginTop: '5px', gap: '1px' }}>
               {progressSegments.map((segment, index) => {
                 const stepId = steps[index]?.id
                 const isCompleted = completedData[stepId] && !completedData[stepId].skipped
@@ -313,7 +313,7 @@ export function CheckInFlow() {
                 }
 
                 return (
-                  <div key={segment.name} className="text-center">
+                  <div key={segment.name} className="text-center" style={{ width: 'calc((100% - 2px) / 3 - 10px)' }}>
                     {canNavigate ? (
                       <button
                         onClick={() => stepId && handleNavigateToStep(stepId)}
