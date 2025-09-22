@@ -641,15 +641,14 @@ export function ChildSummaryAnalytics() {
     return AVATAR_STYLES[index % AVATAR_STYLES.length]
   }
 
-  const getTrendIcon = (trend?: 'improving' | 'developing' | 'stable', size: 'small' | 'large' = 'small') => {
-    const sizeClass = size === 'large' ? 'h-7 w-7' : 'h-4 w-4'
+  const getTrendIcon = (trend?: 'improving' | 'developing' | 'stable') => {
     switch (trend) {
       case 'improving':
-        return <TrendingUp className={`${sizeClass} text-green-600`} />
+        return <TrendingUp className="h-5 w-5 text-green-600" />
       case 'developing':
-        return <TrendingDown className={`${sizeClass} text-amber-600`} />
+        return <TrendingDown className="h-5 w-5 text-amber-600" />
       default:
-        return <Minus className={`${sizeClass} text-gray-400`} />
+        return <Minus className="h-5 w-5 text-gray-400" />
     }
   }
 
@@ -701,28 +700,22 @@ export function ChildSummaryAnalytics() {
             {/* Child Summary Row */}
             <div
               onClick={() => toggleChildExpansion(child.id)}
-              className="p-5 cursor-pointer hover:bg-gradient-to-r hover:from-gray-50 hover:to-white transition-all duration-200"
+              className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   {/* Avatar - Always use generated avatars, ignore database URLs */}
                   {(() => {
                     const style = getAvatarStyle(index)
-                    const baseClasses = "w-14 h-14 flex items-center justify-center text-white font-semibold transition-all duration-200 hover:scale-110 shadow-lg hover:shadow-xl"
+                    const baseClasses = "w-12 h-12 flex items-center justify-center text-white font-semibold shadow-sm"
                     const avatarClassName = `${baseClasses} ${style.bg} ${style.shape}`
 
 
                     return (
-                      <div className="relative">
-                        <div className={avatarClassName} data-child-index={index}>
-                          <span className="text-base font-bold">
-                            {child.initials}
-                          </span>
-                        </div>
-                        {/* Activity indicator */}
-                        {child.recentMood && child.recentMood >= 4 && (
-                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
-                        )}
+                      <div className={avatarClassName} data-child-index={index}>
+                        <span className="text-sm">
+                          {child.initials}
+                        </span>
                       </div>
                     )
                   })()}
@@ -743,68 +736,46 @@ export function ChildSummaryAnalytics() {
                   </div>
                 </div>
 
-                {/* Status Indicators - Redesigned */}
-                <div className="flex items-center space-x-4">
-                  {/* Current Mood Card */}
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-3 min-w-[80px] border border-blue-100">
-                    <div className="flex flex-col items-center">
-                      <span className="text-3xl mb-1">
-                        {child.recentMood ? MOOD_EMOJIS[child.recentMood as keyof typeof MOOD_EMOJIS] : '—'}
+                {/* Status Indicators - Minimal Design */}
+                <div className="flex items-center space-x-6">
+                  {/* Current Mood */}
+                  <div className="flex flex-col items-center">
+                    <span className="text-2xl">
+                      {child.recentMood ? MOOD_EMOJIS[child.recentMood as keyof typeof MOOD_EMOJIS] : '—'}
+                    </span>
+                    <span className="text-[10px] text-gray-500 mt-1">CURRENT</span>
+                  </div>
+
+                  {/* Average Mood */}
+                  <div className="flex flex-col items-center">
+                    <div className="flex items-center">
+                      <Heart className="h-5 w-5 mr-1" style={{
+                        color: child.averageMood ? MOOD_COLORS[Math.round(child.averageMood) as keyof typeof MOOD_COLORS] : '#9CA3AF',
+                        fill: child.averageMood ? MOOD_COLORS[Math.round(child.averageMood) as keyof typeof MOOD_COLORS] : 'none',
+                        fillOpacity: 0.15
+                      }} />
+                      <span className="text-lg font-medium text-gray-700">
+                        {child.averageMood ? child.averageMood.toFixed(1) : '—'}
                       </span>
-                      <span className="text-[10px] font-medium text-blue-700 uppercase tracking-wider">Current</span>
                     </div>
+                    <span className="text-[10px] text-gray-500 mt-1">AVERAGE</span>
                   </div>
 
-                  {/* Average Mood Card */}
-                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-3 min-w-[80px] border border-purple-100">
-                    <div className="flex flex-col items-center">
-                      <div className="flex items-center justify-center mb-1">
-                        <div className="relative">
-                          <Heart className="h-7 w-7" style={{
-                            color: child.averageMood ? MOOD_COLORS[Math.round(child.averageMood) as keyof typeof MOOD_COLORS] : '#6B7280',
-                            fill: child.averageMood ? MOOD_COLORS[Math.round(child.averageMood) as keyof typeof MOOD_COLORS] : 'none',
-                            fillOpacity: 0.2
-                          }} />
-                          <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-700">
-                            {child.averageMood ? child.averageMood.toFixed(1) : '—'}
-                          </span>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-medium text-purple-700 uppercase tracking-wider">Average</span>
+                  {/* Trend */}
+                  <div className="flex flex-col items-center">
+                    <div className="h-5 flex items-center">
+                      {getTrendIcon(child.moodTrend)}
                     </div>
+                    <span className="text-[10px] text-gray-500 mt-1">TREND</span>
                   </div>
 
-                  {/* Trend Card */}
-                  <div className={`rounded-xl p-3 min-w-[80px] border ${
-                    child.moodTrend === 'improving'
-                      ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-100'
-                      : child.moodTrend === 'developing'
-                      ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-100'
-                      : 'bg-gradient-to-br from-gray-50 to-slate-50 border-gray-200'
-                  }`}>
-                    <div className="flex flex-col items-center">
-                      <div className="mb-1">
-                        {getTrendIcon(child.moodTrend, 'large')}
-                      </div>
-                      <span className={`text-[10px] font-medium uppercase tracking-wider ${
-                        child.moodTrend === 'improving'
-                          ? 'text-green-700'
-                          : child.moodTrend === 'developing'
-                          ? 'text-amber-700'
-                          : 'text-gray-600'
-                      }`}>Trend</span>
-                    </div>
-                  </div>
-
-                  {/* Expand Icon - Styled Button */}
+                  {/* Expand Icon */}
                   <div className="ml-2">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors flex items-center justify-center">
-                      {expandedChild === child.id ? (
-                        <ChevronDown className="h-5 w-5 text-gray-600" />
-                      ) : (
-                        <ChevronRight className="h-5 w-5 text-gray-600" />
-                      )}
-                    </div>
+                    {expandedChild === child.id ? (
+                      <ChevronDown className="h-5 w-5 text-gray-400" />
+                    ) : (
+                      <ChevronRight className="h-5 w-5 text-gray-400" />
+                    )}
                   </div>
                 </div>
               </div>
