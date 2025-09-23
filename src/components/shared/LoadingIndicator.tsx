@@ -132,8 +132,9 @@ export function LoadingIndicator({
       {[0, 1, 2, 3].map(i => (
         <div
           key={i}
-          className={`h-3 w-3 rounded-full ${colorClasses[color]} transition-all duration-300`}
+          className="h-3 w-3 rounded-full transition-all duration-300"
           style={{
+            backgroundColor: '#157fe3',
             opacity: animationFrame === i ? 1 : 0.3,
             transform: animationFrame === i ? 'scale(1.3)' : 'scale(1)'
           }}

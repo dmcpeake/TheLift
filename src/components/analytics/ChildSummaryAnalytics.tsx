@@ -393,7 +393,6 @@ export function ChildSummaryAnalytics() {
         const notes = []
         if (moodUsage.data?.notes) notes.push(`Mood: ${moodUsage.data.notes}`)
         if (emotionUsage && emotionUsage.data?.explanation_text) notes.push(`Feelings: ${emotionUsage.data.explanation_text}`)
-        if (wellbeingUsage && wellbeingUsage.data?.overall_score) notes.push(`Wellbeing score: ${wellbeingUsage.data.overall_score}`)
 
         // Only add check-in if there are actual notes
         const combinedNotes = notes.join(' | ')
