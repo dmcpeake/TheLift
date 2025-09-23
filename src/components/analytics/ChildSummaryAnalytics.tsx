@@ -3,7 +3,7 @@ import { MoodHeatmap } from './MoodHeatmap'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { projectId, publicAnonKey } from '../../utils/supabase/info.tsx'
-import { PageLoader, LottieLoader } from '../shared/LottieLoader'
+import { PageAnimatedLoader } from '../shared/AnimatedLoader'
 import { ComparisonView } from './comparison/ComparisonView'
 import { CriticalSupportAlert } from './CriticalSupportAlert'
 import {
@@ -91,6 +91,16 @@ const AVATAR_STYLES = [
   { bg: 'bg-fuchsia-500', shape: 'rounded-full' },
   { bg: 'bg-slate-500', shape: 'rounded-lg' }
 ]
+
+// Format mood labels to be human-readable
+function formatMoodLabel(label: string | undefined): string {
+  if (!label) return ''
+  // Replace underscores with spaces and capitalize each word
+  return label
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+}
 
 export function ChildSummaryAnalytics() {
   const [organizations, setOrganizations] = useState<Organization[]>([])
@@ -759,7 +769,7 @@ export function ChildSummaryAnalytics() {
   }
 
   if (loading) {
-    return <PageLoader message="Loading analytics data..." />
+    return <PageAnimatedLoader message="Loading analytics data..." />
   }
 
   return (
@@ -1053,7 +1063,7 @@ export function ChildSummaryAnalytics() {
                                             backgroundColor: MOOD_COLORS[checkIn.mood_numeric || 3] + '20',
                                             color: MOOD_COLORS[checkIn.mood_numeric || 3]
                                           }}>
-                                            {MOOD_EMOJIS[checkIn.mood_numeric || 3]} {checkIn.mood_level}
+                                            {MOOD_EMOJIS[checkIn.mood_numeric || 3]} {formatMoodLabel(checkIn.mood_level)}
                                           </span>
                                         </div>
                                       )}
@@ -1231,14 +1241,13 @@ export function ChildSummaryAnalytics() {
                             )}
                           </div>
 
-                          {/* Loading Overlay with Lottie animation */}
+                          {/* Loading Overlay with simple spinner */}
                           {loadingInsights[child.id] && (
                             <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-lg z-10">
-                              <LottieLoader
-                                loading={true}
-                                size="small"
-                                message="Analyzing wellbeing patterns..."
-                              />
+                              <div className="flex flex-col items-center">
+                                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+                                <p className="mt-3 text-sm text-gray-600">Analyzing wellbeing patterns...</p>
+                              </div>
                             </div>
                           )}
                         </div>
