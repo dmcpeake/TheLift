@@ -641,25 +641,46 @@ export function CheckInHome() {
 
       {/* Theo Rose Animation - centered under start button - only show when not breathing */}
       {roseAnimation && !showBreathing && (
-        <div
-          className="theo-animation"
-          style={{
-            position: 'fixed',
-            bottom: '100px',
-            left: 'calc(50% + 60px)',
-            transform: 'translateX(-50%)',
-            width: '300px',
-            height: '300px',
-            zIndex: 10,
-            opacity: isTransitioning ? 0 : 1,
-            transition: 'opacity 300ms ease-in-out'
-          }}
-        >
-          <Lottie
-            animationData={roseAnimation}
-            loop={true}
-            autoplay={true}
+        <div style={{ position: 'relative' }}>
+          {/* Oval shadow under Theo's feet */}
+          <div
+            style={{
+              position: 'fixed',
+              bottom: '100px',
+              left: 'calc(50% + 60px)',
+              transform: 'translateX(-50%)',
+              width: '120px',
+              height: '30px',
+              backgroundColor: 'rgba(0, 0, 0, 0.15)',
+              borderRadius: '50%',
+              zIndex: 9,
+              opacity: isTransitioning ? 0 : 1,
+              transition: 'opacity 300ms ease-in-out',
+              filter: 'blur(8px)'
+            }}
           />
+
+          {/* Theo Animation */}
+          <div
+            className="theo-animation"
+            style={{
+              position: 'fixed',
+              bottom: '100px',
+              left: 'calc(50% + 60px)',
+              transform: 'translateX(-50%)',
+              width: '300px',
+              height: '300px',
+              zIndex: 10,
+              opacity: isTransitioning ? 0 : 1,
+              transition: 'opacity 300ms ease-in-out'
+            }}
+          >
+            <Lottie
+              animationData={roseAnimation}
+              loop={true}
+              autoplay={true}
+            />
+          </div>
         </div>
       )}
     </div>
