@@ -24,13 +24,13 @@ export function Header({ onSkip, onSettings, phase, techniqueName }: HeaderProps
             font-size: 28px !important;
           }
           .breathing-header-container-mobile {
-            margin-top: 20px !important;
+            margin-top: 0px !important;
           }
         }
       `}</style>
 
       {/* Centered title like breathing exercise */}
-      <div className="breathing-header-container-mobile text-center" style={{ marginTop: '40px', marginBottom: '2rem' }}>
+      <div className="breathing-header-container-mobile text-center" style={{ marginTop: '20px', marginBottom: '2rem' }}>
         <h1 className="breathing-title-mobile text-white mb-2" style={{ fontSize: '40px', fontWeight: 600, letterSpacing: '0.02em' }}>Let's breathe!</h1>
       </div>
     </>

@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import Lottie from 'lottie-react'
+import sadTearAnimation from '../../assets/animations/Sad_Tear_Shaded.json'
+import blushingAnimation from '../../assets/animations/Blushing_Shaded.json'
 
 interface EmotionData {
   selected_emotions: string[]
@@ -10,6 +13,7 @@ interface EmotionData {
   step_completed: number
   completed_at: string
   time_to_complete_seconds: number
+  skipped?: boolean
 }
 
 interface EmotionGridProps {
@@ -20,9 +24,10 @@ interface EmotionGridProps {
   triggerCompletion?: boolean
   initialData?: any
   onStepChange?: (step: number) => void
+  onPartialSave?: (data: any) => void
 }
 
-export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMade, hideDebugInfo = false, triggerCompletion = false, initialData, onStepChange }: EmotionGridProps = {}) {
+export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMade, hideDebugInfo = false, triggerCompletion = false, initialData, onStepChange, onPartialSave }: EmotionGridProps = {}) {
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState(1)
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([])
@@ -34,34 +39,72 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
   const [isListening, setIsListening] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [selectedQuadrant, setSelectedQuadrant] = useState<string | null>(null)
+  const [voiceText, setVoiceText] = useState('')
+  const [talkPreference, setTalkPreference] = useState<string | null>(null)
+  const [isRecording, setIsRecording] = useState(false)
+  const [angryAnimation, setAngryAnimation] = useState<any>(null)
+  const [laughingAnimation, setLaughingAnimation] = useState<any>(null)
+  const [hasCompletedWhy, setHasCompletedWhy] = useState(false)
+  const [buttonAnimationKey, setButtonAnimationKey] = useState(0)
+
+  // Trigger button animation when save/next conditions change
+  useEffect(() => {
+    setButtonAnimationKey(prev => prev + 1)
+  }, [currentStep, hasCompletedWhy])
 
   // Reset to step 1 when component mounts (navigation occurs)
+  // Only reset if we don't have initial data to restore
   useEffect(() => {
     setCurrentStep(1)
-    setSelectedEmotions([])
-    setEmotionStory('')
-    setDiscussionPreference('')
-    setFinalData(null)
-    setStepData(null)
+    if (!initialData) {
+      setSelectedEmotions([])
+      setEmotionStory('')
+      setDiscussionPreference('')
+      setFinalData(null)
+      setStepData(null)
+      setSelectedQuadrant(null)
+      setVoiceText('')
+      setTalkPreference(null)
+    }
   }, []) // Empty dependency array - runs only on mount (when navigating to this component)
 
-  // Initialize with existing data if available, but only restore to step 2 if we have complete data
+  // Load animations from public directory
   useEffect(() => {
-    if (initialData && selectedEmotions.length === 0) {
-      if (initialData.selected_emotions) {
+    const loadAnimations = async () => {
+      try {
+        const [angryResponse, laughingResponse] = await Promise.all([
+          fetch('/Angry_Shaded.json'),
+          fetch('/Laughing_Shaded.json')
+        ])
+
+        const angryData = await angryResponse.json()
+        const laughingData = await laughingResponse.json()
+
+        setAngryAnimation(angryData)
+        setLaughingAnimation(laughingData)
+      } catch (error) {
+        console.error('Failed to load animations:', error)
+      }
+    }
+
+    loadAnimations()
+  }, [])
+
+  // Initialize with existing data if available, but only restore to step 2 if we have complete data
+  // Only run this once on mount to avoid interfering with navigation
+  useEffect(() => {
+    if (initialData) {
+      if (initialData.selected_emotions && initialData.selected_emotions.length > 0) {
         setSelectedEmotions(initialData.selected_emotions)
-        // Only go to step 2 if we have both emotions AND story data (complete data)
-        // This prevents auto-advancing to step 2 when just coming back from wellbeing
-        if (initialData.emotion_story && initialData.emotion_story.trim() !== '') {
-          setCurrentStep(2)
-        }
+        // Don't automatically navigate to step 2 - let user control navigation
         onSelectionMade?.()
       }
       if (initialData.emotion_story) {
         setEmotionStory(initialData.emotion_story)
       }
     }
-  }, [initialData, onSelectionMade])
+  }, []) // Empty dependency array - only run once on mount
 
   // Handle external trigger for completion
   useEffect(() => {
@@ -70,11 +113,52 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
     }
   }, [triggerCompletion])
 
+  // 2D Mood Meter: 4 Quadrants with 9 emotions each (3x3 grid)
   const emotions = {
-    'Upset': ['😠 Angry', '😤 Frustrated', '😰 Worried', '😬 Anxious', '🤯 Overwhelmed', '😱 Panicked', '😣 Stressed', '😒 Irritated', '😫 Restless'],
-    'Down': ['😢 Sad', '😴 Tired', '😔 Lonely', '😑 Bored', '😞 Disappointed', '😕 Confused', '😪 Hurt', '😟 Discouraged', '😰 Hopeless'],
-    'Joyful': ['😄 Happy', '🤩 Excited', '😊 Proud', '😎 Confident', '🤸 Energetic', '😜 Playful', '🧐 Curious', '😯 Amazed', '🥰 Grateful'],
-    'Cool': ['😌 Calm', '😊 Content', '😎 Relaxed', '🕊️ Peaceful', '🤗 Cozy', '🥰 Loved', '😌 Safe', '😴 Sleepy', '🤔 Thoughtful']
+    'red': {
+      title: 'High Energy + Unpleasant',
+      hint: 'Big buzzy feelings',
+      bg: '#F7D8D6',
+      text: '#7E1B1B',
+      emotions: [
+        ['🤬 Enraged', '😣 Stressed', '😲 Shocked'],
+        ['😤 Fuming', '😠 Angry', '😰 Restless'],
+        ['🤢 Repulsed', '😟 Worried', '😬 Uneasy']
+      ]
+    },
+    'yellow': {
+      title: 'High Energy + Pleasant',
+      hint: 'Bright happy feelings',
+      bg: '#FFF1CC',
+      text: '#6A4B00',
+      emotions: [
+        ['😮 Surprised', '🥳 Festive', '🤩 Ecstatic'],
+        ['⚡ Energized', '😊 Optimistic', '😃 Excited'],
+        ['🙂 Pleasant', '🤞 Hopeful', '🥰 Blissful']
+      ]
+    },
+    'blue': {
+      title: 'Low Energy + Unpleasant',
+      hint: 'Heavy tired feelings',
+      bg: '#E0F0FA',
+      text: '#0F4A67',
+      emotions: [
+        ['🤮 Disgusted', '😞 Down', '😐 Apathetic'],
+        ['😩 Miserable', '🥺 Lonely', '😪 Tired'],
+        ['😭 Despair', '😔 Desolate', '🪫 Drained']
+      ]
+    },
+    'green': {
+      title: 'Low Energy + Pleasant',
+      hint: 'Calm comfy feelings',
+      bg: '#E5F5E3',
+      text: '#1E5B2A',
+      emotions: [
+        ['😮‍💨 At ease', '🙂 Content', '🫶 Fulfilled'],
+        ['😌 Relaxed', '💤 Restful', '⚖️ Balanced'],
+        ['🥱 Sleepy', '🕊️ Tranquil', '🧘 Serene']
+      ]
+    }
   }
 
   const categorySubtexts = {
@@ -114,22 +198,31 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
     let newEmotions: string[]
     if (selectedEmotions.includes(emotion)) {
       newEmotions = selectedEmotions.filter(e => e !== emotion)
-    } else if (selectedEmotions.length < 3) {
-      newEmotions = [...selectedEmotions, emotion]
     } else {
-      return
+      // Only allow selection if less than 3 are selected from current quadrant
+      const currentQuadrantEmotions = emotions[selectedQuadrant as keyof typeof emotions].emotions.flat()
+      const currentQuadrantLabels = currentQuadrantEmotions.map(emotionString =>
+        emotionString.split(' ').slice(1).join(' ')
+      )
+      const selectedFromCurrentQuadrant = selectedEmotions.filter(emotion =>
+        currentQuadrantLabels.includes(emotion)
+      )
+
+      if (selectedFromCurrentQuadrant.length < 3) {
+        newEmotions = [...selectedEmotions, emotion]
+      } else {
+        return // Don't allow more than 3 selections from current quadrant
+      }
     }
     setSelectedEmotions(newEmotions)
+    // Reset hasCompletedWhy when emotions are changed
+    setHasCompletedWhy(false)
 
     // Notify parent of selection (any selection makes chevron active)
     if (newEmotions.length > 0) {
       onSelectionMade?.()
     }
 
-    // Stay on step 1 until user clicks next
-    if (newEmotions.length === 0) {
-      setCurrentStep(1)
-    }
 
     // Update step data for display
     const data = {
@@ -154,14 +247,6 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
   const updateStory = (story: string) => {
     setEmotionStory(story)
-    const data = {
-      step: 2,
-      selected_emotions: selectedEmotions,
-      emotion_story: story,
-      timestamp: new Date().toISOString()
-    }
-    setStepData(data)
-    console.log('🎯 EMOTION GRID STEP 2 DATA:', data)
   }
 
   const handleMicrophoneClick = () => {
@@ -233,572 +318,1093 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
   return (
     <>
       <style jsx>{`
+        @keyframes emotionCircleExpand {
+          0% {
+            width: 56px;
+            border-radius: 28px;
+          }
+          100% {
+            width: 140px;
+            border-radius: 28px;
+          }
+        }
+        @keyframes emotionTextFadeIn {
+          0% {
+            opacity: 0;
+          }
+          60% {
+            opacity: 0;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
         @media (max-width: 768px) {
           .emotion-title-mobile {
             font-size: 28px !important;
             line-height: 1.2 !important;
-            margin-top: -35px !important;
+            margin-top: -55px !important;
           }
           .yellow-swoosh-mobile-hide {
             display: none !important;
           }
         }
+        /* SEND Accessibility - Large touch targets */
+        .touch-target {
+          min-width: 44px !important;
+          min-height: 44px !important;
+        }
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+          .touch-target {
+            border-width: 2px !important;
+          }
+        }
       `}</style>
 
-      {/* Centered title like breathing exercise */}
-      <div className="text-center" style={{ marginBottom: currentStep === 2 ? '0.5rem' : '0.5rem' }}>
-        <h1 className="emotion-title-mobile text-gray-900 mb-1" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-          {currentStep === 1 ? 'How are you feeling?' : 'I am feeling'}
-        </h1>
-        {currentStep === 2 && (
-          <div style={{ height: '20px' }} className="md:hidden"></div>
-        )}
-      </div>
-
-      {/* Step 1: Select Emotions */}
-      {currentStep === 1 && (
-        <div>
-
-          <div className="relative">
-            <style>{`
-              @media (min-width: 1280px) {
-                .emotion-categories {
-                  justify-content: center !important;
-                  min-width: auto !important;
-                }
-                .slider-nav {
-                  display: none !important;
-                }
-              }
-              @media (max-width: 768px) {
-                .slider-nav {
-                  display: none !important;
-                }
-              }
-            `}</style>
-
-            {/* Left chevron */}
-            <button
-              onClick={handlePrevSlide}
-              className="slider-nav absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50"
-              disabled={currentSlide === 0}
-              style={{ opacity: currentSlide === 0 ? 0.5 : 1 }}
-            >
-              <ChevronLeft className="w-6 h-6 text-gray-600" />
-            </button>
-
-            {/* Right chevron */}
-            <button
-              onClick={handleNextSlide}
-              className="slider-nav absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50"
-              disabled={currentSlide === totalSlides - 1}
-              style={{ opacity: currentSlide === totalSlides - 1 ? 0.5 : 1 }}
-            >
-              <ChevronRight className="w-6 h-6 text-gray-600" />
-            </button>
-
-            <div
-              ref={scrollContainerRef}
-              className="overflow-x-auto pb-4"
-              style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: '#cbd5e1 #f1f5f9'
-              }}
-            >
-              <div className="flex emotion-categories" style={{
-                paddingLeft: '20px',
-                paddingRight: '20px',
-                minWidth: '1360px'
-              }}>
-              {Object.entries(emotions).flatMap(([category, categoryEmotions], index) => {
-              // Define category colors
-              const getCategoryColor = (category: string) => {
-                switch (category) {
-                  case 'Upset': return { bg: 'rgba(254, 243, 226, 1.0)', border: 'rgba(251, 191, 36, 0.4)' } // Orange - stronger border
-                  case 'Down': return { bg: 'rgba(230, 242, 255, 1.0)', border: 'rgba(59, 130, 246, 0.4)' } // Blue - stronger border
-                  case 'Joyful': return { bg: 'rgba(255, 251, 235, 1.0)', border: 'rgba(245, 158, 11, 0.4)' } // Yellow - stronger border
-                  case 'Cool': return { bg: 'rgba(240, 253, 244, 1.0)', border: 'rgba(34, 197, 94, 0.4)' } // Green - stronger border
-                  default: return { bg: '#f3f4f6', border: 'rgba(156, 163, 175, 0.4)' }
-                }
-              }
-
-              const categoryColors = getCategoryColor(category)
-              const isLast = index === Object.entries(emotions).length - 1
-
-              const elements = []
-
-              // Group div
-              elements.push(
-                <div key={`group-${index}`} className="flex-none space-y-3" style={{
-                  width: '290px',
-                  minWidth: '290px'
-                }}>
-                  <div className="text-center">
-                    <h4 className="text-lg font-semibold text-gray-800">
-                      {category}
-                    </h4>
-                  </div>
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(3, 90px)',
-                    gap: '10px',
-                    width: '290px'
-                  }}>
-                    {categoryEmotions.map((emotion) => (
-                      <button
-                        key={emotion}
-                        onClick={() => toggleEmotion(emotion)}
-                        disabled={!selectedEmotions.includes(emotion) && selectedEmotions.length >= 3}
-                        className="flex flex-col items-center gap-2 p-3 text-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{
-                          borderRadius: '4px',
-                          backgroundColor: selectedEmotions.includes(emotion) ? 'white' : categoryColors.bg,
-                          border: selectedEmotions.includes(emotion) ? 'none' : `1px solid ${categoryColors.border}`,
-                          boxShadow: selectedEmotions.includes(emotion)
-                            ? 'inset 0 0 0 2px #3a7ddc, 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                            : 'none',
-                          color: selectedEmotions.includes(emotion) ? '#3a7ddc' : '#1f2937',
-                          fontWeight: '600',
-                          boxSizing: 'border-box'
-                        }}
-                      >
-                        {/* Emoticon */}
-                        <div style={{
-                          width: '40px',
-                          height: '40px',
-                          backgroundColor: selectedEmotions.includes(emotion) ? 'rgba(58, 125, 220, 0.1)' : 'white',
-                          borderRadius: '50%',
-                          border: selectedEmotions.includes(emotion) ? 'none' : `1px solid ${categoryColors.border}`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '20px',
-                          boxSizing: 'border-box'
-                        }}>
-                          {emotion.split(' ')[0]}
-                        </div>
-
-                        {/* Text */}
-                        <div className="text-center">
-                          <span style={{ fontSize: '10px', fontWeight: 'inherit' }}>
-                            {emotion.split(' ').slice(1).join(' ')}
-                          </span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )
-
-              // Add separators if not last group
-              if (!isLast) {
-                // 1px dashed line div with 20px margins on both sides
-                elements.push(
-                  <div key={`line-${index}`} style={{
-                    width: '1px',
-                    height: '270px',
-                    borderLeft: '1px dashed #d1d5db',
-                    flexShrink: 0,
-                    marginTop: '37px',
-                    marginLeft: '20px',
-                    marginRight: '20px'
-                  }} />
-                )
-              }
-
-              return elements
-            })}
-              </div>
-            </div>
-
-            {/* Slider dots */}
-            <div className="slider-nav flex justify-center mt-4 gap-2">
-              {Array.from({ length: totalSlides }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => scrollToSlide(index)}
-                  className="w-2 h-2 rounded-full transition-colors"
-                  style={{
-                    backgroundColor: index === currentSlide ? '#3a7ddc' : '#cbd5e1'
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Data Captured for Step 1 */}
-          {!hideDebugInfo && stepData && stepData.step === 1 && (
-            <div className="mt-6 max-w-4xl mx-auto px-4">
-              <h3 className="text-sm font-semibold mb-2">📊 Data Captured:</h3>
-              <pre className="bg-gray-900 text-white p-3 rounded-lg overflow-x-auto text-xs">
-                {JSON.stringify(stepData, null, 2)}
-              </pre>
-            </div>
-          )}
+      {/* Dynamic title for each step */}
+      {currentStep !== 1 && (
+        <div className="text-center">
+          <h1 className="emotion-title-mobile text-gray-900" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+            {currentStep === 2 && (
+              selectedQuadrant === 'red' ? 'Big buzzy feelings' :
+              selectedQuadrant === 'yellow' ? 'Bright happy feelings' :
+              selectedQuadrant === 'blue' ? 'Heavy tired feelings' :
+              selectedQuadrant === 'green' ? 'Calm comfy feelings' :
+              'Choose your emotions'
+            )}
+            {currentStep === 3 && 'Why are you feeling this way?'}
+            {currentStep === 4 && 'Talk to someone?'}
+            {currentStep === 5 && 'Thank you!'}
+          </h1>
         </div>
       )}
 
-      {/* Step 2: Selected Emotions Review + Form */}
-      {currentStep === 2 && selectedEmotions.length > 0 && (
-        <div className="max-w-4xl mx-auto px-4">
-          {/* Show selected emotions - tappable to edit */}
-          <div className="text-center mb-8">
-            <div className="flex flex-wrap justify-center gap-2 mb-8">
-              {selectedEmotions.map((emotion) => (
-                <button
-                  key={emotion}
-                  onClick={() => {
-                    setCurrentStep(1)
-                    onStepChange?.(1)
-                  }}
-                  className="flex flex-col items-center gap-2 p-3 text-xs transition-all cursor-pointer"
-                  style={{
-                    borderRadius: '4px',
-                    backgroundColor: 'white',
-                    border: '2px solid #3a7ddc',
-                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-                    color: '#3a7ddc',
-                    fontWeight: '600',
-                    minWidth: '90px',
-                    width: '90px'
-                  }}
-                >
-                  {/* Emoticon */}
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    backgroundColor: 'rgba(58, 125, 220, 0.1)',
-                    borderRadius: '50%',
-                    border: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '20px',
-                    boxSizing: 'border-box'
-                  }}>
-                    {emotion.split(' ')[0]}
-                  </div>
+      {/* Step 1: Select Quadrant (2x2 Grid) */}
+      {currentStep === 1 && (
+        <>
+          <div className="text-center mb-4">
+            <h1 className="emotion-title-mobile text-gray-900 mb-1" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+              How are you feeling?
+            </h1>
+          </div>
+          <div className="flex flex-col items-center p-4">
+          {/* Grid container - horizontally centered */}
+          <div className="flex items-center justify-center">
+            {/* ENERGY label - 20px LEFT of grid */}
+            <div className="flex flex-col items-center mr-5">
+              <div className="text-sm font-semibold text-gray-600 mb-6">↑</div>
+              <div className="text-sm font-semibold text-gray-600 -rotate-90 whitespace-nowrap">ENERGY</div>
+              <div className="text-sm font-semibold text-gray-600 mt-6">↓</div>
+            </div>
 
-                  {/* Text */}
-                  <div className="text-center">
-                    <span style={{ fontSize: '10px', fontWeight: 'inherit' }}>
-                      {emotion.split(' ').slice(1).join(' ')}
-                    </span>
+            {/* 2x2 Grid - perfectly centered */}
+            <div className="relative" style={{ display: 'grid', gridTemplateColumns: '150px 150px', gap: '20px' }}>
+              <button
+                onClick={() => {
+                  setSelectedQuadrant('red')
+                  setCurrentStep(2)
+                }}
+                className="flex flex-col justify-between items-center transition-all hover:scale-105 touch-target"
+                style={{
+                  width: '150px',
+                  height: '150px',
+                  padding: '20px',
+                  backgroundColor: '#f7e9ee',
+                  border: '2px solid #d78fab',
+                  color: '#374151',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                }}
+              >
+                <div className="flex-grow flex items-center" style={{ marginTop: '10px' }}>
+                  {(() => {
+                    const redEmotions = emotions.red.emotions.flat().filter(emotionString => {
+                      const label = emotionString.split(' ').slice(1).join(' ')
+                      return selectedEmotions.includes(label)
+                    })
+                    return redEmotions.length > 0 ? (
+                      <div className="flex justify-center items-center gap-1" style={{ maxWidth: '60px' }}>
+                        {redEmotions.slice(0, 3).map((emotionString, idx) => (
+                          <span key={idx} style={{ fontSize: '32px' }}>
+                            {emotionString.split(' ')[0]}
+                          </span>
+                        ))}
+                      </div>
+                    ) : angryAnimation && (
+                      <Lottie
+                        animationData={angryAnimation}
+                        style={{
+                          width: '50px',
+                          height: '50px',
+                          filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15))'
+                        }}
+                        loop={true}
+                        autoplay={true}
+                      />
+                    )
+                  })()}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                  <p className="text-center font-semibold" style={{ margin: '0', lineHeight: '1.2', fontSize: '13px', whiteSpace: 'nowrap' }}>
+                    Big buzzy feelings
+                  </p>
+                  <div style={{ minHeight: '24px', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', marginTop: '9px' }}>
+                    {(() => {
+                      const redEmotions = emotions.red.emotions.flat().filter(emotionString => {
+                        const label = emotionString.split(' ').slice(1).join(' ')
+                        return selectedEmotions.includes(label)
+                      })
+                      return redEmotions.length > 0 ? (
+                        <p className="text-center text-xs" style={{ color: '#6b7280', marginTop: '4px', fontSize: '10px', lineHeight: '1.4', margin: '0', padding: '0 4px' }}>
+                          {redEmotions.map(emotionString => emotionString.split(' ').slice(1).join(' ')).join(', ')}
+                        </p>
+                      ) : (
+                        <p className="text-center text-xs" style={{ color: '#6b7280', marginTop: '4px', whiteSpace: 'nowrap', margin: '0' }}>
+                          High energy · Unpleasant
+                        </p>
+                      )
+                    })()}
                   </div>
-                </button>
-              ))}
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  setSelectedQuadrant('yellow')
+                  setCurrentStep(2)
+                }}
+                className="flex flex-col justify-between items-center transition-all hover:scale-105 touch-target"
+                style={{
+                  width: '150px',
+                  height: '150px',
+                  padding: '20px',
+                  backgroundColor: '#f7e9db',
+                  border: '2px solid #d7914c',
+                  color: '#374151',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                }}
+              >
+                <div className="flex-grow flex items-center" style={{ marginTop: '10px' }}>
+                  {(() => {
+                    const yellowEmotions = emotions.yellow.emotions.flat().filter(emotionString => {
+                      const label = emotionString.split(' ').slice(1).join(' ')
+                      return selectedEmotions.includes(label)
+                    })
+                    return yellowEmotions.length > 0 ? (
+                      <div className="flex justify-center items-center gap-1" style={{ maxWidth: '60px' }}>
+                        {yellowEmotions.slice(0, 3).map((emotionString, idx) => (
+                          <span key={idx} style={{ fontSize: '32px' }}>
+                            {emotionString.split(' ')[0]}
+                          </span>
+                        ))}
+                      </div>
+                    ) : laughingAnimation && (
+                      <Lottie
+                        animationData={laughingAnimation}
+                        style={{
+                          width: '50px',
+                          height: '50px',
+                          filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15))'
+                        }}
+                        loop={true}
+                        autoplay={true}
+                      />
+                    )
+                  })()}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                  <p className="text-center font-semibold" style={{ margin: '0', lineHeight: '1.2', fontSize: '13px', whiteSpace: 'nowrap' }}>
+                    Bright happy feelings
+                  </p>
+                  <div style={{ minHeight: '24px', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', marginTop: '9px' }}>
+                    {(() => {
+                      const yellowEmotions = emotions.yellow.emotions.flat().filter(emotionString => {
+                        const label = emotionString.split(' ').slice(1).join(' ')
+                        return selectedEmotions.includes(label)
+                      })
+                      return yellowEmotions.length > 0 ? (
+                        <p className="text-center text-xs" style={{ color: '#6b7280', marginTop: '4px', fontSize: '10px', lineHeight: '1.4', margin: '0', padding: '0 4px' }}>
+                          {yellowEmotions.map(emotionString => emotionString.split(' ').slice(1).join(' ')).join(', ')}
+                        </p>
+                      ) : (
+                        <p className="text-center text-xs" style={{ color: '#6b7280', marginTop: '4px', whiteSpace: 'nowrap', margin: '0' }}>
+                          High energy · Pleasant
+                        </p>
+                      )
+                    })()}
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  setSelectedQuadrant('blue')
+                  setCurrentStep(2)
+                }}
+                className="flex flex-col justify-between items-center transition-all hover:scale-105 touch-target"
+                style={{
+                  width: '150px',
+                  height: '150px',
+                  padding: '20px',
+                  backgroundColor: '#ecf3f4',
+                  border: '2px solid #9fc4c7',
+                  color: '#374151',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                }}
+              >
+                <div className="flex-grow flex items-center" style={{ marginTop: '10px' }}>
+                  {(() => {
+                    const blueEmotions = emotions.blue.emotions.flat().filter(emotionString => {
+                      const label = emotionString.split(' ').slice(1).join(' ')
+                      return selectedEmotions.includes(label)
+                    })
+                    return blueEmotions.length > 0 ? (
+                      <div className="flex justify-center items-center gap-1" style={{ maxWidth: '60px' }}>
+                        {blueEmotions.slice(0, 3).map((emotionString, idx) => (
+                          <span key={idx} style={{ fontSize: '32px' }}>
+                            {emotionString.split(' ')[0]}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <Lottie
+                        animationData={sadTearAnimation}
+                        style={{
+                          width: '50px',
+                          height: '50px',
+                          filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15))'
+                        }}
+                        loop={true}
+                        autoplay={true}
+                      />
+                    )
+                  })()}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                  <p className="text-center font-semibold" style={{ margin: '0', lineHeight: '1.2', fontSize: '13px', whiteSpace: 'nowrap' }}>
+                    Heavy tired feelings
+                  </p>
+                  <div style={{ minHeight: '24px', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', marginTop: '9px' }}>
+                    {(() => {
+                      const blueEmotions = emotions.blue.emotions.flat().filter(emotionString => {
+                        const label = emotionString.split(' ').slice(1).join(' ')
+                        return selectedEmotions.includes(label)
+                      })
+                      return blueEmotions.length > 0 ? (
+                        <p className="text-center text-xs" style={{ color: '#6b7280', marginTop: '4px', fontSize: '10px', lineHeight: '1.4', margin: '0', padding: '0 4px' }}>
+                          {blueEmotions.map(emotionString => emotionString.split(' ').slice(1).join(' ')).join(', ')}
+                        </p>
+                      ) : (
+                        <p className="text-center text-xs" style={{ color: '#6b7280', marginTop: '4px', whiteSpace: 'nowrap', margin: '0' }}>
+                          Low energy · Unpleasant
+                        </p>
+                      )
+                    })()}
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  setSelectedQuadrant('green')
+                  setCurrentStep(2)
+                }}
+                className="flex flex-col justify-between items-center transition-all hover:scale-105 touch-target"
+                style={{
+                  width: '150px',
+                  height: '150px',
+                  padding: '20px',
+                  backgroundColor: '#f5f8f6',
+                  border: '2px solid #ceddd1',
+                  color: '#374151',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                }}
+              >
+                <div className="flex-grow flex items-center" style={{ marginTop: '10px' }}>
+                  {(() => {
+                    const greenEmotions = emotions.green.emotions.flat().filter(emotionString => {
+                      const label = emotionString.split(' ').slice(1).join(' ')
+                      return selectedEmotions.includes(label)
+                    })
+                    return greenEmotions.length > 0 ? (
+                      <div className="flex justify-center items-center gap-1" style={{ maxWidth: '60px' }}>
+                        {greenEmotions.slice(0, 3).map((emotionString, idx) => (
+                          <span key={idx} style={{ fontSize: '32px' }}>
+                            {emotionString.split(' ')[0]}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <Lottie
+                        animationData={blushingAnimation}
+                        style={{
+                          width: '50px',
+                          height: '50px',
+                          filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15))'
+                        }}
+                        loop={true}
+                        autoplay={true}
+                      />
+                    )
+                  })()}
+                </div>
+                <div style={{ marginBottom: '10px' }}>
+                  <p className="text-center font-semibold" style={{ margin: '0', lineHeight: '1.2', fontSize: '13px', whiteSpace: 'nowrap' }}>
+                    Calm comfy feelings
+                  </p>
+                  <div style={{ minHeight: '24px', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', marginTop: '9px' }}>
+                    {(() => {
+                      const greenEmotions = emotions.green.emotions.flat().filter(emotionString => {
+                        const label = emotionString.split(' ').slice(1).join(' ')
+                        return selectedEmotions.includes(label)
+                      })
+                      return greenEmotions.length > 0 ? (
+                        <p className="text-center text-xs" style={{ color: '#6b7280', marginTop: '4px', fontSize: '10px', lineHeight: '1.4', margin: '0', padding: '0 4px' }}>
+                          {greenEmotions.map(emotionString => emotionString.split(' ').slice(1).join(' ')).join(', ')}
+                        </p>
+                      ) : (
+                        <p className="text-center text-xs" style={{ color: '#6b7280', marginTop: '4px', whiteSpace: 'nowrap', margin: '0' }}>
+                          Low energy · Pleasant
+                        </p>
+                      )
+                    })()}
+                  </div>
+                </div>
+              </button>
+              {/* COMFORT label - 20px below grid, horizontal with left/right arrows */}
+              <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center" style={{ top: '100%', marginTop: '16px' }}>
+                <div className="text-sm font-semibold text-gray-600 mr-2">←</div>
+                <div className="text-sm font-semibold text-gray-600">COMFORT</div>
+                <div className="text-sm font-semibold text-gray-600 ml-2">→</div>
+              </div>
+            </div>
+
+            {/* Invisible spacer to balance the ENERGY column */}
+            <div className="flex flex-col items-center ml-5 invisible">
+              <div className="text-sm font-semibold text-gray-600 mb-6">↑</div>
+              <div className="text-sm font-semibold text-gray-600 -rotate-90 whitespace-nowrap">SPACER</div>
+              <div className="text-sm font-semibold text-gray-600 mt-6">↓</div>
             </div>
           </div>
 
+          {/* Navigation Button - 32px from bottom */}
+          <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center items-center" style={{ zIndex: 1000, gap: '20px' }}>
+            {/* Back Button */}
+            <button
+              onClick={() => navigate('/checkin/flow/mood')}
+              style={{
+                backgroundColor: 'white',
+                border: '2px solid #3a7ddc',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '56px',
+                height: '56px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8fafc'
+                e.currentTarget.style.borderColor = '#2e6bc7'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white'
+                e.currentTarget.style.borderColor = '#3a7ddc'
+              }}
+              aria-label="Go back to mood"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+                <polyline points="15,18 9,12 15,6"></polyline>
+              </svg>
+            </button>
 
-          <div className="w-full">
+            {/* Next Button - only show if emotions are selected */}
+            {selectedEmotions.length > 0 && (
+              <button
+                key={`why-next-${buttonAnimationKey}`}
+                onClick={() => {
+                  if (hasCompletedWhy) {
+                    // If user has completed "why", go to wellbeing page
+                    navigate('/checkin/flow/wellbeing')
+                  } else {
+                    // First time or after changes, go to "why" step
+                    if (onPartialSave) {
+                      const data = {
+                        selected_emotions: selectedEmotions,
+                        emotion_story: emotionStory,
+                        step_completed: 1,
+                        completed_at: new Date().toISOString(),
+                        time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
+                      }
+                      onPartialSave(data)
+                    }
+                    setCurrentStep(3)
+                  }
+                }}
+                style={{
+                  width: '140px',
+                  height: '56px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '28px',
+                  backgroundColor: '#3a7ddc',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.3s ease',
+                  color: 'white',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  animation: 'emotionCircleExpand 0.4s ease-out'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
+                aria-label={hasCompletedWhy ? "Continue to wellbeing" : "Continue to why"}
+              >
+                <span style={{ animation: 'emotionTextFadeIn 0.4s ease-out' }}>
+                  {hasCompletedWhy ? 'NEXT' : 'WHY?'}
+                </span>
+              </button>
+            )}
+
+            {/* Skip Button */}
+            <button
+              onClick={() => {
+                // Skip emotions - but preserve any existing selections
+                if (onComplete) {
+                  const data: EmotionData = {
+                    selected_emotions: selectedEmotions, // Keep existing selections
+                    emotion_story: emotionStory,
+                    discussion_preference: discussionPreference,
+                    step_completed: 1,
+                    completed_at: new Date().toISOString(),
+                    time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000),
+                    skipped: true // Mark as skipped
+                  }
+                  onComplete(data)
+                }
+              }}
+              style={{
+                backgroundColor: 'white',
+                border: '2px solid #3a7ddc',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '56px',
+                height: '56px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8fafc'
+                e.currentTarget.style.borderColor = '#2e6bc7'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white'
+                e.currentTarget.style.borderColor = '#3a7ddc'
+              }}
+              aria-label="Skip emotions"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+                <polyline points="9,18 15,12 9,6"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+        </>
+      )}
+
+      {/* Step 2: Select Emotions (3x3 Grid) */}
+      {currentStep === 2 && selectedQuadrant && (
+        <div className="flex flex-col items-center pb-32" style={{ paddingTop: '0', paddingLeft: '16px', paddingRight: '16px' }}>
+          <p className="text-center text-gray-600" style={{ marginTop: '0px', marginBottom: '40px' }}>Choose up to 3 emotions that match how you feel</p>
+
+          {/* 3x3 Grid of Emotions */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 100px)', gap: '10px', justifyContent: 'center' }}>
+            {emotions[selectedQuadrant as keyof typeof emotions].emotions.flat().map((emotionString, index) => {
+              const [emoji, ...labelParts] = emotionString.split(' ')
+              const label = labelParts.join(' ')
+              const isSelected = selectedEmotions.includes(label)
+
+              // Check how many are selected from current quadrant
+              const currentQuadrantEmotions = emotions[selectedQuadrant as keyof typeof emotions].emotions.flat()
+              const currentQuadrantLabels = currentQuadrantEmotions.map(emotionString =>
+                emotionString.split(' ').slice(1).join(' ')
+              )
+              const selectedFromCurrentQuadrant = selectedEmotions.filter(emotion =>
+                currentQuadrantLabels.includes(emotion)
+              )
+              const isDisabled = !isSelected && selectedFromCurrentQuadrant.length >= 3
+
+              return (
+                <button
+                  key={emotionString}
+                  onClick={() => toggleEmotion(label)}
+                  disabled={isDisabled}
+                  className={`relative flex flex-col items-center justify-center gap-1 transition-all touch-target ${
+                    isDisabled ? 'cursor-not-allowed' : 'hover:scale-105'
+                  }`}
+                  style={{
+                    width: '100px',
+                    height: '100px',
+                    padding: '8px',
+                    backgroundColor: isSelected ? '#ffffff' :
+                                    selectedQuadrant === 'red' ? (
+                                      index % 3 === 0 ? '#e7bccd' :
+                                      index % 3 === 1 ? '#efd2dd' :
+                                      '#f7e9ee'
+                                    ) :
+                                    selectedQuadrant === 'yellow' ? (
+                                      index % 3 === 0 ? '#e7bd94' :
+                                      index % 3 === 1 ? '#efd3b7' :
+                                      '#f7e9db'
+                                    ) :
+                                    selectedQuadrant === 'blue' ? (
+                                      index % 3 === 0 ? '#c5dcdd' :
+                                      index % 3 === 1 ? '#d9e7e9' :
+                                      '#ecf3f4'
+                                    ) :
+                                    selectedQuadrant === 'green' ? (
+                                      index % 3 === 0 ? '#e2ebe3' :
+                                      index % 3 === 1 ? '#ebf1ed' :
+                                      '#f5f8f6'
+                                    ) : '#f9f9f9',
+                    border: `2px solid ${selectedQuadrant === 'red' ? '#d78fab' :
+                                    selectedQuadrant === 'yellow' ? '#d7914c' :
+                                    selectedQuadrant === 'blue' ? '#9fc4c7' :
+                                    selectedQuadrant === 'green' ? '#ceddd1' : '#ccc'}`,
+                    color: '#374151',
+                    borderRadius: '4px',
+                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                    transition: 'all 0.3s ease',
+                    opacity: isDisabled ? 0.3 : 1
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                  }}
+                >
+                  <span className="text-3xl">{emoji}</span>
+                  <span className="text-sm font-medium text-center">{label}</span>
+                  {isSelected && (
+                    <div
+                      className="absolute w-6 h-6 rounded-full flex items-center justify-center cursor-pointer transition-colors"
+                      style={{
+                        top: '4px',
+                        right: '4px',
+                        backgroundColor: selectedQuadrant === 'red' ? '#d78fab' :
+                                        selectedQuadrant === 'yellow' ? '#d7914c' :
+                                        selectedQuadrant === 'blue' ? '#9fc4c7' :
+                                        selectedQuadrant === 'green' ? '#ceddd1' : '#ccc'
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        toggleEmotion(label)
+                      }}
+                    >
+                      <span className="text-white text-sm font-bold" style={{ lineHeight: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '-2px' }}>×</span>
+                    </div>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+
+
+          {/* Navigation Buttons - Fixed at bottom */}
+          <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center items-center" style={{ zIndex: 1000 }}>
+            {(() => {
+              const currentQuadrantEmotions = emotions[selectedQuadrant as keyof typeof emotions].emotions.flat()
+              const currentQuadrantLabels = currentQuadrantEmotions.map(emotionString =>
+                emotionString.split(' ').slice(1).join(' ')
+              )
+              const selectedFromCurrentQuadrant = selectedEmotions.filter(emotion =>
+                currentQuadrantLabels.includes(emotion)
+              )
+
+              if (selectedFromCurrentQuadrant.length > 0) {
+                // Show only SELECT button when emotions are selected
+                return (
+                  <button
+                    key={`select-${buttonAnimationKey}`}
+                    onClick={() => {
+                      // Save partial data without triggering navigation
+                      if (onPartialSave) {
+                        const data = {
+                          selected_emotions: selectedEmotions,
+                          emotion_story: emotionStory,
+                          step_completed: 1,
+                          completed_at: new Date().toISOString(),
+                          time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
+                        }
+                        onPartialSave(data)
+                      }
+                      // Go back to quadrant view
+                      setCurrentStep(1)
+                    }}
+                    style={{
+                      width: '140px',
+                      height: '56px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '28px',
+                      backgroundColor: 'white',
+                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                      border: '2px solid #3a7ddc',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease',
+                      color: '#3a7ddc',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      animation: 'emotionCircleExpand 0.4s ease-out'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f8fafc'
+                      e.currentTarget.style.borderColor = '#2e6bc7'
+                      e.currentTarget.style.color = '#2e6bc7'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'white'
+                      e.currentTarget.style.borderColor = '#3a7ddc'
+                      e.currentTarget.style.color = '#3a7ddc'
+                    }}
+                    aria-label="Continue to next step"
+                  >
+                    <span style={{ animation: 'emotionTextFadeIn 0.4s ease-out' }}>
+                      SELECT {selectedFromCurrentQuadrant.length}
+                    </span>
+                  </button>
+                )
+              } else {
+                // Show back and skip buttons when no emotions are selected
+                return (
+                  <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                    {/* Back Button */}
+                    <button
+                      onClick={() => setCurrentStep(1)}
+                      style={{
+                        backgroundColor: 'white',
+                        border: '2px solid #3a7ddc',
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '56px',
+                        height: '56px',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f8fafc'
+                        e.currentTarget.style.borderColor = '#2e6bc7'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'white'
+                        e.currentTarget.style.borderColor = '#3a7ddc'
+                      }}
+                      aria-label="Go back to quadrants"
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+                        <polyline points="15,18 9,12 15,6"></polyline>
+                      </svg>
+                    </button>
+
+                    {/* Skip Button */}
+                    <button
+                      onClick={() => navigate('/checkin/flow/wellbeing')}
+                      style={{
+                        backgroundColor: 'white',
+                        border: '2px solid #3a7ddc',
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '56px',
+                        height: '56px',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f8fafc'
+                        e.currentTarget.style.borderColor = '#2e6bc7'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'white'
+                        e.currentTarget.style.borderColor = '#3a7ddc'
+                      }}
+                      aria-label="Skip to wellbeing"
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+                        <polyline points="9,18 15,12 9,6"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                )
+              }
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* Step 3: Voice/Text Input (Optional) */}
+      {currentStep === 3 && (
+        <div className="flex flex-col items-center p-4 justify-center min-h-[400px] pb-32">
+          {/* Selected Emotions Display */}
+          {selectedEmotions.length > 0 && (
+            <div className="mb-8">
+              <div className="flex flex-wrap justify-center gap-2" style={{ maxWidth: '400px' }}>
+                {selectedEmotions.map((emotion, index) => {
+                  // Find the emotion string and quadrant for styling
+                  let emotionString = ''
+                  let quadrant = ''
+
+                  Object.entries(emotions).forEach(([key, data]) => {
+                    const found = data.emotions.flat().find(e => {
+                      const label = e.split(' ').slice(1).join(' ')
+                      return label === emotion
+                    })
+                    if (found) {
+                      emotionString = found
+                      quadrant = key
+                    }
+                  })
+
+                  const [emoji] = emotionString.split(' ')
+                  const backgroundColor = quadrant === 'red' ? '#f7e9ee' :
+                                        quadrant === 'yellow' ? '#f7e9db' :
+                                        quadrant === 'blue' ? '#ecf3f4' :
+                                        quadrant === 'green' ? '#f5f8f6' : '#f9f9f9'
+                  const borderColor = quadrant === 'red' ? '#d78fab' :
+                                    quadrant === 'yellow' ? '#d7914c' :
+                                    quadrant === 'blue' ? '#9fc4c7' :
+                                    quadrant === 'green' ? '#ceddd1' : '#ccc'
+
+                  return (
+                    <div
+                      key={index}
+                      className="flex flex-col items-center justify-center gap-1"
+                      style={{
+                        width: '80px',
+                        height: '80px',
+                        padding: '8px',
+                        backgroundColor,
+                        border: `2px solid ${borderColor}`,
+                        borderRadius: '4px',
+                        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                      }}
+                    >
+                      <span className="text-2xl">{emoji}</span>
+                      <span className="text-xs font-medium text-center" style={{ lineHeight: '1.1' }}>{emotion}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          <div style={{ width: '100%', maxWidth: '384px', margin: '0 auto' }}>
             <div className="relative">
               <textarea
                 value={emotionStory}
                 onChange={(e) => updateStory(e.target.value.slice(0, 500))}
-                placeholder="What made you feel this way?"
+                placeholder="Note down your thoughts (optional)"
                 className="w-full pr-14 border rounded-lg h-32 resize-none"
                 style={{ paddingTop: '3rem', paddingBottom: '3rem', paddingLeft: '0.75rem', paddingRight: '3.5rem', lineHeight: '1.5' }}
                 maxLength={500}
+                onFocus={(e) => {
+                  if (window.innerWidth <= 768) {
+                    setTimeout(() => {
+                      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    }, 300)
+                  }
+                }}
               />
               <button
                 onClick={handleMicrophoneClick}
-                className={`absolute top-1/2 right-3 transform -translate-y-1/2 rounded-full transition-colors ${
-                  isListening ? 'bg-red-500 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                disabled={isListening}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full transition-colors flex items-center justify-center ${
+                  isListening ? 'bg-red-100 text-red-600' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
                 }`}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                title="Voice input"
-                type="button"
+                style={{ minWidth: '40px', minHeight: '40px' }}
               >
                 {isListening ? (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="6" y="4" width="12" height="16" rx="2"/>
-                  </svg>
+                  <div className="w-4 h-4 bg-red-600 rounded-full animate-pulse" />
                 ) : (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-                    <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-                    <line x1="12" y1="19" x2="12" y2="23"/>
-                    <line x1="8" y1="23" x2="16" y2="23"/>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
                   </svg>
                 )}
               </button>
             </div>
+            <p className="text-xs text-gray-500 text-center mt-2">
+              {emotionStory.length}/500 characters
+            </p>
           </div>
 
-          {/* Discussion Question */}
-          <div className="w-full max-w-2xl mx-auto mt-8">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-semibold">Do you want to discuss this with anyone?</h3>
-            </div>
-
-            <div className="flex justify-center gap-3 flex-wrap">
-              {['I\'m good', 'Parent', 'Teacher'].map((option) => (
-                <button
-                  key={option}
-                  onClick={() => setDiscussionPreference(discussionPreference === option ? '' : option)}
-                  className="px-4 py-3 font-medium transition-all duration-200 flex items-center gap-2"
-                  style={{
-                    backgroundColor: discussionPreference === option ? 'white' : 'rgba(58, 125, 220, 0.1)',
-                    color: '#3a7ddc',
-                    border: 'none',
-                    borderRadius: '20px',
-                    boxShadow: discussionPreference === option
-                      ? 'inset 0 0 0 2px #3a7ddc, 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                      : 'none',
-                    boxSizing: 'border-box'
-                  }}
-                >
-                  <div
-                    className="w-4 h-4 rounded-full border-2 flex items-center justify-center"
-                    style={{
-                      borderColor: '#3a7ddc',
-                      backgroundColor: 'white'
-                    }}
-                  >
-                    {discussionPreference === option && (
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: '#3a7ddc' }}
-                      />
-                    )}
-                  </div>
-                  {option}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Data Captured for Step 2 */}
-          {!hideDebugInfo && stepData && stepData.step === 2 && (
-            <div className="mt-6 max-w-2xl mx-auto">
-              <h3 className="text-sm font-semibold mb-2">📊 Data Captured:</h3>
-              <pre className="bg-gray-900 text-white p-3 rounded-lg overflow-x-auto text-xs">
-                {JSON.stringify(stepData, null, 2)}
-              </pre>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Fixed bottom button - Step 1 */}
-      {showNextButton && currentStep === 1 && (
-        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center items-center" style={{ zIndex: 1000, gap: '20px' }}>
-          {/* Back Button */}
-          <button
-            onClick={() => {
-              // Navigate back to mood page
-              navigate('/checkin/flow/mood')
-            }}
-            style={{
-              background: 'rgba(255, 255, 255, 0.5)',
-              border: 'none',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '56px',
-              height: '56px'
-            }}
-            aria-label="Go back to mood"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
-              <polyline points="15,18 9,12 15,6"></polyline>
-            </svg>
-          </button>
-
-          {/* Choose Button */}
-          <button
-            onClick={() => selectedEmotions.length > 0 && handleNext()}
-            disabled={selectedEmotions.length === 0}
-            style={{
-              width: '100px',
-              height: '56px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '28px',
-              backgroundColor: selectedEmotions.length > 0 ? '#3a7ddc' : 'rgba(255, 255, 255, 0.3)',
-              boxShadow: selectedEmotions.length > 0 ? '0 8px 32px rgba(0, 0, 0, 0.1)' : 'none',
-              border: 'none',
-              cursor: selectedEmotions.length > 0 ? 'pointer' : 'not-allowed',
-              transition: 'all 0.3s ease',
-              color: selectedEmotions.length > 0 ? 'white' : 'rgba(255, 255, 255, 0.5)',
-              fontSize: '16px',
-              fontWeight: '600'
-            }}
-            onMouseEnter={(e) => {
-              if (selectedEmotions.length > 0) {
-                e.currentTarget.style.backgroundColor = '#2e6bc7'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (selectedEmotions.length > 0) {
-                e.currentTarget.style.backgroundColor = '#3a7ddc'
-              }
-            }}
-            aria-label="Choose emotions"
-          >
-            WHY?
-          </button>
-
-          {/* Skip Button */}
-          <button
-            onClick={() => {
-              // Skip to next page - proceed without selecting emotions
-              const data: EmotionData = {
-                selected_emotions: [],
-                emotion_story: '',
-                discussion_preference: '',
-                step_completed: 1,
-                completed_at: new Date().toISOString(),
-                time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
-              }
-              onComplete?.(data)
-            }}
-            style={{
-              background: 'rgba(255, 255, 255, 0.5)',
-              border: 'none',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '56px',
-              height: '56px'
-            }}
-            aria-label="Skip emotions selection"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
-              <polygon points="5,4 15,12 5,20"></polygon>
-              <line x1="19" y1="5" x2="19" y2="19"></line>
-            </svg>
-          </button>
-        </div>
-      )}
-
-      {/* Fixed bottom button - Step 2 */}
-      {showNextButton && currentStep === 2 && (
-        <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center items-center" style={{ zIndex: 1000, gap: '20px' }}>
-          {/* Back Button */}
-          <button
-            onClick={() => {
-              // Navigate back to step 1
-              setCurrentStep(1)
-            }}
-            style={{
-              background: 'rgba(255, 255, 255, 0.5)',
-              border: 'none',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '56px',
-              height: '56px'
-            }}
-            aria-label="Go back to emotion selection"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
-              <polyline points="15,18 9,12 15,6"></polyline>
-            </svg>
-          </button>
-
-          {/* Next Button */}
-          <button
-            onClick={handleNext}
-            style={{
-              width: '100px',
-              height: '56px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '28px',
-              backgroundColor: '#3a7ddc',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              color: 'white',
-              fontSize: '16px',
-              fontWeight: '600'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
-            aria-label="Next"
-          >
-            NEXT
-          </button>
-
-          {/* Skip Button */}
-          <button
-            onClick={() => {
-              // Skip to next page - complete with current selections but skip story/discussion
-              const data: EmotionData = {
-                selected_emotions: selectedEmotions,
-                emotion_story: '',
-                discussion_preference: '',
-                step_completed: 2,
-                completed_at: new Date().toISOString(),
-                time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
-              }
-              onComplete?.(data)
-            }}
-            style={{
-              background: 'rgba(255, 255, 255, 0.5)',
-              border: 'none',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '56px',
-              height: '56px'
-            }}
-            aria-label="Skip story section"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
-              <polygon points="5,4 15,12 5,20"></polygon>
-              <line x1="19" y1="5" x2="19" y2="19"></line>
-            </svg>
-          </button>
-        </div>
-      )}
-
-      {/* Step 4: Show Data */}
-      {currentStep === 4 && (
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h3 className="text-lg font-semibold mb-2">✅ Complete!</h3>
-
-          {!hideDebugInfo && finalData && (
-            <div className="max-w-2xl mx-auto">
-              <h4 className="font-medium mb-2">📊 Data Captured:</h4>
-              <pre className="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto text-sm mb-4">
-                {JSON.stringify(finalData, null, 2)}
-              </pre>
-              <p className="text-xs text-gray-500 mb-4">
-                ✅ This data would be sent to: /api/emotion-grid
-              </p>
-            </div>
-          )}
-
-          {!showNextButton && (
+          {/* Navigation Buttons - Fixed at bottom */}
+          <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center items-center" style={{ zIndex: 1000, gap: '20px' }}>
+            {/* Back Button */}
             <button
-              onClick={reset}
-              className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+              onClick={() => setCurrentStep(1)}
+              style={{
+                backgroundColor: 'white',
+                border: '2px solid #3a7ddc',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '56px',
+                height: '56px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8fafc'
+                e.currentTarget.style.borderColor = '#2e6bc7'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white'
+                e.currentTarget.style.borderColor = '#3a7ddc'
+              }}
+              aria-label="Go back to quadrants"
             >
-              Start Over
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+                <polyline points="15,18 9,12 15,6"></polyline>
+              </svg>
             </button>
-          )}
+
+            {/* Save Button */}
+            <button
+              key={`save-${buttonAnimationKey}`}
+              onClick={() => {
+                // Save the emotion story and return to quadrant page
+                if (onPartialSave) {
+                  const data = {
+                    selected_emotions: selectedEmotions,
+                    emotion_story: emotionStory,
+                    step_completed: 3,
+                    completed_at: new Date().toISOString(),
+                    time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
+                  }
+                  onPartialSave(data)
+                }
+                setHasCompletedWhy(true) // Mark that "why" step is completed
+                setCurrentStep(1) // Return to quadrant selection
+              }}
+              style={{
+                width: '140px',
+                height: '56px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '28px',
+                backgroundColor: 'white',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                border: '2px solid #3a7ddc',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease',
+                color: '#3a7ddc',
+                fontSize: '16px',
+                fontWeight: '600',
+                animation: 'emotionCircleExpand 0.4s ease-out'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8fafc'
+                e.currentTarget.style.borderColor = '#2e6bc7'
+                e.currentTarget.style.color = '#2e6bc7'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white'
+                e.currentTarget.style.borderColor = '#3a7ddc'
+                e.currentTarget.style.color = '#3a7ddc'
+              }}
+              aria-label="Save and continue to wellbeing"
+            >
+              <span style={{ animation: 'emotionTextFadeIn 0.4s ease-out' }}>
+                SAVE
+              </span>
+            </button>
+
+            {/* Skip Button */}
+            <button
+              onClick={() => navigate('/checkin/flow/wellbeing')}
+              style={{
+                backgroundColor: 'white',
+                border: '2px solid #3a7ddc',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '56px',
+                height: '56px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8fafc'
+                e.currentTarget.style.borderColor = '#2e6bc7'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white'
+                e.currentTarget.style.borderColor = '#3a7ddc'
+              }}
+              aria-label="Skip to wellbeing"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+                <polyline points="9,18 15,12 9,6"></polyline>
+              </svg>
+            </button>
+          </div>
         </div>
       )}
+
+      {/* Step 4: Talk to Someone? */}
+      {currentStep === 4 && (
+        <div className="flex flex-col items-center p-4 justify-center min-h-[400px]">
+          <h2 className="text-2xl font-bold text-center mb-8 text-gray-800">
+            Do you want to talk to someone?
+          </h2>
+
+          <div className="max-w-md mx-auto w-full space-y-4">
+            <button
+              onClick={() => {
+                setTalkPreference('parent')
+                setCurrentStep(5)
+              }}
+              className="w-full p-6 rounded-2xl bg-blue-100 hover:bg-blue-200 flex items-center justify-center gap-3 transition-colors touch-target"
+              style={{
+                minHeight: '80px', // SEND accessibility
+                fontSize: '18px'
+              }}
+            >
+              <span className="text-3xl">👨‍👩‍👧</span>
+              <span className="text-lg font-medium">Talk to a Parent</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setTalkPreference('teacher')
+                setCurrentStep(5)
+              }}
+              className="w-full p-6 rounded-2xl bg-green-100 hover:bg-green-200 flex items-center justify-center gap-3 transition-colors touch-target"
+              style={{
+                minHeight: '80px', // SEND accessibility
+                fontSize: '18px'
+              }}
+            >
+              <span className="text-3xl">👩‍🏫</span>
+              <span className="text-lg font-medium">Talk to a Teacher</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setTalkPreference('none')
+                setCurrentStep(5)
+              }}
+              className="w-full p-6 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center gap-3 transition-colors touch-target"
+              style={{
+                minHeight: '80px', // SEND accessibility
+                fontSize: '18px'
+              }}
+            >
+              <span className="text-3xl">💭</span>
+              <span className="text-lg font-medium">Not right now</span>
+            </button>
+          </div>
+
+          {/* Navigation Buttons */}
+          <div className="mt-8 pb-8 flex justify-center items-center gap-4 px-4">
+            <button
+              onClick={() => setCurrentStep(3)}
+              className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-medium transition-colors touch-target"
+            >
+              Back
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Step 5: Done */}
+      {currentStep === 5 && (
+        <div className="flex flex-col items-center justify-center p-4 min-h-[400px]">
+          <div className="text-6xl mb-6">🌟</div>
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Thank you!</h2>
+          <p className="text-lg text-gray-600 text-center mb-8">
+            You did a great job sharing your feelings
+          </p>
+
+
+          <button
+            onClick={() => {
+              if (onComplete) {
+                const data: EmotionData = {
+                  selected_emotions: selectedEmotions,
+                  emotion_story: voiceText,
+                  discussion_preference: talkPreference || '',
+                  step_completed: 5,
+                  completed_at: new Date().toISOString(),
+                  time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
+                }
+                onComplete(data)
+              }
+            }}
+            className="px-8 py-4 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-semibold transition-colors"
+          >
+            DONE
+          </button>
+        </div>
+      )}
+
+
 
       {/* Yellow swoosh section at bottom */}
       <div className="yellow-swoosh-mobile-hide">

@@ -185,29 +185,6 @@ export function Stage({
         // Balloon breathing (default circle animation)
         return (
           <div className="breathing-circle-container">
-            {/* Dashed outer circle - positioned to match orange progress ring exactly */}
-            <div
-              className="breathing-outer-ring absolute"
-              style={{
-                width: '435px',
-                height: '435px',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                zIndex: 2
-              }}
-            >
-              <div
-                className="opacity-20"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: '50%',
-                  border: '3px dashed #e6b6b6',
-                  animation: 'spin 120s linear infinite'
-                }}
-              />
-            </div>
 
             {/* Progress ring for breathing progress */}
             <svg className="progress-ring" viewBox="0 0 400 400" style={{ animation: 'none' }}>

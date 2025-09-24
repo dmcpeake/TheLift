@@ -17,6 +17,7 @@ export function CheckInHome() {
   const [selectedTechniqueId, setSelectedTechniqueId] = useState('balloon')
   const [breathingStarted, setBreathingStarted] = useState(false)
   const [isBreathingRunning, setIsBreathingRunning] = useState(false)
+  const [buttonAnimationKey, setButtonAnimationKey] = useState(0)
   const breathingStartRef = useRef<(() => void) | null>(null)
   const breathingPauseRef = useRef<(() => void) | null>(null)
   const breathingResumeRef = useRef<(() => void) | null>(null)
@@ -58,6 +59,13 @@ export function CheckInHome() {
       .catch(error => console.error('Error loading rose animation:', error))
   }, [])
 
+  // Trigger button animation when breathing UI first appears
+  useEffect(() => {
+    if (showBreathing) {
+      setButtonAnimationKey(prev => prev + 1)
+    }
+  }, [showBreathing])
+
   const handleStartClick = () => {
     setIsTransitioning(true)
     // Fade out welcome content, then fade in breathing
@@ -80,10 +88,34 @@ export function CheckInHome() {
   }
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <>
+      <style jsx>{`
+        @keyframes circleExpand {
+          0% {
+            width: 56px;
+            border-radius: 28px;
+          }
+          100% {
+            width: 140px;
+            border-radius: 28px;
+          }
+        }
+        @keyframes textFadeIn {
+          0% {
+            opacity: 0;
+          }
+          60% {
+            opacity: 0;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
+      `}</style>
+      <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Garden Cards - 40px from top - hide when breathing */}
       {!showBreathing && (
-        <div className="garden-cards-container" style={{ position: 'absolute', top: '40px', left: '0', right: '0', zIndex: 10 }}>
+        <div className="garden-cards-container" style={{ position: 'absolute', top: '20px', left: '0', right: '0', zIndex: 10, opacity: 0 }}>
         <style jsx>{`
           .cards-container {
             display: grid;
@@ -99,7 +131,7 @@ export function CheckInHome() {
               align-items: flex-start !important;
               justify-content: center !important;
               min-height: auto !important;
-              padding-top: 160px !important;
+              padding-top: 140px !important;
             }
             .welcome-content-mobile .max-w-2xl {
               margin-top: 0 !important;
@@ -115,7 +147,7 @@ export function CheckInHome() {
               display: none !important;
             }
             .theo-animation {
-              bottom: 70px !important;
+              bottom: 75px !important;
             }
             .garden-cards-container {
               display: none !important;
@@ -134,7 +166,7 @@ export function CheckInHome() {
               display: flex !important;
             }
             .logout-button {
-              top: 20px !important;
+              top: 40px !important;
               margin-top: 0 !important;
               transform: none !important;
               width: 2.5rem !important;
@@ -301,8 +333,8 @@ export function CheckInHome() {
         style={{
           backgroundColor: 'white',
           border: '1px solid #147fe3',
-          top: '20px',
-          right: '16px'
+          top: '40px',
+          right: '40px'
         }}
       >
         <LogOut className="logout-icon h-6 w-6" style={{ color: '#147fe3' }} />
@@ -459,15 +491,25 @@ export function CheckInHome() {
                 setShowTechniqueSelector(!showTechniqueSelector);
               }}
               style={{
-                background: 'rgba(255, 255, 255, 0.5)',
-                border: 'none',
+                backgroundColor: 'white',
+                border: '2px solid #3a7ddc',
                 borderRadius: '50%',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 width: '56px',
-                height: '56px'
+                height: '56px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8fafc'
+                e.currentTarget.style.borderColor = '#2e6bc7'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white'
+                e.currentTarget.style.borderColor = '#3a7ddc'
               }}
               aria-label="Open settings"
             >
@@ -476,6 +518,7 @@ export function CheckInHome() {
 
             {/* Play/Pause Button */}
             <button
+              key={`play-${buttonAnimationKey}`}
               onClick={() => {
                 if (!breathingStarted) {
                   console.log('Play clicked!');
@@ -495,23 +538,29 @@ export function CheckInHome() {
                 }
               }}
               style={{
-                background: '#3a7ddc',
-                color: 'white',
-                border: 'none',
-                borderRadius: '28px',
-                cursor: 'pointer',
-                width: '100px',
+                width: '140px',
                 height: '56px',
-                fontSize: '16px',
-                fontWeight: '600',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                borderRadius: '28px',
+                backgroundColor: '#3a7ddc',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s ease',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '600',
+                animation: 'circleExpand 0.4s ease-out'
               }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
               aria-label={!breathingStarted ? "Start breathing" : isBreathingRunning ? "Pause breathing" : "Resume breathing"}
             >
-              {breathingStarted && isBreathingRunning ? 'PAUSE' : 'PLAY'}
+              <span style={{ animation: 'textFadeIn 0.4s ease-out' }}>
+                {breathingStarted && isBreathingRunning ? 'PAUSE' : 'PLAY'}
+              </span>
             </button>
 
             {/* Skip Button */}
@@ -521,19 +570,31 @@ export function CheckInHome() {
                 handleBreathingExit('skip');
               }}
               style={{
-                background: 'rgba(255, 255, 255, 0.5)',
-                border: 'none',
+                backgroundColor: 'white',
+                border: '2px solid #3a7ddc',
                 borderRadius: '50%',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 width: '56px',
-                height: '56px'
+                height: '56px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8fafc'
+                e.currentTarget.style.borderColor = '#2e6bc7'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white'
+                e.currentTarget.style.borderColor = '#3a7ddc'
               }}
               aria-label="Skip to mood selection"
             >
-              <SkipForward style={{ width: '24px', height: '24px', color: '#3a7ddc' }} />
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+                <polyline points="9,18 15,12 9,6"></polyline>
+              </svg>
             </button>
           </div>
         </>
@@ -551,7 +612,7 @@ export function CheckInHome() {
               style={{
                 backgroundColor: '#e87e67',
                 color: 'white',
-                width: '100px',
+                width: '140px',
                 height: '56px',
                 borderRadius: '28px',
                 border: 'none',
@@ -596,5 +657,6 @@ export function CheckInHome() {
         )}
       </YellowSwoosh>
     </div>
+    </>
   )
 }

@@ -36,6 +36,31 @@
   50% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.6); }
 }
 
+@keyframes breathingCircleExpand {
+  0% {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+  100% {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+  }
+}
+
+@keyframes breathingIconFadeIn {
+  0% {
+    opacity: 0;
+  }
+  60% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 .breathing-background {
   position: fixed;
   top: 0;

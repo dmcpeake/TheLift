@@ -70,7 +70,8 @@ export function MarketingNavigation() {
           </button>
           
           <div className="flex items-center" style={{ gap: '20px' }}>
-            <Button
+            {/* SIGN IN button temporarily hidden - login page still accessible at /login */}
+            {/* <Button
               onClick={() => window.location.href = '/login'}
               variant="outline"
               className="h-10 rounded flex items-center justify-center pt-2.5 pb-2"
@@ -85,7 +86,7 @@ export function MarketingNavigation() {
               }}
             >
               SIGN IN
-            </Button>
+            </Button> */}
             <Button
               onClick={handleJoinWaitlistClick}
               className="h-10 rounded flex items-center justify-center pt-2.5 pb-2"

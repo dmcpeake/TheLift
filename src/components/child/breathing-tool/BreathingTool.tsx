@@ -39,10 +39,16 @@ export function BreathingTool({ childId, sessionId, onComplete }: BreathingToolP
   const [isSaving, setIsSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [buttonAnimationKey, setButtonAnimationKey] = useState(0)
   
   const intervalRef = useRef<NodeJS.Timeout>()
   const startTimeRef = useRef<number>()
   const durationIntervalRef = useRef<NodeJS.Timeout>()
+
+  // Trigger button animation when conditions change
+  useEffect(() => {
+    setButtonAnimationKey(prev => prev + 1)
+  }, [isRunning, saved])
 
   useEffect(() => {
     if (isRunning && !isPaused) {
@@ -189,7 +195,31 @@ export function BreathingTool({ childId, sessionId, onComplete }: BreathingToolP
   const circleScale = isRunning && !isPaused ? (currentPhase === 'inhale' ? 1.3 : currentPhase === 'exhale' ? 0.7 : 1) : 1
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <>
+      <style jsx>{`
+        @keyframes breathingToolExpand {
+          0% {
+            width: 80px;
+            min-width: 80px;
+          }
+          100% {
+            width: 120px;
+            min-width: 120px;
+          }
+        }
+        @keyframes breathingToolTextFadeIn {
+          0% {
+            opacity: 0;
+          }
+          60% {
+            opacity: 0;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
+      `}</style>
+      <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="text-2xl text-center">Breathing Exercise</CardTitle>
       </CardHeader>
@@ -266,14 +296,32 @@ export function BreathingTool({ childId, sessionId, onComplete }: BreathingToolP
         <div className="flex justify-center gap-3">
           {!isRunning ? (
             <>
-              <Button onClick={handleStart} className="min-w-[120px]">
-                <Play className="mr-2 h-4 w-4" />
-                Start
+              <Button
+                key={`start-${buttonAnimationKey}`}
+                onClick={handleStart}
+                className="min-w-[120px]"
+                style={{
+                  animation: 'breathingToolExpand 0.4s ease-out'
+                }}
+              >
+                <Play className="mr-2 h-4 w-4" style={{ animation: 'breathingToolTextFadeIn 0.4s ease-out' }} />
+                <span style={{ animation: 'breathingToolTextFadeIn 0.4s ease-out' }}>
+                  Start
+                </span>
               </Button>
               {saved && (
-                <Button onClick={handleReset} variant="outline">
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  New Session
+                <Button
+                  key={`new-session-${buttonAnimationKey}`}
+                  onClick={handleReset}
+                  variant="outline"
+                  style={{
+                    animation: 'breathingToolExpand 0.4s ease-out'
+                  }}
+                >
+                  <RotateCcw className="mr-2 h-4 w-4" style={{ animation: 'breathingToolTextFadeIn 0.4s ease-out' }} />
+                  <span style={{ animation: 'breathingToolTextFadeIn 0.4s ease-out' }}>
+                    New Session
+                  </span>
                 </Button>
               )}
             </>
@@ -307,5 +355,6 @@ export function BreathingTool({ childId, sessionId, onComplete }: BreathingToolP
         )}
       </CardContent>
     </Card>
+    </>
   )
 }

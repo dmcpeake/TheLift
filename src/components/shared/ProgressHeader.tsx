@@ -76,11 +76,11 @@ export function ProgressHeader({
               width: '60px',
               height: '60px',
               zIndex: 51,
-              border: '2px dashed #3a7ddc',
+              backgroundColor: 'rgba(232, 126, 103, 0.1)',
               borderRadius: '50%',
-              padding: '1px',
-              boxSizing: 'border-box',
-              background: 'none'
+              border: 'none',
+              padding: '0',
+              boxSizing: 'border-box'
             }}
             aria-label="Open guide"
           >
@@ -123,29 +123,21 @@ export function ProgressHeader({
           {progressSegments.map((segment, index) => {
             const Icon = segment.icon
             const stepId = steps[index]?.id
-            const isCompleted = completedData[stepId] && !completedData[stepId].skipped
-            const isCurrentStep = (() => {
-              // Very explicit mapping to avoid any confusion
-              const stepMapping = {
-                0: 'mood',     // Heart icon
-                1: 'emotions', // Smile icon
-                2: 'wellbeing' // Compass icon
-              }
-              return currentStep === stepMapping[index]
-            })()
-            // Can navigate if it's completed OR if we're past this step OR if it's the next available step
-            const canNavigate = isCompleted || isCurrentStep || (() => {
-              if (index === 0) return currentStep === 'emotions' || currentStep === 'wellbeing'
-              if (index === 1) return currentStep === 'wellbeing'
+
+            // Simple logic: blue if we've reached this section or beyond
+            const isActive = (() => {
+              if (currentStep === 'mood') return index === 0
+              if (currentStep === 'emotions') return index <= 1
+              if (currentStep === 'wellbeing' || currentStep === 'chart' || currentStep === 'talk' || currentStep === 'complete') return true
               return false
-            })() || (() => {
-              // Make next step tappable if current step has selection
+            })()
+
+            // Can navigate if section is active OR if it's the next section and current has selection
+            const canNavigate = isActive || (() => {
+              // Allow navigation to next section if current section has a selection
               if (currentStepHasSelection) {
-                if (currentStep === 'mood' && index === 1) return true // emotions step
-              }
-              // For wellbeing step, only tappable on emotion step 2
-              if (currentStep === 'emotions' && emotionGridStep === 2 && index === 2) {
-                return true // wellbeing step
+                if (currentStep === 'mood' && index === 1) return true // Can go to emotions
+                if (currentStep === 'emotions' && index === 2) return true // Can go to wellbeing
               }
               return false
             })()
@@ -159,13 +151,13 @@ export function ProgressHeader({
                     style={{ background: 'none', border: 'none', padding: '10px', margin: '-10px' }}
                     aria-label={`Navigate to ${segment.name}`}
                   >
-                    <Icon className="h-6 w-6 mx-auto" style={{ color: (isCompleted || isCurrentStep) ? '#3a7ddc' : '#9ca3af' }} />
+                    <Icon className="h-6 w-6 mx-auto" style={{ color: isActive ? '#3a7ddc' : '#9ca3af' }} />
                   </button>
                 ) : (
                   <Icon
                     className="h-6 w-6 mx-auto"
                     style={{
-                      color: isCompleted ? '#3a7ddc' : '#9ca3af',
+                      color: isActive ? '#3a7ddc' : '#9ca3af',
                       marginBottom: currentStep === 'breathing' ? '6px' : '0'
                     }}
                   />
@@ -178,18 +170,20 @@ export function ProgressHeader({
         {/* Progress bar with discrete segments - positioned 10px below icons */}
         <div className="relative w-full h-2 flex justify-center" style={{ gap: '1px' }}>
           {progressSegments.map((_, index) => {
-            const stepId = steps[index]?.id
-            // Check if this step has been completed based on completedData
-            const isCompleted = completedData[stepId] && !completedData[stepId].skipped
-            // Check if this is the current step
-            const isCurrent = stepId === currentStep
+            // Simple logic: blue if we've reached this section or beyond
+            const isActive = (() => {
+              if (currentStep === 'mood') return index === 0
+              if (currentStep === 'emotions') return index <= 1
+              if (currentStep === 'wellbeing' || currentStep === 'chart' || currentStep === 'talk' || currentStep === 'complete') return true
+              return false
+            })()
 
             return (
               <div
                 key={index}
                 className="h-2 transition-all duration-300"
                 style={{
-                  backgroundColor: (isCompleted || isCurrent) ? '#3a7ddc' : '#e5e7eb',
+                  backgroundColor: isActive ? '#3a7ddc' : '#e5e7eb',
                   borderRadius: index === 0 ? '4px 0 0 4px' :
                                index === progressSegments.length - 1 ? '0 4px 4px 0' : '0',
                   width: 'calc((100% - 2px) / 3 - 20px)'
@@ -203,25 +197,24 @@ export function ProgressHeader({
         <div className="flex w-full justify-center" style={{ marginTop: '5px', gap: '1px' }}>
           {progressSegments.map((segment, index) => {
             const stepId = steps[index]?.id
-            const isCompleted = completedData[stepId] && !completedData[stepId].skipped
-            const isCurrentStep = (() => {
-              // Very explicit mapping to avoid any confusion
-              const stepMapping = {
-                0: 'mood',     // Heart icon
-                1: 'emotions', // Smile icon
-                2: 'wellbeing' // Compass icon
-              }
-              return currentStep === stepMapping[index]
-            })()
-            // Can navigate if it's completed OR if we're past this step
-            const canNavigate = isCompleted || isCurrentStep || (() => {
-              if (index === 0) return currentStep === 'emotions' || currentStep === 'wellbeing'
-              if (index === 1) return currentStep === 'wellbeing'
+
+            // Simple logic: blue if we've reached this section or beyond
+            const isActive = (() => {
+              if (currentStep === 'mood') return index === 0
+              if (currentStep === 'emotions') return index <= 1
+              if (currentStep === 'wellbeing' || currentStep === 'chart' || currentStep === 'talk' || currentStep === 'complete') return true
               return false
             })()
 
-            // Highlight if completed OR current
-            const isHighlighted = isCompleted || isCurrentStep
+            // Can navigate if section is active OR if it's the next section and current has selection
+            const canNavigate = isActive || (() => {
+              // Allow navigation to next section if current section has a selection
+              if (currentStepHasSelection) {
+                if (currentStep === 'mood' && index === 1) return true // Can go to emotions
+                if (currentStep === 'emotions' && index === 2) return true // Can go to wellbeing
+              }
+              return false
+            })()
 
             return (
               <div key={segment.name} className="text-center" style={{ width: 'calc((100% - 2px) / 3 - 20px)' }}>
@@ -232,12 +225,12 @@ export function ProgressHeader({
                     style={{ background: 'none', border: 'none', padding: '12px 16px', margin: '-12px -16px' }}
                     aria-label={`Navigate to ${segment.name}`}
                   >
-                    <span className={`text-xs ${isHighlighted ? '' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : undefined }}>
+                    <span className={`text-xs`} style={{ color: isActive ? '#3a7ddc' : '#9ca3af' }}>
                       {segment.name}
                     </span>
                   </button>
                 ) : (
-                  <span className={`text-xs ${isHighlighted ? '' : 'text-gray-600'}`} style={{ color: isHighlighted ? '#3a7ddc' : '#9ca3af' }}>
+                  <span className={`text-xs`} style={{ color: isActive ? '#3a7ddc' : '#9ca3af' }}>
                     {segment.name}
                   </span>
                 )}
