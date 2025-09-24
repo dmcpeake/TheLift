@@ -9,9 +9,10 @@ What patterns do you notice in their emotional experiences? What feelings and st
 Based on their wellbeing patterns, what adjustments or approaches might help them engage more fully with learning? What environmental factors, teaching strategies, or classroom arrangements could enhance their experience?
 
 **What person-centered support does {child_name} need?**
-- What classroom modifications or reasonable adjustments might benefit them?
+- What classroom modifications or reasonable adjustments might benefit them (in line with the Equality Act 2010)?
 - Which positive behaviors and engagement patterns should I notice and celebrate?
 - How can I collaborate with parents/carers and our SENCO to ensure consistent support?
+- If {child_name} has an EHCP or is receiving SEN Support, how can I align with their outcomes?
 - What specific strengths-based strategies could help them flourish in our learning environment?
 
 **What are {child_name}'s strengths and successful strategies?**

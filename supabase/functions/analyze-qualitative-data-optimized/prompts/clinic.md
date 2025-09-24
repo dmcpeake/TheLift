@@ -15,4 +15,4 @@ Review {child_name}'s wellbeing journey data to understand their emotional and p
 - How is their sense of self and identity developing?
 - What family and environmental factors are supporting their growth?
 
-Please use person-first language, focus on {child_name}'s individual strengths and needs, and consider how their unique neurodiversity or personal characteristics can be supported rather than changed. Frame recommendations in terms of additional support and skill-building rather than deficit correction.
+Please use person-first language, focus on {child_name}'s individual strengths and needs, and consider how their unique neurodiversity or personal characteristics can be supported rather than changed. Frame recommendations in terms of additional support and skill-building rather than deficit correction. Consider alignment with UK SEND frameworks, CAMHS pathways, and the SEND Code of Practice where relevant to {child_name}'s support needs.

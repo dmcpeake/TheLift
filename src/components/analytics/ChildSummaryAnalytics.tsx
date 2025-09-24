@@ -3,7 +3,7 @@ import { MoodHeatmap } from './MoodHeatmap'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { projectId, publicAnonKey } from '../../utils/supabase/info.tsx'
-import { PageLoader } from '../shared/LottieLoader'
+import { PageAnimatedLoader } from '../shared/AnimatedLoader'
 import { ComparisonView } from './comparison/ComparisonView'
 import { CriticalSupportAlert } from './CriticalSupportAlert'
 import {
@@ -92,6 +92,16 @@ const AVATAR_STYLES = [
   { bg: 'bg-slate-500', shape: 'rounded-lg' }
 ]
 
+// Format mood labels to be human-readable
+function formatMoodLabel(label: string | undefined): string {
+  if (!label) return ''
+  // Replace underscores with spaces and capitalize each word
+  return label
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+}
+
 export function ChildSummaryAnalytics() {
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [selectedOrg, setSelectedOrg] = useState<string>('all')
@@ -102,7 +112,7 @@ export function ChildSummaryAnalytics() {
   const [aiInsights, setAIInsights] = useState<Record<string, AIInsights>>({})
   const [loading, setLoading] = useState(true)
   const [loadingInsights, setLoadingInsights] = useState<Record<string, boolean>>({})
-  const [aiAnalysisProgress, setAiAnalysisProgress] = useState<Record<string, number>>({})
+  // Removed aiAnalysisProgress to prevent excessive re-renders
   const [loadingStages, setLoadingStages] = useState<Array<{ name: string; status: 'pending' | 'loading' | 'complete' | 'error' }>>([
     { name: 'Loading organizations', status: 'loading' },
     { name: 'Loading children profiles', status: 'pending' },
@@ -393,7 +403,6 @@ export function ChildSummaryAnalytics() {
         const notes = []
         if (moodUsage.data?.notes) notes.push(`Mood: ${moodUsage.data.notes}`)
         if (emotionUsage && emotionUsage.data?.explanation_text) notes.push(`Feelings: ${emotionUsage.data.explanation_text}`)
-        if (wellbeingUsage && wellbeingUsage.data?.overall_score) notes.push(`Wellbeing score: ${wellbeingUsage.data.overall_score}`)
 
         // Only add check-in if there are actual notes
         const combinedNotes = notes.join(' | ')
@@ -432,22 +441,12 @@ export function ChildSummaryAnalytics() {
     // Check if already loading or loaded
     if (loadingInsights[childId] || aiInsights[childId]) return
 
-    console.log('Loading AI insights for child:', childId)
-    setLoadingInsights(prev => ({ ...prev, [childId]: true }))
-    setAiAnalysisProgress(prev => ({ ...prev, [childId]: 0 }))
-
-    // Simulate progress updates
-    const progressInterval = setInterval(() => {
-      setAiAnalysisProgress(prev => {
-        const currentProgress = prev[childId] || 0
-        if (currentProgress >= 90) {
-          return prev
-        }
-        // Increment by 10-20% each time
-        const increment = Math.floor(Math.random() * 10) + 10
-        return { ...prev, [childId]: Math.min(currentProgress + increment, 90) }
-      })
-    }, 500)
+    console.log('🔵 STARTING AI insights loading for child:', childId)
+    setLoadingInsights(prev => {
+      console.log('🔵 Setting loadingInsights to TRUE for child:', childId)
+      return { ...prev, [childId]: true }
+    })
+    // Removed progress animation to prevent excessive re-renders
 
     try {
       // Use the correct Supabase URL and key
@@ -513,9 +512,7 @@ export function ChildSummaryAnalytics() {
 
         console.log('Parsed insights:', insights)
 
-        // Set progress to 100% when complete
-        clearInterval(progressInterval)
-        setAiAnalysisProgress(prev => ({ ...prev, [childId]: 100 }))
+        // AI analysis complete
 
         setAIInsights(prev => ({
           ...prev,
@@ -524,12 +521,11 @@ export function ChildSummaryAnalytics() {
       }
     } catch (error) {
       console.error('Error loading AI insights:', error)
-      clearInterval(progressInterval)
-      setAiAnalysisProgress(prev => ({ ...prev, [childId]: 0 }))
+      // Error handling
     } finally {
       setTimeout(() => {
+        console.log('🔵 Setting loadingInsights to FALSE for child:', childId)
         setLoadingInsights(prev => ({ ...prev, [childId]: false }))
-        setAiAnalysisProgress(prev => ({ ...prev, [childId]: 0 }))
       }, 500) // Small delay to show 100% briefly
     }
   }
@@ -618,22 +614,32 @@ export function ChildSummaryAnalytics() {
     if (match && match[1]) {
       let content = match[1].trim()
 
+      // Check if content has markdown bullets (lines starting with -)
+      const lines = content.split('\n')
+      const bulletLines = lines.filter(line => line.trim().startsWith('-'))
+
+      if (bulletLines.length > 0) {
+        // Join all bullet points with line breaks to preserve the full summary
+        const bullets = bulletLines.map(line =>
+          line.trim().replace(/^-\s*/, '').trim()
+        ).filter(b => b)
+
+        // Return all bullets joined as the summary
+        return cleanupText(bullets.join('\n'))
+      }
+
       // Check if content contains inline bullets (text with - embedded)
       if (content.includes(' - ')) {
         // Format inline bullets as a proper list
         const parts = content.split(' - ')
         if (parts.length > 1) {
-          // First part is the intro, rest are bullet points
-          const intro = parts[0].trim()
-          const bullets = parts.slice(1).map(b => b.trim()).filter(b => b)
-          return cleanupText(intro)
+          // Join all parts for the summary
+          return cleanupText(content)
         }
       }
 
-      // Otherwise, get the first 2-3 sentences for the summary
-      const sentences = content.split(/[.!?]/).filter(s => s.trim())
-      const result = sentences.slice(0, 3).join('. ').trim() + (sentences.length > 0 ? '.' : '')
-      return cleanupText(result)
+      // Return the full content for the summary
+      return cleanupText(content)
     }
 
     return ''
@@ -763,7 +769,7 @@ export function ChildSummaryAnalytics() {
   }
 
   if (loading) {
-    return <PageLoader message="Loading analytics data..." />
+    return <PageAnimatedLoader message="Loading analytics data..." />
   }
 
   return (
@@ -1057,7 +1063,7 @@ export function ChildSummaryAnalytics() {
                                             backgroundColor: MOOD_COLORS[checkIn.mood_numeric || 3] + '20',
                                             color: MOOD_COLORS[checkIn.mood_numeric || 3]
                                           }}>
-                                            {MOOD_EMOJIS[checkIn.mood_numeric || 3]} {checkIn.mood_level}
+                                            {MOOD_EMOJIS[checkIn.mood_numeric || 3]} {formatMoodLabel(checkIn.mood_level)}
                                           </span>
                                         </div>
                                       )}
@@ -1097,9 +1103,9 @@ export function ChildSummaryAnalytics() {
                         </h4>
 
                         <div className="relative min-h-[300px]">
-                          {/* Content - shows through blur when loading */}
+                          {/* Content with blur effect when loading */}
                           <div className={`space-y-4 transition-all duration-700 ${
-                            loadingInsights[child.id] ? 'filter blur-[3px] scale-[0.98]' : 'filter blur-0 scale-100'
+                            loadingInsights[child.id] ? 'filter blur-[3px] opacity-30' : 'filter blur-0 opacity-100'
                           }`}>
                             {/* Summary */}
                             {aiInsights[child.id] && (
@@ -1235,60 +1241,14 @@ export function ChildSummaryAnalytics() {
                             )}
                           </div>
 
-                          {/* Loading Overlay - subtle blur effect */}
+                          {/* Loading Overlay with simple spinner */}
                           {loadingInsights[child.id] && (
-                            <motion.div
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-white/40 via-white/50 to-white/40 backdrop-blur-[1px] rounded-lg"
-                            >
-                              <motion.div
-                                initial={{ scale: 0.9, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                transition={{ duration: 0.3 }}
-                                className="bg-white/95 backdrop-blur-md rounded-xl shadow-xl p-5 border border-gray-100"
-                              >
-                                <div className="flex flex-col items-center space-y-3">
-                                  {/* Smooth pulsing dots */}
-                                  <div className="flex space-x-1.5">
-                                    <motion.div
-                                      className="w-2 h-2 bg-indigo-500 rounded-full"
-                                      animate={{
-                                        scale: [1, 1.5, 1],
-                                        opacity: [0.3, 1, 0.3]
-                                      }}
-                                      transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
-                                    />
-                                    <motion.div
-                                      className="w-2 h-2 bg-indigo-500 rounded-full"
-                                      animate={{
-                                        scale: [1, 1.5, 1],
-                                        opacity: [0.3, 1, 0.3]
-                                      }}
-                                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
-                                    />
-                                    <motion.div
-                                      className="w-2 h-2 bg-indigo-500 rounded-full"
-                                      animate={{
-                                        scale: [1, 1.5, 1],
-                                        opacity: [0.3, 1, 0.3]
-                                      }}
-                                      transition={{ duration: 1.5, repeat: Infinity, delay: 1 }}
-                                    />
-                                  </div>
-                                  <p className="text-sm font-medium text-gray-700">Analyzing wellbeing patterns</p>
-                                  {/* Smooth progress indicator */}
-                                  <div className="w-32 h-1 bg-gray-200 rounded-full overflow-hidden">
-                                    <motion.div
-                                      className="h-full bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-full"
-                                      animate={{ x: ["-100%", "200%"] }}
-                                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                    />
-                                  </div>
-                                </div>
-                              </motion.div>
-                            </motion.div>
+                            <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-lg z-10">
+                              <div className="flex flex-col items-center">
+                                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+                                <p className="mt-3 text-sm text-gray-600">Analyzing wellbeing patterns...</p>
+                              </div>
+                            </div>
                           )}
                         </div>
                       </div>

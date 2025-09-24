@@ -15,4 +15,4 @@ Review {child_name}'s emotional wellbeing journey within the context of their me
 - How is their family adapting and what additional support might benefit them?
 - What reasonable adjustments can make their medical experience more comfortable?
 
-Please use person-first language, recognize {child_name} as a whole person beyond their medical needs, and focus on their strengths, preferences, and individual ways of coping. Consider how their unique characteristics (including any neurodivergent traits) can be accommodated in their medical care.
+Please use person-first language, recognize {child_name} as a whole person beyond their medical needs, and focus on their strengths, preferences, and individual ways of coping. Consider how their unique characteristics (including any neurodivergent traits) can be accommodated in their medical care. Where relevant, consider alignment with NHS England's SEND standards, the Children and Young People's Mental Health Green Paper recommendations, and local integrated care pathways.
