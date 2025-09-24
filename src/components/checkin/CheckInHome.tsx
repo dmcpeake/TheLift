@@ -112,7 +112,13 @@ export function CheckInHome() {
           }
         }
       `}</style>
-      <div className="min-h-screen bg-white relative overflow-hidden">
+      <div className="min-h-screen bg-white relative overflow-hidden" style={{
+        backgroundImage: 'url(/background.svg)',
+        backgroundSize: window.innerWidth > 768 ? 'cover' : 'cover',
+        backgroundPosition: window.innerWidth > 768 ? 'center bottom' : 'center',
+        backgroundAttachment: window.innerWidth > 768 ? 'fixed' : 'scroll',
+        backgroundRepeat: 'no-repeat'
+      }}>
       {/* Garden Cards - 40px from top - hide when breathing */}
       {!showBreathing && (
         <div className="garden-cards-container" style={{ position: 'absolute', top: '20px', left: '0', right: '0', zIndex: 10, opacity: 0 }}>
@@ -401,11 +407,11 @@ export function CheckInHome() {
                   color: 'white',
                   height: '60px',
                   borderRadius: '30px',
-                  paddingLeft: '30px',
-                  paddingRight: '30px',
-                  border: 'none',
+                  paddingLeft: '50px',
+                  paddingRight: '50px',
+                  border: '2px solid white',
                   cursor: 'pointer',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                  boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)'
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
@@ -601,61 +607,61 @@ export function CheckInHome() {
       )}
 
 
-      {/* Yellow swoosh section at bottom */}
-      <YellowSwoosh>
-        {/* Start Button */}
-        {!showBreathing && (
-          <div className="flex justify-center mobile-start-button" style={{ position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
-            <button
-              onClick={handleStartClick}
-              className="transition-all duration-200"
-              style={{
-                backgroundColor: '#e87e67',
-                color: 'white',
-                width: '140px',
-                height: '56px',
-                borderRadius: '28px',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: '600',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
-            >
-              START
-            </button>
-          </div>
-        )}
+      {/* Yellow swoosh section at bottom - only show when breathing */}
+      {showBreathing && <YellowSwoosh />}
 
-        {/* Theo Rose Animation - centered under start button */}
-        {roseAnimation && (
-          <div
-            className="theo-animation"
+      {/* Start Button - only show when not breathing */}
+      {!showBreathing && (
+        <div className="flex justify-center mobile-start-button" style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
+          <button
+            onClick={handleStartClick}
+            className="transition-all duration-200"
             style={{
-              position: 'absolute',
-              bottom: '70px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '300px',
-              height: '300px',
-              zIndex: 10,
-              opacity: isTransitioning || showBreathing ? 0 : 1,
-              transition: 'opacity 300ms ease-in-out'
+              backgroundColor: '#e87e67',
+              color: 'white',
+              width: '180px',
+              height: '56px',
+              borderRadius: '28px',
+              border: '2px solid white',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)'
             }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
           >
-            <Lottie
-              animationData={roseAnimation}
-              loop={true}
-              autoplay={true}
-            />
-          </div>
-        )}
-      </YellowSwoosh>
+            START
+          </button>
+        </div>
+      )}
+
+      {/* Theo Rose Animation - centered under start button - only show when not breathing */}
+      {roseAnimation && !showBreathing && (
+        <div
+          className="theo-animation"
+          style={{
+            position: 'fixed',
+            bottom: '100px',
+            left: 'calc(50% + 60px)',
+            transform: 'translateX(-50%)',
+            width: '300px',
+            height: '300px',
+            zIndex: 10,
+            opacity: isTransitioning ? 0 : 1,
+            transition: 'opacity 300ms ease-in-out'
+          }}
+        >
+          <Lottie
+            animationData={roseAnimation}
+            loop={true}
+            autoplay={true}
+          />
+        </div>
+      )}
     </div>
     </>
   )
