@@ -646,7 +646,7 @@ export function CheckInHome() {
           <div
             style={{
               position: 'fixed',
-              bottom: '100px',
+              bottom: '140px',
               left: 'calc(50% + 60px)',
               transform: 'translateX(-50%)',
               width: '120px',
