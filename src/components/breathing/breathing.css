@@ -290,6 +290,12 @@
     padding: 1.25rem 2rem !important;
     font-size: 1.125rem !important;
   }
+  .breathing-circle.inhale {
+    transform: scale(1.05) !important;
+  }
+  .breathing-circle.hold {
+    transform: scale(1.05) !important;
+  }
 }
 
 .breathing-footer {

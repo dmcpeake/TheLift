@@ -32,25 +32,30 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
   useEffect(() => {
     let timeoutId: NodeJS.Timeout
 
+    // Check if we're on mobile
+    const isMobile = window.innerWidth <= 768
+    const inhaleScale = isMobile ? 1.0 : 1.1
+    const restScale = isMobile ? 0.8 : 0.85
+
     switch (phase) {
       case 'inhale':
-        // Start at current scale, then transition to 1.1
-        timeoutId = setTimeout(() => setCurrentScale(1.1), 50)
+        // Start at current scale, then transition to inhale scale
+        timeoutId = setTimeout(() => setCurrentScale(inhaleScale), 50)
         break
       case 'hold':
-        // Stay at 1.1 (inhaled state)
-        setCurrentScale(1.1)
+        // Stay at inhaled state
+        setCurrentScale(inhaleScale)
         break
       case 'exhale':
-        // Start at 1.1, then transition to 0.85
-        timeoutId = setTimeout(() => setCurrentScale(0.85), 50)
+        // Start at inhale scale, then transition to rest scale
+        timeoutId = setTimeout(() => setCurrentScale(restScale), 50)
         break
       case 'holdAfter':
-        // Stay at 0.85 (exhaled state)
-        setCurrentScale(0.85)
+        // Stay at rest scale (exhaled state)
+        setCurrentScale(restScale)
         break
       default:
-        setCurrentScale(0.85)
+        setCurrentScale(restScale)
     }
 
     return () => {
