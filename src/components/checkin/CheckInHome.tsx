@@ -791,7 +791,7 @@ export function CheckInHome() {
 
       {/* Title header for breathing */}
       {showBreathing && (
-        <div className="text-center" style={{ position: 'fixed', top: '90px', left: 0, right: 0, zIndex: 40 }}>
+        <div className="text-center" style={{ position: 'fixed', top: '50px', left: 0, right: 0, zIndex: 40 }}>
           <h1 className="breathing-title-checkin-mobile text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em', marginTop: '50px' }}>Let's breathe!</h1>
         </div>
       )}
