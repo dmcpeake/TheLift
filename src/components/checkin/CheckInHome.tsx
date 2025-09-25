@@ -7,7 +7,7 @@ import { Settings, SkipForward, Play, Pause, Users, Sparkles, Star, Plus, LogOut
 import { BreathingCircles } from '../breathing/BreathingCircles'
 import './checkin-mobile.css'
 
-// Force deployment refresh
+// Force deployment refresh - button should show START
 
 export function CheckInHome() {
   const navigate = useNavigate()
