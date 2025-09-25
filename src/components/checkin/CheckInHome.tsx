@@ -337,21 +337,43 @@ export function CheckInHome() {
           }
 
           .welcome-content-mobile {
-            padding: 40px 20px !important;
+            padding: 0 !important;
+            min-height: auto !important;
+            align-items: flex-start !important;
+            justify-content: flex-start !important;
+            display: flex !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+          }
+
+          .welcome-content-mobile .max-w-4xl {
+            margin-top: 40px !important;
+            padding: 0 20px !important;
+            width: 100% !important;
           }
 
           .welcome-content-mobile .rounded-2xl {
-            padding: 32px !important;
+            background: none !important;
+            backdrop-filter: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            position: static !important;
+            z-index: auto !important;
           }
 
           .welcome-content-mobile h1 {
             font-size: 28px !important;
             margin-bottom: 16px !important;
+            color: #1f2937 !important;
           }
 
           .welcome-content-mobile p {
             font-size: 16px !important;
             margin-bottom: 24px !important;
+            color: #6b7280 !important;
           }
         }
       `}</style>
@@ -429,13 +451,19 @@ export function CheckInHome() {
             }
             .welcome-content-mobile {
               display: flex !important;
-              align-items: center !important;
-              justify-content: center !important;
+              align-items: flex-start !important;
+              justify-content: flex-start !important;
               min-height: 100vh !important;
-              padding: 80px !important;
+              padding: 40px 20px 20px 20px !important;
             }
-            .welcome-content-mobile .max-w-2xl {
+            .welcome-content-mobile .max-w-4xl {
               margin-top: 0 !important;
+              margin-left: auto !important;
+              margin-right: auto !important;
+              width: 100% !important;
+            }
+            .welcome-content-mobile .rounded-2xl {
+              display: none !important;
             }
             .mobile-start-button {
               position: fixed !important;
@@ -675,7 +703,7 @@ export function CheckInHome() {
       {/* Welcome Content */}
       {!showBreathing && (
         <div
-          className="welcome-content-mobile flex items-center justify-center transition-opacity duration-300"
+          className="welcome-content-mobile flex items-start justify-start transition-opacity duration-300"
           style={{
             minHeight: '100vh',
             opacity: isTransitioning ? 0 : 1,
