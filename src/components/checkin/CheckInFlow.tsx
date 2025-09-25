@@ -58,6 +58,9 @@ export function CheckInFlow() {
 
   // Reset selection state when step changes
   React.useEffect(() => {
+    // Scroll to top when step changes
+    window.scrollTo(0, 0)
+
     // Check if current step has completed data
     const hasCompletedData = completedData[currentStep] && !completedData[currentStep].skipped
     setCurrentStepHasSelection(hasCompletedData)
