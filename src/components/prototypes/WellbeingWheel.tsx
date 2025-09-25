@@ -889,9 +889,9 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                       {moods.map((mood, index) => {
                         const segmentAngle = 72
                         const angle = (index * segmentAngle) - 90
-                        const radius = 125
-                        const x = 200 + radius * Math.cos((angle * Math.PI) / 180)
-                        const y = 200 + radius * Math.sin((angle * Math.PI) / 180)
+                        const radius = 110
+                        const x = 180 + radius * Math.cos((angle * Math.PI) / 180)
+                        const y = 180 + radius * Math.sin((angle * Math.PI) / 180)
 
                         return (
                           <foreignObject
