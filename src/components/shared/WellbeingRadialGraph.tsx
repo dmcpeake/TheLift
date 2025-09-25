@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Lottie from 'lottie-react'
+import { Info } from 'lucide-react'
 
 // Import mood animations
 import BlushingShaded from '../../assets/animations/Blushing_Shaded.json'
@@ -28,7 +29,7 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation, onCe
   useEffect(() => {
     const checkScreenSize = () => {
       if (window.innerWidth <= 768) {
-        setActualSize(300)
+        setActualSize(330) // Increased from 300 to 330 for more space around labels
       } else {
         setActualSize(size)
       }
@@ -155,6 +156,20 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation, onCe
             max-width: 326px !important;
             max-height: 326px !important;
           }
+          .low-score-text {
+            display: none !important;
+          }
+          .low-score-icon {
+            display: inline-block !important;
+          }
+        }
+        @media (min-width: 769px) {
+          .low-score-text {
+            display: block !important;
+          }
+          .low-score-icon {
+            display: none !important;
+          }
         }
       `}</style>
       <div className="radial-graph-container relative">
@@ -217,7 +232,7 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation, onCe
         {/* Section labels with curved text */}
         <defs>
           {segments.map((segment, index) => {
-            const labelRadius = maxRadius + 25
+            const labelRadius = maxRadius + 20
             const startAngleRad = ((segment.startAngle + 5) * Math.PI) / 180 // Add 5 degrees offset for better centering
             const endAngleRad = ((segment.endAngle - 5) * Math.PI) / 180 // Subtract 5 degrees offset
 
@@ -359,7 +374,7 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation, onCe
                   }}
                   aria-label="Chart center button"
                 >
-                  <span style={{
+                  <span className="low-score-text" style={{
                     color: 'white',
                     fontSize: '12px',
                     fontWeight: '600',
@@ -368,6 +383,14 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation, onCe
                     lineHeight: '1.3'
                   }}>
                     LOW<br/>SCORE?
+                  </span>
+                  <span className="low-score-icon" style={{
+                    color: 'white',
+                    display: 'none',
+                    textAlign: 'center',
+                    marginTop: '7px'
+                  }}>
+                    <Info size={18} />
                   </span>
                 </button>
               </div>
