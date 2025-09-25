@@ -240,10 +240,17 @@ export function CheckInFlow() {
             </div>
 
             {/* DONE Button */}
-            <div className="flex justify-center">
+            <div
+              className="fixed left-0 right-0 flex justify-center"
+              style={{
+                bottom: window.innerWidth <= 768 ? '32px' : '32px',
+                zIndex: 1000,
+                padding: '0 2rem'
+              }}
+            >
               <button
                 onClick={() => navigate('/checkin/home')}
-                className="complete-done-button text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                 style={{
                   backgroundColor: '#e87e67',
                   color: 'white',
@@ -280,12 +287,9 @@ export function CheckInFlow() {
           .chart-title-container {
             margin-top: 40px;
           }
-          .complete-done-button {
-            position: fixed !important;
+          .complete-done-container {
             bottom: 32px !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            z-index: 1000 !important;
+            padding: 0 2rem !important;
           }
         }
       `}</style>
