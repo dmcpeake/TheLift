@@ -272,6 +272,14 @@ export function CheckInFlow() {
 
   return (
     <>
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .chart-title-container {
+            margin-top: 20px;
+          }
+        }
+      `}</style>
+
       {/* Progress bar shows on all steps except garden */}
       {currentStep !== 'garden' && <ProgressBar />}
 
@@ -331,7 +339,7 @@ export function CheckInFlow() {
           <>
             <div className="bg-white min-h-screen relative" style={{ paddingTop: '140px', paddingBottom: '120px' }}>
               {/* Title - matching wellbeing page styling */}
-              <div className="text-center" style={{ marginBottom: '2rem' }}>
+              <div className="text-center chart-title-container" style={{ marginBottom: '2rem' }}>
                 <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
                   You've completed your wheel!
                 </h1>
