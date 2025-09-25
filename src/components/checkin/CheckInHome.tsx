@@ -304,7 +304,10 @@ export function CheckInHome() {
           height: 40px;
           pointer-events: none;
           z-index: 3;
+          opacity: 0;
           animation: butterflyPath 12s linear infinite;
+          animation-delay: 2s;
+          animation-fill-mode: forwards;
         }
         .butterfly svg {
           animation: butterflyWings 0.2s ease-in-out infinite;
