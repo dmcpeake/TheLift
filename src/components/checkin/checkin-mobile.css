@@ -42,4 +42,10 @@
   .yellow-swoosh-container {
     display: none !important;
   }
+
+  /* Reduce breathing circle size by 30px on mobile */
+  .breathing-circle {
+    width: 250px !important;
+    height: 250px !important;
+  }
 }
