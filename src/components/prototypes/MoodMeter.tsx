@@ -174,18 +174,18 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
         <div className="mb-6 w-full max-w-2xl">
           <div className="flex justify-center">
             {/* Breathing circle container - 480px like breathing circle */}
-            <div className="mood-meter-container relative" style={{ width: '480px', height: '480px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="mood-meter-container relative" style={{ width: '440px', height: '440px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 
 
               {/* Clean doughnut with 5 segments */}
               <div className="mood-meter-doughnut" style={{ position: 'absolute', left: '50%', top: '50%', transform: `translate(-50%, -50%) rotate(${rotationOffset}deg)`, zIndex: 4, transition: 'transform 0.8s ease-in-out', padding: '30px' }}>
-                <svg width="400" height="400" style={{ overflow: 'visible' }}>
+                <svg width="360" height="360" style={{ overflow: 'visible' }}>
                   {moods.map((mood, index) => {
                     const isSelected = selectedMood?.mood_level === mood.level
-                    const centerX = 200
-                    const centerY = 200
-                    const outerRadius = isSelected ? 170 : 165
-                    const innerRadius = isSelected ? 80 : 85
+                    const centerX = 180
+                    const centerY = 180
+                    const outerRadius = isSelected ? 150 : 145
+                    const innerRadius = isSelected ? 70 : 75
                     const segmentAngle = 72 // 72 degrees per segment
                     // Calculate angles with no gaps - offset by half segment to center first segment at top
                     const startAngle = (index * segmentAngle) - 90 - (segmentAngle / 2)
@@ -242,9 +242,9 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
                   {moods.map((mood, index) => {
                     const segmentAngle = 72
                     const angle = (index * segmentAngle) - 90 // Center of each segment, with first segment centered at top
-                    const radius = 125 // Middle of the doughnut ring
-                    const x = 200 + radius * Math.cos((angle * Math.PI) / 180)
-                    const y = 200 + radius * Math.sin((angle * Math.PI) / 180)
+                    const radius = 110 // Middle of the doughnut ring
+                    const x = 180 + radius * Math.cos((angle * Math.PI) / 180)
+                    const y = 180 + radius * Math.sin((angle * Math.PI) / 180)
 
                     return (
                       <foreignObject
