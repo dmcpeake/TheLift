@@ -988,10 +988,10 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                             style={{ paddingTop: '3rem', paddingBottom: '3rem', paddingLeft: '0.75rem', paddingRight: '3.5rem', lineHeight: '1.5' }}
                             maxLength={500}
                             onFocus={() => {
-                              // Store current scroll position on mobile
+                              // Store current scroll position on mobile BEFORE keyboard appears
                               if (window.innerWidth <= 768) {
-                                const scrollY = window.scrollY;
-                                (window as any).wellbeingTextareaScrollY = scrollY;
+                                // Store the position before any scrolling happens
+                                (window as any).wellbeingTextareaScrollY = window.scrollY;
                               }
                             }}
                             onBlur={() => {
@@ -999,10 +999,11 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                               if (window.innerWidth <= 768) {
                                 const originalScrollY = (window as any).wellbeingTextareaScrollY;
                                 if (originalScrollY !== undefined) {
+                                  // Longer delay to wait for keyboard to fully close
                                   setTimeout(() => {
                                     window.scrollTo(0, originalScrollY);
                                     delete (window as any).wellbeingTextareaScrollY;
-                                  }, 100);
+                                  }, 300);
                                 }
                               }
                             }}

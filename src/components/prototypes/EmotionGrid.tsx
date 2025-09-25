@@ -1208,10 +1208,10 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                 style={{ paddingTop: '3rem', paddingBottom: '3rem', paddingLeft: '0.75rem', paddingRight: '3.5rem', lineHeight: '1.5' }}
                 maxLength={500}
                 onFocus={() => {
-                  // Store current scroll position on mobile
+                  // Store current scroll position on mobile BEFORE keyboard appears
                   if (window.innerWidth <= 768) {
-                    const scrollY = window.scrollY;
-                    (window as any).emotionTextareaScrollY = scrollY;
+                    // Store the position before any scrolling happens
+                    (window as any).emotionTextareaScrollY = window.scrollY;
                   }
                 }}
                 onBlur={() => {
@@ -1219,10 +1219,11 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                   if (window.innerWidth <= 768) {
                     const originalScrollY = (window as any).emotionTextareaScrollY;
                     if (originalScrollY !== undefined) {
+                      // Longer delay to wait for keyboard to fully close
                       setTimeout(() => {
                         window.scrollTo(0, originalScrollY);
                         delete (window as any).emotionTextareaScrollY;
-                      }, 100);
+                      }, 300);
                     }
                   }
                 }}
