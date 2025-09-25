@@ -815,7 +815,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
 
               {/* Container for mood wheel and text input - same size */}
               <div className="flex justify-center mb-8" style={{ marginTop: '-20px' }}>
-                <div className="relative" style={{ width: '400px', height: '400px' }}>
+                <div className="relative" style={{ width: '360px', height: '360px' }}>
 
                   {/* Mood doughnut selector - fades out when mood is selected */}
                   <div
@@ -828,13 +828,13 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                     }}
                   >
                     <div style={{ position: 'absolute', left: '50%', top: '50%', transform: `translate(-50%, -50%) rotate(${rotationOffset}deg)`, zIndex: 4, transition: 'transform 0.8s ease-in-out' }}>
-                    <svg width="400" height="400" style={{ overflow: 'visible' }}>
+                    <svg width="360" height="360" style={{ overflow: 'visible' }}>
                       {moods.map((mood, index) => {
                         const isSelected = sections[currentSection.id]?.mood_level === mood.level
-                        const centerX = 200
-                        const centerY = 200
-                        const outerRadius = isSelected ? 170 : 165
-                        const innerRadius = isSelected ? 80 : 85
+                        const centerX = 180
+                        const centerY = 180
+                        const outerRadius = isSelected ? 150 : 145
+                        const innerRadius = isSelected ? 70 : 75
                         const segmentAngle = 72 // 72 degrees per segment
                         const startAngle = (index * segmentAngle) - 90 - (segmentAngle / 2)
                         const endAngle = startAngle + segmentAngle
