@@ -274,6 +274,9 @@ export function CheckInFlow() {
     <>
       <style jsx>{`
         @media (max-width: 768px) {
+          .chart-page-container {
+            padding-top: 60px !important;
+          }
           .chart-title-container {
             margin-top: 20px;
           }
@@ -337,7 +340,7 @@ export function CheckInFlow() {
 
         {currentStep === 'chart' && (
           <>
-            <div className="bg-white min-h-screen relative" style={{ paddingTop: '140px', paddingBottom: '120px' }}>
+            <div className="bg-white min-h-screen relative chart-page-container" style={{ paddingTop: '140px', paddingBottom: '120px' }}>
               {/* Title - matching wellbeing page styling */}
               <div className="text-center chart-title-container" style={{ marginBottom: '2rem' }}>
                 <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
