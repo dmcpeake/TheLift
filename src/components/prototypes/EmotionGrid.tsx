@@ -360,11 +360,18 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
             border-width: 2px !important;
           }
         }
+        /* Mobile title spacing */
+        @media (max-width: 768px) {
+          .emotion-main-title-container,
+          .emotion-dynamic-title-container {
+            margin-top: 20px;
+          }
+        }
       `}</style>
 
       {/* Dynamic title for each step */}
       {currentStep !== 1 && (
-        <div className="text-center" style={{ marginTop: '20px' }}>
+        <div className="text-center emotion-dynamic-title-container">
           <h1 className="emotion-title-mobile text-gray-900" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
             {currentStep === 2 && (
               selectedQuadrant === 'red' ? 'Big buzzy feelings' :
@@ -383,7 +390,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
       {/* Step 1: Select Quadrant (2x2 Grid) */}
       {currentStep === 1 && (
         <>
-          <div className="text-center mb-4" style={{ marginTop: '20px' }}>
+          <div className="text-center mb-4 emotion-main-title-container">
             <h1 className="emotion-title-mobile text-gray-900 mb-1" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
               How are you feeling?
             </h1>
