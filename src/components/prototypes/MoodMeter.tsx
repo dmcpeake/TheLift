@@ -160,7 +160,7 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
       `}</style>
 
       {/* Centered title like breathing exercise */}
-      <div className="text-center" style={{ marginBottom: '1rem' }}>
+      <div className="text-center" style={{ marginTop: '20px', marginBottom: '1rem' }}>
         <h1 className="mood-meter-title-mobile text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
           <span className="hidden md:inline">How would you describe your mood?</span>
           <span className="md:hidden">Select your mood</span>
