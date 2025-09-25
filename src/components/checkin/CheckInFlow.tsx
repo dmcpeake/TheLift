@@ -278,7 +278,7 @@ export function CheckInFlow() {
             padding-top: 60px !important;
           }
           .chart-title-container {
-            margin-top: 20px;
+            margin-top: 40px;
           }
         }
       `}</style>
