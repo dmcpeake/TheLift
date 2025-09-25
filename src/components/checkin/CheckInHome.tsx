@@ -5,6 +5,7 @@ import { ProgressHeader } from '../shared/ProgressHeader'
 import Lottie from 'lottie-react'
 import { Settings, SkipForward, Play, Pause, Users, Sparkles, Star, Plus, LogOut, X, Heart, Smile } from 'lucide-react'
 import { BreathingCircles } from '../breathing/BreathingCircles'
+import './checkin-mobile.css'
 
 // Force deployment refresh
 
@@ -480,7 +481,7 @@ export function CheckInHome() {
               display: none !important;
             }
             .theo-animation {
-              bottom: 75px !important;
+              bottom: 55px !important;
             }
             .garden-cards-container {
               display: none !important;
@@ -751,12 +752,12 @@ export function CheckInHome() {
               }}
             >
               {/* Header */}
-              <div className="mb-8">
+              <div className="mb-8" style={{ marginTop: '40px' }}>
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">
                   Ready for your check in?
                 </h1>
-                <p className="text-lg text-gray-600 max-w-lg mx-auto">
-                  Take a moment to explore how you're feeling.
+                <p className="text-lg text-gray-900 max-w-lg mx-auto" style={{ fontWeight: 500 }}>
+                  Take a moment to explore your feelings.
                 </p>
               </div>
 
@@ -779,7 +780,7 @@ export function CheckInHome() {
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
                 >
-                  TEST
+                  START
                 </button>
               </div>
             </div>
@@ -998,7 +999,7 @@ export function CheckInHome() {
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
           >
-            TEST
+            START
           </button>
         </div>
       )}
@@ -1011,7 +1012,7 @@ export function CheckInHome() {
             className="theo-animation"
             style={{
               position: 'fixed',
-              bottom: '100px',
+              bottom: '80px',
               left: 'calc(50% + 60px)',
               transform: 'translateX(-50%)',
               width: '300px',
