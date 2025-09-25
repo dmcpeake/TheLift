@@ -373,7 +373,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               selectedQuadrant === 'green' ? 'Calm comfy feelings' :
               'Choose your emotions'
             )}
-            {currentStep === 3 && 'Why are you feeling this way?'}
+            {currentStep === 3 && 'Why do you feel this way?'}
             {currentStep === 4 && 'Talk to someone?'}
             {currentStep === 5 && 'Thank you!'}
           </h1>
