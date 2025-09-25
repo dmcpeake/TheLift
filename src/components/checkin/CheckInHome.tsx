@@ -973,7 +973,11 @@ export function CheckInHome() {
 
 
       {/* Yellow swoosh section at bottom - only show when breathing */}
-      {showBreathing && <YellowSwoosh />}
+      {showBreathing && (
+        <div className="yellow-swoosh-container">
+          <YellowSwoosh />
+        </div>
+      )}
 
       {/* Start Button - only show when not breathing */}
       {!showBreathing && (

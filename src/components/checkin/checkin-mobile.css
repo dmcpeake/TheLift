@@ -37,4 +37,9 @@
     width: 1.25rem !important;
     height: 1.25rem !important;
   }
+
+  /* Hide yellow swoosh on mobile */
+  .yellow-swoosh-container {
+    display: none !important;
+  }
 }
