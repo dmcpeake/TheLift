@@ -25,7 +25,7 @@ export function WellbeingSuccessPage() {
   }, [])
 
   const handleContinue = () => {
-    navigate('/checkin/home')
+    navigate('/child/home')
   }
 
   return (

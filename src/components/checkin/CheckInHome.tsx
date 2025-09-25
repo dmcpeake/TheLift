@@ -17,6 +17,7 @@ export function CheckInHome() {
   const [selectedTechniqueId, setSelectedTechniqueId] = useState('balloon')
   const [breathingStarted, setBreathingStarted] = useState(false)
   const [isBreathingRunning, setIsBreathingRunning] = useState(false)
+  const [buttonAnimationKey, setButtonAnimationKey] = useState(0)
   const breathingStartRef = useRef<(() => void) | null>(null)
   const breathingPauseRef = useRef<(() => void) | null>(null)
   const breathingResumeRef = useRef<(() => void) | null>(null)
@@ -58,6 +59,13 @@ export function CheckInHome() {
       .catch(error => console.error('Error loading rose animation:', error))
   }, [])
 
+  // Trigger button animation when breathing UI first appears
+  useEffect(() => {
+    if (showBreathing) {
+      setButtonAnimationKey(prev => prev + 1)
+    }
+  }, [showBreathing])
+
   const handleStartClick = () => {
     setIsTransitioning(true)
     // Fade out welcome content, then fade in breathing
@@ -80,10 +88,357 @@ export function CheckInHome() {
   }
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <>
+      <style jsx>{`
+        @keyframes circleExpand {
+          0% {
+            width: 56px;
+            border-radius: 28px;
+          }
+          100% {
+            width: 140px;
+            border-radius: 28px;
+          }
+        }
+        @keyframes textFadeIn {
+          0% {
+            opacity: 0;
+          }
+          60% {
+            opacity: 0;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
+        @keyframes leafGroup {
+          0% {
+            transform: translateX(-150px) translateY(0);
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.9;
+          }
+          90% {
+            opacity: 0.9;
+          }
+          100% {
+            transform: translateX(calc(100vw + 150px)) translateY(-50vh);
+            opacity: 0;
+          }
+        }
+        @keyframes leafFloat1 {
+          0% {
+            transform: translate(0, 0) rotate(0deg);
+          }
+          25% {
+            transform: translate(-10px, -15px) rotate(45deg);
+          }
+          50% {
+            transform: translate(-25px, 10px) rotate(-30deg);
+          }
+          75% {
+            transform: translate(-35px, -8px) rotate(60deg);
+          }
+          100% {
+            transform: translate(-50px, 0) rotate(360deg);
+          }
+        }
+        @keyframes leafFloat2 {
+          0% {
+            transform: translate(0, 0) rotate(0deg);
+          }
+          25% {
+            transform: translate(15px, 12px) rotate(-45deg);
+          }
+          50% {
+            transform: translate(30px, -20px) rotate(30deg);
+          }
+          75% {
+            transform: translate(45px, 5px) rotate(-60deg);
+          }
+          100% {
+            transform: translate(60px, -10px) rotate(-360deg);
+          }
+        }
+        @keyframes leafFloat3 {
+          0% {
+            transform: translate(0, 0) rotate(0deg);
+          }
+          25% {
+            transform: translate(5px, -10px) rotate(30deg);
+          }
+          50% {
+            transform: translate(10px, 15px) rotate(-45deg);
+          }
+          75% {
+            transform: translate(15px, -5px) rotate(45deg);
+          }
+          100% {
+            transform: translate(20px, 20px) rotate(720deg);
+          }
+        }
+        @keyframes leafFloat4 {
+          0% {
+            transform: translate(0, 0) rotate(0deg);
+          }
+          25% {
+            transform: translate(-8px, 8px) rotate(-30deg);
+          }
+          50% {
+            transform: translate(-20px, -15px) rotate(45deg);
+          }
+          75% {
+            transform: translate(-30px, 10px) rotate(-45deg);
+          }
+          100% {
+            transform: translate(-40px, -25px) rotate(360deg);
+          }
+        }
+        @keyframes leafFloat5 {
+          0% {
+            transform: translate(0, 0) rotate(0deg);
+          }
+          25% {
+            transform: translate(12px, -5px) rotate(45deg);
+          }
+          50% {
+            transform: translate(25px, 12px) rotate(-60deg);
+          }
+          75% {
+            transform: translate(40px, -8px) rotate(30deg);
+          }
+          100% {
+            transform: translate(55px, 15px) rotate(-360deg);
+          }
+        }
+        .leaf-group {
+          position: fixed;
+          top: 75%;
+          width: 180px;
+          height: 150px;
+          pointer-events: none;
+          z-index: 2;
+          animation: leafGroup 10s linear infinite;
+        }
+        .leaf {
+          position: absolute;
+          width: 30px;
+          height: 30px;
+        }
+        .leaf1 {
+          top: 10px;
+          left: 15px;
+          animation: leafFloat1 3s ease-in-out infinite;
+        }
+        .leaf2 {
+          top: 45px;
+          left: 80px;
+          animation: leafFloat2 3.5s ease-in-out infinite;
+          animation-delay: 0.3s;
+        }
+        .leaf3 {
+          top: 90px;
+          left: 30px;
+          animation: leafFloat3 4s ease-in-out infinite;
+          animation-delay: 0.6s;
+        }
+        .leaf4 {
+          top: 20px;
+          left: 120px;
+          animation: leafFloat4 3.8s ease-in-out infinite;
+          animation-delay: 0.9s;
+        }
+        .leaf5 {
+          top: 75px;
+          left: 100px;
+          animation: leafFloat5 3.2s ease-in-out infinite;
+          animation-delay: 1.2s;
+        }
+        @keyframes butterflyPath {
+          0% {
+            transform: translateX(-100px) translateY(0);
+            opacity: 0;
+          }
+          5% {
+            opacity: 0.8;
+          }
+          15% {
+            transform: translateX(15vw) translateY(-50px);
+          }
+          30% {
+            transform: translateX(30vw) translateY(30px);
+          }
+          45% {
+            transform: translateX(45vw) translateY(-70px);
+          }
+          60% {
+            transform: translateX(60vw) translateY(10px);
+          }
+          75% {
+            transform: translateX(75vw) translateY(-60px);
+          }
+          90% {
+            transform: translateX(90vw) translateY(20px);
+          }
+          95% {
+            opacity: 0.8;
+          }
+          100% {
+            transform: translateX(calc(100vw + 100px)) translateY(-30px);
+            opacity: 0;
+          }
+        }
+        @keyframes butterflyWings {
+          0%, 100% {
+            transform: scaleY(1) scaleX(1);
+          }
+          50% {
+            transform: scaleY(0.3) scaleX(1.1);
+          }
+        }
+        .butterfly {
+          position: fixed;
+          bottom: 15%;
+          width: 40px;
+          height: 40px;
+          pointer-events: none;
+          z-index: 3;
+          opacity: 0;
+          animation: butterflyPath 12s linear infinite;
+          animation-delay: 2s;
+          animation-fill-mode: forwards;
+        }
+        .butterfly svg {
+          animation: butterflyWings 0.2s ease-in-out infinite;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+          .leaf-group {
+            width: 100px !important;
+            height: 100px !important;
+            top: 80% !important;
+          }
+          .leaf {
+            width: 20px !important;
+            height: 20px !important;
+          }
+          .leaf1 { top: 5px !important; left: 10px !important; }
+          .leaf2 { top: 30px !important; left: 50px !important; }
+          .leaf3 { top: 60px !important; left: 20px !important; }
+          .leaf4 { top: 15px !important; left: 70px !important; }
+          .leaf5 { top: 50px !important; left: 65px !important; }
+
+          .butterfly {
+            width: 28px !important;
+            height: 28px !important;
+            bottom: 20% !important;
+          }
+
+          .welcome-content-mobile {
+            padding: 0 !important;
+            min-height: auto !important;
+            align-items: flex-start !important;
+            justify-content: flex-start !important;
+            display: flex !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+          }
+
+          .welcome-content-mobile .max-w-4xl {
+            margin-top: 40px !important;
+            padding: 0 20px !important;
+            width: 100% !important;
+          }
+
+          .welcome-content-mobile .rounded-2xl {
+            background: none !important;
+            backdrop-filter: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            position: static !important;
+            z-index: auto !important;
+          }
+
+          .welcome-content-mobile h1 {
+            font-size: 28px !important;
+            margin-bottom: 16px !important;
+            color: #1f2937 !important;
+          }
+
+          .welcome-content-mobile p {
+            font-size: 16px !important;
+            margin-bottom: 24px !important;
+            color: #6b7280 !important;
+          }
+        }
+      `}</style>
+      <div className="min-h-screen bg-white relative overflow-hidden" style={{
+        backgroundImage: !showBreathing ? 'url(/background.svg)' : undefined,
+        backgroundSize: window.innerWidth > 768 ? 'cover' : 'cover',
+        backgroundPosition: window.innerWidth > 768 ? 'center bottom' : 'center',
+        backgroundAttachment: window.innerWidth > 768 ? 'fixed' : 'scroll',
+        backgroundRepeat: 'no-repeat'
+      }}>
+
+      {/* Butterfly - only show when not breathing */}
+      {!showBreathing && (
+        <div className="butterfly">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Left wing */}
+            <ellipse cx="12" cy="20" rx="10" ry="15" fill="#FF6B9D" fillOpacity="0.7" transform="rotate(-20 12 20)"/>
+            <ellipse cx="12" cy="20" rx="8" ry="12" fill="#C66FCF" fillOpacity="0.6" transform="rotate(-20 12 20)"/>
+            {/* Right wing */}
+            <ellipse cx="28" cy="20" rx="10" ry="15" fill="#FF6B9D" fillOpacity="0.7" transform="rotate(20 28 20)"/>
+            <ellipse cx="28" cy="20" rx="8" ry="12" fill="#C66FCF" fillOpacity="0.6" transform="rotate(20 28 20)"/>
+            {/* Body */}
+            <ellipse cx="20" cy="20" rx="2" ry="8" fill="#4A4A4A" fillOpacity="0.8"/>
+            {/* Antennae */}
+            <line x1="20" y1="16" x2="17" y2="12" stroke="#4A4A4A" strokeWidth="0.5" strokeOpacity="0.6"/>
+            <line x1="20" y1="16" x2="23" y2="12" stroke="#4A4A4A" strokeWidth="0.5" strokeOpacity="0.6"/>
+            <circle cx="17" cy="12" r="0.8" fill="#4A4A4A" fillOpacity="0.6"/>
+            <circle cx="23" cy="12" r="0.8" fill="#4A4A4A" fillOpacity="0.6"/>
+          </svg>
+        </div>
+      )}
+
+      {/* Animated Leaves - only show when not breathing */}
+      {!showBreathing && (
+        <div className="leaf-group">
+          <div className="leaf leaf1">
+            <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7.5 0C7.5 0 3 3 3 7.5C3 9.5 4.5 11 6 11.5C6 10.5 6.5 9.5 7.5 8.5C8.5 9.5 9 10.5 9 11.5C10.5 11 12 9.5 12 7.5C12 3 7.5 0 7.5 0Z" fill="#8BC34A" fillOpacity="0.85"/>
+            </svg>
+          </div>
+          <div className="leaf leaf2">
+            <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7.5 0C7.5 0 3 3 3 7.5C3 9.5 4.5 11 6 11.5C6 10.5 6.5 9.5 7.5 8.5C8.5 9.5 9 10.5 9 11.5C10.5 11 12 9.5 12 7.5C12 3 7.5 0 7.5 0Z" fill="#FFA726" fillOpacity="0.75"/>
+            </svg>
+          </div>
+          <div className="leaf leaf3">
+            <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7.5 0C7.5 0 3 3 3 7.5C3 9.5 4.5 11 6 11.5C6 10.5 6.5 9.5 7.5 8.5C8.5 9.5 9 10.5 9 11.5C10.5 11 12 9.5 12 7.5C12 3 7.5 0 7.5 0Z" fill="#FFD54F" fillOpacity="0.7"/>
+            </svg>
+          </div>
+          <div className="leaf leaf4">
+            <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7.5 0C7.5 0 3 3 3 7.5C3 9.5 4.5 11 6 11.5C6 10.5 6.5 9.5 7.5 8.5C8.5 9.5 9 10.5 9 11.5C10.5 11 12 9.5 12 7.5C12 3 7.5 0 7.5 0Z" fill="#FF7043" fillOpacity="0.8"/>
+            </svg>
+          </div>
+          <div className="leaf leaf5">
+            <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7.5 0C7.5 0 3 3 3 7.5C3 9.5 4.5 11 6 11.5C6 10.5 6.5 9.5 7.5 8.5C8.5 9.5 9 10.5 9 11.5C10.5 11 12 9.5 12 7.5C12 3 7.5 0 7.5 0Z" fill="#CDDC39" fillOpacity="0.65"/>
+            </svg>
+          </div>
+        </div>
+      )}
       {/* Garden Cards - 40px from top - hide when breathing */}
       {!showBreathing && (
-        <div className="garden-cards-container" style={{ position: 'absolute', top: '40px', left: '0', right: '0', zIndex: 10 }}>
+        <div className="garden-cards-container" style={{ position: 'absolute', top: '20px', left: '0', right: '0', zIndex: 10, opacity: 0 }}>
         <style jsx>{`
           .cards-container {
             display: grid;
@@ -97,12 +452,22 @@ export function CheckInHome() {
             .welcome-content-mobile {
               display: flex !important;
               align-items: flex-start !important;
-              justify-content: center !important;
-              min-height: auto !important;
-              padding-top: 160px !important;
+              justify-content: flex-start !important;
+              min-height: 100vh !important;
+              padding: 40px 20px 20px 20px !important;
             }
-            .welcome-content-mobile .max-w-2xl {
+            .welcome-content-mobile .max-w-4xl {
               margin-top: 0 !important;
+              margin-left: auto !important;
+              margin-right: auto !important;
+              width: 100% !important;
+            }
+            .welcome-content-mobile .rounded-2xl {
+              background: transparent !important;
+              backdrop-filter: none !important;
+              border: none !important;
+              box-shadow: none !important;
+              padding: 0 !important;
             }
             .mobile-start-button {
               position: fixed !important;
@@ -115,7 +480,7 @@ export function CheckInHome() {
               display: none !important;
             }
             .theo-animation {
-              bottom: 70px !important;
+              bottom: 75px !important;
             }
             .garden-cards-container {
               display: none !important;
@@ -123,8 +488,8 @@ export function CheckInHome() {
           }
           @media (min-width: 769px) {
             .welcome-content-mobile {
-              padding-top: 0 !important;
-              min-height: calc(100vh - 200px) !important;
+              padding: 80px !important;
+              min-height: 100vh !important;
               align-items: center !important;
             }
             .mobile-start-button {
@@ -134,7 +499,7 @@ export function CheckInHome() {
               display: flex !important;
             }
             .logout-button {
-              top: 20px !important;
+              top: 40px !important;
               margin-top: 0 !important;
               transform: none !important;
               width: 2.5rem !important;
@@ -301,8 +666,8 @@ export function CheckInHome() {
         style={{
           backgroundColor: 'white',
           border: '1px solid #147fe3',
-          top: '20px',
-          right: '16px'
+          top: '40px',
+          right: '40px'
         }}
       >
         <LogOut className="logout-icon h-6 w-6" style={{ color: '#147fe3' }} />
@@ -342,44 +707,59 @@ export function CheckInHome() {
       {/* Welcome Content */}
       {!showBreathing && (
         <div
-          className="welcome-content-mobile flex items-start justify-center p-4 transition-opacity duration-300"
+          className="welcome-content-mobile flex items-start justify-start transition-opacity duration-300"
           style={{
-            minHeight: 'auto',
-            opacity: isTransitioning ? 0 : 1
+            minHeight: '100vh',
+            opacity: isTransitioning ? 0 : 1,
+            padding: '80px'
           }}
         >
-          <div className="max-w-2xl mx-auto text-center">
-            {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                Ready for your check in?
-              </h1>
-              <p className="text-lg text-gray-600 max-w-lg mx-auto">
-                Take a moment to explore how you're feeling.
-              </p>
-            </div>
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Container Card */}
+            <div
+              className="rounded-2xl"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                padding: '52px',
+                position: 'relative',
+                zIndex: 10
+              }}
+            >
+              {/* Header */}
+              <div className="mb-8">
+                <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                  Ready for your check in?
+                </h1>
+                <p className="text-lg text-gray-600 max-w-lg mx-auto">
+                  Take a moment to explore how you're feeling.
+                </p>
+              </div>
 
-            {/* Start Button - desktop only */}
-            <div className="flex justify-center desktop-start-button">
-              <button
-                onClick={handleStartClick}
-                className="font-semibold text-lg transition-all duration-200"
-                style={{
-                  backgroundColor: '#e87e67',
-                  color: 'white',
-                  height: '60px',
-                  borderRadius: '30px',
-                  paddingLeft: '30px',
-                  paddingRight: '30px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
-              >
-                START
-              </button>
+              {/* Start Button - desktop only */}
+              <div className="flex justify-center desktop-start-button">
+                <button
+                  onClick={handleStartClick}
+                  className="font-semibold text-lg transition-all duration-200"
+                  style={{
+                    backgroundColor: '#e87e67',
+                    color: 'white',
+                    height: '60px',
+                    borderRadius: '30px',
+                    paddingLeft: '50px',
+                    paddingRight: '50px',
+                    border: '2px solid white',
+                    cursor: 'pointer',
+                    boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
+                >
+                  START
+                </button>
+              </div>
             </div>
 
           </div>
@@ -459,15 +839,25 @@ export function CheckInHome() {
                 setShowTechniqueSelector(!showTechniqueSelector);
               }}
               style={{
-                background: 'rgba(255, 255, 255, 0.5)',
-                border: 'none',
+                backgroundColor: 'white',
+                border: '2px solid #3a7ddc',
                 borderRadius: '50%',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 width: '56px',
-                height: '56px'
+                height: '56px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8fafc'
+                e.currentTarget.style.borderColor = '#2e6bc7'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white'
+                e.currentTarget.style.borderColor = '#3a7ddc'
               }}
               aria-label="Open settings"
             >
@@ -476,6 +866,7 @@ export function CheckInHome() {
 
             {/* Play/Pause Button */}
             <button
+              key={`play-${buttonAnimationKey}`}
               onClick={() => {
                 if (!breathingStarted) {
                   console.log('Play clicked!');
@@ -495,23 +886,29 @@ export function CheckInHome() {
                 }
               }}
               style={{
-                background: '#3a7ddc',
-                color: 'white',
-                border: 'none',
-                borderRadius: '28px',
-                cursor: 'pointer',
-                width: '100px',
+                width: '140px',
                 height: '56px',
-                fontSize: '16px',
-                fontWeight: '600',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                borderRadius: '28px',
+                backgroundColor: '#3a7ddc',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s ease',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '600',
+                animation: 'circleExpand 0.4s ease-out'
               }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
               aria-label={!breathingStarted ? "Start breathing" : isBreathingRunning ? "Pause breathing" : "Resume breathing"}
             >
-              {breathingStarted && isBreathingRunning ? 'PAUSE' : 'PLAY'}
+              <span style={{ animation: 'textFadeIn 0.4s ease-out' }}>
+                {breathingStarted && isBreathingRunning ? 'PAUSE' : 'PLAY'}
+              </span>
             </button>
 
             {/* Skip Button */}
@@ -521,69 +918,84 @@ export function CheckInHome() {
                 handleBreathingExit('skip');
               }}
               style={{
-                background: 'rgba(255, 255, 255, 0.5)',
-                border: 'none',
+                backgroundColor: 'white',
+                border: '2px solid #3a7ddc',
                 borderRadius: '50%',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 width: '56px',
-                height: '56px'
+                height: '56px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8fafc'
+                e.currentTarget.style.borderColor = '#2e6bc7'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white'
+                e.currentTarget.style.borderColor = '#3a7ddc'
               }}
               aria-label="Skip to mood selection"
             >
-              <SkipForward style={{ width: '24px', height: '24px', color: '#3a7ddc' }} />
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+                <polyline points="9,18 15,12 9,6"></polyline>
+              </svg>
             </button>
           </div>
         </>
       )}
 
 
-      {/* Yellow swoosh section at bottom */}
-      <YellowSwoosh>
-        {/* Start Button */}
-        {!showBreathing && (
-          <div className="flex justify-center mobile-start-button" style={{ position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
-            <button
-              onClick={handleStartClick}
-              className="transition-all duration-200"
-              style={{
-                backgroundColor: '#e87e67',
-                color: 'white',
-                width: '100px',
-                height: '56px',
-                borderRadius: '28px',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: '600',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
-            >
-              START
-            </button>
-          </div>
-        )}
+      {/* Yellow swoosh section at bottom - only show when breathing */}
+      {showBreathing && <YellowSwoosh />}
 
-        {/* Theo Rose Animation - centered under start button */}
-        {roseAnimation && (
+      {/* Start Button - only show when not breathing */}
+      {!showBreathing && (
+        <div className="flex justify-center mobile-start-button" style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
+          <button
+            onClick={handleStartClick}
+            className="transition-all duration-200"
+            style={{
+              backgroundColor: '#e87e67',
+              color: 'white',
+              width: '180px',
+              height: '56px',
+              borderRadius: '28px',
+              border: '2px solid white',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
+          >
+            START
+          </button>
+        </div>
+      )}
+
+      {/* Theo Rose Animation - centered under start button - only show when not breathing */}
+      {roseAnimation && !showBreathing && (
+        <div style={{ position: 'relative' }}>
+          {/* Theo Animation */}
           <div
             className="theo-animation"
             style={{
-              position: 'absolute',
-              bottom: '70px',
-              left: '50%',
+              position: 'fixed',
+              bottom: '100px',
+              left: 'calc(50% + 60px)',
               transform: 'translateX(-50%)',
               width: '300px',
               height: '300px',
               zIndex: 10,
-              opacity: isTransitioning || showBreathing ? 0 : 1,
+              opacity: isTransitioning ? 0 : 1,
               transition: 'opacity 300ms ease-in-out'
             }}
           >
@@ -593,8 +1005,9 @@ export function CheckInHome() {
               autoplay={true}
             />
           </div>
-        )}
-      </YellowSwoosh>
+        </div>
+      )}
     </div>
+    </>
   )
 }

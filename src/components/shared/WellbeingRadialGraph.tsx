@@ -1,5 +1,12 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Lottie from 'lottie-react'
+
+// Import mood animations
+import BlushingShaded from '../../assets/animations/Blushing_Shaded.json'
+import HappyShaded from '../../assets/animations/Happy_Shaded.json'
+import MehShaded from '../../assets/animations/Meh_Shaded.json'
+import SadTearShaded from '../../assets/animations/Sad_Tear_Shaded.json'
+import CryingShaded from '../../assets/animations/Crying_Shaded.json'
 
 interface WellbeingSection {
   name: string
@@ -12,9 +19,25 @@ interface WellbeingRadialGraphProps {
   sections: WellbeingSection[]
   size?: number
   theoAnimation?: any
+  onCenterButtonClick?: () => void
 }
 
-export function WellbeingRadialGraph({ sections, size = 400, theoAnimation }: WellbeingRadialGraphProps) {
+export function WellbeingRadialGraph({ sections, size = 400, theoAnimation, onCenterButtonClick }: WellbeingRadialGraphProps) {
+  const [actualSize, setActualSize] = useState(size)
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      if (window.innerWidth <= 768) {
+        setActualSize(300)
+      } else {
+        setActualSize(size)
+      }
+    }
+
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [size])
   // Map section names to their positions (clockwise from top)
   const sectionOrder = [
     'Family & Friends',
@@ -38,6 +61,18 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation }: We
     }
   }
 
+  // Get appropriate animation based on mood level
+  const getMoodAnimation = (moodNumeric: number) => {
+    switch (moodNumeric) {
+      case 5: return BlushingShaded // Very Happy
+      case 4: return HappyShaded // Happy
+      case 3: return MehShaded // OK
+      case 2: return SadTearShaded // Sad
+      case 1: return CryingShaded // Very Sad
+      default: return null
+    }
+  }
+
   // Mood level colors (matching mood meter)
   const moodColors = {
     'very_sad': '#e38bac',    // Ring 1 (center)
@@ -47,10 +82,10 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation }: We
     'very_happy': '#95c5c8'   // Ring 5 (outer)
   }
 
-  const centerX = size / 2
-  const centerY = size / 2
-  const maxRadius = size * 0.4
-  const minRadius = size * 0.08
+  const centerX = actualSize / 2
+  const centerY = actualSize / 2
+  const maxRadius = actualSize * 0.4
+  const minRadius = actualSize * 0.08
   const ringWidth = (maxRadius - minRadius) / 5
 
   // Create 7 segments, each covering 360/7 = ~51.43 degrees
@@ -123,16 +158,34 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation }: We
         }
       `}</style>
       <div className="radial-graph-container relative">
-        <svg width={size} height={size} style={{ backgroundColor: 'white', borderRadius: '50%' }}>
+        <svg width={actualSize} height={actualSize} style={{ backgroundColor: 'white', borderRadius: '50%', border: '1px solid #e5e7eb', boxShadow: '0 1px 20px rgba(0, 0, 0, 0.1)' }}>
         {/* Background circle */}
         <circle
           cx={centerX}
           cy={centerY}
           r={maxRadius}
           fill="white"
-          stroke="#d1d5db"
-          strokeWidth="2"
+          stroke="#e5e7eb"
+          strokeWidth="1"
         />
+
+        {/* Draw segment backgrounds first for segments with answers */}
+        {segments.map((segment, segmentIndex) => {
+          // Only draw background if segment has an answer (moodLevel > 0)
+          if (segment.moodLevel > 0) {
+            return (
+              <path
+                key={`background-${segmentIndex}`}
+                d={createSegmentPath(segment.startAngle, segment.endAngle, minRadius, maxRadius)}
+                fill={segment.color}
+                fillOpacity={0.4}
+                stroke="#e5e7eb"
+                strokeWidth="1"
+              />
+            )
+          }
+          return null
+        })}
 
         {/* Draw each segment */}
         {segments.map((segment, segmentIndex) => {
@@ -153,7 +206,7 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation }: We
                 d={createSegmentPath(segment.startAngle, segment.endAngle, innerRadius, outerRadius)}
                 fill={fillColor}
                 fillOpacity={opacity}
-                stroke="#d1d5db"
+                stroke="#e5e7eb"
                 strokeWidth="1"
                 className="transition-all duration-300 hover:opacity-90"
               />
@@ -164,7 +217,7 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation }: We
         {/* Section labels with curved text */}
         <defs>
           {segments.map((segment, index) => {
-            const labelRadius = maxRadius + 35
+            const labelRadius = maxRadius + 25
             const startAngleRad = ((segment.startAngle + 5) * Math.PI) / 180 // Add 5 degrees offset for better centering
             const endAngleRad = ((segment.endAngle - 5) * Math.PI) / 180 // Subtract 5 degrees offset
 
@@ -174,13 +227,21 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation }: We
             const y2 = centerY + labelRadius * Math.sin(endAngleRad)
 
             const midAngle = (segment.startAngle + segment.endAngle) / 2
-            const isFlipped = midAngle > 90 && midAngle < 270
+
+            // Target specific segments that need text reversal based on their names
+            const segmentName = segments[index]?.name || ''
+            const shouldReverse = segmentName === 'Fun & Hobbies' ||
+                                 segmentName === 'Health & Body' ||
+                                 segmentName === 'Emotions & Feelings'
 
             return (
               <path
                 key={`textpath-${index}`}
                 id={`textpath-${index}`}
-                d={`M ${isFlipped ? x2 : x1} ${isFlipped ? y2 : y1} A ${labelRadius} ${labelRadius} 0 0 ${isFlipped ? 0 : 1} ${isFlipped ? x1 : x2} ${isFlipped ? y1 : y2}`}
+                d={shouldReverse
+                  ? `M ${x2} ${y2} A ${labelRadius} ${labelRadius} 0 0 0 ${x1} ${y1}`
+                  : `M ${x1} ${y1} A ${labelRadius} ${labelRadius} 0 0 1 ${x2} ${y2}`
+                }
                 fill="none"
                 stroke="none"
               />
@@ -204,59 +265,134 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation }: We
           </text>
         ))}
 
-        {/* Center circle */}
+        {/* Emoji animations on segments with data */}
+        {segments.map((segment, index) => {
+          // Only show animation if segment has data
+          if (segment.moodLevel === 0) return null
+
+          const animation = getMoodAnimation(segment.moodLevel)
+          if (!animation) return null
+
+          const segmentAngle = 360 / 7
+          const midAngle = (segment.startAngle + segment.endAngle) / 2
+          const animationRadius = maxRadius - 5 // Position slightly inside the edge
+          const x = centerX + animationRadius * Math.cos((midAngle * Math.PI) / 180)
+          const y = centerY + animationRadius * Math.sin((midAngle * Math.PI) / 180)
+
+          return (
+            <foreignObject
+              key={`emoji-${index}`}
+              x={x - 25}
+              y={y - 25}
+              width="50"
+              height="50"
+            >
+              <div style={{
+                width: '50px',
+                height: '50px',
+                pointerEvents: 'none'
+              }}>
+                <Lottie
+                  animationData={animation}
+                  loop={true}
+                  autoplay={true}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))'
+                  }}
+                />
+              </div>
+            </foreignObject>
+          )
+        })}
+
+        {/* Center circle (invisible for positioning) */}
         <circle
           cx={centerX}
           cy={centerY}
           r={minRadius}
-          fill="white"
-          stroke="#374151"
-          strokeWidth="2"
+          fill="transparent"
+          stroke="none"
         />
         </svg>
 
-        {/* Theo animation in center */}
-        {theoAnimation && (
-          <div
-            className="absolute"
-            style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: minRadius * 2,
-              height: minRadius * 2,
-              borderRadius: '50%',
-              zIndex: 10
-            }}
-          >
-            <Lottie
-              animationData={theoAnimation}
-              loop={true}
-              autoplay={true}
-              style={{ width: '100%', height: '100%' }}
-            />
-          </div>
-        )}
+        {/* Center button or white circle */}
+        {(() => {
+          // Check if any section has sad (2) or very sad (1) mood
+          const hasLowScore = sections.some(section => section.mood_numeric <= 2 && section.mood_numeric > 0)
 
-        {/* Dashed outer ring - same as mood meter */}
-        <div
-          className="radial-graph-outer-ring"
-          style={{
-            width: size + 45,
-            height: size + 45,
-            zIndex: 5
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              borderRadius: '50%',
-              border: '3px dashed #e6b6b6',
-              animation: 'spin 120s linear infinite'
-            }}
-          />
-        </div>
+          if (hasLowScore) {
+            // Show the LOW SCORE button
+            return (
+              <div
+                className="absolute"
+                style={{
+                  left: 'calc(50% + 1px)',
+                  top: 'calc(50% + 1px)',
+                  transform: 'translate(-50%, -50%)',
+                  width: minRadius * 2,
+                  height: minRadius * 2,
+                  borderRadius: '50%',
+                  zIndex: 10
+                }}
+              >
+                <button
+                  onClick={() => {
+                    onCenterButtonClick?.()
+                  }}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    backgroundColor: '#3a7ddc',
+                    border: '2px solid white',
+                    cursor: 'pointer',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#2e6bc7'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#3a7ddc'
+                  }}
+                  aria-label="Chart center button"
+                >
+                  <span style={{
+                    color: 'white',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    textAlign: 'center',
+                    display: 'block',
+                    lineHeight: '1.3'
+                  }}>
+                    LOW<br/>SCORE?
+                  </span>
+                </button>
+              </div>
+            )
+          } else {
+            // Show a flat white circle
+            return (
+              <div
+                className="absolute"
+                style={{
+                  left: 'calc(50% + 1px)',
+                  top: 'calc(50% + 1px)',
+                  transform: 'translate(-50%, -50%)',
+                  width: minRadius * 2,
+                  height: minRadius * 2,
+                  borderRadius: '50%',
+                  backgroundColor: 'white',
+                  border: '1px solid #e5e7eb',
+                  zIndex: 10
+                }}
+              />
+            )
+          }
+        })()}
+
       </div>
     </div>
   )

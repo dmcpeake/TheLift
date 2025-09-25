@@ -119,18 +119,6 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
           />
         </g>
 
-        {/* Dotted outline square - white dashed */}
-        <rect
-          x="60"
-          y="60"
-          width={squareSize + 80}
-          height={squareSize + 80}
-          rx="30"
-          fill="none"
-          stroke="white"
-          strokeWidth="6"
-          strokeDasharray="12 6"
-        />
 
         {/* Animated line that traces around the outer square - orange without glow */}
         {shouldAnimate && (

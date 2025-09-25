@@ -11,7 +11,7 @@ export function YellowSwoosh({ zIndex = 999, children }: YellowSwooshProps) {
   return (
     <div style={{
       position: 'fixed',
-      bottom: 0,
+      bottom: '-35px',
       left: 0,
       right: 0,
       height: '120px',

@@ -30,6 +30,7 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
   const [hoveredMood, setHoveredMood] = useState<string | null>(null)
   const [startTime] = useState(Date.now())
   const [rotationOffset, setRotationOffset] = useState(0)
+  const [buttonAnimationKey, setButtonAnimationKey] = useState(0)
 
   // Initialize with existing data if available
   useEffect(() => {
@@ -46,6 +47,13 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
       onSelectionMade?.()
     }
   }, [initialData, onSelectionMade, selectedMood])
+
+  // Trigger button animation when mood is selected
+  useEffect(() => {
+    if (selectedMood && showNextButton) {
+      setButtonAnimationKey(prev => prev + 1)
+    }
+  }, [selectedMood, showNextButton])
 
   // Handle external trigger for completion
   useEffect(() => {
@@ -93,11 +101,34 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
   return (
     <>
       <style jsx>{`
+        @keyframes moodCircleExpand {
+          0% {
+            width: 56px;
+            border-radius: 28px;
+          }
+          100% {
+            width: 140px;
+            border-radius: 28px;
+          }
+        }
+        @keyframes moodTextFadeIn {
+          0% {
+            opacity: 0;
+          }
+          60% {
+            opacity: 0;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
+      `}</style>
+      <style jsx>{`
         @media (max-width: 768px) {
           .mood-meter-title-mobile {
             font-size: 28px !important;
             line-height: 1.2 !important;
-            margin-top: -35px !important;
+            margin-top: -55px !important;
           }
           .mood-meter-container {
             width: calc(100vw - 40px) !important;
@@ -142,29 +173,6 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
             {/* Breathing circle container - 480px like breathing circle */}
             <div className="mood-meter-container relative" style={{ width: '480px', height: '480px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 
-              {/* Dashed outer circle - exact same as breathing circle */}
-              <div
-                className="mood-meter-outer-ring absolute"
-                style={{
-                  width: '435px',
-                  height: '435px',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: 2
-                }}
-              >
-                <div
-                  className="opacity-20"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: '50%',
-                    border: '3px dashed #e6b6b6',
-                    animation: 'spin 120s linear infinite'
-                  }}
-                />
-              </div>
 
               {/* Clean doughnut with 5 segments */}
               <div className="mood-meter-doughnut" style={{ position: 'absolute', left: '50%', top: '50%', transform: `translate(-50%, -50%) rotate(${rotationOffset}deg)`, zIndex: 4, transition: 'transform 0.8s ease-in-out', padding: '30px' }}>
@@ -288,7 +296,7 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
                     </span>
                   ) : (
                     <span className="text-base text-gray-500">
-                      Choose your mood
+                      Choose
                     </span>
                   )}
                 </div>
@@ -311,40 +319,39 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
       </div>
 
 
-      {showNextButton && (
+      {showNextButton && selectedMood && (
         <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center" style={{ zIndex: 1000 }}>
           <button
-            onClick={() => selectedMood && onComplete?.(selectedMood)}
-            disabled={!selectedMood}
+            key={`mood-next-${buttonAnimationKey}`}
+            onClick={() => onComplete?.(selectedMood)}
             style={{
-              width: '100px',
+              width: '140px',
               height: '56px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: '28px',
-              backgroundColor: selectedMood ? '#3a7ddc' : 'rgba(255, 255, 255, 0.3)',
-              boxShadow: selectedMood ? '0 8px 32px rgba(0, 0, 0, 0.1)' : 'none',
+              backgroundColor: '#3a7ddc',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
               border: 'none',
-              cursor: selectedMood ? 'pointer' : 'not-allowed',
-              transition: 'all 0.3s ease',
-              color: selectedMood ? 'white' : 'rgba(255, 255, 255, 0.5)',
+              cursor: 'pointer',
+              transition: 'background-color 0.3s ease',
+              color: 'white',
               fontSize: '16px',
-              fontWeight: '600'
+              fontWeight: '600',
+              animation: 'moodCircleExpand 0.4s ease-out'
             }}
             onMouseEnter={(e) => {
-              if (selectedMood) {
-                e.currentTarget.style.backgroundColor = '#1066c2'
-              }
+              e.currentTarget.style.backgroundColor = '#1066c2'
             }}
             onMouseLeave={(e) => {
-              if (selectedMood) {
-                e.currentTarget.style.backgroundColor = '#3a7ddc'
-              }
+              e.currentTarget.style.backgroundColor = '#3a7ddc'
             }}
-            aria-label="Next"
+            aria-label="Emotions"
           >
-            NEXT
+            <span style={{ animation: 'moodTextFadeIn 0.4s ease-out' }}>
+              NEXT
+            </span>
           </button>
         </div>
       )}
