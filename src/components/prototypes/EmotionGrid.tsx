@@ -364,7 +364,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
 
       {/* Dynamic title for each step */}
       {currentStep !== 1 && (
-        <div className="text-center">
+        <div className="text-center" style={{ marginTop: '20px' }}>
           <h1 className="emotion-title-mobile text-gray-900" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
             {currentStep === 2 && (
               selectedQuadrant === 'red' ? 'Big buzzy feelings' :
@@ -383,7 +383,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
       {/* Step 1: Select Quadrant (2x2 Grid) */}
       {currentStep === 1 && (
         <>
-          <div className="text-center mb-4">
+          <div className="text-center mb-4" style={{ marginTop: '20px' }}>
             <h1 className="emotion-title-mobile text-gray-900 mb-1" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
               How are you feeling?
             </h1>
