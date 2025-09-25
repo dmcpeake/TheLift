@@ -360,11 +360,15 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
             border-width: 2px !important;
           }
         }
-        /* Mobile title spacing */
+        /* Mobile title spacing and input zoom prevention */
         @media (max-width: 768px) {
           .emotion-main-title-container,
           .emotion-dynamic-title-container {
             margin-top: 20px;
+          }
+          /* Prevent zoom on input focus - set font-size to 16px minimum */
+          .emotion-textarea {
+            font-size: 16px !important;
           }
         }
       `}</style>
@@ -1162,7 +1166,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                 value={emotionStory}
                 onChange={(e) => updateStory(e.target.value.slice(0, 500))}
                 placeholder="Note down your thoughts (optional)"
-                className="w-full pr-14 border rounded-lg h-32 resize-none"
+                className="w-full pr-14 border rounded-lg h-32 resize-none emotion-textarea"
                 style={{ paddingTop: '3rem', paddingBottom: '3rem', paddingLeft: '0.75rem', paddingRight: '3.5rem', lineHeight: '1.5' }}
                 maxLength={500}
                 onFocus={(e) => {
