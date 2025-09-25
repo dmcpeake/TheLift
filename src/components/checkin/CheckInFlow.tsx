@@ -341,7 +341,8 @@ export function CheckInFlow() {
               {/* Title - matching wellbeing page styling */}
               <div className="text-center chart-title-container" style={{ marginBottom: '2rem' }}>
                 <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-                  You've completed your wheel!
+                  <span className="hidden md:inline">You've completed your wheel!</span>
+                  <span className="md:hidden">Wheel completed!</span>
                 </h1>
               </div>
 
