@@ -342,7 +342,8 @@ export function BreathingCircles(props: BreathingCirclesProps & {
         position: 'relative',
         overflow: 'hidden',
         width: '100%',
-        minHeight: '100vh'
+        minHeight: '100vh',
+        zIndex: 1
       }}>
       {/* REMOVED ALL YELLOW BACKGROUNDS FOR DEBUG */}
 
