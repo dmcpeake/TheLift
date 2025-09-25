@@ -249,9 +249,33 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
     setEmotionStory(story)
   }
 
-  const handleMicrophoneClick = () => {
+  const handleMicrophoneClick = async () => {
+    // Check for Safari on iOS
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert('Speech recognition is not supported in your browser')
+      if (isSafari && isIOS) {
+        alert('Voice input is not available in Safari on iOS. Please type your thoughts instead, or try using Chrome.')
+      } else {
+        alert('Speech recognition is not supported in your browser')
+      }
+      return
+    }
+
+    // Check if we're on HTTPS (required for microphone access)
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      alert('Microphone access requires a secure connection (HTTPS). Please use the live site at https://the-lift.org')
+      return
+    }
+
+    try {
+      // Request microphone permission first
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        await navigator.mediaDevices.getUserMedia({ audio: true })
+      }
+    } catch (error) {
+      alert('Microphone permission denied. Please allow microphone access and try again.')
       return
     }
 
@@ -272,16 +296,27 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
       updateStory(newStory.slice(0, 500))
     }
 
-    recognition.onerror = () => {
+    recognition.onerror = (event: any) => {
       setIsListening(false)
-      alert('Speech recognition error. Please try again.')
+      if (event.error === 'not-allowed') {
+        alert('Microphone permission denied. Please enable microphone access in your browser settings.')
+      } else if (event.error === 'no-speech') {
+        alert('No speech detected. Please try again.')
+      } else {
+        alert(`Voice input error: ${event.error}. Please type your thoughts instead.`)
+      }
     }
 
     recognition.onend = () => {
       setIsListening(false)
     }
 
-    recognition.start()
+    try {
+      recognition.start()
+    } catch (error) {
+      setIsListening(false)
+      alert('Could not start voice input. Please type your thoughts instead.')
+    }
   }
 
   const handleComplete = () => {
