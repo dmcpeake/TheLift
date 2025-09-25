@@ -410,3 +410,4 @@ END $$;
 - **Session IDs link** mood_meter_usage → checkin_sessions → profiles
 - **Timestamps should be realistic** (past dates for test data)
 - EHCP and SEN Code of Practice alignment
+- Westfield Primary School is now "The Rainbow School"

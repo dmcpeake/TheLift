@@ -753,8 +753,10 @@ export function ChildSummaryAnalytics() {
     }
   }
 
-  const getAvatarStyle = (index: number) => {
-    return AVATAR_STYLES[index % AVATAR_STYLES.length]
+  const getAvatarStyle = (childId: string) => {
+    // Use child ID hash to consistently assign colors across filters
+    const hash = childId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+    return AVATAR_STYLES[hash % AVATAR_STYLES.length]
   }
 
   const getTrendIcon = (trend?: 'improving' | 'developing' | 'stable') => {
@@ -910,13 +912,13 @@ export function ChildSummaryAnalytics() {
                 <div className="flex items-center space-x-4">
                   {/* Avatar - Always use generated avatars, ignore database URLs */}
                   {(() => {
-                    const style = getAvatarStyle(index)
+                    const style = getAvatarStyle(child.id)
                     const baseClasses = "w-12 h-12 flex items-center justify-center text-white font-semibold shadow-sm"
                     const avatarClassName = `${baseClasses} ${style.bg} ${style.shape}`
 
 
                     return (
-                      <div className={avatarClassName} data-child-index={index}>
+                      <div className={avatarClassName} data-child-id={child.id}>
                         <span className="text-sm">
                           {child.initials}
                         </span>
