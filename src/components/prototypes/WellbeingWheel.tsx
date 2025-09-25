@@ -477,6 +477,13 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
           .wellbeing-title-container {
             margin-top: 20px;
           }
+          /* Prevent zoom on input focus - set font-size to 16px minimum */
+          .wellbeing-textarea {
+            font-size: 16px !important;
+            /* Prevent viewport manipulation on focus */
+            touch-action: manipulation;
+            -webkit-text-size-adjust: 100%;
+          }
         }
       `}</style>
 
@@ -977,14 +984,26 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                             value={sections[currentSection.id]?.notes || ''}
                             onChange={(e) => updateNotes(currentSection.id, e.target.value.slice(0, 500))}
                             placeholder="Note down your thoughts (optional)"
-                            className="w-full pr-14 border rounded-lg h-32 resize-none"
+                            className="w-full pr-14 border rounded-lg h-32 resize-none wellbeing-textarea"
                             style={{ paddingTop: '3rem', paddingBottom: '3rem', paddingLeft: '0.75rem', paddingRight: '3.5rem', lineHeight: '1.5' }}
                             maxLength={500}
-                            onFocus={(e) => {
+                            onFocus={() => {
+                              // Store current scroll position on mobile
                               if (window.innerWidth <= 768) {
-                                setTimeout(() => {
-                                  e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                                }, 300)
+                                const scrollY = window.scrollY;
+                                (window as any).wellbeingTextareaScrollY = scrollY;
+                              }
+                            }}
+                            onBlur={() => {
+                              // Restore scroll position when keyboard closes on mobile
+                              if (window.innerWidth <= 768) {
+                                const originalScrollY = (window as any).wellbeingTextareaScrollY;
+                                if (originalScrollY !== undefined) {
+                                  setTimeout(() => {
+                                    window.scrollTo(0, originalScrollY);
+                                    delete (window as any).wellbeingTextareaScrollY;
+                                  }, 100);
+                                }
                               }
                             }}
                           />
