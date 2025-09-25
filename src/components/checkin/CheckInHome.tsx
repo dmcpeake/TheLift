@@ -312,6 +312,48 @@ export function CheckInHome() {
         .butterfly svg {
           animation: butterflyWings 0.2s ease-in-out infinite;
         }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+          .leaf-group {
+            width: 100px !important;
+            height: 100px !important;
+            top: 80% !important;
+          }
+          .leaf {
+            width: 20px !important;
+            height: 20px !important;
+          }
+          .leaf1 { top: 5px !important; left: 10px !important; }
+          .leaf2 { top: 30px !important; left: 50px !important; }
+          .leaf3 { top: 60px !important; left: 20px !important; }
+          .leaf4 { top: 15px !important; left: 70px !important; }
+          .leaf5 { top: 50px !important; left: 65px !important; }
+
+          .butterfly {
+            width: 28px !important;
+            height: 28px !important;
+            bottom: 20% !important;
+          }
+
+          .welcome-content-mobile {
+            padding: 40px 20px !important;
+          }
+
+          .welcome-content-mobile .rounded-2xl {
+            padding: 32px !important;
+          }
+
+          .welcome-content-mobile h1 {
+            font-size: 28px !important;
+            margin-bottom: 16px !important;
+          }
+
+          .welcome-content-mobile p {
+            font-size: 16px !important;
+            margin-bottom: 24px !important;
+          }
+        }
       `}</style>
       <div className="min-h-screen bg-white relative overflow-hidden" style={{
         backgroundImage: !showBreathing ? 'url(/background.svg)' : undefined,
