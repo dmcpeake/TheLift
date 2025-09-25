@@ -463,7 +463,11 @@ export function CheckInHome() {
               width: 100% !important;
             }
             .welcome-content-mobile .rounded-2xl {
-              display: none !important;
+              background: transparent !important;
+              backdrop-filter: none !important;
+              border: none !important;
+              box-shadow: none !important;
+              padding: 0 !important;
             }
             .mobile-start-button {
               position: fixed !important;
