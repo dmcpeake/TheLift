@@ -273,8 +273,8 @@
     max-height: 326px !important;
   }
   .breathing-circle {
-    width: 280px !important;
-    height: 280px !important;
+    width: 180px !important;
+    height: 180px !important;
   }
   .breathing-square-container {
     width: calc(100vw - 40px) !important;
