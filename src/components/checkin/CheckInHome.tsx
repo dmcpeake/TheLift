@@ -134,10 +134,10 @@ export function CheckInHome() {
             }
             .welcome-content-mobile {
               display: flex !important;
-              align-items: flex-start !important;
+              align-items: center !important;
               justify-content: center !important;
-              min-height: auto !important;
-              padding-top: 140px !important;
+              min-height: 100vh !important;
+              padding: 80px !important;
             }
             .welcome-content-mobile .max-w-2xl {
               margin-top: 0 !important;
@@ -161,8 +161,8 @@ export function CheckInHome() {
           }
           @media (min-width: 769px) {
             .welcome-content-mobile {
-              padding-top: 0 !important;
-              min-height: calc(100vh - 200px) !important;
+              padding: 80px !important;
+              min-height: 100vh !important;
               align-items: center !important;
             }
             .mobile-start-button {
@@ -380,44 +380,57 @@ export function CheckInHome() {
       {/* Welcome Content */}
       {!showBreathing && (
         <div
-          className="welcome-content-mobile flex items-start justify-center p-4 transition-opacity duration-300"
+          className="welcome-content-mobile flex items-center justify-center transition-opacity duration-300"
           style={{
-            minHeight: 'auto',
-            opacity: isTransitioning ? 0 : 1
+            minHeight: '100vh',
+            opacity: isTransitioning ? 0 : 1,
+            padding: '80px'
           }}
         >
-          <div className="max-w-2xl mx-auto text-center">
-            {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                Ready for your check in?
-              </h1>
-              <p className="text-lg text-gray-600 max-w-lg mx-auto">
-                Take a moment to explore how you're feeling.
-              </p>
-            </div>
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Container Card */}
+            <div
+              className="rounded-2xl"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                padding: '52px'
+              }}
+            >
+              {/* Header */}
+              <div className="mb-8">
+                <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                  Ready for your check in?
+                </h1>
+                <p className="text-lg text-gray-600 max-w-lg mx-auto">
+                  Take a moment to explore how you're feeling.
+                </p>
+              </div>
 
-            {/* Start Button - desktop only */}
-            <div className="flex justify-center desktop-start-button">
-              <button
-                onClick={handleStartClick}
-                className="font-semibold text-lg transition-all duration-200"
-                style={{
-                  backgroundColor: '#e87e67',
-                  color: 'white',
-                  height: '60px',
-                  borderRadius: '30px',
-                  paddingLeft: '50px',
-                  paddingRight: '50px',
-                  border: '2px solid white',
-                  cursor: 'pointer',
-                  boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
-              >
-                START
-              </button>
+              {/* Start Button - desktop only */}
+              <div className="flex justify-center desktop-start-button">
+                <button
+                  onClick={handleStartClick}
+                  className="font-semibold text-lg transition-all duration-200"
+                  style={{
+                    backgroundColor: '#e87e67',
+                    color: 'white',
+                    height: '60px',
+                    borderRadius: '30px',
+                    paddingLeft: '50px',
+                    paddingRight: '50px',
+                    border: '2px solid white',
+                    cursor: 'pointer',
+                    boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
+                >
+                  START
+                </button>
+              </div>
             </div>
 
           </div>
