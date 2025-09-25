@@ -273,14 +273,22 @@
     max-height: 326px !important;
   }
   .breathing-circle {
-    width: 224px !important;
-    height: 224px !important;
+    width: 280px !important;
+    height: 280px !important;
   }
   .breathing-square-container {
     width: calc(100vw - 40px) !important;
     height: calc(100vw - 40px) !important;
     max-width: 360px !important;
     max-height: 360px !important;
+  }
+  .breathing-instruction {
+    font-size: 16px !important;
+  }
+  .breathing-button {
+    min-width: 180px !important;
+    padding: 1.25rem 2rem !important;
+    font-size: 1.125rem !important;
   }
 }
 
@@ -377,43 +385,21 @@
     0 12px 40px rgba(0, 0, 0, 0.2);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  
-  .breathing-circle-container {
-    width: 350px;
-    height: 350px;
-  }
-  
-  .breathing-circle {
-    width: 300px;
-    height: 300px;
-  }
-  
-  .breathing-instruction {
-    font-size: 16px;
-  }
-  
-  .breathing-button {
-    min-width: 180px;
-    padding: 1.25rem 2rem;
-    font-size: 1.125rem;
-  }
-}
+/* Responsive Design - consolidated above */
 
 @media (max-width: 480px) {
   .breathing-circle-container {
-    width: 280px;
-    height: 280px;
+    width: 280px !important;
+    height: 280px !important;
   }
-  
+
   .breathing-circle {
-    width: 250px;
-    height: 250px;
+    width: 250px !important;
+    height: 250px !important;
   }
-  
+
   .breathing-instruction {
-    font-size: 16px;
+    font-size: 16px !important;
   }
 }
 

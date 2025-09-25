@@ -377,7 +377,7 @@ export function CheckInHome() {
           }
         }
       `}</style>
-      <div className="min-h-screen bg-white relative overflow-hidden" style={{
+      <div className={`min-h-screen bg-white relative overflow-hidden ${showBreathing ? 'breathing-active' : ''}`} style={{
         backgroundImage: !showBreathing ? 'url(/background.svg)' : undefined,
         backgroundSize: window.innerWidth > 768 ? 'cover' : 'cover',
         backgroundPosition: window.innerWidth > 768 ? 'center bottom' : 'center',
@@ -499,7 +499,8 @@ export function CheckInHome() {
               display: flex !important;
             }
             .logout-button {
-              top: 40px !important;
+              top: 20px !important;
+              right: 20px !important;
               margin-top: 0 !important;
               transform: none !important;
               width: 2.5rem !important;
@@ -512,6 +513,27 @@ export function CheckInHome() {
             .breathing-title-checkin-mobile {
               font-size: 28px !important;
               margin-top: 30px !important;
+            }
+            /* Mobile breathing container adjustments */
+            .breathing-container-mobile {
+              padding-top: 120px !important;
+              padding-bottom: 100px !important;
+              height: 100vh !important;
+              position: fixed !important;
+              top: 0 !important;
+              left: 0 !important;
+              right: 0 !important;
+              width: 100vw !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              z-index: 1001 !important;
+            }
+            /* Ensure start button is hidden when breathing */
+            .breathing-active .mobile-start-button {
+              display: none !important;
+              visibility: hidden !important;
+              opacity: 0 !important;
             }
           }
         `}</style>
@@ -757,7 +779,7 @@ export function CheckInHome() {
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
                 >
-                  START
+                  TEST
                 </button>
               </div>
             </div>
@@ -776,7 +798,7 @@ export function CheckInHome() {
       {/* Breathing Exercise */}
       {showBreathing && (
         <div
-            className="absolute inset-0 overflow-hidden"
+            className="absolute inset-0 overflow-hidden breathing-container-mobile"
             style={{
               opacity: isTransitioning ? 0 : 1,
               transform: isTransitioning ? 'scale(0.8)' : 'scale(1)',
@@ -976,7 +998,7 @@ export function CheckInHome() {
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
           >
-            START
+            TEST
           </button>
         </div>
       )}
