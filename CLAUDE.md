@@ -79,16 +79,26 @@ The app automatically initializes test users on startup via the `/server/auth/in
 
 ## Known Issues & Debugging Notes
 
-### Avatar Colors Not Displaying (Fixed 2025-09-22)
+### Avatar Colors Not Displaying (Fixed 2025-09-22, Updated 2025-09-25)
 
-**Issue**: Avatar colors in `/test/analytics` (ChildSummaryAnalytics.tsx) were displaying as gray instead of their configured colors.
+**Issue**: Avatar colors in `/test/analytics` (ChildSummaryAnalytics.tsx) were displaying as gray instead of their configured colors. Additionally, avatar colors were changing when filtering by organization.
 
-**Root Cause**: CSS cascade issue where wireframe styles were overriding Tailwind color classes with gray (#6b7280).
+**Root Cause**:
+1. CSS cascade issue where global/wireframe styles were overriding Tailwind color classes with gray (#6b7280)
+2. Avatar colors were based on array index, which changed when filtering by organization
 
-**Solution**: Implemented inline styles for avatar background colors to bypass CSS specificity issues. All 9 avatar colors now display correctly with their assigned colors (blue, green, purple, etc.).
+**Solution**:
+1. Implemented inline styles for avatar background colors to bypass CSS specificity issues
+2. Changed avatar color assignment from array index to child ID hash for consistency across filters
+3. All 18 avatar colors now display correctly and remain consistent regardless of organization filter
+
+**CRITICAL**: Avatar background colors MUST use inline `style={{ backgroundColor }}` NOT Tailwind classes. This prevents global CSS from overriding colors.
 
 **Files Updated**:
-- `src/components/analytics/ChildSummaryAnalytics.tsx` - Avatar rendering now uses inline styles instead of Tailwind classes
+- `src/components/analytics/ChildSummaryAnalytics.tsx` - Avatar rendering now uses:
+  - Inline styles with `bgColorMap` object mapping Tailwind class names to hex colors
+  - `getAvatarStyle(child.id)` using ID hash instead of array index
+  - Debug logging to track color assignment in console
 
 ### Date Handling in Analytics (Fixed 2025-09-18)
 
@@ -410,3 +420,4 @@ END $$;
 - **Session IDs link** mood_meter_usage → checkin_sessions → profiles
 - **Timestamps should be realistic** (past dates for test data)
 - EHCP and SEN Code of Practice alignment
+- Westfield Primary School is now "The Rainbow School"

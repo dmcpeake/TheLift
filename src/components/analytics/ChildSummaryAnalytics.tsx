@@ -753,8 +753,10 @@ export function ChildSummaryAnalytics() {
     }
   }
 
-  const getAvatarStyle = (index: number) => {
-    return AVATAR_STYLES[index % AVATAR_STYLES.length]
+  const getAvatarStyle = (childId: string) => {
+    // Use child ID hash to consistently assign colors across filters
+    const hash = childId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+    return AVATAR_STYLES[hash % AVATAR_STYLES.length]
   }
 
   const getTrendIcon = (trend?: 'improving' | 'developing' | 'stable') => {
@@ -910,13 +912,50 @@ export function ChildSummaryAnalytics() {
                 <div className="flex items-center space-x-4">
                   {/* Avatar - Always use generated avatars, ignore database URLs */}
                   {(() => {
-                    const style = getAvatarStyle(index)
+                    const style = getAvatarStyle(child.id)
                     const baseClasses = "w-12 h-12 flex items-center justify-center text-white font-semibold shadow-sm"
-                    const avatarClassName = `${baseClasses} ${style.bg} ${style.shape}`
 
+                    // Debug logging
+                    console.log(`Avatar for ${child.name}:`, {
+                      childId: child.id,
+                      bgClass: style.bg,
+                      shape: style.shape,
+                      fullClassName: `${baseClasses} ${style.bg} ${style.shape}`
+                    })
+
+                    // Use inline styles like the mood heatmap fix
+                    const bgColorMap: Record<string, string> = {
+                      'bg-blue-500': '#3b82f6',
+                      'bg-green-500': '#22c55e',
+                      'bg-purple-500': '#a855f7',
+                      'bg-orange-500': '#f97316',
+                      'bg-pink-500': '#ec4899',
+                      'bg-teal-500': '#14b8a6',
+                      'bg-red-500': '#ef4444',
+                      'bg-indigo-500': '#6366f1',
+                      'bg-yellow-500': '#eab308',
+                      'bg-cyan-500': '#06b6d4',
+                      'bg-emerald-500': '#10b981',
+                      'bg-rose-500': '#f43f5e',
+                      'bg-violet-500': '#8b5cf6',
+                      'bg-amber-500': '#f59e0b',
+                      'bg-sky-500': '#0ea5e9',
+                      'bg-lime-500': '#84cc16',
+                      'bg-fuchsia-500': '#d946ef',
+                      'bg-slate-500': '#64748b'
+                    }
+
+                    const backgroundColor = bgColorMap[style.bg] || '#6b7280'
+
+                    console.log(`  -> Mapped to color: ${backgroundColor}`)
 
                     return (
-                      <div className={avatarClassName} data-child-index={index}>
+                      <div
+                        className={`${baseClasses} ${style.shape}`}
+                        style={{ backgroundColor }}
+                        data-child-id={child.id}
+                        data-bg-class={style.bg}
+                      >
                         <span className="text-sm">
                           {child.initials}
                         </span>
