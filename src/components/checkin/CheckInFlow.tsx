@@ -243,7 +243,7 @@ export function CheckInFlow() {
             <div className="flex justify-center">
               <button
                 onClick={() => navigate('/checkin/home')}
-                className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="complete-done-button text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                 style={{
                   backgroundColor: '#e87e67',
                   color: 'white',
@@ -279,6 +279,13 @@ export function CheckInFlow() {
           }
           .chart-title-container {
             margin-top: 40px;
+          }
+          .complete-done-button {
+            position: fixed !important;
+            bottom: 32px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            z-index: 1000 !important;
           }
         }
       `}</style>
