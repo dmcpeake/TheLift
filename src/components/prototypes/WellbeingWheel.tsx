@@ -642,7 +642,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                       setTimeout(() => scrollToActiveCard(index), 100)
                     }
                   }}
-                  className={`relative rounded-lg flex flex-col items-center gap-2 px-3 py-4 text-sm transition-all ${
+                  className={`relative rounded-lg flex flex-col items-center gap-2 px-3 py-3 text-sm transition-all ${
                     isActive ? 'font-medium' :
                     isCompleted ? 'hover:text-blue-700 cursor-pointer' :
                     'hover:text-blue-700 cursor-pointer'
