@@ -119,7 +119,7 @@ export function StatusPage() {
   const upcomingMilestones = [
     {
       icon: <TreePine className="h-5 w-5" />,
-      title: "Garden Content",
+      title: "Garden Content TBD",
       description: "Interactive wellbeing garden with rewards and progress tracking",
       date: "Sep 30 - Oct 11",
       status: "upcoming",
@@ -133,6 +133,15 @@ export function StatusPage() {
       date: "Sep 30 - Oct 11",
       status: "upcoming",
       week: "Week 1-2",
+      type: "design"
+    },
+    {
+      icon: <Users className="h-5 w-5" />,
+      title: "Onboarding Process",
+      description: "Streamlined onboarding workflow for new customers",
+      date: "Oct 7 - Oct 18",
+      status: "upcoming",
+      week: "Week 2-3",
       type: "design"
     },
     {

@@ -1341,7 +1341,7 @@ export function ChildSummaryAnalytics() {
 
                           {/* Loading Overlay with progress bar - positioned over content area only */}
                           {loadingInsights[child.id] && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 rounded-lg z-10">
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 rounded-lg z-10" style={{ top: '50px' }}>
                               <div className="px-8 py-6 max-w-sm w-full">
                                 <div className="space-y-6">
                                   {/* Main loading title */}
