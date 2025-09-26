@@ -808,7 +808,7 @@ export function ChildSummaryAnalytics() {
               if (currentOrg.name === 'The Rainbow School') {
                 logoPath = '/trs.png'
               } else if (currentOrg.name === 'The Soke') {
-                logoPath = '/the_soke.png'
+                logoPath = '/the_soke.webp'
               } else if (currentOrg.name === 'Evelina Hospital') {
                 logoPath = '/evelina.png'
               }
