@@ -112,6 +112,7 @@ export function ChildSummaryAnalytics() {
   const [aiInsights, setAIInsights] = useState<Record<string, AIInsights>>({})
   const [loading, setLoading] = useState(true)
   const [loadingInsights, setLoadingInsights] = useState<Record<string, boolean>>({})
+  const [aiLoadingProgress, setAILoadingProgress] = useState<Record<string, number>>({})
   // Removed aiAnalysisProgress to prevent excessive re-renders
   const [loadingStages, setLoadingStages] = useState<Array<{ name: string; status: 'pending' | 'loading' | 'complete' | 'error' }>>([
     { name: 'Loading organizations', status: 'loading' },
@@ -446,7 +447,19 @@ export function ChildSummaryAnalytics() {
       console.log('🔵 Setting loadingInsights to TRUE for child:', childId)
       return { ...prev, [childId]: true }
     })
-    // Removed progress animation to prevent excessive re-renders
+    setAILoadingProgress(prev => ({ ...prev, [childId]: 0 }))
+
+    // Simulate progress updates
+    const progressInterval = setInterval(() => {
+      setAILoadingProgress(prev => {
+        const currentProgress = prev[childId] || 0
+        if (currentProgress >= 90) {
+          clearInterval(progressInterval)
+          return prev
+        }
+        return { ...prev, [childId]: currentProgress + 10 }
+      })
+    }, 300)
 
     try {
       // Use the correct Supabase URL and key
@@ -523,9 +536,13 @@ export function ChildSummaryAnalytics() {
       console.error('Error loading AI insights:', error)
       // Error handling
     } finally {
+      // Set progress to 100% before hiding
+      setAILoadingProgress(prev => ({ ...prev, [childId]: 100 }))
+
       setTimeout(() => {
         console.log('🔵 Setting loadingInsights to FALSE for child:', childId)
         setLoadingInsights(prev => ({ ...prev, [childId]: false }))
+        setAILoadingProgress(prev => ({ ...prev, [childId]: 0 }))
       }, 500) // Small delay to show 100% briefly
     }
   }
@@ -1319,12 +1336,42 @@ export function ChildSummaryAnalytics() {
                             )}
                           </div>
 
-                          {/* Loading Overlay with simple spinner */}
+                          {/* Loading Overlay with progress bar */}
                           {loadingInsights[child.id] && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-lg z-10">
-                              <div className="flex flex-col items-center">
-                                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
-                                <p className="mt-3 text-sm text-gray-600">Analyzing wellbeing patterns...</p>
+                            <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-lg z-10">
+                              <div className="flex flex-col items-center w-3/4 max-w-sm">
+                                <div className="w-full space-y-4">
+                                  {/* Progress bar container */}
+                                  <div className="w-full">
+                                    <div className="flex justify-between text-xs text-gray-600 mb-2">
+                                      <span>Analyzing wellbeing patterns...</span>
+                                      <span>{aiLoadingProgress[child.id] || 0}%</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                      <div
+                                        className="bg-gradient-to-r from-blue-500 to-purple-600 h-full rounded-full transition-all duration-300 ease-out"
+                                        style={{ width: `${aiLoadingProgress[child.id] || 0}%` }}
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Loading animation */}
+                                  <div className="flex justify-center">
+                                    <div className="flex space-x-2">
+                                      <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                      <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                      <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                    </div>
+                                  </div>
+
+                                  {/* Loading message based on progress */}
+                                  <p className="text-xs text-center text-gray-500">
+                                    {aiLoadingProgress[child.id] < 30 ? 'Gathering check-in data...' :
+                                     aiLoadingProgress[child.id] < 60 ? 'Processing emotional patterns...' :
+                                     aiLoadingProgress[child.id] < 90 ? 'Generating personalized insights...' :
+                                     'Almost ready...'}
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           )}
