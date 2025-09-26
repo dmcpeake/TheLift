@@ -819,7 +819,12 @@ export function ChildSummaryAnalytics() {
                 <img
                   src={logoPath}
                   alt={`${currentOrg?.name} logo`}
-                  className="h-12 object-contain"
+                  className="h-12 w-auto object-contain"
+                  style={{
+                    maxHeight: '48px',
+                    minHeight: '48px',
+                    width: 'auto'
+                  }}
                   onError={(e) => {
                     console.error(`Failed to load logo: ${logoPath}`)
                     e.currentTarget.style.display = 'none'
