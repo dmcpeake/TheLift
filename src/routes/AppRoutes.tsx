@@ -7,7 +7,7 @@ import { Navigation } from '../components/shared/Navigation'
 // Auth Components
 import { UnifiedLoginPage } from '../components/auth/UnifiedLoginPage'
 
-// Marketing Components  
+// Marketing Components
 import { MarketingHome } from '../components/marketing/MarketingHome'
 import { About } from '../components/marketing/About'
 import { HowItWorks } from '../components/marketing/HowItWorks'
@@ -16,6 +16,7 @@ import { Contact } from '../components/marketing/Contact'
 import { Waitlist } from '../components/marketing/Waitlist'
 import { Legal } from '../components/marketing/Legal'
 import { Sitemap } from '../components/marketing/Sitemap'
+import { StatusPage } from '../components/marketing/StatusPage'
 
 // Practitioner Components
 import { PractitionerDashboard } from '../components/practitioner/PractitionerDashboard'
@@ -64,7 +65,7 @@ export function AppRoutes() {
   
   // Determine if we're in a child-specific route (more specific matching)
   const isChildApp = location.pathname.startsWith('/child/') || location.pathname === '/child/onboarding' || location.pathname.startsWith('/checkin/')
-  const isMarketingApp = ['/', '/about', '/how-it-works', '/pricing', '/contact', '/waitlist', '/legal', '/sitemap'].some(path =>
+  const isMarketingApp = ['/', '/about', '/how-it-works', '/pricing', '/contact', '/waitlist', '/legal', '/sitemap', '/status'].some(path =>
     location.pathname === path || location.pathname.startsWith('/legal')
   )
   const isAuthApp = ['/login', '/admin/login'].includes(location.pathname)
@@ -84,6 +85,7 @@ export function AppRoutes() {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/waitlist" element={<Waitlist />} />
+        <Route path="/status" element={<StatusPage />} />
         <Route path="/legal" element={<Legal />} />
         <Route path="/legal/terms" element={<Legal section="terms" />} />
         <Route path="/legal/privacy" element={<Legal section="privacy" />} />
