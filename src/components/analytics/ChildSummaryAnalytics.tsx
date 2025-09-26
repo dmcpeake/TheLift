@@ -1197,11 +1197,13 @@ export function ChildSummaryAnalytics() {
                           Support Insights
                         </h4>
 
-                        <div className="relative min-h-[300px]">
-                          {/* Content with blur effect when loading */}
-                          <div className={`space-y-4 transition-all duration-700 ${
-                            loadingInsights[child.id] ? 'filter blur-[3px] opacity-30' : 'filter blur-0 opacity-100'
-                          }`}>
+                        <div className="relative">
+                          {/* Minimum height container for content */}
+                          <div className="min-h-[300px]">
+                            {/* Content with blur effect when loading */}
+                            <div className={`space-y-4 transition-all duration-700 ${
+                              loadingInsights[child.id] ? 'filter blur-[3px] opacity-30' : 'filter blur-0 opacity-100'
+                            }`}>
                             {/* Summary */}
                             {aiInsights[child.id] && (
                             <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -1334,20 +1336,32 @@ export function ChildSummaryAnalytics() {
                               Last analyzed: {aiInsights[child.id].lastAnalyzed}
                             </p>
                             )}
+                            </div>
                           </div>
 
-                          {/* Loading Overlay with progress bar */}
+                          {/* Loading Overlay with progress bar - positioned over content area only */}
                           {loadingInsights[child.id] && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-lg z-10">
-                              <div className="flex flex-col items-center w-3/4 max-w-sm">
-                                <div className="w-full space-y-4">
-                                  {/* Progress bar container */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 rounded-lg z-10">
+                              <div className="px-8 py-6 max-w-sm w-full">
+                                <div className="space-y-6">
+                                  {/* Main loading title */}
+                                  <div className="text-center">
+                                    <h5 className="text-sm font-medium text-gray-900 mb-1">Analyzing Wellbeing Data</h5>
+                                    <p className="text-xs text-gray-500">
+                                      {aiLoadingProgress[child.id] < 30 ? 'Gathering check-in data...' :
+                                       aiLoadingProgress[child.id] < 60 ? 'Processing emotional patterns...' :
+                                       aiLoadingProgress[child.id] < 90 ? 'Generating personalized insights...' :
+                                       'Finalizing analysis...'}
+                                    </p>
+                                  </div>
+
+                                  {/* Progress bar */}
                                   <div className="w-full">
                                     <div className="flex justify-between text-xs text-gray-600 mb-2">
-                                      <span>Analyzing wellbeing patterns...</span>
+                                      <span>Progress</span>
                                       <span>{aiLoadingProgress[child.id] || 0}%</span>
                                     </div>
-                                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                    <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
                                       <div
                                         className="bg-gradient-to-r from-blue-500 to-purple-600 h-full rounded-full transition-all duration-300 ease-out"
                                         style={{ width: `${aiLoadingProgress[child.id] || 0}%` }}
@@ -1355,22 +1369,14 @@ export function ChildSummaryAnalytics() {
                                     </div>
                                   </div>
 
-                                  {/* Loading animation */}
+                                  {/* Loading animation dots */}
                                   <div className="flex justify-center">
                                     <div className="flex space-x-2">
-                                      <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                                      <div className="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                                      <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                      <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                                     </div>
                                   </div>
-
-                                  {/* Loading message based on progress */}
-                                  <p className="text-xs text-center text-gray-500">
-                                    {aiLoadingProgress[child.id] < 30 ? 'Gathering check-in data...' :
-                                     aiLoadingProgress[child.id] < 60 ? 'Processing emotional patterns...' :
-                                     aiLoadingProgress[child.id] < 90 ? 'Generating personalized insights...' :
-                                     'Almost ready...'}
-                                  </p>
                                 </div>
                               </div>
                             </div>
