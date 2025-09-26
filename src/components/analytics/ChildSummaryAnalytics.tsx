@@ -787,15 +787,49 @@ export function ChildSummaryAnalytics() {
 
       {/* Organization Filter and Compare Button */}
       <div className="mb-6 flex items-center justify-between">
-        <select
-          value={selectedOrg}
-          onChange={(e) => setSelectedOrg(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          {organizations.map(org => (
-            <option key={org.id} value={org.id}>{org.name}</option>
-          ))}
-        </select>
+        <div className="flex items-center space-x-4">
+          <select
+            value={selectedOrg}
+            onChange={(e) => setSelectedOrg(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {organizations.map(org => (
+              <option key={org.id} value={org.id}>{org.name}</option>
+            ))}
+          </select>
+
+          {/* Organization Logo */}
+          {selectedOrg !== 'all' && (() => {
+            const currentOrg = organizations.find(org => org.id === selectedOrg)
+            let logoPath = ''
+
+            if (currentOrg) {
+              // Map organization names to logo files
+              if (currentOrg.name === 'The Rainbow School') {
+                logoPath = '/trs.png'
+              } else if (currentOrg.name === 'The Soke') {
+                logoPath = '/the_soke.png'
+              } else if (currentOrg.name === 'Evelina Hospital') {
+                logoPath = '/evelina.png'
+              }
+            }
+
+            if (logoPath) {
+              return (
+                <img
+                  src={logoPath}
+                  alt={`${currentOrg?.name} logo`}
+                  className="h-12 object-contain"
+                  onError={(e) => {
+                    console.error(`Failed to load logo: ${logoPath}`)
+                    e.currentTarget.style.display = 'none'
+                  }}
+                />
+              )
+            }
+            return null
+          })()}
+        </div>
 
         {children.length >= 2 && !showComparison && (
           <button

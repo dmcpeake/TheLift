@@ -172,9 +172,10 @@ The app automatically initializes test users on startup via the `/server/auth/in
 
 ### Test Data Setup
 
-**Organizations Created**:
-- Westfield Primary School (id: '5f910546-8bdc-44ca-b776-fdd5eb5cccd9', type: 'school-primary')
-- St. Mary's Hospital (id: '7eab219a-7c83-406c-a6b2-75ed44de715b', type: 'hospital')
+**Organizations Created** (Updated 2025-09-26):
+- The Soke (id: '0e233a3b-e007-4eae-a9a5-4586c59b2faf')
+- The Rainbow School (id: '61f8c1e3-29f1-4e3c-af8b-ffaff5c3a455', type: 'school-primary') - formerly Westfield Primary School
+- Evelina Hospital (id: 'd3859fa2-4719-40db-8abf-9c6bf982272d', type: 'hospital')
 
 **Important**: Children profiles must have valid `org_id` linking to existing organization for proper analysis.
 
@@ -198,12 +199,13 @@ The app automatically initializes test users on startup via the `/server/auth/in
 - Never use hardcoded UUID strings for new records
 - This ensures unique IDs and avoids duplicate key violations
 
-### Current Child Distribution (2025-09-19)
+### Current Child Distribution (Updated 2025-09-26)
 
 **Actual Children in Database**:
-- **St. Mary's Hospital (3):** Aisha Patel, Emma Thompson, Sophia Chen
-- **Wellmind Children's Clinic (3):** Charlie Brown, Maya Rodriguez, Sebastian Clarke
-- **Westfield Primary School (3):** Ava Davis, Lucas Williams, Oliver Johnson
+- **The Rainbow School (formerly Westfield Primary):** Ava Davis, Lucas Williams, Oliver Johnson, Amelia Thompson, Jayden Martinez
+- **Evelina Hospital (formerly St. Mary's Hospital):** Aisha Patel, Emma Thompson, Sophia Chen
+- **The Soke:** (New organization - children to be added)
+- **Wellmind Children's Clinic:** Charlie Brown, Maya Rodriguez, Sebastian Clarke (if still exists)
 
 **Note**: The synthetic data generator creates different child names than originally expected. The current 3-3-3 distribution was achieved by moving Sophia Chen from Westfield to St. Mary's Hospital.
 
