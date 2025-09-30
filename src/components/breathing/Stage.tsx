@@ -345,7 +345,7 @@ export function Stage({
                   margin: 0
                 }}>{getInstructionText().title}</h2>
                 {getInstructionText().subtitle && (
-                  <p className="breathing-subtitle" style={{ fontSize: '16px', opacity: 0.8, marginTop: '8px' }}>
+                  <p className="breathing-subtitle" style={{ fontSize: '16px', opacity: 0.8 }}>
                     {getInstructionText().subtitle}
                   </p>
                 )}
