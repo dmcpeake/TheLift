@@ -475,13 +475,14 @@ export function CheckInHome() {
               bottom: 32px !important;
               left: 50% !important;
               transform: translateX(-50%) !important;
-              z-index: 1000 !important;
+              z-index: 10000 !important;
             }
             .desktop-start-button {
               display: none !important;
             }
             .theo-animation {
               bottom: 55px !important;
+              left: calc(50% + 60px) !important;
             }
             .garden-cards-container {
               display: none !important;
@@ -734,7 +735,8 @@ export function CheckInHome() {
           style={{
             minHeight: '100vh',
             opacity: isTransitioning ? 0 : 1,
-            padding: '80px'
+            padding: '80px',
+            paddingTop: '0px'
           }}
         >
           <div className="max-w-4xl mx-auto text-center">
@@ -746,13 +748,13 @@ export function CheckInHome() {
                 backdropFilter: 'blur(16px)',
                 border: '1px solid rgba(255, 255, 255, 0.3)',
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                padding: '52px',
+                padding: '22px 52px',
                 position: 'relative',
                 zIndex: 10
               }}
             >
               {/* Header */}
-              <div className="mb-8" style={{ marginTop: '40px' }}>
+              <div className="mb-8" style={{ marginTop: '20px', marginBottom: '20px' }}>
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">
                   Ready for your check in?
                 </h1>
@@ -762,7 +764,7 @@ export function CheckInHome() {
               </div>
 
               {/* Start Button - desktop only */}
-              <div className="flex justify-center desktop-start-button">
+              <div className="flex justify-center desktop-start-button" style={{ marginBottom: '20px' }}>
                 <button
                   onClick={handleStartClick}
                   className="font-semibold text-lg transition-all duration-200"
@@ -789,34 +791,31 @@ export function CheckInHome() {
         </div>
       )}
 
-      {/* Title header for breathing */}
-      {showBreathing && (
-        <div className="text-center" style={{ position: 'fixed', top: '50px', left: 0, right: 0, zIndex: 40 }}>
-          <h1 className="breathing-title-checkin-mobile text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em', marginTop: '50px' }}>Let's breathe!</h1>
-        </div>
-      )}
-
       {/* Breathing Exercise */}
       {showBreathing && (
-        <div
-            className="absolute inset-0 overflow-hidden breathing-container-mobile"
-            style={{
-              opacity: isTransitioning ? 0 : 1,
-              transform: isTransitioning ? 'scale(0.8)' : 'scale(1)',
-              transition: 'opacity 500ms ease-out, transform 500ms ease-out',
-              paddingTop: '200px',
-              paddingBottom: '150px',
-              height: '100vh',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100vw',
-              left: 0,
-              right: 0
-            }}
-          >
+        <div className="bg-white min-h-screen" style={{ paddingTop: '140px' }}>
+          <div className="max-w-7xl mx-auto px-6 w-full">
+            {/* Title header for breathing - positioned like mood page */}
+            <div className="text-center" style={{ marginBottom: '1rem', position: 'relative', zIndex: 50 }}>
+              <h1 className="breathing-title-checkin-mobile text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>Let's breathe!</h1>
+            </div>
+
+            <div
+              className="breathing-container-mobile"
+              style={{
+                opacity: isTransitioning ? 0 : 1,
+                transform: isTransitioning ? 'scale(0.8)' : 'scale(1)',
+                transition: 'opacity 500ms ease-out, transform 500ms ease-out',
+                height: 'calc(100vh - 200px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'visible',
+                position: 'relative'
+              }}
+            >
           <BreathingCircles
-            cycles={5}
+            cycles={3}
             muted={false}
             captions={true}
             embedded={true}
@@ -838,6 +837,8 @@ export function CheckInHome() {
             onComplete={handleBreathingComplete}
             onExit={handleBreathingExit}
           />
+            </div>
+          </div>
         </div>
       )}
 
@@ -981,7 +982,7 @@ export function CheckInHome() {
 
       {/* Start Button - only show when not breathing */}
       {!showBreathing && (
-        <div className="flex justify-center mobile-start-button" style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
+        <div className="flex justify-center mobile-start-button" style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
           <button
             onClick={handleStartClick}
             className="transition-all duration-200"
@@ -998,7 +999,10 @@ export function CheckInHome() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)'
+              boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)',
+              position: 'relative',
+              zIndex: 10001,
+              pointerEvents: 'auto'
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
@@ -1016,14 +1020,15 @@ export function CheckInHome() {
             className="theo-animation"
             style={{
               position: 'fixed',
-              bottom: '80px',
-              left: 'calc(50% + 60px)',
+              bottom: '20px',
+              left: 'calc(50% + 120px)',
               transform: 'translateX(-50%)',
               width: '300px',
               height: '300px',
-              zIndex: 10,
+              zIndex: 5,
               opacity: isTransitioning ? 0 : 1,
-              transition: 'opacity 300ms ease-in-out'
+              transition: 'opacity 300ms ease-in-out',
+              pointerEvents: 'none'
             }}
           >
             <Lottie

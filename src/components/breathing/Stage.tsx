@@ -182,18 +182,21 @@ export function Stage({
           />
         )
       default:
-        // Balloon breathing (default circle animation)
+        // Balloon breathing (default circle animation) - with radiating rings
         return (
           <div className="breathing-circle-container">
 
             {/* Progress ring for breathing progress */}
-            <svg className="progress-ring" viewBox="0 0 400 400" style={{ animation: 'none' }}>
+            <svg className="progress-ring" viewBox="-10 -10 420 420" style={{ animation: 'none', overflow: 'visible' }}>
               <defs>
                 <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="rgba(59, 130, 246, 0.8)" />
                   <stop offset="50%" stopColor="rgba(218, 131, 109, 0.8)" />
                   <stop offset="100%" stopColor="rgba(236, 72, 153, 0.8)" />
                 </linearGradient>
+                <filter id="dotShadow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.3"/>
+                </filter>
               </defs>
               <circle
                 className="progress-ring-progress"
@@ -212,6 +215,49 @@ export function Stage({
                   transitionTimingFunction: 'linear'
                 }}
               />
+
+              {/* Cycle separators - white circles marking each breath cycle - only show when breathing */}
+              {isBreathingPhase && (
+                <>
+                  {/* The progress ring is rotated -90deg in CSS, so dots align with the rotated progress */}
+                  {/* Position 1: Right side (becomes top after CSS rotation) */}
+                  <circle
+                    cx="380"
+                    cy="200"
+                    r="7"
+                    fill="white"
+                    stroke="#e87e67"
+                    strokeWidth="2"
+                    style={{
+                      filter: 'drop-shadow(0px -2px 4px rgba(0,0,0,0.15))'
+                    }}
+                  />
+                  {/* Position 2: 1/3 around clockwise from right */}
+                  <circle
+                    cx={200 + 180 * Math.cos((2 * Math.PI * 1) / 3)}
+                    cy={200 + 180 * Math.sin((2 * Math.PI * 1) / 3)}
+                    r="7"
+                    fill="white"
+                    stroke="#e87e67"
+                    strokeWidth="2"
+                    style={{
+                      filter: 'drop-shadow(0px -2px 4px rgba(0,0,0,0.15))'
+                    }}
+                  />
+                  {/* Position 3: 2/3 around clockwise from right */}
+                  <circle
+                    cx={200 + 180 * Math.cos((2 * Math.PI * 2) / 3)}
+                    cy={200 + 180 * Math.sin((2 * Math.PI * 2) / 3)}
+                    r="7"
+                    fill="white"
+                    stroke="#e87e67"
+                    strokeWidth="2"
+                    style={{
+                      filter: 'drop-shadow(0px -2px 4px rgba(0,0,0,0.15))'
+                    }}
+                  />
+                </>
+              )}
             </svg>
 
             {/* Inner balloon circle */}
@@ -226,18 +272,82 @@ export function Stage({
                   4
                 }s`,
                 transitionTimingFunction: 'linear',
-                borderRadius: '50%'
+                borderRadius: '50%',
+                position: 'relative',
+                zIndex: 10
               }}
             >
-              <div className="breathing-text">
-                <h2 className="breathing-instruction" style={{ fontSize: getInstructionText().title === "Let's breathe!" ? '20px' : undefined, fontWeight: getInstructionText().title === "Let's breathe!" ? 'bold' : undefined }}>{getInstructionText().title}</h2>
+              {/* Colored radiating rings INSIDE the balloon */}
+              {(isBreathingPhase || phase === 'intro') && (
+                <>
+                  {/* Inner core ring 1 - smallest, brightest */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      width: '80px',
+                      height: '80px',
+                      borderRadius: '50%',
+                      background: 'radial-gradient(circle, rgba(255, 204, 0, 0.8) 0%, rgba(255, 204, 0, 0.4) 100%)',
+                      transform: 'translate(-50%, -50%)',
+                      animation: phase === 'intro' ? 'none' : `${phase === 'inhale' ? 'pulseRing1' : phase === 'exhale' ? 'pulseRing1Reverse' : 'none'} ${phase === 'inhale' ? pace.in : pace.out}s ease-in-out`,
+                      zIndex: 3
+                    }}
+                  />
+                  {/* Inner core ring 2 - medium */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      width: '160px',
+                      height: '160px',
+                      borderRadius: '50%',
+                      background: 'radial-gradient(circle, rgba(255, 140, 0, 0.6) 0%, rgba(255, 140, 0, 0.2) 100%)',
+                      transform: 'translate(-50%, -50%)',
+                      animation: phase === 'intro' ? 'none' : `${phase === 'inhale' ? 'pulseRing2' : phase === 'exhale' ? 'pulseRing2Reverse' : 'none'} ${phase === 'inhale' ? pace.in : pace.out}s ease-in-out`,
+                      animationDelay: '0.2s',
+                      zIndex: 2
+                    }}
+                  />
+                  {/* Inner core ring 3 - largest */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      width: '240px',
+                      height: '240px',
+                      borderRadius: '50%',
+                      background: 'radial-gradient(circle, rgba(255, 69, 0, 0.4) 0%, rgba(255, 69, 0, 0.1) 100%)',
+                      transform: 'translate(-50%, -50%)',
+                      animation: phase === 'intro' ? 'none' : `${phase === 'inhale' ? 'pulseRing3' : phase === 'exhale' ? 'pulseRing3Reverse' : 'none'} ${phase === 'inhale' ? pace.in : pace.out}s ease-in-out`,
+                      animationDelay: '0.4s',
+                      zIndex: 1
+                    }}
+                  />
+                </>
+              )}
+
+              <div className="breathing-text" style={{
+                position: 'relative',
+                zIndex: 5,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%'
+              }}>
+                <h2 className="breathing-instruction" style={{
+                  fontSize: getInstructionText().title === "Let's breathe!" ? '20px' : undefined,
+                  fontWeight: getInstructionText().title === "Let's breathe!" ? 'bold' : undefined,
+                  margin: 0
+                }}>{getInstructionText().title}</h2>
                 {getInstructionText().subtitle && (
                   <p className="breathing-subtitle" style={{ fontSize: '16px', opacity: 0.8, marginTop: '8px' }}>
                     {getInstructionText().subtitle}
                   </p>
-                )}
-                {isBreathingPhase && (
-                  <p className="breathing-counter">{cycle} of {totalCycles}</p>
                 )}
               </div>
             </div>
@@ -303,6 +413,96 @@ export function Stage({
       {renderAnimation()}
 
       <style jsx>{`
+        @keyframes pulseRing1 {
+          0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0.2;
+          }
+          50% {
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 0.6;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(1.4);
+            opacity: 0.1;
+          }
+        }
+
+        @keyframes pulseRing1Reverse {
+          0% {
+            transform: translate(-50%, -50%) scale(1.4);
+            opacity: 0.1;
+          }
+          50% {
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 0.6;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0.2;
+          }
+        }
+
+        @keyframes pulseRing2 {
+          0% {
+            transform: translate(-50%, -50%) scale(0.9);
+            opacity: 0.15;
+          }
+          50% {
+            transform: translate(-50%, -50%) scale(1.3);
+            opacity: 0.5;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(1.5);
+            opacity: 0.05;
+          }
+        }
+
+        @keyframes pulseRing2Reverse {
+          0% {
+            transform: translate(-50%, -50%) scale(1.5);
+            opacity: 0.05;
+          }
+          50% {
+            transform: translate(-50%, -50%) scale(1.3);
+            opacity: 0.5;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(0.9);
+            opacity: 0.15;
+          }
+        }
+
+        @keyframes pulseRing3 {
+          0% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0.1;
+          }
+          50% {
+            transform: translate(-50%, -50%) scale(1.4);
+            opacity: 0.4;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(1.6);
+            opacity: 0;
+          }
+        }
+
+        @keyframes pulseRing3Reverse {
+          0% {
+            transform: translate(-50%, -50%) scale(1.6);
+            opacity: 0;
+          }
+          50% {
+            transform: translate(-50%, -50%) scale(1.4);
+            opacity: 0.4;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0.1;
+          }
+        }
+
         @keyframes radiate1 {
           0%, 100% {
             transform: translate(-50%, -50%) scale(0.3) translateX(0px) translateY(0px);
