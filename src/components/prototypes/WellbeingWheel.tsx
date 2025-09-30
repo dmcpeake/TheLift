@@ -1095,47 +1095,46 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
       {/* Fixed bottom button - always show to allow proceeding without completing all sections */}
       {!finalData && (
         <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center items-center" style={{ zIndex: 1000, gap: '20px' }}>
-          {/* Back Button */}
-          <button
-            onClick={() => {
-              // Navigate back to emotions page (step 1)
-              navigate('/checkin/flow/emotions')
-            }}
-            style={{
-              backgroundColor: 'white',
-              border: '2px solid #3a7ddc',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '56px',
-              height: '56px',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8fafc'
-              e.currentTarget.style.borderColor = '#2e6bc7'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'white'
-              e.currentTarget.style.borderColor = '#3a7ddc'
-            }}
-            aria-label="Go back to emotions"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
-              <polyline points="15,18 9,12 15,6"></polyline>
-            </svg>
-          </button>
+          {/* Back Button - Hide when all sections completed */}
+          {Object.keys(sections).length < wheelSections.length && (
+            <button
+              onClick={() => {
+                // Navigate back to mood page (step 1 in new order)
+                navigate('/checkin/flow/mood')
+              }}
+              style={{
+                backgroundColor: 'white',
+                border: '2px solid #3a7ddc',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '56px',
+                height: '56px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8fafc'
+                e.currentTarget.style.borderColor = '#2e6bc7'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white'
+                e.currentTarget.style.borderColor = '#3a7ddc'
+              }}
+              aria-label="Go back to mood"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+                <polyline points="15,18 9,12 15,6"></polyline>
+              </svg>
+            </button>
+          )}
 
-          {/* Dynamic Button Logic */}
+          {/* NEXT Button - Only visible when ALL sections are completed */}
           {(() => {
-            const currentSection = wheelSections[currentSectionIndex]
-            const isCurrentSectionCompleted = sections[currentSection?.id]?.mood_level
             const allSectionsCompleted = Object.keys(sections).length === wheelSections.length
 
-            // Show blue NEXT button if all sections are completed
             if (allSectionsCompleted) {
               return (
                 <button
@@ -1171,127 +1170,85 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
               )
             }
 
-            // Show SAVE button if current section has rating but hasn't been saved yet
-            if (isCurrentSectionCompleted && !hasSavedCurrentSection) {
-              return (
-                <button
-                  key={`save-${buttonAnimationKey}`}
-                  onClick={() => {
-                    // Mark as saved and advance to next section
-                    setHasSavedCurrentSection(true)
-
-                    // Find next unrated section (including deselected ones)
-                    let targetIndex = -1
-
-                    // First, try to find an unrated section starting from the next index
-                    for (let i = currentSectionIndex + 1; i < wheelSections.length; i++) {
-                      if (!sections[wheelSections[i].id]) {
-                        targetIndex = i
-                        break
-                      }
-                    }
-
-                    // If no unrated section found after current, check from the beginning
-                    if (targetIndex === -1) {
-                      for (let i = 0; i < currentSectionIndex; i++) {
-                        if (!sections[wheelSections[i].id]) {
-                          targetIndex = i
-                          break
-                        }
-                      }
-                    }
-
-                    if (targetIndex !== -1) {
-                      // Advance to next unrated section
-                      setCurrentSectionIndex(targetIndex)
-                      setRotationOffset(0)
-                      setHasSavedCurrentSection(false) // Reset saved status for new section
-                      setTimeout(() => scrollToActiveCard(targetIndex), 100)
-                    }
-                  }}
-                  style={{
-                    width: '140px',
-                    height: '56px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '28px',
-                    backgroundColor: 'white',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                    border: '2px solid #3a7ddc',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease',
-                    color: '#3a7ddc',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    animation: 'circleExpand 0.4s ease-out'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#f8fafc'
-                    e.currentTarget.style.borderColor = '#2e6bc7'
-                    e.currentTarget.style.color = '#2e6bc7'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'white'
-                    e.currentTarget.style.borderColor = '#3a7ddc'
-                    e.currentTarget.style.color = '#3a7ddc'
-                  }}
-                  aria-label="Save and continue"
-                >
-                  <span style={{ animation: 'textFadeIn 0.4s ease-out' }}>
-                    SAVE
-                  </span>
-                </button>
-              )
-            }
-
-
-            // No button shown by default
             return null
           })()}
 
-          {/* Skip Button */}
-          <button
-            onClick={() => {
-              // If user has completed any sections, send those; otherwise send empty data with skip flag
-              const completedSections = Object.values(sections)
-              onComplete?.({
-                sections: completedSections,
-                overall_score: completedSections.length > 0 ? completedSections.reduce((sum, s) => sum + s.mood_numeric, 0) / completedSections.length : 0,
-                completed_sections: completedSections.length,
-                completed_at: new Date().toISOString(),
-                time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000),
-                skipped: true,
-                hasCompletedSections: completedSections.length > 0
-              })
-            }}
-            style={{
-              backgroundColor: 'white',
-              border: '2px solid #3a7ddc',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '56px',
-              height: '56px',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8fafc'
-              e.currentTarget.style.borderColor = '#2e6bc7'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'white'
-              e.currentTarget.style.borderColor = '#3a7ddc'
-            }}
-            aria-label="Skip to completion"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
-              <polyline points="9,18 15,12 9,6"></polyline>
-            </svg>
-          </button>
+          {/* Right Arrow Button - Acts like old SAVE button to advance to next topic */}
+          {Object.keys(sections).length < wheelSections.length && (
+            <button
+              onClick={() => {
+                const currentSection = wheelSections[currentSectionIndex]
+                const isCurrentSectionCompleted = sections[currentSection?.id]?.mood_level
+
+                // Current section must be completed to advance
+                if (!isCurrentSectionCompleted) {
+                  return // Do nothing if current section not completed
+                }
+
+                // Mark as saved and find next unrated section
+                setHasSavedCurrentSection(true)
+
+                // Find next unrated section
+                let targetIndex = -1
+
+                // First, try to find an unrated section starting from the next index
+                for (let i = currentSectionIndex + 1; i < wheelSections.length; i++) {
+                  if (!sections[wheelSections[i].id]) {
+                    targetIndex = i
+                    break
+                  }
+                }
+
+                // If no unrated section found after current, check from the beginning
+                if (targetIndex === -1) {
+                  for (let i = 0; i < currentSectionIndex; i++) {
+                    if (!sections[wheelSections[i].id]) {
+                      targetIndex = i
+                      break
+                    }
+                  }
+                }
+
+                if (targetIndex !== -1) {
+                  // Advance to next unrated section
+                  setCurrentSectionIndex(targetIndex)
+                  setRotationOffset(0)
+                  setHasSavedCurrentSection(false) // Reset saved status for new section
+                  setTimeout(() => scrollToActiveCard(targetIndex), 100)
+                }
+              }}
+              style={{
+                backgroundColor: 'white',
+                border: '2px solid #3a7ddc',
+                borderRadius: '50%',
+                cursor: sections[wheelSections[currentSectionIndex]?.id]?.mood_level ? 'pointer' : 'not-allowed',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '56px',
+                height: '56px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease',
+                opacity: sections[wheelSections[currentSectionIndex]?.id]?.mood_level ? 1 : 0.5
+              }}
+              onMouseEnter={(e) => {
+                if (sections[wheelSections[currentSectionIndex]?.id]?.mood_level) {
+                  e.currentTarget.style.backgroundColor = '#f8fafc'
+                  e.currentTarget.style.borderColor = '#2e6bc7'
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'white'
+                e.currentTarget.style.borderColor = '#3a7ddc'
+              }}
+              disabled={!sections[wheelSections[currentSectionIndex]?.id]?.mood_level}
+              aria-label="Continue to next topic"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+                <polyline points="9,18 15,12 9,6"></polyline>
+              </svg>
+            </button>
+          )}
         </div>
       )}
 

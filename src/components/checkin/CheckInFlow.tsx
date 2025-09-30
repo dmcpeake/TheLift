@@ -19,8 +19,8 @@ type FlowStep = 'checkin' | 'mood' | 'emotions' | 'wellbeing' | 'chart' | 'talk'
 
 const steps = [
   { id: 'mood', name: 'My emotions', number: 1 },
-  { id: 'emotions', name: 'My emotions', number: 2 },
-  { id: 'wellbeing', name: 'Wellbeing wheel', number: 3 },
+  { id: 'wellbeing', name: 'Wellbeing wheel', number: 2 },
+  { id: 'emotions', name: 'My emotions', number: 3 },
   { id: 'chart', name: 'Wellbeing chart', number: 4 },
   { id: 'talk', name: 'Talk to someone', number: 5 }
 ]
@@ -97,8 +97,15 @@ export function CheckInFlow() {
       return
     }
 
-    // Special handling for chart completion - go to talk page
+    // Special handling for chart completion - go to emotions page (since order changed)
     if (stepId === 'chart') {
+      // Navigate to emotions page (step 3 in new order)
+      navigate('/checkin/flow/emotions')
+      return
+    }
+
+    // Special handling for emotions completion - go to talk page
+    if (stepId === 'emotions') {
       // Navigate to talk page
       navigate('/checkin/flow/talk')
       return
@@ -719,70 +726,6 @@ export function CheckInFlow() {
                   </div>
                 )}
 
-                {/* Wellbeing Section */}
-                {completedData.wellbeing?.sections && completedData.wellbeing.sections.length > 0 && (
-                  <div>
-                    <h2 className="text-center text-gray-700 mb-4" style={{ fontSize: '18px', fontWeight: 600 }}>
-                      How you're feeling about
-                    </h2>
-                    <div className="space-y-3">
-                      {completedData.wellbeing.sections.map((section: any, index: number) => {
-                        // Get the mood animation based on mood level
-                        const getMoodAnimation = () => {
-                          switch (section.mood_level) {
-                            case 'very_happy': return BlushingShaded
-                            case 'happy': return HappyShaded
-                            case 'ok': return MehShaded
-                            case 'sad': return SadTearShaded
-                            case 'very_sad': return CryingShaded
-                            default: return null
-                          }
-                        }
-                        const animation = getMoodAnimation()
-
-                        return (
-                          <div key={index}>
-                            <div className="flex justify-between items-center">
-                              <span className="text-base font-semibold">{section.name}</span>
-                              <div className="flex items-center gap-2">
-                                <span className="text-base capitalize">
-                                  {section.mood_level.replace('_', ' ')}
-                                </span>
-                                {animation && (
-                                  <div style={{ width: '30px', height: '30px' }}>
-                                    <Lottie
-                                      animationData={animation}
-                                      loop={true}
-                                      autoplay={true}
-                                      style={{ width: '100%', height: '100%' }}
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            {section.notes && (
-                              <p className="text-left text-gray-600 mt-2 italic" style={{ fontSize: '14px' }}>
-                                "{section.notes}"
-                              </p>
-                            )}
-                            {/* Add dashed divider between sections (except for the last one) */}
-                            {index < completedData.wellbeing.sections.length - 1 && (
-                              <div style={{
-                                width: '100%',
-                                height: '1px',
-                                borderTop: '1px dashed #d1d5db',
-                                borderImageSource: 'repeating-linear-gradient(90deg, #d1d5db 0px, #d1d5db 4px, transparent 4px, transparent 8px)',
-                                borderImageSlice: 1,
-                                marginTop: '12px'
-                              }} />
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                    <hr className="border-t border-gray-200 mt-6" />
-                  </div>
-                )}
               </div>
 
               {/* Action Buttons - horizontal row with consistent site styling */}

@@ -216,11 +216,13 @@ export function Stage({
                 }}
               />
 
-              {/* Cycle separators - white circles marking each breath cycle - only show when breathing */}
+              {/* Cycle separators - white circles marking each breath cycle start - only show when breathing */}
               {isBreathingPhase && (
                 <>
                   {/* The progress ring is rotated -90deg in CSS, so dots align with the rotated progress */}
-                  {/* Position 1: Right side (becomes top after CSS rotation) */}
+                  {/* For 3 cycles: dots at 0%, 33.33%, and 66.67% of the circle */}
+
+                  {/* Cycle 1 start: Top (0% - start position after rotation) */}
                   <circle
                     cx="380"
                     cy="200"
@@ -232,7 +234,7 @@ export function Stage({
                       filter: 'drop-shadow(0px -2px 4px rgba(0,0,0,0.15))'
                     }}
                   />
-                  {/* Position 2: 1/3 around clockwise from right */}
+                  {/* Cycle 2 start: 1/3 around (33.33% position) */}
                   <circle
                     cx={200 + 180 * Math.cos((2 * Math.PI * 1) / 3)}
                     cy={200 + 180 * Math.sin((2 * Math.PI * 1) / 3)}
@@ -244,7 +246,7 @@ export function Stage({
                       filter: 'drop-shadow(0px -2px 4px rgba(0,0,0,0.15))'
                     }}
                   />
-                  {/* Position 3: 2/3 around clockwise from right */}
+                  {/* Cycle 3 start: 2/3 around (66.67% position) */}
                   <circle
                     cx={200 + 180 * Math.cos((2 * Math.PI * 2) / 3)}
                     cy={200 + 180 * Math.sin((2 * Math.PI * 2) / 3)}

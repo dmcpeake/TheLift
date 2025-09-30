@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import Lottie from 'lottie-react'
 import { Info } from 'lucide-react'
-
-// Import mood animations
-import BlushingShaded from '../../assets/animations/Blushing_Shaded.json'
-import HappyShaded from '../../assets/animations/Happy_Shaded.json'
-import MehShaded from '../../assets/animations/Meh_Shaded.json'
-import SadTearShaded from '../../assets/animations/Sad_Tear_Shaded.json'
-import CryingShaded from '../../assets/animations/Crying_Shaded.json'
 
 interface WellbeingSection {
   name: string
@@ -62,17 +54,6 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation, onCe
     }
   }
 
-  // Get appropriate animation based on mood level
-  const getMoodAnimation = (moodNumeric: number) => {
-    switch (moodNumeric) {
-      case 5: return BlushingShaded // Very Happy
-      case 4: return HappyShaded // Happy
-      case 3: return MehShaded // OK
-      case 2: return SadTearShaded // Sad
-      case 1: return CryingShaded // Very Sad
-      default: return null
-    }
-  }
 
   // Mood level colors (matching mood meter)
   const moodColors = {
@@ -280,47 +261,6 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation, onCe
           </text>
         ))}
 
-        {/* Emoji animations on segments with data */}
-        {segments.map((segment, index) => {
-          // Only show animation if segment has data
-          if (segment.moodLevel === 0) return null
-
-          const animation = getMoodAnimation(segment.moodLevel)
-          if (!animation) return null
-
-          const segmentAngle = 360 / 7
-          const midAngle = (segment.startAngle + segment.endAngle) / 2
-          const animationRadius = maxRadius - 5 // Position slightly inside the edge
-          const x = centerX + animationRadius * Math.cos((midAngle * Math.PI) / 180)
-          const y = centerY + animationRadius * Math.sin((midAngle * Math.PI) / 180)
-
-          return (
-            <foreignObject
-              key={`emoji-${index}`}
-              x={x - 25}
-              y={y - 25}
-              width="50"
-              height="50"
-            >
-              <div style={{
-                width: '50px',
-                height: '50px',
-                pointerEvents: 'none'
-              }}>
-                <Lottie
-                  animationData={animation}
-                  loop={true}
-                  autoplay={true}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))'
-                  }}
-                />
-              </div>
-            </foreignObject>
-          )
-        })}
 
         {/* Center circle (invisible for positioning) */}
         <circle

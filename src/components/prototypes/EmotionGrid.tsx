@@ -776,7 +776,7 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
           <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center items-center" style={{ zIndex: 1000, gap: '20px' }}>
             {/* Back Button */}
             <button
-              onClick={() => navigate('/checkin/flow/mood')}
+              onClick={() => navigate('/checkin/flow/wellbeing')}
               style={{
                 backgroundColor: 'white',
                 border: '2px solid #3a7ddc',

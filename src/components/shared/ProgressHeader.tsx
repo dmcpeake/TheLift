@@ -13,14 +13,14 @@ interface ProgressHeaderProps {
 
 const progressSegments = [
   { name: 'Mood', icon: Heart },
-  { name: 'Emotions', icon: Smile },
-  { name: 'Wellbeing', icon: Compass }
+  { name: 'Wellbeing', icon: Compass },
+  { name: 'Emotions', icon: Smile }
 ]
 
 const steps = [
   { id: 'mood', name: 'Mood meter', number: 1 },
-  { id: 'emotions', name: 'My emotions', number: 2 },
-  { id: 'wellbeing', name: 'Wellbeing wheel', number: 3 }
+  { id: 'wellbeing', name: 'Wellbeing wheel', number: 2 },
+  { id: 'emotions', name: 'My emotions', number: 3 }
 ]
 
 export function ProgressHeader({
@@ -127,8 +127,8 @@ export function ProgressHeader({
             // Simple logic: blue if we've reached this section or beyond
             const isActive = (() => {
               if (currentStep === 'mood') return index === 0
-              if (currentStep === 'emotions') return index <= 1
-              if (currentStep === 'wellbeing' || currentStep === 'chart' || currentStep === 'talk' || currentStep === 'complete') return true
+              if (currentStep === 'wellbeing') return index <= 1
+              if (currentStep === 'emotions' || currentStep === 'chart' || currentStep === 'talk' || currentStep === 'complete') return true
               return false
             })()
 
@@ -136,8 +136,8 @@ export function ProgressHeader({
             const canNavigate = isActive || (() => {
               // Allow navigation to next section if current section has a selection
               if (currentStepHasSelection) {
-                if (currentStep === 'mood' && index === 1) return true // Can go to emotions
-                if (currentStep === 'emotions' && index === 2) return true // Can go to wellbeing
+                if (currentStep === 'mood' && index === 1) return true // Can go to wellbeing
+                if (currentStep === 'wellbeing' && index === 2) return true // Can go to emotions
               }
               return false
             })()
@@ -173,8 +173,8 @@ export function ProgressHeader({
             // Simple logic: blue if we've reached this section or beyond
             const isActive = (() => {
               if (currentStep === 'mood') return index === 0
-              if (currentStep === 'emotions') return index <= 1
-              if (currentStep === 'wellbeing' || currentStep === 'chart' || currentStep === 'talk' || currentStep === 'complete') return true
+              if (currentStep === 'wellbeing') return index <= 1
+              if (currentStep === 'emotions' || currentStep === 'chart' || currentStep === 'talk' || currentStep === 'complete') return true
               return false
             })()
 
@@ -201,8 +201,8 @@ export function ProgressHeader({
             // Simple logic: blue if we've reached this section or beyond
             const isActive = (() => {
               if (currentStep === 'mood') return index === 0
-              if (currentStep === 'emotions') return index <= 1
-              if (currentStep === 'wellbeing' || currentStep === 'chart' || currentStep === 'talk' || currentStep === 'complete') return true
+              if (currentStep === 'wellbeing') return index <= 1
+              if (currentStep === 'emotions' || currentStep === 'chart' || currentStep === 'talk' || currentStep === 'complete') return true
               return false
             })()
 
@@ -210,8 +210,8 @@ export function ProgressHeader({
             const canNavigate = isActive || (() => {
               // Allow navigation to next section if current section has a selection
               if (currentStepHasSelection) {
-                if (currentStep === 'mood' && index === 1) return true // Can go to emotions
-                if (currentStep === 'emotions' && index === 2) return true // Can go to wellbeing
+                if (currentStep === 'mood' && index === 1) return true // Can go to wellbeing
+                if (currentStep === 'wellbeing' && index === 2) return true // Can go to emotions
               }
               return false
             })()

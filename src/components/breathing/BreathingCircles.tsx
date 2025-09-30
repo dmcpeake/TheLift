@@ -28,7 +28,7 @@ export function BreathingCircles(props: BreathingCirclesProps & {
   onExternalRunningChange?: (running: boolean) => void;
 }) {
   const {
-    cycles: defaultCycles = 5,
+    cycles: defaultCycles = 3,
     pace: defaultPace,
     muted: initialMuted = true,
     captions: initialCaptions = true,
