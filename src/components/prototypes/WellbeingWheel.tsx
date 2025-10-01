@@ -125,14 +125,36 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
   }, [triggerCompletion, sections, startTime, onComplete])
 
   const wheelSections = [
-    { id: 'family', name: 'Family & Friends' },
-    { id: 'school', name: 'School & Learning' },
-    { id: 'health', name: 'Health & Body' },
-    { id: 'emotions', name: 'Emotions & Feelings' },
-    { id: 'fun', name: 'Fun & Hobbies' },
-    { id: 'safety', name: 'Safety & Security' },
-    { id: 'growth', name: 'Growth & Goals' }
+    { id: 'friends', name: 'My friends' },
+    { id: 'work', name: 'My work' },
+    { id: 'health', name: 'My health' },
+    { id: 'family', name: 'My family' },
+    { id: 'fun', name: 'My fun & play' },
+    { id: 'safety', name: 'My safety' },
+    { id: 'emotions', name: 'My emotions' }
   ]
+
+  // Get subtext for each topic
+  const getTopicSubtext = (sectionId: string) => {
+    switch (sectionId) {
+      case 'friends':
+        return 'Think about how you have been getting on with your friends today. Have you felt you could be yourself? Have you enjoyed their company?'
+      case 'work':
+        return 'If you think about your home or schoolwork - how was it today? Has it been easy, hard, fun, boring or just ok?'
+      case 'health':
+        return 'How healthy are you today? Think about your sleep, food, water, exercise. Have you had the energy you need for all the things you wanted to do?'
+      case 'family':
+        return 'Think about your special family and all the love and support you have between you. How connected are you feeling today?'
+      case 'fun':
+        return 'How fun has today been for you? Have you played with any friends or enjoyed some time alone? You can also think about any hobbies, sports or games you\'ve played today.'
+      case 'safety':
+        return 'Think about how safe you feel when you are on the road, online, on playdates, or at school. Feeling unsafe can sometimes feel like a worry that sits like bubbles in your tummy. How safe have you felt today?'
+      case 'emotions':
+        return 'Emotions are simply feelings that tell you how you\'re feeling about the world. Have you been able to handle or talk about all the big emotions that have shown up for you today?'
+      default:
+        return ''
+    }
+  }
 
   const moods = [
     { animation: BlushingShaded, level: 'very_happy', numeric: 5, color: '#95c5c8' },
@@ -490,11 +512,13 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
       {/* Centered title like breathing exercise */}
       <div className="text-center wellbeing-title-container" style={{ marginBottom: '2rem' }}>
         <h1 className="wellbeing-title-mobile wellbeing-title-desktop text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-          {currentSection ? `How are you feeling about your ${currentSection.name}` : 'How do you feel about these areas of your life?'}
+          {currentSection ? currentSection.name : 'How do you feel about these areas of your life?'}
         </h1>
-        <h1 className="wellbeing-title-mobile wellbeing-title-mobile-text text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em', display: 'none' }}>
-          {currentSection ? 'How are you feeling about' : 'How do you feel about these areas of your life?'}
-        </h1>
+        {currentSection && (
+          <p className="text-gray-600 mx-auto px-4" style={{ fontSize: '16px', fontWeight: 400, lineHeight: '1.5', maxWidth: '600px', marginTop: '8px' }}>
+            {getTopicSubtext(currentSection.id)}
+          </p>
+        )}
       </div>
 
       {!finalData ? (
@@ -572,7 +596,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
               // Icon mapping for each section
               const getIcon = (sectionId: string) => {
                 switch (sectionId) {
-                  case 'family':
+                  case 'friends':
                     return (
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -582,7 +606,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                         <circle cx="18" cy="12" r="3"/>
                       </svg>
                     )
-                  case 'school':
+                  case 'work':
                     return (
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
@@ -596,13 +620,11 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                         <path d="M12 5L8 21l4-7 4 7-4-16"/>
                       </svg>
                     )
-                  case 'emotions':
+                  case 'family':
                     return (
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-                        <line x1="9" y1="9" x2="9.01" y2="9"/>
-                        <line x1="15" y1="9" x2="15.01" y2="9"/>
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
                       </svg>
                     )
                   case 'fun':
@@ -617,10 +639,13 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
                       </svg>
                     )
-                  case 'growth':
+                  case 'emotions':
                     return (
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                        <line x1="9" y1="9" x2="9.01" y2="9"/>
+                        <line x1="15" y1="9" x2="15.01" y2="9"/>
                       </svg>
                     )
                   default:
@@ -1095,41 +1120,6 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
       {/* Fixed bottom button - always show to allow proceeding without completing all sections */}
       {!finalData && (
         <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center items-center" style={{ zIndex: 1000, gap: '20px' }}>
-          {/* Back Button - Hide when all sections completed */}
-          {Object.keys(sections).length < wheelSections.length && (
-            <button
-              onClick={() => {
-                // Navigate back to mood page (step 1 in new order)
-                navigate('/checkin/flow/mood')
-              }}
-              style={{
-                backgroundColor: 'white',
-                border: '2px solid #3a7ddc',
-                borderRadius: '50%',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '56px',
-                height: '56px',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f8fafc'
-                e.currentTarget.style.borderColor = '#2e6bc7'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'white'
-                e.currentTarget.style.borderColor = '#3a7ddc'
-              }}
-              aria-label="Go back to mood"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
-                <polyline points="15,18 9,12 15,6"></polyline>
-              </svg>
-            </button>
-          )}
 
           {/* NEXT Button - Only visible when ALL sections are completed */}
           {(() => {
@@ -1218,7 +1208,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                 }
               }}
               style={{
-                backgroundColor: 'white',
+                backgroundColor: sections[wheelSections[currentSectionIndex]?.id]?.mood_level ? '#3a7ddc' : 'white',
                 border: '2px solid #3a7ddc',
                 borderRadius: '50%',
                 cursor: sections[wheelSections[currentSectionIndex]?.id]?.mood_level ? 'pointer' : 'not-allowed',
@@ -1233,20 +1223,32 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
               }}
               onMouseEnter={(e) => {
                 if (sections[wheelSections[currentSectionIndex]?.id]?.mood_level) {
+                  e.currentTarget.style.backgroundColor = '#2e6bc7'
+                } else {
                   e.currentTarget.style.backgroundColor = '#f8fafc'
                   e.currentTarget.style.borderColor = '#2e6bc7'
                 }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'white'
-                e.currentTarget.style.borderColor = '#3a7ddc'
+                if (sections[wheelSections[currentSectionIndex]?.id]?.mood_level) {
+                  e.currentTarget.style.backgroundColor = '#3a7ddc'
+                } else {
+                  e.currentTarget.style.backgroundColor = 'white'
+                  e.currentTarget.style.borderColor = '#3a7ddc'
+                }
               }}
               disabled={!sections[wheelSections[currentSectionIndex]?.id]?.mood_level}
               aria-label="Continue to next topic"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
-                <polyline points="9,18 15,12 9,6"></polyline>
-              </svg>
+              {sections[wheelSections[currentSectionIndex]?.id]?.mood_level ? (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'white' }}>
+                  <polyline points="20,6 9,17 4,12"></polyline>
+                </svg>
+              ) : (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
+                  <polyline points="20,6 9,17 4,12"></polyline>
+                </svg>
+              )}
             </button>
           )}
         </div>

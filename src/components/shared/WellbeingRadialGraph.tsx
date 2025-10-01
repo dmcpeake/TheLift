@@ -33,13 +33,13 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation, onCe
   }, [size])
   // Map section names to their positions (clockwise from top)
   const sectionOrder = [
-    'Family & Friends',
-    'School & Learning',
-    'Health & Body',
-    'Emotions & Feelings',
-    'Fun & Hobbies',
-    'Safety & Security',
-    'Growth & Goals'
+    'My friends',
+    'My work',
+    'My health',
+    'My family',
+    'My fun & play',
+    'My safety',
+    'My emotions'
   ]
 
   // Use mood level colors from wellbeing wheel (not section colors)
@@ -226,9 +226,9 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation, onCe
 
             // Target specific segments that need text reversal based on their names
             const segmentName = segments[index]?.name || ''
-            const shouldReverse = segmentName === 'Fun & Hobbies' ||
-                                 segmentName === 'Health & Body' ||
-                                 segmentName === 'Emotions & Feelings'
+            const shouldReverse = segmentName === 'My fun & play' ||
+                                 segmentName === 'My health' ||
+                                 segmentName === 'My family'
 
             return (
               <path
