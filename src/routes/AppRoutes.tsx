@@ -57,7 +57,7 @@ import { LottieLoaderDemo } from '../pages/test/LottieLoaderDemo'
 // Check-in Flow Components
 import { CheckInHome } from '../components/checkin/CheckInHome'
 import { CheckInFlow } from '../components/checkin/CheckInFlow'
-import { GardenPage } from '../pages/GardenPage'
+import { CheckInGarden } from '../components/checkin/CheckInGarden'
 
 export function AppRoutes() {
   const { user } = React.useContext(AuthContext)
@@ -133,7 +133,7 @@ export function AppRoutes() {
         {/* Check-in Flow Routes - Public access for prototypes */}
         <Route path="/checkin/home" element={<CheckInHome />} />
         <Route path="/checkin/flow/:step" element={<CheckInFlow />} />
-        <Route path="/checkin/garden" element={<GardenPage />} />
+        <Route path="/checkin/garden" element={<CheckInGarden />} />
 
         {/* Prototypes Route - No authentication required */}
         <Route path="/prototypes" element={<PrototypesPage />} />

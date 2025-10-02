@@ -41,6 +41,7 @@ export function CheckInFlow() {
   const [theoDocumentAnimation, setTheoDocumentAnimation] = useState<any>(null)
   const [activeCardIndex, setActiveCardIndex] = useState(0)
   const [theoSuccessAnimation, setTheoSuccessAnimation] = useState<any>(null)
+  const [theoThumbsUpAnimation, setTheoThumbsUpAnimation] = useState<any>(null)
 
   const currentStep = (step || 'mood') as FlowStep
   const currentStepIndex = steps.findIndex(s => s.id === currentStep)
@@ -61,6 +62,11 @@ export function CheckInFlow() {
       .then(response => response.json())
       .then(data => setTheoSuccessAnimation(data))
       .catch(error => console.error('Error loading Theo success animation:', error))
+
+    fetch('/theo-thumb-up.json')
+      .then(response => response.json())
+      .then(data => setTheoThumbsUpAnimation(data))
+      .catch(error => console.error('Error loading Theo thumbs up animation:', error))
   }, [])
 
   // Reset selection state when step changes
@@ -533,7 +539,7 @@ export function CheckInFlow() {
                 {/* DONE Button - desktop only */}
                 <div className="hidden md:flex justify-center" style={{ marginBottom: '20px' }}>
                   <button
-                    onClick={() => navigate('/checkin/home')}
+                    onClick={() => navigate('/checkin/garden')}
                     className="font-semibold text-lg transition-all duration-200"
                     style={{
                       backgroundColor: '#e87e67',
@@ -549,17 +555,17 @@ export function CheckInFlow() {
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
                   >
-                    DONE
+                    MY GARDEN
                   </button>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* DONE Button - mobile only */}
+          {/* MY GARDEN Button - mobile only */}
           <div className="complete-mobile-button flex justify-center" style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
             <button
-              onClick={() => navigate('/checkin/home')}
+              onClick={() => navigate('/checkin/garden')}
               className="transition-all duration-200"
               style={{
                 backgroundColor: '#e87e67',
@@ -582,7 +588,7 @@ export function CheckInFlow() {
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
             >
-              DONE
+              MY GARDEN
             </button>
           </div>
 
@@ -1157,7 +1163,6 @@ export function CheckInFlow() {
                   <button
                     onClick={() => {
                       setCompletedData(prev => ({ ...prev, talk: { choice: 'parent' } }))
-                      setTimeout(() => navigate('/checkin/flow/complete'), 4000)
                     }}
                     className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                     style={{
@@ -1183,7 +1188,6 @@ export function CheckInFlow() {
                   <button
                     onClick={() => {
                       setCompletedData(prev => ({ ...prev, talk: { choice: 'teacher' } }))
-                      setTimeout(() => navigate('/checkin/flow/complete'), 4000)
                     }}
                     className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                     style={{
@@ -1209,7 +1213,6 @@ export function CheckInFlow() {
                   <button
                     onClick={() => {
                       setCompletedData(prev => ({ ...prev, talk: { choice: 'none' } }))
-                      setTimeout(() => navigate('/checkin/flow/complete'), 4000)
                     }}
                     className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                     style={{
@@ -1236,48 +1239,343 @@ export function CheckInFlow() {
 
               {/* Message - fades in after button click */}
               <div
-                className="talk-message transition-opacity duration-500 flex items-center justify-center"
+                className="talk-message transition-opacity duration-500"
                 style={{
                   opacity: completedData.talk ? 1 : 0,
-                  display: completedData.talk ? 'flex' : 'none',
-                  minHeight: '60vh'
+                  display: completedData.talk ? 'block' : 'none'
                 }}
               >
-                <div
-                  style={{
-                    backgroundColor: '#f8d678',
-                    border: '1px solid white',
-                    borderRadius: '4px',
-                    padding: '24px 32px',
-                    maxWidth: '600px'
-                  }}
-                >
+                {/* Title and Subtitle - matching wellbeing page styling */}
+                <div className="text-center" style={{ marginBottom: '2rem' }}>
                   {(() => {
                     const talkChoice = completedData.talk?.choice
                     if (talkChoice === 'parent') {
                       return (
-                        <p className="text-gray-900 text-center" style={{ fontWeight: 500, margin: 0, fontSize: '18px' }}>
+                        <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
                           Your parent will check in with you soon
-                        </p>
+                        </h1>
                       )
                     } else if (talkChoice === 'teacher') {
                       return (
-                        <p className="text-gray-900 text-center" style={{ fontWeight: 500, margin: 0, fontSize: '18px' }}>
+                        <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
                           Your teacher will check in with you soon
-                        </p>
+                        </h1>
                       )
                     } else {
                       return (
-                        <div className="text-gray-900 text-center">
-                          <p className="mb-2" style={{ fontWeight: 500, margin: '0 0 12px 0', fontSize: '18px' }}>Your feelings are safe with us</p>
-                          <p className="text-base text-gray-700" style={{ fontWeight: 400, margin: 0 }}>
+                        <>
+                          <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+                            Your feelings are safe with us
+                          </h1>
+                          <p className="text-base text-gray-700" style={{ fontWeight: 400 }}>
                             You can always share with someone later if you want to
                           </p>
-                        </div>
+                        </>
                       )
                     }
                   })()}
                 </div>
+
+                {/* Theo Thumbs Up Animation */}
+                {theoThumbsUpAnimation && (
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+                    <div style={{ width: '200px', height: '200px' }}>
+                      <Lottie
+                        animationData={theoThumbsUpAnimation}
+                        loop={true}
+                        autoplay={true}
+                        style={{ width: '100%', height: '100%' }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Divider Line */}
+                <hr style={{
+                  width: '100%',
+                  maxWidth: '600px',
+                  margin: '0 auto 2rem auto',
+                  border: 'none',
+                  borderTop: '1px solid #d1d5db'
+                }} />
+
+                {/* Have a lift section */}
+                <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto' }}>
+                  <h2 style={{
+                    fontSize: '16pt',
+                    fontWeight: '400',
+                    color: '#111827',
+                    marginBottom: '1.5rem',
+                    textAlign: 'center'
+                  }}>
+                    Have a lift
+                  </h2>
+
+                  {/* Cards - Desktop: 3 columns, Mobile: Horizontal scroll */}
+                  <div
+                    className="lift-cards-container"
+                    onScroll={(e) => {
+                      const container = e.currentTarget
+                      const scrollLeft = container.scrollLeft
+                      const cardWidth = 280 + 24 // card width + gap
+                      const index = Math.round(scrollLeft / cardWidth)
+                      setActiveCardIndex(index)
+                    }}
+                    style={{
+                      display: 'flex',
+                      gap: '1.5rem',
+                      overflowX: 'auto',
+                      scrollSnapType: 'x mandatory',
+                      WebkitOverflowScrolling: 'touch',
+                      paddingBottom: '1rem'
+                    }}
+                  >
+                    {/* Joke Card */}
+                    <div
+                      style={{
+                        flex: '0 0 auto',
+                        width: 'calc(100% - 2rem)',
+                        minWidth: '280px',
+                        maxWidth: '280px',
+                        backgroundColor: 'white',
+                        borderRadius: '4px',
+                        padding: '1rem 1.5rem',
+                        border: '2px solid #e5e7eb',
+                        scrollSnapAlign: 'center',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                        minHeight: 'auto'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                        <div style={{
+                          backgroundColor: 'rgba(227, 141, 59, 0.2)',
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                            <line x1="9" y1="9" x2="9.01" y2="9"/>
+                            <line x1="15" y1="9" x2="15.01" y2="9"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <h3 style={{
+                        margin: '0 0 0.5rem 0',
+                        color: '#374151',
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        fontWeight: '600'
+                      }}>
+                        Joke of the day
+                      </h3>
+                      <p style={{
+                        margin: '0',
+                        color: '#374151',
+                        lineHeight: '1.5',
+                        textAlign: 'center',
+                        fontSize: '14px'
+                      }}>
+                        Where do fish keep their money?<br />
+                        <strong>In a river bank</strong>
+                      </p>
+                    </div>
+
+                    {/* Riddle Card */}
+                    <div
+                      style={{
+                        flex: '0 0 auto',
+                        width: 'calc(100% - 2rem)',
+                        minWidth: '280px',
+                        maxWidth: '280px',
+                        backgroundColor: 'white',
+                        borderRadius: '4px',
+                        padding: '1rem 1.5rem',
+                        border: '2px solid #e5e7eb',
+                        scrollSnapAlign: 'center',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                        minHeight: 'auto'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                        <div style={{
+                          backgroundColor: 'rgba(227, 141, 59, 0.2)',
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <h3 style={{
+                        margin: '0 0 0.5rem 0',
+                        color: '#374151',
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        fontWeight: '600'
+                      }}>
+                        Riddle of the day
+                      </h3>
+                      <p style={{
+                        margin: '0',
+                        color: '#374151',
+                        lineHeight: '1.5',
+                        textAlign: 'center',
+                        fontSize: '14px'
+                      }}>
+                        What is the hardest key to turn?<br />
+                        <strong>A donkey</strong>
+                      </p>
+                    </div>
+
+                    {/* Fact Card */}
+                    <div
+                      style={{
+                        flex: '0 0 auto',
+                        width: 'calc(100% - 2rem)',
+                        minWidth: '280px',
+                        maxWidth: '280px',
+                        backgroundColor: 'white',
+                        borderRadius: '4px',
+                        padding: '1rem 1.5rem',
+                        border: '2px solid #e5e7eb',
+                        scrollSnapAlign: 'center',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                        minHeight: 'auto'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                        <div style={{
+                          backgroundColor: 'rgba(227, 141, 59, 0.2)',
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <h3 style={{
+                        margin: '0 0 0.5rem 0',
+                        color: '#374151',
+                        textAlign: 'center',
+                        fontSize: '14px',
+                        fontWeight: '600'
+                      }}>
+                        Fact of the day
+                      </h3>
+                      <p style={{
+                        margin: '0',
+                        color: '#374151',
+                        lineHeight: '1.5',
+                        textAlign: 'center',
+                        fontSize: '14px'
+                      }}>
+                        A crocodile cannot stick its tongue out
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Mobile scroll indicator dots */}
+                  <div className="mobile-dots" style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    marginTop: '1rem'
+                  }}>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: activeCardIndex === 0 ? '#3a7ddc' : '#d1d5db',
+                      transition: 'background-color 0.3s ease'
+                    }}></div>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: activeCardIndex === 1 ? '#3a7ddc' : '#d1d5db',
+                      transition: 'background-color 0.3s ease'
+                    }}></div>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: activeCardIndex === 2 ? '#3a7ddc' : '#d1d5db',
+                      transition: 'background-color 0.3s ease'
+                    }}></div>
+                  </div>
+                </div>
+
+                <style jsx>{`
+                  @media (min-width: 768px) {
+                    .lift-cards-container {
+                      justify-content: center;
+                      overflow-x: visible !important;
+                    }
+                    .mobile-dots {
+                      display: none !important;
+                    }
+                  }
+
+                  .lift-cards-container::-webkit-scrollbar {
+                    display: none;
+                  }
+
+                  .lift-cards-container {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                  }
+                `}</style>
+              </div>
+
+              {/* Yellow swoosh footer - hidden on mobile */}
+              <div className="hidden md:block absolute bottom-0 left-0 right-0">
+                <YellowSwoosh />
+              </div>
+
+              {/* NEXT Button - positioned above yellow swoosh on desktop, at bottom on mobile */}
+              <div className="fixed left-1/2 transform -translate-x-1/2 text-center"
+                   style={{ zIndex: 1100, bottom: '32px' }}>
+                <button
+                  onClick={() => navigate('/checkin/flow/complete')}
+                  className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  style={{
+                    backgroundColor: '#3a7ddc',
+                    color: 'white',
+                    width: '140px',
+                    height: '56px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '28px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#2e6bc7'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#3a7ddc'
+                  }}
+                >
+                  NEXT
+                </button>
               </div>
             </div>
           </div>
