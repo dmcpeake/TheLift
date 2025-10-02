@@ -1,8 +1,15 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ThreeHappyThings } from './garden/ThreeHappyThings'
+import { ThreeGratefulThings } from './garden/ThreeGratefulThings'
+import { IfICouldBe } from './garden/IfICouldBe'
+import { DrawYourMind } from './garden/DrawYourMind'
+
+type ActivityType = 'happy' | 'grateful' | 'ifICouldBe' | 'draw' | null
 
 export function CheckInGarden() {
   const navigate = useNavigate()
+  const [activeActivity, setActiveActivity] = useState<ActivityType>(null)
 
   return (
     <>
@@ -311,22 +318,127 @@ export function CheckInGarden() {
 
         {/* Content */}
         <div
-          className="flex items-center justify-center transition-opacity duration-300"
+          className="transition-opacity duration-300"
           style={{
             minHeight: '100vh',
-            padding: '80px',
+            padding: '140px 80px 80px 80px',
             width: '100%'
           }}
         >
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="max-w-5xl mx-auto">
+            {/* Title */}
+            <h1 className="text-4xl font-bold text-gray-900 mb-2 text-center">
               My Garden
             </h1>
-            <p className="text-lg text-gray-700">
-              Your garden content goes here
+            <p className="text-lg text-gray-700 mb-12 text-center">
+              Choose an activity to help you reflect
             </p>
+
+            {/* Activity Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Card 1: 3 Happy Things */}
+              <button
+                onClick={() => setActiveActivity('happy')}
+                className="bg-white rounded-lg p-6 border-2 border-gray-200 hover:border-blue-400 hover:shadow-lg transition-all duration-200 text-left"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#eab308" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                      <line x1="9" y1="9" x2="9.01" y2="9"/>
+                      <line x1="15" y1="9" x2="15.01" y2="9"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      3 things that made me happy today
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      Reflect on the positive moments from your day
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Card 2: 3 Grateful Things */}
+              <button
+                onClick={() => setActiveActivity('grateful')}
+                className="bg-white rounded-lg p-6 border-2 border-gray-200 hover:border-blue-400 hover:shadow-lg transition-all duration-200 text-left"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      3 things I am grateful for
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      Share what you're thankful for today
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Card 3: If I Could Be */}
+              <button
+                onClick={() => setActiveActivity('ifICouldBe')}
+                className="bg-white rounded-lg p-6 border-2 border-gray-200 hover:border-blue-400 hover:shadow-lg transition-all duration-200 text-left"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="10" r="3"/>
+                      <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      If I could be anything...
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      Imagine being any object, animal, or vegetable
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Card 4: Draw Your Mind */}
+              <button
+                onClick={() => setActiveActivity('draw')}
+                className="bg-white rounded-lg p-6 border-2 border-gray-200 hover:border-blue-400 hover:shadow-lg transition-all duration-200 text-left"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                      <path d="M2 2l7.586 7.586"/>
+                      <circle cx="11" cy="11" r="2"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      Draw what's on your mind
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      Express yourself through drawing
+                    </p>
+                  </div>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Activity Modals */}
+        {activeActivity === 'happy' && <ThreeHappyThings onClose={() => setActiveActivity(null)} />}
+        {activeActivity === 'grateful' && <ThreeGratefulThings onClose={() => setActiveActivity(null)} />}
+        {activeActivity === 'ifICouldBe' && <IfICouldBe onClose={() => setActiveActivity(null)} />}
+        {activeActivity === 'draw' && <DrawYourMind onClose={() => setActiveActivity(null)} />}
       </div>
     </>
   )
