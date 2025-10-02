@@ -39,6 +39,8 @@ export function CheckInFlow() {
   const [theoAnimation, setTheoAnimation] = useState<any>(null)
   const [showSupportLightbox, setShowSupportLightbox] = useState(false)
   const [theoDocumentAnimation, setTheoDocumentAnimation] = useState<any>(null)
+  const [activeCardIndex, setActiveCardIndex] = useState(0)
+  const [theoSuccessAnimation, setTheoSuccessAnimation] = useState<any>(null)
 
   const currentStep = (step || 'mood') as FlowStep
   const currentStepIndex = steps.findIndex(s => s.id === currentStep)
@@ -54,6 +56,11 @@ export function CheckInFlow() {
       .then(response => response.json())
       .then(data => setTheoDocumentAnimation(data))
       .catch(error => console.error('Error loading Theo document animation:', error))
+
+    fetch('/theo-success.json')
+      .then(response => response.json())
+      .then(data => setTheoSuccessAnimation(data))
+      .catch(error => console.error('Error loading Theo success animation:', error))
   }, [])
 
   // Reset selection state when step changes
@@ -188,97 +195,442 @@ export function CheckInFlow() {
   if (currentStep === 'complete') {
     return (
       <>
-        <style>{`
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        <style jsx>{`
+          @keyframes leafGroup {
+            0% {
+              transform: translateX(-150px) translateY(0);
+              opacity: 0;
+            }
+            10% {
+              opacity: 0.9;
+            }
+            90% {
+              opacity: 0.9;
+            }
+            100% {
+              transform: translateX(calc(100vw + 150px)) translateY(-50vh);
+              opacity: 0;
+            }
+          }
+          @keyframes leafFloat1 {
+            0% {
+              transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+              transform: translate(-10px, -15px) rotate(45deg);
+            }
+            50% {
+              transform: translate(-25px, 10px) rotate(-30deg);
+            }
+            75% {
+              transform: translate(-35px, -8px) rotate(60deg);
+            }
+            100% {
+              transform: translate(-50px, 0) rotate(360deg);
+            }
+          }
+          @keyframes leafFloat2 {
+            0% {
+              transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+              transform: translate(15px, 12px) rotate(-45deg);
+            }
+            50% {
+              transform: translate(30px, -20px) rotate(30deg);
+            }
+            75% {
+              transform: translate(45px, 5px) rotate(-60deg);
+            }
+            100% {
+              transform: translate(60px, -10px) rotate(-360deg);
+            }
+          }
+          @keyframes leafFloat3 {
+            0% {
+              transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+              transform: translate(5px, -10px) rotate(30deg);
+            }
+            50% {
+              transform: translate(10px, 15px) rotate(-45deg);
+            }
+            75% {
+              transform: translate(15px, -5px) rotate(45deg);
+            }
+            100% {
+              transform: translate(20px, 20px) rotate(720deg);
+            }
+          }
+          @keyframes leafFloat4 {
+            0% {
+              transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+              transform: translate(-8px, 8px) rotate(-30deg);
+            }
+            50% {
+              transform: translate(-20px, -15px) rotate(45deg);
+            }
+            75% {
+              transform: translate(-30px, 10px) rotate(-45deg);
+            }
+            100% {
+              transform: translate(-40px, -25px) rotate(360deg);
+            }
+          }
+          @keyframes leafFloat5 {
+            0% {
+              transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+              transform: translate(12px, -5px) rotate(45deg);
+            }
+            50% {
+              transform: translate(25px, 12px) rotate(-60deg);
+            }
+            75% {
+              transform: translate(40px, -8px) rotate(30deg);
+            }
+            100% {
+              transform: translate(55px, 15px) rotate(-360deg);
+            }
+          }
+          .leaf-group {
+            position: fixed;
+            top: 75%;
+            width: 180px;
+            height: 150px;
+            pointer-events: none;
+            z-index: 2;
+            animation: leafGroup 10s linear infinite;
+          }
+          .leaf {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+          }
+          .leaf1 {
+            top: 10px;
+            left: 15px;
+            animation: leafFloat1 3s ease-in-out infinite;
+          }
+          .leaf2 {
+            top: 45px;
+            left: 80px;
+            animation: leafFloat2 3.5s ease-in-out infinite;
+            animation-delay: 0.3s;
+          }
+          .leaf3 {
+            top: 90px;
+            left: 30px;
+            animation: leafFloat3 4s ease-in-out infinite;
+            animation-delay: 0.6s;
+          }
+          .leaf4 {
+            top: 20px;
+            left: 120px;
+            animation: leafFloat4 3.8s ease-in-out infinite;
+            animation-delay: 0.9s;
+          }
+          .leaf5 {
+            top: 75px;
+            left: 100px;
+            animation: leafFloat5 3.2s ease-in-out infinite;
+            animation-delay: 1.2s;
+          }
+          @keyframes butterflyPath {
+            0% {
+              transform: translateX(-100px) translateY(0);
+              opacity: 0;
+            }
+            5% {
+              opacity: 0.8;
+            }
+            15% {
+              transform: translateX(15vw) translateY(-50px);
+            }
+            30% {
+              transform: translateX(30vw) translateY(30px);
+            }
+            45% {
+              transform: translateX(45vw) translateY(-70px);
+            }
+            60% {
+              transform: translateX(60vw) translateY(10px);
+            }
+            75% {
+              transform: translateX(75vw) translateY(-60px);
+            }
+            90% {
+              transform: translateX(90vw) translateY(20px);
+            }
+            95% {
+              opacity: 0.8;
+            }
+            100% {
+              transform: translateX(calc(100vw + 100px)) translateY(-30px);
+              opacity: 0;
+            }
+          }
+          @keyframes butterflyWings {
+            0%, 100% {
+              transform: scaleY(1) scaleX(1);
+            }
+            50% {
+              transform: scaleY(0.3) scaleX(1.1);
+            }
+          }
+          .butterfly {
+            position: fixed;
+            bottom: 15%;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 3;
+            opacity: 0;
+            animation: butterflyPath 12s linear infinite;
+            animation-delay: 2s;
+            animation-fill-mode: forwards;
+          }
+          .butterfly svg {
+            animation: butterflyWings 0.2s ease-in-out infinite;
+          }
+
+          /* Mobile Optimizations */
+          @media (max-width: 768px) {
+            .leaf-group {
+              width: 100px !important;
+              height: 100px !important;
+              top: 80% !important;
+            }
+            .leaf {
+              width: 20px !important;
+              height: 20px !important;
+            }
+            .leaf1 { top: 5px !important; left: 10px !important; }
+            .leaf2 { top: 30px !important; left: 50px !important; }
+            .leaf3 { top: 60px !important; left: 20px !important; }
+            .leaf4 { top: 15px !important; left: 70px !important; }
+            .leaf5 { top: 50px !important; left: 65px !important; }
+
+            .butterfly {
+              width: 28px !important;
+              height: 28px !important;
+              bottom: 20% !important;
+            }
           }
         `}</style>
-        <div className="min-h-screen bg-white flex items-center justify-center p-4">
-          <div className="max-w-2xl mx-auto text-center">
-            {/* Theo Document Animation */}
-            {theoDocumentAnimation && (
-              <div className="flex justify-center mb-6">
-                <div style={{ width: '120px', height: '120px' }}>
-                  <Lottie
-                    animationData={theoDocumentAnimation}
-                    loop={true}
-                    autoplay={true}
-                    style={{ width: '100%', height: '100%' }}
-                  />
-                </div>
-              </div>
-            )}
+        <div
+          className="min-h-screen bg-white relative overflow-hidden flex items-start justify-start"
+          style={{
+            backgroundImage: 'url(/CheckinComplete.svg)',
+            backgroundSize: window.innerWidth > 768 ? 'cover' : 'cover',
+            backgroundPosition: window.innerWidth > 768 ? 'center bottom' : 'center',
+            backgroundAttachment: window.innerWidth > 768 ? 'fixed' : 'scroll',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
+          {/* Butterfly */}
+          <div className="butterfly">
+            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Left wing */}
+              <ellipse cx="12" cy="20" rx="10" ry="15" fill="#FF6B9D" fillOpacity="0.7" transform="rotate(-20 12 20)"/>
+              <ellipse cx="12" cy="20" rx="8" ry="12" fill="#C66FCF" fillOpacity="0.6" transform="rotate(-20 12 20)"/>
+              {/* Right wing */}
+              <ellipse cx="28" cy="20" rx="10" ry="15" fill="#FF6B9D" fillOpacity="0.7" transform="rotate(20 28 20)"/>
+              <ellipse cx="28" cy="20" rx="8" ry="12" fill="#C66FCF" fillOpacity="0.6" transform="rotate(20 28 20)"/>
+              {/* Body */}
+              <ellipse cx="20" cy="20" rx="2" ry="8" fill="#4A4A4A" fillOpacity="0.8"/>
+              {/* Antennae */}
+              <line x1="20" y1="16" x2="17" y2="12" stroke="#4A4A4A" strokeWidth="0.5" strokeOpacity="0.6"/>
+              <line x1="20" y1="16" x2="23" y2="12" stroke="#4A4A4A" strokeWidth="0.5" strokeOpacity="0.6"/>
+              <circle cx="17" cy="12" r="0.8" fill="#4A4A4A" fillOpacity="0.6"/>
+              <circle cx="23" cy="12" r="0.8" fill="#4A4A4A" fillOpacity="0.6"/>
+            </svg>
+          </div>
 
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Great job!
-            </h1>
-            <p className="text-lg text-gray-600 mb-8">
-              Thanks for sharing your feelings today
-            </p>
-
-            {/* Conditional message card based on talk choice */}
-            <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6 mb-8 max-w-md mx-auto">
-              {(() => {
-                const talkChoice = completedData.talk?.choice
-                if (talkChoice === 'parent') {
-                  return (
-                    <p className="text-gray-700">
-                      Your parent will check in with you soon
-                    </p>
-                  )
-                } else if (talkChoice === 'teacher') {
-                  return (
-                    <p className="text-gray-700">
-                      Your teacher will check in with you soon
-                    </p>
-                  )
-                } else {
-                  return (
-                    <div className="text-gray-700">
-                      <p className="mb-2">Your feelings are safe with us</p>
-                      <p className="text-sm text-gray-600">
-                        You can always share with someone later if you want to
-                      </p>
-                    </div>
-                  )
-                }
-              })()}
+          {/* Animated Leaves */}
+          <div className="leaf-group">
+            <div className="leaf leaf1">
+              <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.5 0C7.5 0 3 3 3 7.5C3 9.5 4.5 11 6 11.5C6 10.5 6.5 9.5 7.5 8.5C8.5 9.5 9 10.5 9 11.5C10.5 11 12 9.5 12 7.5C12 3 7.5 0 7.5 0Z" fill="#8BC34A" fillOpacity="0.85"/>
+              </svg>
             </div>
-
-            {/* DONE Button */}
-            <div
-              className="fixed left-0 right-0 flex justify-center"
-              style={{
-                bottom: window.innerWidth <= 768 ? '32px' : '32px',
-                zIndex: 1000,
-                padding: '0 2rem'
-              }}
-            >
-              <button
-                onClick={() => navigate('/checkin/home')}
-                className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                style={{
-                  backgroundColor: '#e87e67',
-                  color: 'white',
-                  width: '140px',
-                  height: '56px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '28px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#d86b4f'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#e87e67'
-                }}
-              >
-                DONE
-              </button>
+            <div className="leaf leaf2">
+              <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.5 0C7.5 0 3 3 3 7.5C3 9.5 4.5 11 6 11.5C6 10.5 6.5 9.5 7.5 8.5C8.5 9.5 9 10.5 9 11.5C10.5 11 12 9.5 12 7.5C12 3 7.5 0 7.5 0Z" fill="#FFA726" fillOpacity="0.75"/>
+              </svg>
+            </div>
+            <div className="leaf leaf3">
+              <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.5 0C7.5 0 3 3 3 7.5C3 9.5 4.5 11 6 11.5C6 10.5 6.5 9.5 7.5 8.5C8.5 9.5 9 10.5 9 11.5C10.5 11 12 9.5 12 7.5C12 3 7.5 0 7.5 0Z" fill="#FFD54F" fillOpacity="0.7"/>
+              </svg>
+            </div>
+            <div className="leaf leaf4">
+              <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.5 0C7.5 0 3 3 3 7.5C3 9.5 4.5 11 6 11.5C6 10.5 6.5 9.5 7.5 8.5C8.5 9.5 9 10.5 9 11.5C10.5 11 12 9.5 12 7.5C12 3 7.5 0 7.5 0Z" fill="#FF7043" fillOpacity="0.8"/>
+              </svg>
+            </div>
+            <div className="leaf leaf5">
+              <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.5 0C7.5 0 3 3 3 7.5C3 9.5 4.5 11 6 11.5C6 10.5 6.5 9.5 7.5 8.5C8.5 9.5 9 10.5 9 11.5C10.5 11 12 9.5 12 7.5C12 3 7.5 0 7.5 0Z" fill="#CDDC39" fillOpacity="0.65"/>
+              </svg>
             </div>
           </div>
+          {/* Close Button */}
+          <button
+            onClick={() => navigate('/')}
+            className="fixed w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors z-50 shadow-lg"
+            style={{
+              backgroundColor: 'white',
+              border: '1px solid #147fe3',
+              top: '40px',
+              right: '40px'
+            }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#147fe3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+          </button>
+
+          {/* Welcome Content */}
+          <div
+            className="complete-content flex items-center justify-center transition-opacity duration-300"
+            style={{
+              minHeight: '100vh',
+              padding: '80px',
+              width: '100%'
+            }}
+          >
+            <div className="max-w-4xl mx-auto text-center">
+              {/* Container Card - Blurred Box */}
+              <div
+                className="rounded-2xl"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  padding: '22px 52px',
+                  position: 'relative',
+                  zIndex: 10
+                }}
+              >
+                {/* Header */}
+                <div className="mb-8" style={{ marginTop: '20px', marginBottom: '20px' }}>
+                  <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                    Great job!
+                  </h1>
+                  <p className="text-lg text-gray-900 max-w-lg mx-auto" style={{ fontWeight: 500 }}>
+                    Thanks for sharing your feelings today
+                  </p>
+                </div>
+
+                {/* DONE Button - desktop only */}
+                <div className="hidden md:flex justify-center" style={{ marginBottom: '20px' }}>
+                  <button
+                    onClick={() => navigate('/checkin/home')}
+                    className="font-semibold text-lg transition-all duration-200"
+                    style={{
+                      backgroundColor: '#e87e67',
+                      color: 'white',
+                      height: '60px',
+                      borderRadius: '30px',
+                      paddingLeft: '50px',
+                      paddingRight: '50px',
+                      border: '2px solid white',
+                      cursor: 'pointer',
+                      boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
+                  >
+                    DONE
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* DONE Button - mobile only */}
+          <div className="complete-mobile-button flex justify-center" style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
+            <button
+              onClick={() => navigate('/checkin/home')}
+              className="transition-all duration-200"
+              style={{
+                backgroundColor: '#e87e67',
+                color: 'white',
+                width: '180px',
+                height: '56px',
+                borderRadius: '28px',
+                border: '2px solid white',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)',
+                position: 'relative',
+                zIndex: 10001,
+                pointerEvents: 'auto'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
+            >
+              DONE
+            </button>
+          </div>
+
+          {/* Theo Success Animation - positioned like on checkin/home */}
+          {theoSuccessAnimation && (
+            <div style={{ position: 'relative' }}>
+              <div
+                className="theo-success-animation"
+                style={{
+                  position: 'fixed',
+                  bottom: '20px',
+                  left: 'calc(50% + 60px)',
+                  transform: 'translateX(-50%)',
+                  width: '240px',
+                  height: '240px',
+                  zIndex: 5,
+                  pointerEvents: 'none'
+                }}
+              >
+                <Lottie
+                  animationData={theoSuccessAnimation}
+                  loop={true}
+                  autoplay={true}
+                />
+              </div>
+            </div>
+          )}
+
+          <style jsx>{`
+            @media (min-width: 769px) {
+              .complete-mobile-button {
+                display: none !important;
+              }
+              .complete-content {
+                align-items: center !important;
+              }
+            }
+            @media (max-width: 768px) {
+              .complete-content {
+                align-items: flex-start !important;
+                padding-top: 40px !important;
+              }
+              .theo-success-animation {
+                bottom: 55px !important;
+                left: calc(50% + 60px) !important;
+              }
+            }
+          `}</style>
         </div>
       </>
     )
@@ -370,165 +722,229 @@ export function CheckInFlow() {
               <div className="flex flex-col items-center p-8"
                    style={{ paddingTop: '0' }}>
 
-                {/* Radial Graph */}
-                <div>
+                {/* Radial Graph - Reduced to 50% size */}
+                <div style={{ marginBottom: '3rem' }}>
                   <WellbeingRadialGraph
                     sections={completedData.wellbeing?.sections || []}
-                    size={500}
+                    size={250}
                     theoAnimation={theoAnimation}
-                    onCenterButtonClick={() => setShowSupportLightbox(true)}
                   />
                 </div>
 
-                {/* Support Lightbox */}
-                {showSupportLightbox && (
+                {/* Support Tips Section */}
+                <div style={{ width: '100%', maxWidth: '900px', marginBottom: '4rem' }}>
+                  <h2 style={{
+                    fontSize: '16pt',
+                    fontWeight: '400',
+                    color: '#111827',
+                    marginBottom: '1.5rem',
+                    textAlign: 'center'
+                  }}>
+                    Low score? To feel better you could try...
+                  </h2>
+
+                  {/* Desktop: 3 columns, Mobile: Horizontal scroll */}
                   <div
-                    style={{
-                      position: 'fixed',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                      zIndex: 9999
+                    className="support-tips-container"
+                    onScroll={(e) => {
+                      const container = e.currentTarget
+                      const scrollLeft = container.scrollLeft
+                      const cardWidth = 280 + 24 // card width + gap
+                      const index = Math.round(scrollLeft / cardWidth)
+                      setActiveCardIndex(index)
                     }}
-                    onClick={() => setShowSupportLightbox(false)}
+                    style={{
+                      display: 'flex',
+                      gap: '1.5rem',
+                      overflowX: 'auto',
+                      scrollSnapType: 'x mandatory',
+                      WebkitOverflowScrolling: 'touch',
+                      paddingBottom: '1rem'
+                    }}
                   >
+                    {/* Card 1 */}
                     <div
                       style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
+                        flex: '0 0 auto',
+                        width: 'calc(100% - 2rem)',
+                        minWidth: '280px',
+                        maxWidth: '280px',
                         backgroundColor: 'white',
-                        borderRadius: '8px',
-                        padding: '20px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        overflow: 'hidden',
-                        maxWidth: '500px',
-                        width: 'calc(100vw - 40px)'
+                        borderRadius: '4px',
+                        padding: '1rem 1.5rem',
+                        border: '2px solid #e5e7eb',
+                        scrollSnapAlign: 'center',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                        minHeight: 'auto'
                       }}
-                      onClick={(e) => e.stopPropagation()}
                     >
-                      {/* Header with Theo and title */}
-                      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                        {theoAnimation && (
-                          <div style={{ marginBottom: '16px' }}>
-                            <div
-                              style={{
-                                width: '80px',
-                                height: '80px',
-                                margin: '0 auto'
-                              }}
-                            >
-                              <Lottie
-                                animationData={theoAnimation}
-                                loop={true}
-                                autoplay={true}
-                                style={{ width: '100%', height: '100%' }}
-                              />
-                            </div>
-                          </div>
-                        )}
-
-                        <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '16px' }}>
-                          Low score? To feel better you could try...
-                        </h2>
-
-                        {/* Dashed line separator */}
+                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
                         <div style={{
-                          width: '100%',
-                          height: '1px',
-                          borderTop: '1px dashed #d1d5db',
-                          marginBottom: '0'
-                        }} />
-                      </div>
-
-                      {/* Content area */}
-                      <div style={{ marginBottom: '20px' }}>
-                        <div style={{ textAlign: 'left' }}>
-                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '16px' }}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ marginTop: '2px', flexShrink: 0 }}>
-                              <path d="M9 12l2 2 4-4" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              <circle cx="12" cy="12" r="10" stroke="#e38d3b" strokeWidth="2"/>
-                            </svg>
-                            <p style={{
-                              margin: '0',
-                              color: '#374151',
-                              lineHeight: '1.6'
-                            }}>
-                              List out the things that make you feel good
-                            </p>
-                          </div>
-                          <div style={{
-                            width: '100%',
-                            height: '1px',
-                            borderTop: '1px dotted #d1d5db',
-                            marginBottom: '16px'
-                          }} />
-                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '16px' }}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ marginTop: '2px', flexShrink: 0 }}>
-                              <path d="M9 12l2 2 4-4" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              <circle cx="12" cy="12" r="10" stroke="#e38d3b" strokeWidth="2"/>
-                            </svg>
-                            <p style={{
-                              margin: '0',
-                              color: '#374151',
-                              lineHeight: '1.6'
-                            }}>
-                              Talk to a friend
-                            </p>
-                          </div>
-                          <div style={{
-                            width: '100%',
-                            height: '1px',
-                            borderTop: '1px dotted #d1d5db',
-                            marginBottom: '16px'
-                          }} />
-                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ marginTop: '2px', flexShrink: 0 }}>
-                              <path d="M9 12l2 2 4-4" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              <circle cx="12" cy="12" r="10" stroke="#e38d3b" strokeWidth="2"/>
-                            </svg>
-                            <p style={{
-                              margin: '0',
-                              color: '#374151',
-                              lineHeight: '1.6'
-                            }}>
-                              Talk to your adults or teachers for a bit more support
-                            </p>
-                          </div>
+                          backgroundColor: 'rgba(227, 141, 59, 0.2)',
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
                         </div>
                       </div>
-
-                      {/* Footer with close button */}
-                      <div style={{
-                        borderTop: '1px solid #e5e7eb',
-                        paddingTop: '20px',
-                        marginTop: '0px'
+                      <p style={{
+                        margin: '0',
+                        color: '#374151',
+                        lineHeight: '1.5',
+                        textAlign: 'center',
+                        fontSize: '14px'
                       }}>
-                        <button
-                          onClick={() => setShowSupportLightbox(false)}
-                          style={{
-                            width: '100%',
-                            padding: '12px',
-                            textAlign: 'center',
-                            color: '#3a7ddc',
-                            fontWeight: '500',
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontSize: '16px'
-                          }}
-                        >
-                          CLOSE
-                        </button>
+                        List out the things that make you feel good
+                      </p>
+                    </div>
+
+                    {/* Card 2 */}
+                    <div
+                      style={{
+                        flex: '0 0 auto',
+                        width: 'calc(100% - 2rem)',
+                        minWidth: '280px',
+                        maxWidth: '280px',
+                        backgroundColor: 'white',
+                        borderRadius: '4px',
+                        padding: '1rem 1.5rem',
+                        border: '2px solid #e5e7eb',
+                        scrollSnapAlign: 'center',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                        minHeight: 'auto'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                        <div style={{
+                          backgroundColor: 'rgba(227, 141, 59, 0.2)',
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                          </svg>
+                        </div>
                       </div>
+                      <p style={{
+                        margin: '0',
+                        color: '#374151',
+                        lineHeight: '1.5',
+                        textAlign: 'center',
+                        fontSize: '14px'
+                      }}>
+                        Talk to a friend
+                      </p>
+                    </div>
+
+                    {/* Card 3 */}
+                    <div
+                      style={{
+                        flex: '0 0 auto',
+                        width: 'calc(100% - 2rem)',
+                        minWidth: '280px',
+                        maxWidth: '280px',
+                        backgroundColor: 'white',
+                        borderRadius: '4px',
+                        padding: '1rem 1.5rem',
+                        border: '2px solid #e5e7eb',
+                        scrollSnapAlign: 'center',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                        minHeight: 'auto'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                        <div style={{
+                          backgroundColor: 'rgba(227, 141, 59, 0.2)',
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <p style={{
+                        margin: '0',
+                        color: '#374151',
+                        lineHeight: '1.5',
+                        textAlign: 'center',
+                        fontSize: '14px'
+                      }}>
+                        Talk to your adults or teachers for a bit more support
+                      </p>
                     </div>
                   </div>
-                )}
+
+                  {/* Mobile scroll indicator dots */}
+                  <div className="mobile-dots" style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    marginTop: '1rem'
+                  }}>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: activeCardIndex === 0 ? '#3a7ddc' : '#d1d5db',
+                      transition: 'background-color 0.3s ease'
+                    }}></div>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: activeCardIndex === 1 ? '#3a7ddc' : '#d1d5db',
+                      transition: 'background-color 0.3s ease'
+                    }}></div>
+                    <div style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: activeCardIndex === 2 ? '#3a7ddc' : '#d1d5db',
+                      transition: 'background-color 0.3s ease'
+                    }}></div>
+                  </div>
+                </div>
               </div>
+
+              <style jsx>{`
+                @media (min-width: 768px) {
+                  .support-tips-container {
+                    justify-content: center;
+                    overflow-x: visible !important;
+                  }
+                  .mobile-dots {
+                    display: none !important;
+                  }
+                }
+
+                .support-tips-container::-webkit-scrollbar {
+                  display: none;
+                }
+
+                .support-tips-container {
+                  -ms-overflow-style: none;
+                  scrollbar-width: none;
+                }
+              `}</style>
 
               {/* Yellow swoosh footer - hidden on mobile */}
               <div className="hidden md:block absolute bottom-0 left-0 right-0">
@@ -568,236 +984,300 @@ export function CheckInFlow() {
         {currentStep === 'talk' && (
           <div className="bg-white min-h-screen" style={{ paddingTop: '140px', paddingBottom: '120px' }}>
             <div className="max-w-2xl mx-auto px-6">
-              {/* Title - matching other page styling */}
-              <div className="text-center" style={{ marginBottom: '3rem' }}>
-                <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-                  Do you want to talk to someone?
-                </h1>
-              </div>
+              {/* Main Content - fades out */}
+              <div
+                className="talk-main-content transition-opacity duration-500"
+                style={{
+                  opacity: completedData.talk ? 0 : 1,
+                  display: completedData.talk ? 'none' : 'block'
+                }}
+              >
+                {/* Title - matching other page styling */}
+                <div className="text-center" style={{ marginBottom: '3rem' }}>
+                  <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+                    Do you want to talk to someone?
+                  </h1>
+                </div>
 
-              {/* Summary Content - not in cards */}
-              <div className="space-y-10">
-                {/* Mood Section */}
-                {completedData.mood && (
-                  <div>
-                    <hr className="border-t border-gray-200 mb-6" />
-                    <h2 className="text-center text-gray-700 mb-4" style={{ fontSize: '18px', fontWeight: 600 }}>
-                      Your mood
-                    </h2>
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      {(() => {
-                        // Get the mood animation based on mood level
-                        const getMoodAnimation = () => {
-                          switch (completedData.mood.mood_level) {
-                            case 'very_happy': return BlushingShaded
-                            case 'happy': return HappyShaded
-                            case 'ok': return MehShaded
-                            case 'sad': return SadTearShaded
-                            case 'very_sad': return CryingShaded
-                            default: return null
+                {/* Summary Content - not in cards */}
+                <div className="space-y-10">
+                  {/* Mood Section */}
+                  {completedData.mood && (
+                    <div>
+                      <hr className="border-t border-gray-200 mb-6" />
+                      <h2 className="text-center text-gray-700 mb-4" style={{ fontSize: '18px', fontWeight: 600 }}>
+                        Your mood
+                      </h2>
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        {(() => {
+                          // Get the mood animation based on mood level
+                          const getMoodAnimation = () => {
+                            switch (completedData.mood.mood_level) {
+                              case 'very_happy': return BlushingShaded
+                              case 'happy': return HappyShaded
+                              case 'ok': return MehShaded
+                              case 'sad': return SadTearShaded
+                              case 'very_sad': return CryingShaded
+                              default: return null
+                            }
                           }
-                        }
-                        const animation = getMoodAnimation()
-                        if (animation) {
-                          return (
-                            <div style={{ width: '60px', height: '60px' }}>
-                              <Lottie
-                                animationData={animation}
-                                loop={true}
-                                autoplay={true}
-                                style={{ width: '100%', height: '100%' }}
-                              />
-                            </div>
-                          )
-                        }
-                        return null
-                      })()}
-                      <p className="text-lg capitalize">
-                        {completedData.mood.mood_level.replace('_', ' ')}
-                      </p>
+                          const animation = getMoodAnimation()
+                          if (animation) {
+                            return (
+                              <div style={{ width: '60px', height: '60px' }}>
+                                <Lottie
+                                  animationData={animation}
+                                  loop={true}
+                                  autoplay={true}
+                                  style={{ width: '100%', height: '100%' }}
+                                />
+                              </div>
+                            )
+                          }
+                          return null
+                        })()}
+                        <p className="text-lg capitalize">
+                          {completedData.mood.mood_level.replace('_', ' ')}
+                        </p>
+                      </div>
+                      {completedData.mood.notes && (
+                        <p className="text-center text-gray-600 mt-3 italic" style={{ maxWidth: '500px', margin: '1rem auto' }}>
+                          "{completedData.mood.notes}"
+                        </p>
+                      )}
+                      <div className="mt-6"></div>
                     </div>
-                    {completedData.mood.notes && (
-                      <p className="text-center text-gray-600 mt-3 italic" style={{ maxWidth: '500px', margin: '1rem auto' }}>
-                        "{completedData.mood.notes}"
-                      </p>
-                    )}
-                    <div className="mt-6"></div>
-                  </div>
-                )}
+                  )}
 
-                {/* Emotions Section */}
-                {completedData.emotions?.selected_emotions && completedData.emotions.selected_emotions.length > 0 && (
-                  <div>
-                    <hr className="border-t border-gray-200 mb-6" />
-                    <h2 className="text-center text-gray-700 mb-4" style={{ fontSize: '18px', fontWeight: 600 }}>
-                      Your emotions
-                    </h2>
-                    <div className="flex flex-wrap justify-center gap-3">
-                      {completedData.emotions.selected_emotions.map((emotion: string, index: number) => {
-                        // Find the emoji for this emotion
-                        const emotionsData = {
-                          'red': [
-                            ['🤬 Enraged', '😣 Stressed', '😲 Shocked'],
-                            ['😤 Fuming', '😠 Angry', '😰 Restless'],
-                            ['🤢 Repulsed', '😟 Worried', '😬 Uneasy']
-                          ],
-                          'yellow': [
-                            ['😮 Surprised', '🥳 Festive', '🤩 Ecstatic'],
-                            ['⚡ Energized', '😊 Optimistic', '😃 Excited'],
-                            ['🙂 Pleasant', '🤞 Hopeful', '🥰 Blissful']
-                          ],
-                          'blue': [
-                            ['🤮 Disgusted', '😞 Down', '😐 Apathetic'],
-                            ['😩 Miserable', '🥺 Lonely', '😪 Tired'],
-                            ['😭 Despair', '😔 Desolate', '🪫 Drained']
-                          ],
-                          'green': [
-                            ['😮‍💨 At ease', '🙂 Content', '🫶 Fulfilled'],
-                            ['😌 Relaxed', '💤 Restful', '⚖️ Balanced'],
-                            ['🥱 Sleepy', '🕊️ Tranquil', '🧘 Serene']
-                          ]
-                        }
+                  {/* Emotions Section */}
+                  {completedData.emotions?.selected_emotions && completedData.emotions.selected_emotions.length > 0 && (
+                    <div>
+                      <hr className="border-t border-gray-200 mb-6" />
+                      <h2 className="text-center text-gray-700 mb-4" style={{ fontSize: '18px', fontWeight: 600 }}>
+                        Your emotions
+                      </h2>
+                      <div className="flex flex-wrap justify-center gap-3">
+                        {completedData.emotions.selected_emotions.map((emotion: string, index: number) => {
+                          // Find the emoji for this emotion
+                          const emotionsData = {
+                            'red': [
+                              ['🤬 Enraged', '😣 Stressed', '😲 Shocked'],
+                              ['😤 Fuming', '😠 Angry', '😰 Restless'],
+                              ['🤢 Repulsed', '😟 Worried', '😬 Uneasy']
+                            ],
+                            'yellow': [
+                              ['😮 Surprised', '🥳 Festive', '🤩 Ecstatic'],
+                              ['⚡ Energized', '😊 Optimistic', '😃 Excited'],
+                              ['🙂 Pleasant', '🤞 Hopeful', '🥰 Blissful']
+                            ],
+                            'blue': [
+                              ['🤮 Disgusted', '😞 Down', '😐 Apathetic'],
+                              ['😩 Miserable', '🥺 Lonely', '😪 Tired'],
+                              ['😭 Despair', '😔 Desolate', '🪫 Drained']
+                            ],
+                            'green': [
+                              ['😮‍💨 At ease', '🙂 Content', '🫶 Fulfilled'],
+                              ['😌 Relaxed', '💤 Restful', '⚖️ Balanced'],
+                              ['🥱 Sleepy', '🕊️ Tranquil', '🧘 Serene']
+                            ]
+                          }
 
-                        let emotionWithEmoji = emotion
-                        let quadrantColor = 'gray'
+                          let emotionWithEmoji = emotion
+                          let quadrantColor = 'gray'
 
-                        // Find which quadrant this emotion belongs to
-                        Object.entries(emotionsData).forEach(([quadrant, quadrantEmotions]) => {
-                          quadrantEmotions.forEach(row => {
-                            row.forEach(emotionStr => {
-                              const label = emotionStr.split(' ').slice(1).join(' ')
-                              if (label === emotion) {
-                                emotionWithEmoji = emotionStr
-                                quadrantColor = quadrant
-                              }
+                          // Find which quadrant this emotion belongs to
+                          Object.entries(emotionsData).forEach(([quadrant, quadrantEmotions]) => {
+                            quadrantEmotions.forEach(row => {
+                              row.forEach(emotionStr => {
+                                const label = emotionStr.split(' ').slice(1).join(' ')
+                                if (label === emotion) {
+                                  emotionWithEmoji = emotionStr
+                                  quadrantColor = quadrant
+                                }
+                              })
                             })
                           })
-                        })
 
-                        const [emoji, ...labelParts] = emotionWithEmoji.split(' ')
+                          const [emoji, ...labelParts] = emotionWithEmoji.split(' ')
 
-                        // Get background color based on quadrant
-                        const getQuadrantColors = (quadrant: string) => {
-                          switch (quadrant) {
-                            case 'red':
-                              return { bg: '#f7e9ee', border: '#d78fab' }
-                            case 'yellow':
-                              return { bg: '#f7e9db', border: '#d7914c' }
-                            case 'blue':
-                              return { bg: '#ecf3f4', border: '#9fc4c7' }
-                            case 'green':
-                              return { bg: '#f5f8f6', border: '#ceddd1' }
-                            default:
-                              return { bg: '#f9f9f9', border: '#e5e7eb' }
+                          // Get background color based on quadrant
+                          const getQuadrantColors = (quadrant: string) => {
+                            switch (quadrant) {
+                              case 'red':
+                                return { bg: '#f7e9ee', border: '#d78fab' }
+                              case 'yellow':
+                                return { bg: '#f7e9db', border: '#d7914c' }
+                              case 'blue':
+                                return { bg: '#ecf3f4', border: '#9fc4c7' }
+                              case 'green':
+                                return { bg: '#f5f8f6', border: '#ceddd1' }
+                              default:
+                                return { bg: '#f9f9f9', border: '#e5e7eb' }
+                            }
                           }
-                        }
 
-                        const colors = getQuadrantColors(quadrantColor)
+                          const colors = getQuadrantColors(quadrantColor)
 
-                        return (
-                          <div
-                            key={index}
-                            className="flex flex-col items-center justify-center gap-1"
-                            style={{
-                              width: '80px',
-                              height: '80px',
-                              padding: '8px',
-                              backgroundColor: colors.bg,
-                              border: `2px solid ${colors.border}`,
-                              color: '#374151',
-                              borderRadius: '4px',
-                              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                            }}
-                          >
-                            <span className="text-xl">{emoji}</span>
-                            <span className="text-xs font-medium text-center" style={{ lineHeight: '1.1' }}>
-                              {labelParts.join(' ')}
-                            </span>
-                          </div>
-                        )
-                      })}
+                          return (
+                            <div
+                              key={index}
+                              className="flex flex-col items-center justify-center gap-1"
+                              style={{
+                                width: '80px',
+                                height: '80px',
+                                padding: '8px',
+                                backgroundColor: colors.bg,
+                                border: `2px solid ${colors.border}`,
+                                color: '#374151',
+                                borderRadius: '4px',
+                                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                              }}
+                            >
+                              <span className="text-xl">{emoji}</span>
+                              <span className="text-xs font-medium text-center" style={{ lineHeight: '1.1' }}>
+                                {labelParts.join(' ')}
+                              </span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                      {completedData.emotions?.emotion_story && (
+                        <p className="text-center text-gray-600 mt-3 italic" style={{ maxWidth: '500px', margin: '1rem auto' }}>
+                          "{completedData.emotions.emotion_story}"
+                        </p>
+                      )}
+                      <hr className="border-t border-gray-200 mt-6 mb-6" />
                     </div>
-                    {completedData.emotions?.emotion_story && (
-                      <p className="text-center text-gray-600 mt-3 italic" style={{ maxWidth: '500px', margin: '1rem auto' }}>
-                        "{completedData.emotions.emotion_story}"
-                      </p>
-                    )}
-                    <hr className="border-t border-gray-200 mt-6 mb-6" />
-                  </div>
-                )}
+                  )}
 
+                </div>
+
+                {/* Action Buttons - horizontal row with consistent site styling */}
+                <div className="flex flex-wrap justify-center gap-4 mt-8">
+                  <button
+                    onClick={() => {
+                      setCompletedData(prev => ({ ...prev, talk: { choice: 'parent' } }))
+                      setTimeout(() => navigate('/checkin/flow/complete'), 4000)
+                    }}
+                    className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    style={{
+                      backgroundColor: '#3a7ddc',
+                      color: 'white',
+                      width: '100px',
+                      height: '56px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '28px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#2e6bc7'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#3a7ddc'
+                    }}
+                  >
+                    A parent
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setCompletedData(prev => ({ ...prev, talk: { choice: 'teacher' } }))
+                      setTimeout(() => navigate('/checkin/flow/complete'), 4000)
+                    }}
+                    className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    style={{
+                      backgroundColor: '#3a7ddc',
+                      color: 'white',
+                      width: '100px',
+                      height: '56px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '28px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#2e6bc7'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#3a7ddc'
+                    }}
+                  >
+                    A teacher
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setCompletedData(prev => ({ ...prev, talk: { choice: 'none' } }))
+                      setTimeout(() => navigate('/checkin/flow/complete'), 4000)
+                    }}
+                    className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    style={{
+                      backgroundColor: '#3a7ddc',
+                      color: 'white',
+                      width: '100px',
+                      height: '56px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '28px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#2e6bc7'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#3a7ddc'
+                    }}
+                  >
+                    No one
+                  </button>
+                </div>
               </div>
 
-              {/* Action Buttons - horizontal row with consistent site styling */}
-              <div className="flex flex-wrap justify-center gap-4 mt-8">
-                <button
-                  onClick={() => handleStepComplete('talk', { choice: 'parent' })}
-                  className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              {/* Message - fades in after button click */}
+              <div
+                className="talk-message transition-opacity duration-500 flex items-center justify-center"
+                style={{
+                  opacity: completedData.talk ? 1 : 0,
+                  display: completedData.talk ? 'flex' : 'none',
+                  minHeight: '60vh'
+                }}
+              >
+                <div
                   style={{
-                    backgroundColor: '#3a7ddc',
-                    color: 'white',
-                    width: '100px',
-                    height: '56px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '28px'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#2e6bc7'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#3a7ddc'
+                    backgroundColor: '#f8d678',
+                    border: '1px solid white',
+                    borderRadius: '4px',
+                    padding: '24px 32px',
+                    maxWidth: '600px'
                   }}
                 >
-                  A parent
-                </button>
-
-                <button
-                  onClick={() => handleStepComplete('talk', { choice: 'teacher' })}
-                  className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                  style={{
-                    backgroundColor: '#3a7ddc',
-                    color: 'white',
-                    width: '100px',
-                    height: '56px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '28px'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#2e6bc7'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#3a7ddc'
-                  }}
-                >
-                  A teacher
-                </button>
-
-                <button
-                  onClick={() => handleStepComplete('talk', { choice: 'none' })}
-                  className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                  style={{
-                    backgroundColor: '#3a7ddc',
-                    color: 'white',
-                    width: '100px',
-                    height: '56px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '28px'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#2e6bc7'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#3a7ddc'
-                  }}
-                >
-                  No one
-                </button>
+                  {(() => {
+                    const talkChoice = completedData.talk?.choice
+                    if (talkChoice === 'parent') {
+                      return (
+                        <p className="text-gray-900 text-center" style={{ fontWeight: 500, margin: 0, fontSize: '18px' }}>
+                          Your parent will check in with you soon
+                        </p>
+                      )
+                    } else if (talkChoice === 'teacher') {
+                      return (
+                        <p className="text-gray-900 text-center" style={{ fontWeight: 500, margin: 0, fontSize: '18px' }}>
+                          Your teacher will check in with you soon
+                        </p>
+                      )
+                    } else {
+                      return (
+                        <div className="text-gray-900 text-center">
+                          <p className="mb-2" style={{ fontWeight: 500, margin: '0 0 12px 0', fontSize: '18px' }}>Your feelings are safe with us</p>
+                          <p className="text-base text-gray-700" style={{ fontWeight: 400, margin: 0 }}>
+                            You can always share with someone later if you want to
+                          </p>
+                        </div>
+                      )
+                    }
+                  })()}
+                </div>
               </div>
             </div>
           </div>

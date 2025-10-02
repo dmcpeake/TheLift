@@ -213,7 +213,7 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation, onCe
         {/* Section labels with curved text */}
         <defs>
           {segments.map((segment, index) => {
-            const labelRadius = maxRadius + 20
+            const labelRadius = maxRadius + 10
             const startAngleRad = ((segment.startAngle + 5) * Math.PI) / 180 // Add 5 degrees offset for better centering
             const endAngleRad = ((segment.endAngle - 5) * Math.PI) / 180 // Subtract 5 degrees offset
 
@@ -272,89 +272,21 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation, onCe
         />
         </svg>
 
-        {/* Center button or white circle */}
-        {(() => {
-          // Check if any section has sad (2) or very sad (1) mood
-          const hasLowScore = sections.some(section => section.mood_numeric <= 2 && section.mood_numeric > 0)
-
-          if (hasLowScore) {
-            // Show the LOW SCORE button
-            return (
-              <div
-                className="absolute"
-                style={{
-                  left: 'calc(50% + 1px)',
-                  top: 'calc(50% + 1px)',
-                  transform: 'translate(-50%, -50%)',
-                  width: minRadius * 2,
-                  height: minRadius * 2,
-                  borderRadius: '50%',
-                  zIndex: 10
-                }}
-              >
-                <button
-                  onClick={() => {
-                    onCenterButtonClick?.()
-                  }}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: '50%',
-                    backgroundColor: '#3a7ddc',
-                    border: '2px solid white',
-                    cursor: 'pointer',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#2e6bc7'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#3a7ddc'
-                  }}
-                  aria-label="Chart center button"
-                >
-                  <span className="low-score-text" style={{
-                    color: 'white',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    textAlign: 'center',
-                    display: 'block',
-                    lineHeight: '1.3'
-                  }}>
-                    LOW<br/>SCORE?
-                  </span>
-                  <span className="low-score-icon" style={{
-                    color: 'white',
-                    display: 'none',
-                    textAlign: 'center',
-                    marginTop: '7px'
-                  }}>
-                    <Info size={18} />
-                  </span>
-                </button>
-              </div>
-            )
-          } else {
-            // Show a flat white circle
-            return (
-              <div
-                className="absolute"
-                style={{
-                  left: 'calc(50% + 1px)',
-                  top: 'calc(50% + 1px)',
-                  transform: 'translate(-50%, -50%)',
-                  width: minRadius * 2,
-                  height: minRadius * 2,
-                  borderRadius: '50%',
-                  backgroundColor: 'white',
-                  border: '1px solid #e5e7eb',
-                  zIndex: 10
-                }}
-              />
-            )
-          }
-        })()}
+        {/* Center white circle - always shown */}
+        <div
+          className="absolute"
+          style={{
+            left: 'calc(50% + 1px)',
+            top: 'calc(50% + 1px)',
+            transform: 'translate(-50%, -50%)',
+            width: minRadius * 2,
+            height: minRadius * 2,
+            borderRadius: '50%',
+            backgroundColor: 'white',
+            border: '1px solid #e5e7eb',
+            zIndex: 10
+          }}
+        />
 
       </div>
     </div>

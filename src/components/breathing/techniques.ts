@@ -6,7 +6,7 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
     name: 'Balloon Breathing',
     description: 'Imagine your belly is a balloon that inflates and deflates',
     pace: { in: 4, hold: 2, out: 2, label: 'Balloon' },
-    cycles: 5,
+    cycles: 3,
     theme: {
       primaryColor: '#60a5fa', // Sky blue
       secondaryColor: '#fbbf24', // Warm yellow

@@ -883,27 +883,26 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               </button>
             )}
 
-            {/* Next Button - only show if emotions are selected */}
-            {selectedEmotions.length > 0 && (
+            {/* Next Button - only show if emotions are selected AND "why" has been completed */}
+            {selectedEmotions.length > 0 && hasCompletedWhy && (
               <button
-                key={`why-next-${buttonAnimationKey}`}
+                key={`next-${buttonAnimationKey}`}
                 onClick={() => {
-                  if (hasCompletedWhy) {
-                    // If user has completed "why", go to "talk to someone" step
-                    setCurrentStep(4)
-                  } else {
-                    // First time or after changes, go to "why" step
-                    if (onPartialSave) {
-                      const data = {
-                        selected_emotions: selectedEmotions,
-                        emotion_story: emotionStory,
-                        step_completed: 1,
-                        completed_at: new Date().toISOString(),
-                        time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
-                      }
-                      onPartialSave(data)
+                  // If user has completed "why", complete the emotions step
+                  if (onComplete) {
+                    // When in CheckInFlow, complete and navigate to next page
+                    const data: EmotionData = {
+                      selected_emotions: selectedEmotions,
+                      emotion_story: emotionStory,
+                      discussion_preference: '',
+                      step_completed: 3,
+                      completed_at: new Date().toISOString(),
+                      time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
                     }
-                    setCurrentStep(3)
+                    onComplete(data)
+                  } else {
+                    // Standalone mode: go to "talk to someone" step
+                    setCurrentStep(4)
                   }
                 }}
                 style={{
@@ -925,10 +924,10 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
-                aria-label={hasCompletedWhy ? "Continue to wellbeing" : "Continue to why"}
+                aria-label="Continue to next step"
               >
                 <span style={{ animation: 'emotionTextFadeIn 0.4s ease-out' }}>
-                  {hasCompletedWhy ? 'NEXT' : 'WHY?'}
+                  NEXT
                 </span>
               </button>
             )}
@@ -1073,53 +1072,88 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                 currentQuadrantLabels.includes(emotion)
               )
 
-              // Show back button with dynamic icon based on selection
-                const hasSelectedEmotions = selectedFromCurrentQuadrant.length > 0
-                return (
-                  <button
-                    onClick={() => setCurrentStep(1)}
-                    style={{
-                      backgroundColor: hasSelectedEmotions ? '#3a7ddc' : 'white',
-                      border: '2px solid #3a7ddc',
-                      borderRadius: '50%',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '56px',
-                      height: '56px',
-                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (hasSelectedEmotions) {
-                        e.currentTarget.style.backgroundColor = '#2e6bc7'
-                      } else {
+              const hasSelectedEmotions = selectedFromCurrentQuadrant.length > 0
+
+              return (
+                <>
+                  {/* Back button - shown when no emotions selected */}
+                  {!hasSelectedEmotions && (
+                    <button
+                      onClick={() => setCurrentStep(1)}
+                      style={{
+                        backgroundColor: 'white',
+                        border: '2px solid #3a7ddc',
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '56px',
+                        height: '56px',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor = '#f8fafc'
                         e.currentTarget.style.borderColor = '#2e6bc7'
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (hasSelectedEmotions) {
-                        e.currentTarget.style.backgroundColor = '#3a7ddc'
-                      } else {
+                      }}
+                      onMouseLeave={(e) => {
                         e.currentTarget.style.backgroundColor = 'white'
                         e.currentTarget.style.borderColor = '#3a7ddc'
-                      }
-                    }}
-                    aria-label={hasSelectedEmotions ? "Confirm selection" : "Go back to quadrants"}
-                  >
-                    {hasSelectedEmotions ? (
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'white' }}>
-                        <polyline points="20,6 9,17 4,12"></polyline>
-                      </svg>
-                    ) : (
+                      }}
+                      aria-label="Go back to quadrants"
+                    >
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
                         <polyline points="15,18 9,12 15,6"></polyline>
                       </svg>
-                    )}
-                  </button>
-                )
+                    </button>
+                  )}
+
+                  {/* WHY button - shown when emotions are selected, replaces back button with animation */}
+                  {hasSelectedEmotions && (
+                    <button
+                      key={`why-${buttonAnimationKey}`}
+                      onClick={() => {
+                        if (onPartialSave) {
+                          const data = {
+                            selected_emotions: selectedEmotions,
+                            emotion_story: emotionStory,
+                            step_completed: 2,
+                            completed_at: new Date().toISOString(),
+                            time_to_complete_seconds: Math.round((Date.now() - startTime) / 1000)
+                          }
+                          onPartialSave(data)
+                        }
+                        setCurrentStep(3)
+                      }}
+                      style={{
+                        width: '140px',
+                        height: '56px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '28px',
+                        backgroundColor: '#3a7ddc',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                        border: 'none',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.3s ease',
+                        color: 'white',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        animation: 'emotionCircleExpand 0.4s ease-out'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
+                      aria-label="Continue to why"
+                    >
+                      <span style={{ animation: 'emotionTextFadeIn 0.4s ease-out' }}>
+                        WHY?
+                      </span>
+                    </button>
+                  )}
+                </>
+              )
             })()}
           </div>
         </div>
