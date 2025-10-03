@@ -60,13 +60,13 @@ export function ThreeHappyThings({ onClose }: ThreeHappyThingsProps) {
                   value={responses[index]}
                   onChange={(e) => handleTextChange(index, e.target.value)}
                   placeholder={`What made you happy?`}
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 pr-14 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   rows={3}
                   style={{ fontSize: '16px' }}
                 />
                 <button
                   onClick={() => handleVoiceCapture(index)}
-                  className={`absolute right-3 top-3 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                  className={`absolute top-1/2 right-3 transform -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
                     isRecording === index ? 'bg-red-100' : 'bg-gray-100 hover:bg-gray-200'
                   }`}
                 >

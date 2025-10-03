@@ -55,13 +55,13 @@ export function IfICouldBe({ onClose }: IfICouldBeProps) {
                 value={whatIWouldBe}
                 onChange={(e) => setWhatIWouldBe(e.target.value)}
                 placeholder="Tell us what you would be"
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-3 pr-14 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 rows={3}
                 style={{ fontSize: '16px' }}
               />
               <button
                 onClick={() => handleVoiceCapture('what')}
-                className={`absolute right-3 top-3 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                className={`absolute top-1/2 right-3 transform -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
                   isRecording === 'what' ? 'bg-red-100' : 'bg-gray-100 hover:bg-gray-200'
                 }`}
               >
@@ -94,13 +94,13 @@ export function IfICouldBe({ onClose }: IfICouldBeProps) {
                 value={whyReason}
                 onChange={(e) => setWhyReason(e.target.value)}
                 placeholder="Why would you be this?"
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-3 pr-14 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 rows={5}
                 style={{ fontSize: '16px' }}
               />
               <button
                 onClick={() => handleVoiceCapture('why')}
-                className={`absolute right-3 top-3 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                className={`absolute top-1/2 right-3 transform -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
                   isRecording === 'why' ? 'bg-red-100' : 'bg-gray-100 hover:bg-gray-200'
                 }`}
               >
