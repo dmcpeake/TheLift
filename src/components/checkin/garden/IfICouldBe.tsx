@@ -33,9 +33,9 @@ export function IfICouldBe({ onClose }: IfICouldBeProps) {
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-100 transition-colors"
         >
-          <X size={20} color="#374151" />
+          <X size={20} color="#2563eb" />
         </button>
 
         {/* Title */}
@@ -62,7 +62,7 @@ export function IfICouldBe({ onClose }: IfICouldBeProps) {
               <button
                 onClick={() => handleVoiceCapture('what')}
                 className={`absolute top-1/2 right-3 transform -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                  isRecording === 'what' ? 'bg-red-100' : 'bg-gray-100 hover:bg-gray-200'
+                  isRecording === 'what' ? 'bg-red-100' : 'bg-blue-100 hover:bg-blue-200'
                 }`}
               >
                 <svg
@@ -70,7 +70,7 @@ export function IfICouldBe({ onClose }: IfICouldBeProps) {
                   height="20"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke={isRecording === 'what' ? '#dc2626' : '#374151'}
+                  stroke={isRecording === 'what' ? '#dc2626' : '#2563eb'}
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -101,7 +101,7 @@ export function IfICouldBe({ onClose }: IfICouldBeProps) {
               <button
                 onClick={() => handleVoiceCapture('why')}
                 className={`absolute top-1/2 right-3 transform -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                  isRecording === 'why' ? 'bg-red-100' : 'bg-gray-100 hover:bg-gray-200'
+                  isRecording === 'why' ? 'bg-red-100' : 'bg-blue-100 hover:bg-blue-200'
                 }`}
               >
                 <svg
@@ -109,7 +109,7 @@ export function IfICouldBe({ onClose }: IfICouldBeProps) {
                   height="20"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke={isRecording === 'why' ? '#dc2626' : '#374151'}
+                  stroke={isRecording === 'why' ? '#dc2626' : '#2563eb'}
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -128,7 +128,10 @@ export function IfICouldBe({ onClose }: IfICouldBeProps) {
         <div className="mt-8 flex justify-center">
           <button
             onClick={onClose}
-            className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition-colors"
+            className="px-8 py-3 font-semibold rounded-full transition-colors"
+            style={{ backgroundColor: '#2563eb', color: 'white' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
           >
             Save
           </button>

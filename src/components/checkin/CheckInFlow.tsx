@@ -28,6 +28,7 @@ const steps = [
 export function CheckInFlow() {
   const { step } = useParams<{ step: string }>()
   const navigate = useNavigate()
+  const [completeMood, setCompleteMood] = useState<string | null>(null)
   const [completedData, setCompletedData] = useState<Record<string, any>>({})
   const [currentStepHasSelection, setCurrentStepHasSelection] = useState(false)
   const [emotionGridStep, setEmotionGridStep] = useState(1)
@@ -527,17 +528,31 @@ export function CheckInFlow() {
                 }}
               >
                 {/* Header */}
-                <div className="mb-8" style={{ marginTop: '20px', marginBottom: '20px' }}>
-                  <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                    Great job!
+                <div className="text-center" style={{ marginTop: '20px', marginBottom: '2rem' }}>
+                  <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+                    Great check in today!
                   </h1>
-                  <p className="text-lg text-gray-900 max-w-lg mx-auto" style={{ fontWeight: 500 }}>
-                    Thanks for sharing your feelings today
+                  <p className="text-gray-600" style={{ fontSize: '16px', fontWeight: 400, lineHeight: '1.5' }}>
+                    How do you feel now?
                   </p>
                 </div>
 
-                {/* DONE Button - desktop only */}
-                <div className="hidden md:flex justify-center" style={{ marginBottom: '20px' }}>
+                {/* Use MoodMeter component without title */}
+                <div style={{ marginTop: '-60px' }}>
+                  <MoodMeter
+                    onComplete={(data) => {
+                      setCompleteMood(data.mood_level)
+                    }}
+                    showNextButton={false}
+                    hideButton={true}
+                    hideDebugInfo={true}
+                    hideSwoosh={true}
+                    hideTitle={true}
+                  />
+                </div>
+
+                {/* MY GARDEN Button - desktop only */}
+                <div className="hidden md:flex justify-center" style={{ marginBottom: '20px', marginTop: '-40px', position: 'relative', zIndex: 20 }}>
                   <button
                     onClick={() => navigate('/checkin/garden')}
                     className="font-semibold text-lg transition-all duration-200"
@@ -550,7 +565,9 @@ export function CheckInFlow() {
                       paddingRight: '50px',
                       border: '2px solid white',
                       cursor: 'pointer',
-                      boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)'
+                      boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)',
+                      position: 'relative',
+                      zIndex: 20
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
@@ -592,30 +609,6 @@ export function CheckInFlow() {
             </button>
           </div>
 
-          {/* Theo Success Animation - positioned like on checkin/home */}
-          {theoSuccessAnimation && (
-            <div style={{ position: 'relative' }}>
-              <div
-                className="theo-success-animation"
-                style={{
-                  position: 'fixed',
-                  bottom: '20px',
-                  left: 'calc(50% + 60px)',
-                  transform: 'translateX(-50%)',
-                  width: '240px',
-                  height: '240px',
-                  zIndex: 5,
-                  pointerEvents: 'none'
-                }}
-              >
-                <Lottie
-                  animationData={theoSuccessAnimation}
-                  loop={true}
-                  autoplay={true}
-                />
-              </div>
-            </div>
-          )}
 
           <style jsx>{`
             @media (min-width: 769px) {
@@ -989,7 +982,7 @@ export function CheckInFlow() {
 
         {currentStep === 'talk' && (
           <div className="bg-white min-h-screen" style={{ paddingTop: '140px', paddingBottom: '120px' }}>
-            <div className="max-w-2xl mx-auto px-6">
+            <div className="mx-auto px-6" style={{ maxWidth: '800px' }}>
               {/* Main Content - fades out */}
               <div
                 className="talk-main-content transition-opacity duration-500"

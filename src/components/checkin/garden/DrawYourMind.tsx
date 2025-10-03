@@ -13,6 +13,11 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
   useEffect(() => {
     const canvas = canvasRef.current
     if (canvas) {
+      // Set canvas size to match its display size
+      const rect = canvas.getBoundingClientRect()
+      canvas.width = rect.width
+      canvas.height = rect.height
+
       const ctx = canvas.getContext('2d')
       if (ctx) {
         ctx.lineCap = 'round'
@@ -25,39 +30,43 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
   }, [])
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (!context) return
+    if (!context || !canvasRef.current) return
     setIsDrawing(true)
-    const rect = canvasRef.current?.getBoundingClientRect()
-    if (!rect) return
+    const rect = canvasRef.current.getBoundingClientRect()
 
-    let x, y
+    let clientX, clientY
     if ('touches' in e) {
-      x = e.touches[0].clientX - rect.left
-      y = e.touches[0].clientY - rect.top
+      clientX = e.touches[0].clientX
+      clientY = e.touches[0].clientY
     } else {
-      x = e.clientX - rect.left
-      y = e.clientY - rect.top
+      clientX = e.clientX
+      clientY = e.clientY
     }
+
+    const x = ((clientX - rect.left) / rect.width) * canvasRef.current.width
+    const y = ((clientY - rect.top) / rect.height) * canvasRef.current.height
 
     context.beginPath()
     context.moveTo(x, y)
   }
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !context) return
+    if (!isDrawing || !context || !canvasRef.current) return
     e.preventDefault()
 
-    const rect = canvasRef.current?.getBoundingClientRect()
-    if (!rect) return
+    const rect = canvasRef.current.getBoundingClientRect()
 
-    let x, y
+    let clientX, clientY
     if ('touches' in e) {
-      x = e.touches[0].clientX - rect.left
-      y = e.touches[0].clientY - rect.top
+      clientX = e.touches[0].clientX
+      clientY = e.touches[0].clientY
     } else {
-      x = e.clientX - rect.left
-      y = e.clientY - rect.top
+      clientX = e.clientX
+      clientY = e.clientY
     }
+
+    const x = ((clientX - rect.left) / rect.width) * canvasRef.current.width
+    const y = ((clientY - rect.top) / rect.height) * canvasRef.current.height
 
     context.lineTo(x, y)
     context.stroke()
@@ -89,9 +98,9 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-100 transition-colors"
         >
-          <X size={20} color="#374151" />
+          <X size={20} color="#2563eb" />
         </button>
 
         {/* Title */}
@@ -103,8 +112,6 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
         <div className="mb-6">
           <canvas
             ref={canvasRef}
-            width={700}
-            height={500}
             onMouseDown={startDrawing}
             onMouseMove={draw}
             onMouseUp={stopDrawing}
@@ -113,7 +120,7 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
             onTouchMove={draw}
             onTouchEnd={stopDrawing}
             className="border-2 border-gray-300 rounded-lg w-full cursor-crosshair"
-            style={{ touchAction: 'none', maxWidth: '100%', height: 'auto' }}
+            style={{ touchAction: 'none', width: '100%', height: '500px', display: 'block' }}
           />
         </div>
 
@@ -121,14 +128,20 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
         <div className="flex justify-center gap-4">
           <button
             onClick={clearCanvas}
-            className="flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-full hover:bg-gray-300 transition-colors"
+            className="flex items-center gap-2 px-6 py-3 font-semibold rounded-full transition-colors"
+            style={{ backgroundColor: 'white', color: '#2563eb', border: '2px solid #2563eb' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#eff6ff'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
           >
             <RefreshCw size={18} />
             Clear
           </button>
           <button
             onClick={onClose}
-            className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition-colors"
+            className="px-8 py-3 font-semibold rounded-full transition-colors"
+            style={{ backgroundColor: '#2563eb', color: 'white' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
           >
             Save
           </button>

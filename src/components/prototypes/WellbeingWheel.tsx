@@ -138,19 +138,19 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
   const getTopicSubtext = (sectionId: string) => {
     switch (sectionId) {
       case 'friends':
-        return 'Think about how you have been getting on with your friends today. Have you felt you could be yourself? Have you enjoyed their company?'
+        return 'Think about how you have been getting on with your friends today.<br>Have you felt you could be yourself? Have you enjoyed their company?'
       case 'work':
-        return 'If you think about your home or schoolwork - how was it today? Has it been easy, hard, fun, boring or just ok?'
+        return 'If you think about your home or schoolwork - how was it today?<br>Has it been easy, hard, fun, boring or just ok?'
       case 'health':
-        return 'How healthy are you today? Think about your sleep, food, water, exercise. Have you had the energy you need for all the things you wanted to do?'
+        return 'How healthy are you today? Think about your sleep, food, water, exercise.<br>Have you had the energy you need for all the things you wanted to do?'
       case 'family':
-        return 'Think about your special family and all the love and support you have between you. How connected are you feeling today?'
+        return 'Think about your special family and all the love and support you have between you.<br>How connected are you feeling today?'
       case 'fun':
-        return 'How fun has today been for you? Have you played with any friends or enjoyed some time alone? You can also think about any hobbies, sports or games you\'ve played today.'
+        return 'How fun has today been for you? Have you played with any friends or enjoyed some time alone?<br>You can also think about any hobbies, sports or games you\'ve played today.'
       case 'safety':
-        return 'Think about how safe you feel when you are on the road, online, on playdates, or at school. Feeling unsafe can sometimes feel like a worry that sits like bubbles in your tummy. How safe have you felt today?'
+        return 'Think about how safe you feel when you are on the road, online, on playdates, or at school.<br>Feeling unsafe can feel like a worry that sits like bubbles in your tummy. How safe have you felt today?'
       case 'emotions':
-        return 'Emotions are simply feelings that tell you how you\'re feeling about the world. Have you been able to handle or talk about all the big emotions that have shown up for you today?'
+        return 'Emotions are simply feelings that tell you how you\'re feeling about the world.<br>Have you been able to handle all the big emotions that have shown up for you today?'
       default:
         return ''
     }
@@ -511,13 +511,15 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
 
       {/* Centered title like breathing exercise */}
       <div className="text-center wellbeing-title-container" style={{ marginBottom: '2rem' }}>
-        <h1 className="wellbeing-title-mobile wellbeing-title-desktop text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+        <h1 className="wellbeing-title-mobile wellbeing-title-desktop text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em', maxWidth: '800px', marginLeft: 'auto', marginRight: 'auto' }}>
           {currentSection ? currentSection.name : 'How do you feel about these areas of your life?'}
         </h1>
         {currentSection && (
-          <p className="text-gray-600 mx-auto px-4" style={{ fontSize: '16px', fontWeight: 400, lineHeight: '1.5', maxWidth: '600px', marginTop: '8px' }}>
-            {getTopicSubtext(currentSection.id)}
-          </p>
+          <p
+            className="text-gray-600 mx-auto px-4"
+            style={{ fontSize: '16px', fontWeight: 400, lineHeight: '1.5', maxWidth: '800px', marginTop: '8px' }}
+            dangerouslySetInnerHTML={{ __html: getTopicSubtext(currentSection.id) }}
+          />
         )}
       </div>
 

@@ -23,9 +23,14 @@ interface MoodMeterProps {
   hideDebugInfo?: boolean
   triggerCompletion?: boolean
   initialData?: any
+  customTitle?: string
+  customSubtitle?: string
+  hideButton?: boolean
+  hideSwoosh?: boolean
+  hideTitle?: boolean
 }
 
-export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade, onSelectionRemoved, hideDebugInfo = false, triggerCompletion = false, initialData }: MoodMeterProps = {}) {
+export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade, onSelectionRemoved, hideDebugInfo = false, triggerCompletion = false, initialData, customTitle, customSubtitle, hideButton = false, hideSwoosh = false, hideTitle = false }: MoodMeterProps = {}) {
   const [selectedMood, setSelectedMood] = useState<MoodData | null>(null)
   const [hoveredMood, setHoveredMood] = useState<string | null>(null)
   const [startTime] = useState(Date.now())
@@ -163,12 +168,23 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
       `}</style>
 
       {/* Centered title like breathing exercise */}
-      <div className="text-center mood-title-container" style={{ marginBottom: '1rem' }}>
-        <h1 className="mood-meter-title-mobile text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-          <span className="hidden md:inline">How would you describe your mood?</span>
-          <span className="md:hidden">Select your mood</span>
-        </h1>
-      </div>
+      {!hideTitle && (
+        <div className="text-center mood-title-container" style={{ marginBottom: '1rem' }}>
+          <h1 className="mood-meter-title-mobile text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+            {customTitle || (
+              <>
+                <span className="hidden md:inline">How would you describe your mood?</span>
+                <span className="md:hidden">Select your mood</span>
+              </>
+            )}
+          </h1>
+          {customSubtitle && (
+            <p className="text-gray-600" style={{ fontSize: '16px', fontWeight: 400, lineHeight: '1.5' }}>
+              {customSubtitle}
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="flex flex-col items-center">
         <div className="mb-6 w-full max-w-2xl">
@@ -322,7 +338,7 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
       </div>
 
 
-      {showNextButton && selectedMood && (
+      {showNextButton && selectedMood && !hideButton && (
         <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center" style={{ zIndex: 1000 }}>
           <button
             key={`mood-next-${buttonAnimationKey}`}
@@ -360,9 +376,11 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
       )}
 
       {/* Yellow swoosh section at bottom */}
-      <div className="yellow-swoosh-mobile-hide">
-        <YellowSwoosh />
-      </div>
+      {!hideSwoosh && (
+        <div className="yellow-swoosh-mobile-hide">
+          <YellowSwoosh />
+        </div>
+      )}
     </>
   )
 }
