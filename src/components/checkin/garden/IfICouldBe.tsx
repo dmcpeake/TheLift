@@ -18,7 +18,11 @@ export function IfICouldBe({ onClose }: IfICouldBeProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      className="fixed inset-0 flex items-center justify-center"
+      style={{
+        zIndex: 9999,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)'
+      }}
       onClick={onClose}
     >
       <div
@@ -30,7 +34,6 @@ export function IfICouldBe({ onClose }: IfICouldBeProps) {
         <button
           onClick={onClose}
           className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
-          style={{ border: '1px solid #e5e7eb' }}
         >
           <X size={20} color="#374151" />
         </button>

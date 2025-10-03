@@ -335,11 +335,17 @@ export function CheckInGarden() {
             </p>
 
             {/* Activity Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{ maxWidth: '900px', margin: '0 auto' }}>
               {/* Card 1: 3 Happy Things */}
               <button
                 onClick={() => setActiveActivity('happy')}
-                className="bg-white rounded-lg p-6 border-2 border-gray-200 hover:border-blue-400 hover:shadow-lg transition-all duration-200 text-left"
+                className="rounded-2xl p-6 hover:shadow-xl transition-all duration-200 text-left"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                }}
               >
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
@@ -354,7 +360,7 @@ export function CheckInGarden() {
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
                       3 things that made me happy today
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-700 text-sm">
                       Reflect on the positive moments from your day
                     </p>
                   </div>
@@ -364,7 +370,13 @@ export function CheckInGarden() {
               {/* Card 2: 3 Grateful Things */}
               <button
                 onClick={() => setActiveActivity('grateful')}
-                className="bg-white rounded-lg p-6 border-2 border-gray-200 hover:border-blue-400 hover:shadow-lg transition-all duration-200 text-left"
+                className="rounded-2xl p-6 hover:shadow-xl transition-all duration-200 text-left"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                }}
               >
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0">
@@ -376,7 +388,7 @@ export function CheckInGarden() {
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
                       3 things I am grateful for
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-700 text-sm">
                       Share what you're thankful for today
                     </p>
                   </div>
@@ -386,7 +398,13 @@ export function CheckInGarden() {
               {/* Card 3: If I Could Be */}
               <button
                 onClick={() => setActiveActivity('ifICouldBe')}
-                className="bg-white rounded-lg p-6 border-2 border-gray-200 hover:border-blue-400 hover:shadow-lg transition-all duration-200 text-left"
+                className="rounded-2xl p-6 hover:shadow-xl transition-all duration-200 text-left"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                }}
               >
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
@@ -399,7 +417,7 @@ export function CheckInGarden() {
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
                       If I could be anything...
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-700 text-sm">
                       Imagine being any object, animal, or vegetable
                     </p>
                   </div>
@@ -409,7 +427,13 @@ export function CheckInGarden() {
               {/* Card 4: Draw Your Mind */}
               <button
                 onClick={() => setActiveActivity('draw')}
-                className="bg-white rounded-lg p-6 border-2 border-gray-200 hover:border-blue-400 hover:shadow-lg transition-all duration-200 text-left"
+                className="rounded-2xl p-6 hover:shadow-xl transition-all duration-200 text-left"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                }}
               >
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
@@ -424,7 +448,7 @@ export function CheckInGarden() {
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
                       Draw what's on your mind
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-700 text-sm">
                       Express yourself through drawing
                     </p>
                   </div>
@@ -434,12 +458,13 @@ export function CheckInGarden() {
           </div>
         </div>
 
-        {/* Activity Modals */}
-        {activeActivity === 'happy' && <ThreeHappyThings onClose={() => setActiveActivity(null)} />}
-        {activeActivity === 'grateful' && <ThreeGratefulThings onClose={() => setActiveActivity(null)} />}
-        {activeActivity === 'ifICouldBe' && <IfICouldBe onClose={() => setActiveActivity(null)} />}
-        {activeActivity === 'draw' && <DrawYourMind onClose={() => setActiveActivity(null)} />}
       </div>
+
+      {/* Activity Modals - rendered outside main container */}
+      {activeActivity === 'happy' && <ThreeHappyThings onClose={() => setActiveActivity(null)} />}
+      {activeActivity === 'grateful' && <ThreeGratefulThings onClose={() => setActiveActivity(null)} />}
+      {activeActivity === 'ifICouldBe' && <IfICouldBe onClose={() => setActiveActivity(null)} />}
+      {activeActivity === 'draw' && <DrawYourMind onClose={() => setActiveActivity(null)} />}
     </>
   )
 }
