@@ -1157,84 +1157,6 @@ export function CheckInFlow() {
                   )}
 
                 </div>
-
-                {/* Action Buttons - horizontal row with consistent site styling */}
-                <div className="flex flex-wrap justify-center gap-4 mt-8">
-                  <button
-                    onClick={() => {
-                      setCompletedData(prev => ({ ...prev, talk: { choice: 'parent' } }))
-                    }}
-                    className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                    style={{
-                      backgroundColor: '#3a7ddc',
-                      color: 'white',
-                      width: '100px',
-                      height: '56px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: '28px'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#2e6bc7'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#3a7ddc'
-                    }}
-                  >
-                    A parent
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setCompletedData(prev => ({ ...prev, talk: { choice: 'teacher' } }))
-                    }}
-                    className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                    style={{
-                      backgroundColor: '#3a7ddc',
-                      color: 'white',
-                      width: '100px',
-                      height: '56px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: '28px'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#2e6bc7'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#3a7ddc'
-                    }}
-                  >
-                    A teacher
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setCompletedData(prev => ({ ...prev, talk: { choice: 'none' } }))
-                    }}
-                    className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                    style={{
-                      backgroundColor: '#3a7ddc',
-                      color: 'white',
-                      width: '100px',
-                      height: '56px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: '28px'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#2e6bc7'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#3a7ddc'
-                    }}
-                  >
-                    No one
-                  </button>
-                </div>
               </div>
 
               {/* Message - fades in after button click */}
@@ -1546,36 +1468,97 @@ export function CheckInFlow() {
                 `}</style>
               </div>
 
-              {/* Yellow swoosh footer - hidden on mobile */}
+              {/* Yellow swoosh footer */}
               <div className="hidden md:block absolute bottom-0 left-0 right-0">
                 <YellowSwoosh />
               </div>
 
-              {/* NEXT Button - positioned above yellow swoosh on desktop, at bottom on mobile */}
-              <div className="fixed left-1/2 transform -translate-x-1/2 text-center"
-                   style={{ zIndex: 1100, bottom: '32px' }}>
-                <button
-                  onClick={() => navigate('/checkin/flow/complete')}
-                  className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                  style={{
-                    backgroundColor: '#3a7ddc',
-                    color: 'white',
-                    width: '140px',
-                    height: '56px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '28px'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#2e6bc7'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#3a7ddc'
-                  }}
-                >
-                  NEXT
-                </button>
+              {/* Action Buttons - positioned above yellow swoosh */}
+              <div
+                className="talk-buttons transition-opacity duration-500 fixed left-1/2 transform -translate-x-1/2"
+                style={{
+                  zIndex: 1100,
+                  bottom: '32px',
+                  opacity: completedData.talk ? 0 : 1,
+                  pointerEvents: completedData.talk ? 'none' : 'auto'
+                }}
+              >
+                <div className="flex flex-wrap justify-center gap-4">
+                  <button
+                    onClick={() => {
+                      setCompletedData(prev => ({ ...prev, talk: { choice: 'parent' } }))
+                    }}
+                    className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    style={{
+                      backgroundColor: '#3a7ddc',
+                      color: 'white',
+                      width: '100px',
+                      height: '56px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '28px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#2e6bc7'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#3a7ddc'
+                    }}
+                  >
+                    A parent
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setCompletedData(prev => ({ ...prev, talk: { choice: 'teacher' } }))
+                    }}
+                    className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    style={{
+                      backgroundColor: '#3a7ddc',
+                      color: 'white',
+                      width: '100px',
+                      height: '56px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '28px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#2e6bc7'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#3a7ddc'
+                    }}
+                  >
+                    A teacher
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setCompletedData(prev => ({ ...prev, talk: { choice: 'none' } }))
+                    }}
+                    className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    style={{
+                      backgroundColor: '#3a7ddc',
+                      color: 'white',
+                      width: '100px',
+                      height: '56px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '28px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#2e6bc7'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#3a7ddc'
+                    }}
+                  >
+                    No one
+                  </button>
+                </div>
               </div>
             </div>
           </div>
