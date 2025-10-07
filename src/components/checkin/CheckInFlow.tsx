@@ -468,8 +468,8 @@ export function CheckInFlow() {
             .complete-exit-button {
               width: 3rem !important;
               height: 3rem !important;
-              top: 40px !important;
-              right: 40px !important;
+              top: 20px !important;
+              right: 20px !important;
             }
             .complete-exit-button svg {
               width: 1.25rem !important;
