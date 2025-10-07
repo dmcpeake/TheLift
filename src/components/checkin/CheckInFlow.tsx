@@ -736,7 +736,7 @@ export function CheckInFlow() {
               <div className="text-center chart-title-container" style={{ marginBottom: '0.5rem' }}>
                 <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
                   <span className="hidden md:inline">Low score?</span>
-                  <span className="md:hidden">Feeling low?</span>
+                  <span className="md:hidden">Feeling down?</span>
                 </h1>
               </div>
 
