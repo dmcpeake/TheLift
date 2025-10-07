@@ -283,8 +283,8 @@ export function CheckInGarden() {
             display: none !important;
           }
 
-          .garden-cards-grid button {
-            padding-top: calc(1.5rem + 15px) !important;
+          .garden-cards-grid button > div {
+            align-items: center !important;
           }
         }
       `}</style>
