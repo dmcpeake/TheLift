@@ -448,14 +448,16 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
 
   const scrollToActiveCard = (sectionIndex: number) => {
     if (scrollContainerRef.current) {
-      const cardWidth = 140 + 10 // card width + gap
+      // Use 150px card width on mobile (<=768px), 140px on desktop
+      const actualCardWidth = window.innerWidth <= 768 ? 150 : 140
+      const cardWidth = actualCardWidth + 10 // card width + gap
       const containerWidth = scrollContainerRef.current.clientWidth
       const cardPosition = sectionIndex * cardWidth
 
       // Calculate if we need to scroll to keep the card in view
       const currentScroll = scrollContainerRef.current.scrollLeft
       const cardStart = cardPosition - 20 // Account for padding
-      const cardEnd = cardPosition + 140 + 20 // Card width + padding
+      const cardEnd = cardPosition + actualCardWidth + 20 // Card width + padding
 
       if (cardStart < currentScroll) {
         // Card is to the left of view, scroll left
@@ -465,8 +467,9 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
         })
       } else if (cardEnd > currentScroll + containerWidth) {
         // Card is to the right of view, scroll right
+        // Reduced by 40px so card doesn't sit hard against right edge
         scrollContainerRef.current.scrollTo({
-          left: cardEnd - containerWidth + 60,
+          left: cardEnd - containerWidth + 20,
           behavior: 'smooth'
         })
       }
