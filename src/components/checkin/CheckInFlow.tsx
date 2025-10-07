@@ -1502,6 +1502,9 @@ export function CheckInFlow() {
                       padding-left: 0 !important;
                       padding-right: 0 !important;
                     }
+                    .lift-cards-container > div {
+                      width: 100% !important;
+                    }
                     .theo-animation-mobile-hide {
                       display: none !important;
                     }
