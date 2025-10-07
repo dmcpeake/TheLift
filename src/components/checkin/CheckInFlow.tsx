@@ -427,6 +427,14 @@ export function CheckInFlow() {
               height: 28px !important;
               bottom: 20% !important;
             }
+
+            .complete-blurred-container {
+              background-color: transparent !important;
+              backdrop-filter: none !important;
+              border: none !important;
+              box-shadow: none !important;
+              padding: 0 !important;
+            }
           }
         `}</style>
         <div
@@ -516,7 +524,7 @@ export function CheckInFlow() {
             <div className="max-w-4xl mx-auto text-center">
               {/* Container Card - Blurred Box */}
               <div
-                className="rounded-2xl"
+                className="complete-blurred-container rounded-2xl"
                 style={{
                   backgroundColor: 'rgba(255, 255, 255, 0.3)',
                   backdropFilter: 'blur(16px)',
