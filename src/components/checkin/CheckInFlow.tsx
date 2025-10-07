@@ -763,7 +763,7 @@ export function CheckInFlow() {
                     marginBottom: '1.5rem',
                     textAlign: 'center'
                   }}>
-                    Low score? To feel better you could try...
+                    To feel better you could try...
                   </h2>
 
                   {/* Desktop: 3 columns, Mobile: Horizontal scroll */}
