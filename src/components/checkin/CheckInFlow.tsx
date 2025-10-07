@@ -442,7 +442,7 @@ export function CheckInFlow() {
               margin-left: 20px !important;
               margin-right: 20px !important;
               margin-top: 20px !important;
-              padding: 30px 20px !important;
+              padding: 20px !important;
             }
             .complete-header-mobile {
               padding: 0 20px !important;
