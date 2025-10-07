@@ -843,7 +843,7 @@ export function CheckInFlow() {
                 </h1>
               </div>
 
-              <div className="flex flex-col items-center p-8"
+              <div className="chart-page-content flex flex-col items-center p-8"
                    style={{ paddingTop: '0' }}>
 
                 {/* Support Tips Section */}
@@ -1053,6 +1053,10 @@ export function CheckInFlow() {
 
               <style jsx>{`
                 @media (max-width: 767px) {
+                  .chart-page-content {
+                    padding-left: 0 !important;
+                    padding-right: 0 !important;
+                  }
                   .support-tips-section {
                     padding-left: 0 !important;
                     padding-right: 0 !important;
