@@ -56,6 +56,27 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
   const [editingNotes, setEditingNotes] = useState<string>('')
   const [buttonAnimationKey, setButtonAnimationKey] = useState(0)
   const [isPlayingAudio, setIsPlayingAudio] = useState(false)
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
+
+  // Load voices for text-to-speech
+  useEffect(() => {
+    const loadVoices = () => {
+      const availableVoices = speechSynthesis.getVoices()
+      if (availableVoices.length > 0) {
+        setVoices(availableVoices)
+      }
+    }
+
+    // Load voices immediately if available
+    loadVoices()
+
+    // Chrome loads voices asynchronously
+    speechSynthesis.addEventListener('voiceschanged', loadVoices)
+
+    return () => {
+      speechSynthesis.removeEventListener('voiceschanged', loadVoices)
+    }
+  }, [])
 
   // Reset saved status when section changes
   useEffect(() => {
@@ -175,7 +196,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
     const utterance = new SpeechSynthesisUtterance(`${sectionName}. ${subtext}`)
 
     // Voice selection logic - prioritize child-friendly voices
-    const voices = speechSynthesis.getVoices()
+    // Use cached voices from state instead of calling getVoices() each time
     const preferredVoice = voices.find(voice =>
       voice.name.toLowerCase().includes('female') ||
       voice.name.toLowerCase().includes('woman') ||
