@@ -541,10 +541,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
         }
         @media (max-width: 768px) {
           .wellbeing-title-container {
-            margin-top: -55px !important;
-          }
-          .wellbeing-title-inline-container {
-            margin-bottom: -5px !important;
+            margin-top: -45px !important;
           }
           .wellbeing-title-mobile-text {
             display: block !important;
