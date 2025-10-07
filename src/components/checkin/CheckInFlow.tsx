@@ -1477,7 +1477,7 @@ export function CheckInFlow() {
 
                   {/* Theo Thumbs Up Animation */}
                   {theoThumbsUpAnimation && (
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '2rem' }}>
+                    <div className="theo-animation-mobile-hide" style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '2rem' }}>
                       <div style={{ width: '200px', height: '200px' }}>
                         <Lottie
                           animationData={theoThumbsUpAnimation}
@@ -1491,6 +1491,29 @@ export function CheckInFlow() {
                 </div>
 
                 <style jsx>{`
+                  @media (max-width: 767px) {
+                    .lift-cards-container {
+                      flex-direction: column !important;
+                      overflow-x: visible !important;
+                      scroll-snap-type: none !important;
+                      margin-left: 20px !important;
+                      margin-right: 20px !important;
+                      padding-left: 0 !important;
+                      padding-right: 0 !important;
+                      gap: 1rem !important;
+                    }
+                    .lift-cards-container > div {
+                      width: 100% !important;
+                      max-width: 100% !important;
+                      min-width: auto !important;
+                    }
+                    .mobile-dots {
+                      display: none !important;
+                    }
+                    .theo-animation-mobile-hide {
+                      display: none !important;
+                    }
+                  }
                   @media (min-width: 768px) {
                     .lift-cards-container {
                       justify-content: center;
