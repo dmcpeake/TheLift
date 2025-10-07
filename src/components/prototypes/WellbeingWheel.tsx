@@ -555,6 +555,27 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
           .wellbeing-speaker-icon {
             display: flex !important;
           }
+          /* Mobile card layout - horizontal */
+          .wellbeing-card-mobile {
+            flex-direction: row !important;
+            justify-content: flex-start !important;
+            height: 50px !important;
+            min-height: 50px !important;
+            width: 200px !important;
+            min-width: 200px !important;
+            padding: 8px 12px !important;
+            gap: 12px !important;
+          }
+          .wellbeing-card-icon {
+            width: 32px !important;
+            height: 32px !important;
+            min-width: 32px !important;
+            min-height: 32px !important;
+          }
+          .wellbeing-card-text {
+            text-align: left !important;
+            font-size: 12px !important;
+          }
         }
         @media (min-width: 769px) {
           .wellbeing-title-mobile-text {
@@ -822,7 +843,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                       setTimeout(() => scrollToActiveCard(index), 100)
                     }
                   }}
-                  className={`relative rounded-lg flex flex-col items-center gap-2 px-3 py-3 text-sm transition-all ${
+                  className={`wellbeing-card-mobile relative rounded-lg flex flex-col items-center gap-2 px-3 py-3 text-sm transition-all ${
                     isActive ? 'font-medium' :
                     isCompleted ? 'hover:text-blue-700 cursor-pointer' :
                     'hover:text-blue-700 cursor-pointer'
@@ -860,7 +881,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
 
                   {/* Icon circle */}
                   {isCompleted && completedMood ? (
-                    <div className="flex items-center justify-center" style={{
+                    <div className="wellbeing-card-icon flex items-center justify-center flex-shrink-0" style={{
                       width: '40px',
                       height: '40px',
                       minWidth: '40px',
@@ -870,6 +891,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                         animationData={completedMood.animation}
                         loop={true}
                         autoplay={true}
+                        className="wellbeing-card-icon"
                         style={{
                           width: '40px',
                           height: '40px',
@@ -878,7 +900,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                       />
                     </div>
                   ) : (
-                    <div className="rounded-full flex items-center justify-center transition-all" style={{
+                    <div className="wellbeing-card-icon rounded-full flex items-center justify-center transition-all flex-shrink-0" style={{
                       width: '40px',
                       height: '40px',
                       backgroundColor: isActive ? '#e87e671a' : '#3b82f61a',
@@ -889,7 +911,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                   )}
 
                   {/* Text */}
-                  <div className="text-center">
+                  <div className="wellbeing-card-text text-center">
                     <span className="font-semibold" style={{ fontSize: '11px', lineHeight: '1.2', color: isCompleted ? '#1f2937' : isActive ? '#e87e67' : '#3b82f6' }}>{section.name}</span>
                   </div>
                 </button>
