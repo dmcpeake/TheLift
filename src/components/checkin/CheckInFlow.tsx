@@ -743,7 +743,7 @@ export function CheckInFlow() {
                    style={{ paddingTop: '0' }}>
 
                 {/* Support Tips Section */}
-                <div style={{ width: '100%', maxWidth: '900px', marginBottom: '4rem' }}>
+                <div style={{ width: '100%', maxWidth: '900px', marginBottom: '20px' }}>
                   <p className="chart-support-title text-gray-600 mx-auto px-4" style={{
                     fontSize: '16px',
                     fontWeight: 400,
@@ -938,7 +938,7 @@ export function CheckInFlow() {
                 </div>
 
                 {/* Radial Graph - Hidden on mobile, shown below cards on desktop */}
-                <div className="chart-graph-container" style={{ marginBottom: '3rem', marginTop: '2rem' }}>
+                <div className="chart-graph-container" style={{ marginBottom: '3rem', marginTop: '20px' }}>
                   <WellbeingRadialGraph
                     sections={completedData.wellbeing?.sections || []}
                     size={250}
