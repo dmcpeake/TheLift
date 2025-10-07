@@ -1261,29 +1261,6 @@ export function CheckInFlow() {
                   })()}
                 </div>
 
-                {/* Theo Thumbs Up Animation */}
-                {theoThumbsUpAnimation && (
-                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
-                    <div style={{ width: '200px', height: '200px' }}>
-                      <Lottie
-                        animationData={theoThumbsUpAnimation}
-                        loop={true}
-                        autoplay={true}
-                        style={{ width: '100%', height: '100%' }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Divider Line */}
-                <hr style={{
-                  width: '100%',
-                  maxWidth: '600px',
-                  margin: '0 auto 2rem auto',
-                  border: 'none',
-                  borderTop: '1px solid #d1d5db'
-                }} />
-
                 {/* Lift cards section */}
                 <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto' }}>
                   {/* Cards - Desktop: 3 columns, Mobile: Horizontal scroll */}
@@ -1497,6 +1474,20 @@ export function CheckInFlow() {
                       transition: 'background-color 0.3s ease'
                     }}></div>
                   </div>
+
+                  {/* Theo Thumbs Up Animation */}
+                  {theoThumbsUpAnimation && (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '2rem' }}>
+                      <div style={{ width: '200px', height: '200px' }}>
+                        <Lottie
+                          animationData={theoThumbsUpAnimation}
+                          loop={true}
+                          autoplay={true}
+                          style={{ width: '100%', height: '100%' }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <style jsx>{`
