@@ -733,7 +733,7 @@ export function CheckInFlow() {
           <>
             <div className="bg-white min-h-screen relative chart-page-container" style={{ paddingTop: '140px', paddingBottom: '120px' }}>
               {/* Title - matching wellbeing page styling */}
-              <div className="text-center chart-title-container" style={{ marginBottom: '2rem' }}>
+              <div className="text-center chart-title-container" style={{ marginBottom: '0.5rem' }}>
                 <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
                   Low score?
                 </h1>
@@ -750,7 +750,7 @@ export function CheckInFlow() {
                     lineHeight: '1.5',
                     maxWidth: '800px',
                     marginBottom: '1.5rem',
-                    marginTop: '8px',
+                    marginTop: '0',
                     textAlign: 'center'
                   }}>
                     To feel better you could try...
