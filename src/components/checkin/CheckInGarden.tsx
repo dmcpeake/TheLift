@@ -288,7 +288,7 @@ export function CheckInGarden() {
           }
 
           .garden-cards-grid button > div > div:last-child {
-            margin-top: 5px !important;
+            margin-top: 7px !important;
           }
         }
       `}</style>
