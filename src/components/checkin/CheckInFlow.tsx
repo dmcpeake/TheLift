@@ -664,6 +664,9 @@ export function CheckInFlow() {
           .chart-title-container {
             margin-top: 40px;
           }
+          .chart-support-title {
+            font-size: 16px !important;
+          }
           .complete-done-container {
             bottom: 32px !important;
             padding: 0 2rem !important;
@@ -744,14 +747,14 @@ export function CheckInFlow() {
                 <div style={{ marginBottom: '3rem' }}>
                   <WellbeingRadialGraph
                     sections={completedData.wellbeing?.sections || []}
-                    size={250}
+                    size={window.innerWidth <= 768 ? 200 : 250}
                     theoAnimation={theoAnimation}
                   />
                 </div>
 
                 {/* Support Tips Section */}
                 <div style={{ width: '100%', maxWidth: '900px', marginBottom: '4rem' }}>
-                  <h2 style={{
+                  <h2 className="chart-support-title" style={{
                     fontSize: '16pt',
                     fontWeight: '400',
                     color: '#111827',
