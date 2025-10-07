@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Lottie from 'lottie-react'
+import { Volume2 } from 'lucide-react'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
 import BlushingShaded from '../../assets/animations/Blushing_Shaded.json'
 import HappyShaded from '../../assets/animations/Happy_Shaded.json'
@@ -54,6 +55,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
   const [hasSavedCurrentSection, setHasSavedCurrentSection] = useState(false)
   const [editingNotes, setEditingNotes] = useState<string>('')
   const [buttonAnimationKey, setButtonAnimationKey] = useState(0)
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false)
 
   // Reset saved status when section changes
   useEffect(() => {
@@ -154,6 +156,47 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
       default:
         return ''
     }
+  }
+
+  // Get plain text version of subtext (without HTML)
+  const getTopicSubtextPlain = (sectionId: string) => {
+    return getTopicSubtext(sectionId).replace(/<br>/g, ' ')
+  }
+
+  // Function to play topic title and subtext using Web Speech API
+  const playTopicAudio = (sectionId: string, sectionName: string) => {
+    const subtext = getTopicSubtextPlain(sectionId)
+    if (!subtext) return
+
+    // Stop any currently playing speech
+    speechSynthesis.cancel()
+
+    // Create speech synthesis utterance
+    const utterance = new SpeechSynthesisUtterance(`${sectionName}. ${subtext}`)
+
+    // Voice selection logic - prioritize child-friendly voices
+    const voices = speechSynthesis.getVoices()
+    const preferredVoice = voices.find(voice =>
+      voice.name.toLowerCase().includes('female') ||
+      voice.name.toLowerCase().includes('woman') ||
+      voice.name.toLowerCase().includes('girl') ||
+      (voice as any).gender === 'female'
+    ) || voices.find(voice => voice.lang.startsWith('en')) || voices[0]
+
+    if (preferredVoice) {
+      utterance.voice = preferredVoice
+    }
+
+    // Child-friendly speech settings
+    utterance.rate = 0.8    // 20% slower for comprehension
+    utterance.pitch = 1.2   // Slightly higher, more pleasant
+    utterance.volume = 0.8  // Comfortable listening level
+
+    utterance.onstart = () => setIsPlayingAudio(true)
+    utterance.onend = () => setIsPlayingAudio(false)
+    utterance.onerror = () => setIsPlayingAudio(false)
+
+    speechSynthesis.speak(utterance)
   }
 
   const moods = [
@@ -467,21 +510,42 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
   return (
     <>
       <style jsx>{`
+        @keyframes pulse {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.1);
+          }
+        }
         @media (max-width: 768px) {
           .wellbeing-title-mobile {
             font-size: 28px !important;
             line-height: 1.2 !important;
             margin-top: -55px !important;
           }
-          .wellbeing-title-desktop {
-            display: none !important;
-          }
           .wellbeing-title-mobile-text {
             display: block !important;
+          }
+          /* Hide subtext on mobile */
+          .wellbeing-subtext {
+            display: none !important;
+          }
+          /* Show speaker icon on mobile */
+          .wellbeing-speaker-icon {
+            display: flex !important;
           }
         }
         @media (min-width: 769px) {
           .wellbeing-title-mobile-text {
+            display: none !important;
+          }
+          /* Show subtext on desktop */
+          .wellbeing-subtext {
+            display: block !important;
+          }
+          /* Hide speaker icon on desktop */
+          .wellbeing-speaker-icon {
             display: none !important;
           }
         }
@@ -511,13 +575,75 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
 
       {/* Centered title like breathing exercise */}
       <div className="text-center wellbeing-title-container" style={{ marginBottom: '2rem' }}>
-        <h1 className="wellbeing-title-mobile wellbeing-title-desktop text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em', maxWidth: '800px', marginLeft: 'auto', marginRight: 'auto' }}>
-          {currentSection ? currentSection.name : 'How do you feel about these areas of your life?'}
-        </h1>
+        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px' }}>
+          <h1
+            className="text-gray-900"
+            style={{
+              fontSize: '30px',
+              fontWeight: 600,
+              letterSpacing: '0.02em',
+              cursor: window.innerWidth <= 768 ? 'pointer' : 'default',
+              margin: 0,
+              padding: 0,
+              display: 'inline'
+            }}
+            onClick={() => {
+              if (currentSection && window.innerWidth <= 768) {
+                playTopicAudio(currentSection.id, currentSection.name)
+              }
+            }}
+          >
+            {currentSection ? currentSection.name : 'How do you feel about these areas of your life?'}
+          </h1>
+          {/* Speaker icon - only visible on mobile */}
+          {currentSection && (
+            <button
+              onClick={() => playTopicAudio(currentSection.id, currentSection.name)}
+              className="wellbeing-speaker-icon"
+              style={{
+                display: 'none', // Hidden by default, shown on mobile via media query
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '36px',
+                height: '36px',
+                minWidth: '36px',
+                minHeight: '36px',
+                borderRadius: '50%',
+                backgroundColor: isPlayingAudio ? '#3a7ddc' : '#e0f0fa',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                flexShrink: 0,
+                padding: 0,
+                margin: 0,
+                marginLeft: '20px'
+              }}
+              onMouseEnter={(e) => {
+                if (!isPlayingAudio) {
+                  e.currentTarget.style.backgroundColor = '#d0e5f5'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isPlayingAudio) {
+                  e.currentTarget.style.backgroundColor = '#e0f0fa'
+                }
+              }}
+              aria-label="Read title and description aloud"
+            >
+              <Volume2
+                size={18}
+                color={isPlayingAudio ? 'white' : '#3a7ddc'}
+                style={{
+                  animation: isPlayingAudio ? 'pulse 1.5s ease-in-out infinite' : 'none'
+                }}
+              />
+            </button>
+          )}
+        </div>
         {currentSection && (
           <p
-            className="text-gray-600 mx-auto px-4"
-            style={{ fontSize: '16px', fontWeight: 400, lineHeight: '1.5', maxWidth: '800px', marginTop: '8px' }}
+            className="wellbeing-subtext text-gray-600 mx-auto px-4"
+            style={{ fontSize: '16px', fontWeight: 400, lineHeight: '1.5', maxWidth: '800px', marginTop: '0' }}
             dangerouslySetInnerHTML={{ __html: getTopicSubtext(currentSection.id) }}
           />
         )}
