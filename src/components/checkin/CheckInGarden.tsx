@@ -282,6 +282,10 @@ export function CheckInGarden() {
           .garden-card-subtext {
             display: none !important;
           }
+
+          .garden-card-content {
+            padding-top: 15px !important;
+          }
         }
       `}</style>
       <div
@@ -391,7 +395,7 @@ export function CheckInGarden() {
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
                 }}
               >
-                <div className="flex items-start gap-4">
+                <div className="garden-card-content flex items-start gap-4">
                   <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#eab308" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10"/>
@@ -422,7 +426,7 @@ export function CheckInGarden() {
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
                 }}
               >
-                <div className="flex items-start gap-4">
+                <div className="garden-card-content flex items-start gap-4">
                   <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -450,7 +454,7 @@ export function CheckInGarden() {
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
                 }}
               >
-                <div className="flex items-start gap-4">
+                <div className="garden-card-content flex items-start gap-4">
                   <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="10" r="3"/>
@@ -479,7 +483,7 @@ export function CheckInGarden() {
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
                 }}
               >
-                <div className="flex items-start gap-4">
+                <div className="garden-card-content flex items-start gap-4">
                   <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 19l7-7 3 3-7 7-3-3z"/>
