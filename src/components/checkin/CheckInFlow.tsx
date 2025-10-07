@@ -745,15 +745,6 @@ export function CheckInFlow() {
               <div className="flex flex-col items-center p-8"
                    style={{ paddingTop: '0' }}>
 
-                {/* Radial Graph - Hidden on mobile */}
-                <div className="chart-graph-container" style={{ marginBottom: '3rem' }}>
-                  <WellbeingRadialGraph
-                    sections={completedData.wellbeing?.sections || []}
-                    size={250}
-                    theoAnimation={theoAnimation}
-                  />
-                </div>
-
                 {/* Support Tips Section */}
                 <div style={{ width: '100%', maxWidth: '900px', marginBottom: '4rem' }}>
                   <h2 className="chart-support-title" style={{
@@ -945,6 +936,15 @@ export function CheckInFlow() {
                       transition: 'background-color 0.3s ease'
                     }}></div>
                   </div>
+                </div>
+
+                {/* Radial Graph - Hidden on mobile, shown below cards on desktop */}
+                <div className="chart-graph-container" style={{ marginBottom: '3rem', marginTop: '2rem' }}>
+                  <WellbeingRadialGraph
+                    sections={completedData.wellbeing?.sections || []}
+                    size={250}
+                    theoAnimation={theoAnimation}
+                  />
                 </div>
               </div>
 
