@@ -278,6 +278,10 @@ export function CheckInGarden() {
             gap: 1rem !important;
             padding: 0 !important;
           }
+
+          .garden-card-subtext {
+            display: none !important;
+          }
         }
       `}</style>
       <div
@@ -398,9 +402,9 @@ export function CheckInGarden() {
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      3 things that made me happy today
+                      3 things that made me happy
                     </h3>
-                    <p className="text-gray-700 text-sm">
+                    <p className="garden-card-subtext text-gray-700 text-sm">
                       Reflect on the positive moments from your day
                     </p>
                   </div>
@@ -428,7 +432,7 @@ export function CheckInGarden() {
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
                       3 things I am grateful for
                     </h3>
-                    <p className="text-gray-700 text-sm">
+                    <p className="garden-card-subtext text-gray-700 text-sm">
                       Share what you're thankful for today
                     </p>
                   </div>
@@ -457,7 +461,7 @@ export function CheckInGarden() {
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
                       If I could be anything...
                     </h3>
-                    <p className="text-gray-700 text-sm">
+                    <p className="garden-card-subtext text-gray-700 text-sm">
                       Imagine being any object, animal, or vegetable
                     </p>
                   </div>
@@ -488,7 +492,7 @@ export function CheckInGarden() {
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
                       Draw what's on your mind
                     </h3>
-                    <p className="text-gray-700 text-sm">
+                    <p className="garden-card-subtext text-gray-700 text-sm">
                       Express yourself through drawing
                     </p>
                   </div>
