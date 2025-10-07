@@ -1499,22 +1499,8 @@ export function CheckInFlow() {
                 <style jsx>{`
                   @media (max-width: 767px) {
                     .lift-cards-container {
-                      flex-direction: column !important;
-                      overflow-x: visible !important;
-                      scroll-snap-type: none !important;
-                      margin-left: 20px !important;
-                      margin-right: 20px !important;
-                      padding-left: 0 !important;
-                      padding-right: 0 !important;
-                      gap: 1rem !important;
-                    }
-                    .lift-cards-container > div {
-                      width: 100% !important;
-                      max-width: 100% !important;
-                      min-width: auto !important;
-                    }
-                    .mobile-dots {
-                      display: none !important;
+                      padding-left: 1rem !important;
+                      padding-right: 1rem !important;
                     }
                     .theo-animation-mobile-hide {
                       display: none !important;
