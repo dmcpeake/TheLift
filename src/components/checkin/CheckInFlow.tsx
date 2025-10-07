@@ -1245,9 +1245,6 @@ export function CheckInFlow() {
                           <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
                             Your feelings are safe with us
                           </h1>
-                          <p className="text-base text-gray-700" style={{ fontWeight: 400 }}>
-                            You can always share with someone later if you want to
-                          </p>
                         </>
                       )
                     }
