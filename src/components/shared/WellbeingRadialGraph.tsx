@@ -20,11 +20,8 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation, onCe
 
   useEffect(() => {
     const checkScreenSize = () => {
-      if (window.innerWidth <= 768) {
-        setActualSize(330) // Increased from 300 to 330 for more space around labels
-      } else {
-        setActualSize(size)
-      }
+      // Always use the passed size prop - don't override on mobile
+      setActualSize(size)
     }
 
     checkScreenSize()
