@@ -428,15 +428,38 @@ export function CheckInFlow() {
               bottom: 20% !important;
             }
 
+            .complete-content .max-w-4xl {
+              margin-top: 40px !important;
+              padding: 0 20px !important;
+            }
             .complete-blurred-container {
-              margin: 40px !important;
-              padding: 20px !important;
+              background: transparent !important;
+              backdrop-filter: none !important;
+              border: none !important;
+              box-shadow: none !important;
+              padding: 0 !important;
+              margin: 0 !important;
+            }
+            .complete-header-mobile h1 {
+              font-size: 28px !important;
+              margin-bottom: 16px !important;
+              color: #1f2937 !important;
+              font-weight: 700 !important;
+            }
+            .complete-header-mobile p {
+              font-size: 16px !important;
+              margin-bottom: 24px !important;
+              color: #6b7280 !important;
             }
             .complete-mood-meter {
               margin-top: 0 !important;
             }
             .complete-header-desktop {
               display: none !important;
+            }
+            .complete-exit-button {
+              top: 40px !important;
+              right: 40px !important;
             }
           }
 
@@ -507,7 +530,7 @@ export function CheckInFlow() {
           {/* Close Button */}
           <button
             onClick={() => navigate('/')}
-            className="fixed w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors z-50 shadow-lg"
+            className="complete-exit-button fixed w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors z-50 shadow-lg"
             style={{
               backgroundColor: 'white',
               border: '1px solid #147fe3',
@@ -533,11 +556,11 @@ export function CheckInFlow() {
           >
             <div className="max-w-4xl mx-auto text-center">
               {/* Header - Mobile only (outside blurred container) */}
-              <div className="complete-header-mobile md:hidden text-center" style={{ marginBottom: '2rem' }}>
-                <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+              <div className="complete-header-mobile md:hidden text-center">
+                <h1 className="text-gray-900">
                   Great check in today!
                 </h1>
-                <p className="text-gray-600" style={{ fontSize: '16px', fontWeight: 400, lineHeight: '1.5' }}>
+                <p className="text-gray-600">
                   How do you feel now?
                 </p>
               </div>
