@@ -1245,6 +1245,16 @@ export function CheckInFlow() {
                           <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
                             Your feelings are safe with us
                           </h1>
+                          <p className="text-gray-600 mx-auto px-4" style={{
+                            fontSize: '16px',
+                            fontWeight: 400,
+                            lineHeight: '1.5',
+                            maxWidth: '800px',
+                            marginTop: '8px',
+                            textAlign: 'center'
+                          }}>
+                            Have a lift
+                          </p>
                         </>
                       )
                     }
@@ -1274,18 +1284,8 @@ export function CheckInFlow() {
                   borderTop: '1px solid #d1d5db'
                 }} />
 
-                {/* Have a lift section */}
+                {/* Lift cards section */}
                 <div style={{ width: '100%', maxWidth: '900px', margin: '0 auto' }}>
-                  <h2 style={{
-                    fontSize: '16pt',
-                    fontWeight: '400',
-                    color: '#111827',
-                    marginBottom: '1.5rem',
-                    textAlign: 'center'
-                  }}>
-                    Have a lift
-                  </h2>
-
                   {/* Cards - Desktop: 3 columns, Mobile: Horizontal scroll */}
                   <div
                     className="lift-cards-container"
