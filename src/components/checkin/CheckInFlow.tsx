@@ -683,6 +683,10 @@ export function CheckInFlow() {
             bottom: 32px !important;
             padding: 0 2rem !important;
           }
+          .talk-buttons-container {
+            flex-wrap: nowrap !important;
+            gap: 0.5rem !important;
+          }
         }
       `}</style>
 
@@ -1534,7 +1538,7 @@ export function CheckInFlow() {
                     bottom: '32px'
                   }}
                 >
-                  <div className="flex flex-wrap justify-center gap-4">
+                  <div className="talk-buttons-container flex justify-center gap-4">
                     <button
                       onClick={() => {
                         setCompletedData(prev => ({ ...prev, talk: { choice: 'parent' } }))
