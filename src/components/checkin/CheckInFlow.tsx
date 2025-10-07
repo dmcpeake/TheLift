@@ -543,6 +543,13 @@ export function CheckInFlow() {
                     onComplete={(data) => {
                       setCompleteMood(data.mood_level)
                     }}
+                    onSelectionMade={() => {
+                      // Enable button - actual mood value will be set via onComplete
+                      setCompleteMood('selected')
+                    }}
+                    onSelectionRemoved={() => {
+                      setCompleteMood(null)
+                    }}
                     showNextButton={false}
                     hideButton={true}
                     hideDebugInfo={true}
@@ -554,7 +561,8 @@ export function CheckInFlow() {
                 {/* MY GARDEN Button - desktop only */}
                 <div className="hidden md:flex justify-center" style={{ marginBottom: '20px', marginTop: '-40px', position: 'relative', zIndex: 20 }}>
                   <button
-                    onClick={() => navigate('/checkin/garden')}
+                    onClick={() => completeMood && navigate('/checkin/garden')}
+                    disabled={!completeMood}
                     className="font-semibold text-lg transition-all duration-200"
                     style={{
                       backgroundColor: '#e87e67',
@@ -564,13 +572,18 @@ export function CheckInFlow() {
                       paddingLeft: '50px',
                       paddingRight: '50px',
                       border: '2px solid white',
-                      cursor: 'pointer',
+                      cursor: completeMood ? 'pointer' : 'not-allowed',
                       boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)',
                       position: 'relative',
-                      zIndex: 20
+                      zIndex: 20,
+                      opacity: completeMood ? 1 : 0.3
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
+                    onMouseEnter={(e) => {
+                      if (completeMood) e.currentTarget.style.backgroundColor = '#d66e5a'
+                    }}
+                    onMouseLeave={(e) => {
+                      if (completeMood) e.currentTarget.style.backgroundColor = '#e87e67'
+                    }}
                   >
                     MY GARDEN
                   </button>
@@ -582,7 +595,8 @@ export function CheckInFlow() {
           {/* MY GARDEN Button - mobile only */}
           <div className="complete-mobile-button flex justify-center" style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
             <button
-              onClick={() => navigate('/checkin/garden')}
+              onClick={() => completeMood && navigate('/checkin/garden')}
+              disabled={!completeMood}
               className="transition-all duration-200"
               style={{
                 backgroundColor: '#e87e67',
@@ -591,7 +605,7 @@ export function CheckInFlow() {
                 height: '56px',
                 borderRadius: '28px',
                 border: '2px solid white',
-                cursor: 'pointer',
+                cursor: completeMood ? 'pointer' : 'not-allowed',
                 fontSize: '16px',
                 fontWeight: '600',
                 display: 'flex',
@@ -600,10 +614,15 @@ export function CheckInFlow() {
                 boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)',
                 position: 'relative',
                 zIndex: 10001,
-                pointerEvents: 'auto'
+                pointerEvents: 'auto',
+                opacity: completeMood ? 1 : 0.3
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
+              onMouseEnter={(e) => {
+                if (completeMood) e.currentTarget.style.backgroundColor = '#d66e5a'
+              }}
+              onMouseLeave={(e) => {
+                if (completeMood) e.currentTarget.style.backgroundColor = '#e87e67'
+              }}
             >
               MY GARDEN
             </button>

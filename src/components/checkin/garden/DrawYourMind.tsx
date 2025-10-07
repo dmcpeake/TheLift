@@ -91,22 +91,25 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg p-8 max-w-3xl w-full mx-4 relative"
+        className="bg-white rounded-lg max-w-3xl w-full mx-4 relative"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxHeight: '90vh', overflowY: 'auto' }}
+        style={{ maxHeight: '90vh', overflowY: 'auto', padding: '2rem' }}
       >
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-100 transition-colors"
-        >
-          <X size={20} color="#2563eb" />
-        </button>
-
         {/* Title */}
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6 pr-12">
-          Draw a picture of what's on your mind
-        </h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold text-gray-900">
+            Draw a picture of what's on your mind
+          </h2>
+          <button
+            onClick={clearCanvas}
+            className="transition-colors"
+            style={{ color: '#2563eb' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#1d4ed8'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#2563eb'}
+          >
+            <RefreshCw size={24} />
+          </button>
+        </div>
 
         {/* Canvas */}
         <div className="mb-6">
@@ -124,27 +127,29 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
           />
         </div>
 
-        {/* Buttons */}
-        <div className="flex justify-center gap-4">
-          <button
-            onClick={clearCanvas}
-            className="flex items-center gap-2 px-6 py-3 font-semibold rounded-full transition-colors"
-            style={{ backgroundColor: 'white', color: '#2563eb', border: '2px solid #2563eb' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#eff6ff'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-          >
-            <RefreshCw size={18} />
-            Clear
-          </button>
-          <button
-            onClick={onClose}
-            className="px-8 py-3 font-semibold rounded-full transition-colors"
-            style={{ backgroundColor: '#2563eb', color: 'white' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
-          >
-            Save
-          </button>
+        {/* Action Footer */}
+        <div className="mt-8 pt-4 border-t border-gray-200" style={{ marginBottom: '-1rem' }}>
+          <div className="flex items-center">
+            <button
+              onClick={onClose}
+              className="flex-1 font-medium transition-colors text-center"
+              style={{ fontSize: '16px', color: '#2563eb' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#1d4ed8'}
+              onMouseLeave={(e) => e.currentTarget.style.color = '#2563eb'}
+            >
+              CLOSE
+            </button>
+            <div style={{ width: '1px', height: '20px', backgroundColor: '#d1d5db' }}></div>
+            <button
+              onClick={onClose}
+              className="flex-1 font-medium transition-colors text-center"
+              style={{ fontSize: '16px', color: '#2563eb' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#1d4ed8'}
+              onMouseLeave={(e) => e.currentTarget.style.color = '#2563eb'}
+            >
+              SAVE
+            </button>
+          </div>
         </div>
       </div>
     </div>
