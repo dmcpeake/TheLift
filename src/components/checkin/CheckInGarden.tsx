@@ -238,6 +238,46 @@ export function CheckInGarden() {
             height: 28px !important;
             bottom: 20% !important;
           }
+
+          .garden-exit-button {
+            width: 3rem !important;
+            height: 3rem !important;
+            top: 20px !important;
+            right: 20px !important;
+          }
+          .garden-exit-button svg {
+            width: 1.25rem !important;
+            height: 1.25rem !important;
+          }
+
+          .garden-content-wrapper {
+            padding: 0 !important;
+            align-items: flex-start !important;
+            justify-content: flex-start !important;
+          }
+
+          .garden-content-inner {
+            margin-top: 40px !important;
+            padding: 0 20px !important;
+          }
+
+          .garden-title {
+            font-size: 28px !important;
+            margin-bottom: 16px !important;
+            color: #1f2937 !important;
+            font-weight: 700 !important;
+          }
+
+          .garden-subtitle {
+            font-size: 16px !important;
+            margin-bottom: 20px !important;
+            color: #6b7280 !important;
+          }
+
+          .garden-cards-grid {
+            gap: 1rem !important;
+            padding: 0 !important;
+          }
         }
       `}</style>
       <div
@@ -301,7 +341,7 @@ export function CheckInGarden() {
         {/* Close Button */}
         <button
           onClick={() => navigate('/')}
-          className="fixed w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors z-50 shadow-lg"
+          className="garden-exit-button fixed w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors z-50 shadow-lg"
           style={{
             backgroundColor: 'white',
             border: '1px solid #147fe3',
@@ -318,24 +358,24 @@ export function CheckInGarden() {
 
         {/* Content */}
         <div
-          className="transition-opacity duration-300"
+          className="garden-content-wrapper transition-opacity duration-300"
           style={{
             minHeight: '100vh',
             padding: '140px 80px 80px 80px',
             width: '100%'
           }}
         >
-          <div className="max-w-5xl mx-auto">
+          <div className="garden-content-inner max-w-5xl mx-auto">
             {/* Title */}
-            <h1 className="text-4xl font-bold text-gray-900 mb-2 text-center">
+            <h1 className="garden-title text-4xl font-bold text-gray-900 mb-2 text-center">
               My Garden
             </h1>
-            <p className="text-lg text-gray-700 mb-12 text-center">
+            <p className="garden-subtitle text-lg text-gray-700 mb-12 text-center">
               Choose an activity to help you reflect
             </p>
 
             {/* Activity Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{ maxWidth: '900px', margin: '0 auto' }}>
+            <div className="garden-cards-grid grid grid-cols-1 md:grid-cols-2 gap-6" style={{ maxWidth: '900px', margin: '0 auto' }}>
               {/* Card 1: 3 Happy Things */}
               <button
                 onClick={() => setActiveActivity('happy')}
