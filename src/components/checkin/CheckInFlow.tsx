@@ -442,7 +442,10 @@ export function CheckInFlow() {
               margin-left: 20px !important;
               margin-right: 20px !important;
               margin-top: 20px !important;
-              padding: 20px !important;
+              padding-top: 10px !important;
+              padding-left: 20px !important;
+              padding-right: 20px !important;
+              padding-bottom: 0 !important;
             }
             .complete-header-mobile {
               padding: 0 20px !important;
@@ -461,7 +464,7 @@ export function CheckInFlow() {
             }
             .complete-mood-meter {
               margin-top: 0 !important;
-              margin-bottom: 0 !important;
+              margin-bottom: -10px !important;
             }
             .complete-header-desktop {
               display: none !important;
