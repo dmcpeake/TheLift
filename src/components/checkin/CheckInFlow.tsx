@@ -657,7 +657,7 @@ export function CheckInFlow() {
   return (
     <>
       <style jsx>{`
-        @media (max-width: 768px) {
+        @media (max-width: 767px) {
           .chart-page-container {
             padding-top: 60px !important;
           }
@@ -666,6 +666,15 @@ export function CheckInFlow() {
           }
           .chart-graph-container {
             display: none !important;
+          }
+          .chart-main-title::before {
+            content: 'Feeling down?';
+          }
+          .chart-main-title {
+            font-size: 0;
+          }
+          .chart-main-title::before {
+            font-size: 30px;
           }
           .complete-done-container {
             bottom: 32px !important;
@@ -734,9 +743,8 @@ export function CheckInFlow() {
             <div className="bg-white min-h-screen relative chart-page-container" style={{ paddingTop: '140px', paddingBottom: '120px' }}>
               {/* Title - matching wellbeing page styling */}
               <div className="text-center chart-title-container" style={{ marginBottom: '0.5rem' }}>
-                <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-                  <span className="hidden md:inline">Low score?</span>
-                  <span className="md:hidden">Feeling down?</span>
+                <h1 className="text-gray-900 mb-2 chart-main-title" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+                  Low score?
                 </h1>
               </div>
 
