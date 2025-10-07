@@ -453,14 +453,9 @@ export function CheckInFlow() {
             }
             .complete-header-mobile h1 {
               font-size: 28px !important;
-              margin-bottom: 16px !important;
+              margin-bottom: 0 !important;
               color: #1f2937 !important;
               font-weight: 700 !important;
-            }
-            .complete-header-mobile p {
-              font-size: 16px !important;
-              margin-bottom: 0 !important;
-              color: #6b7280 !important;
             }
             .complete-mood-meter {
               margin-top: 0 !important;
@@ -591,11 +586,8 @@ export function CheckInFlow() {
               {/* Header - Mobile only (outside blurred container) */}
               <div className="complete-header-mobile md:hidden text-center">
                 <h1 className="text-gray-900">
-                  Great check in today!
+                  Great check in, how do you feel now?
                 </h1>
-                <p className="text-gray-600">
-                  How do you feel now?
-                </p>
               </div>
 
               {/* Container Card - Blurred Box */}
