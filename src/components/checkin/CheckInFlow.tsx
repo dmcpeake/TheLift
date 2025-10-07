@@ -743,7 +743,7 @@ export function CheckInFlow() {
                    style={{ paddingTop: '0' }}>
 
                 {/* Support Tips Section */}
-                <div style={{ width: '100%', maxWidth: '900px', marginBottom: '20px' }}>
+                <div className="support-tips-section" style={{ width: '100%', maxWidth: '900px', marginBottom: '20px' }}>
                   <p className="chart-support-title text-gray-600 mx-auto px-4" style={{
                     fontSize: '16px',
                     fontWeight: 400,
@@ -948,6 +948,30 @@ export function CheckInFlow() {
               </div>
 
               <style jsx>{`
+                @media (max-width: 767px) {
+                  .support-tips-section {
+                    padding-left: 0 !important;
+                    padding-right: 0 !important;
+                  }
+                  .support-tips-container {
+                    flex-direction: column !important;
+                    overflow-x: visible !important;
+                    scroll-snap-type: none !important;
+                    margin-left: 20px !important;
+                    margin-right: 20px !important;
+                    padding-left: 0 !important;
+                    padding-right: 0 !important;
+                    gap: 1rem !important;
+                  }
+                  .support-tips-container > div {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    min-width: auto !important;
+                  }
+                  .mobile-dots {
+                    display: none !important;
+                  }
+                }
                 @media (min-width: 768px) {
                   .support-tips-container {
                     justify-content: center;
