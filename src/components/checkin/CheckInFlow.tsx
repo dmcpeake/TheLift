@@ -688,7 +688,10 @@ export function CheckInFlow() {
             gap: 0.5rem !important;
           }
           .talk-page-container {
-            padding-top: 80px !important;
+            padding-top: 60px !important;
+          }
+          .talk-title-container {
+            margin-top: 40px;
           }
         }
       `}</style>
@@ -1058,7 +1061,7 @@ export function CheckInFlow() {
                 }}
               >
                 {/* Title - matching other page styling */}
-                <div className="text-center" style={{ marginBottom: '3rem' }}>
+                <div className="text-center talk-title-container" style={{ marginBottom: '3rem' }}>
                   <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
                     Do you want to talk to someone?
                   </h1>
