@@ -1005,7 +1005,7 @@ export function CheckInFlow() {
                         textAlign: 'center',
                         fontSize: '14px'
                       }}>
-                        Talk to your adults or teachers for a bit more support
+                        Talk to your adults or teachers for more support
                       </p>
                     </div>
                   </div>
