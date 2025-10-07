@@ -690,7 +690,7 @@ export function CheckInFlow() {
           .talk-page-container {
             padding-top: 60px !important;
           }
-          .talk-title-container {
+          .talk-content-wrapper {
             margin-top: 40px;
           }
         }
@@ -1051,7 +1051,7 @@ export function CheckInFlow() {
 
         {currentStep === 'talk' && (
           <div className="talk-page-container bg-white min-h-screen" style={{ paddingTop: '140px', paddingBottom: '120px' }}>
-            <div className="mx-auto px-6" style={{ maxWidth: '800px' }}>
+            <div className="talk-content-wrapper mx-auto px-6" style={{ maxWidth: '800px' }}>
               {/* Main Content - fades out */}
               <div
                 className="talk-main-content transition-opacity duration-500"
