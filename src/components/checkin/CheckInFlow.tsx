@@ -692,6 +692,8 @@ export function CheckInFlow() {
           }
           .talk-content-wrapper {
             margin-top: 40px;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
           }
         }
       `}</style>
