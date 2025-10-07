@@ -667,9 +667,6 @@ export function CheckInFlow() {
           .chart-graph-container {
             display: none !important;
           }
-          .chart-support-title {
-            font-size: 16px !important;
-          }
           .complete-done-container {
             bottom: 32px !important;
             padding: 0 2rem !important;
@@ -747,15 +744,17 @@ export function CheckInFlow() {
 
                 {/* Support Tips Section */}
                 <div style={{ width: '100%', maxWidth: '900px', marginBottom: '4rem' }}>
-                  <h2 className="chart-support-title" style={{
-                    fontSize: '16pt',
-                    fontWeight: '400',
-                    color: '#111827',
+                  <p className="chart-support-title text-gray-600 mx-auto px-4" style={{
+                    fontSize: '16px',
+                    fontWeight: 400,
+                    lineHeight: '1.5',
+                    maxWidth: '800px',
                     marginBottom: '1.5rem',
+                    marginTop: '8px',
                     textAlign: 'center'
                   }}>
                     To feel better you could try...
-                  </h2>
+                  </p>
 
                   {/* Desktop: 3 columns, Mobile: Horizontal scroll */}
                   <div
