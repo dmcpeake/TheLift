@@ -687,6 +687,9 @@ export function CheckInFlow() {
             flex-wrap: nowrap !important;
             gap: 0.5rem !important;
           }
+          .talk-page-container {
+            padding-top: 80px !important;
+          }
         }
       `}</style>
 
@@ -1044,7 +1047,7 @@ export function CheckInFlow() {
         )}
 
         {currentStep === 'talk' && (
-          <div className="bg-white min-h-screen" style={{ paddingTop: '140px', paddingBottom: '120px' }}>
+          <div className="talk-page-container bg-white min-h-screen" style={{ paddingTop: '140px', paddingBottom: '120px' }}>
             <div className="mx-auto px-6" style={{ maxWidth: '800px' }}>
               {/* Main Content - fades out */}
               <div
