@@ -432,11 +432,11 @@ export function CheckInFlow() {
               margin: 40px !important;
               padding: 20px !important;
             }
-            .complete-header {
-              margin-top: 0 !important;
-            }
             .complete-mood-meter {
               margin-top: 0 !important;
+            }
+            .complete-header-desktop {
+              display: none !important;
             }
           }
         `}</style>
@@ -525,8 +525,8 @@ export function CheckInFlow() {
             }}
           >
             <div className="max-w-4xl mx-auto text-center">
-              {/* Header */}
-              <div className="complete-header text-center" style={{ marginTop: '20px', marginBottom: '2rem' }}>
+              {/* Header - Mobile only (outside blurred container) */}
+              <div className="complete-header-mobile md:hidden text-center" style={{ marginBottom: '2rem' }}>
                 <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
                   Great check in today!
                 </h1>
@@ -548,6 +548,16 @@ export function CheckInFlow() {
                   zIndex: 10
                 }}
               >
+                {/* Header - Desktop only (inside blurred container) */}
+                <div className="complete-header-desktop hidden md:block text-center" style={{ marginTop: '20px', marginBottom: '2rem' }}>
+                  <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+                    Great check in today!
+                  </h1>
+                  <p className="text-gray-600" style={{ fontSize: '16px', fontWeight: 400, lineHeight: '1.5' }}>
+                    How do you feel now?
+                  </p>
+                </div>
+
                 {/* Use MoodMeter component without title */}
                 <div className="complete-mood-meter" style={{ marginTop: '-60px' }}>
                   <MoodMeter
