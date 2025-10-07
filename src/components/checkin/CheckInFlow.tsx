@@ -439,6 +439,13 @@ export function CheckInFlow() {
               display: none !important;
             }
           }
+
+          /* Desktop Optimizations */
+          @media (min-width: 769px) {
+            .complete-header-mobile {
+              display: none !important;
+            }
+          }
         `}</style>
         <div
           className="min-h-screen bg-white relative overflow-hidden flex items-start justify-start"
