@@ -461,8 +461,15 @@ export function CheckInFlow() {
             }
             .complete-mood-meter {
               margin-top: 0 !important;
+              margin-bottom: 0 !important;
             }
             .complete-header-desktop {
+              display: none !important;
+            }
+            .complete-mobile-button {
+              display: flex !important;
+            }
+            .complete-desktop-button {
               display: none !important;
             }
             .complete-exit-button {
@@ -481,6 +488,15 @@ export function CheckInFlow() {
           @media (min-width: 769px) {
             .complete-header-mobile {
               display: none !important;
+            }
+            .complete-mobile-button {
+              display: none !important;
+            }
+            .complete-desktop-button {
+              display: flex !important;
+            }
+            .complete-mood-meter {
+              margin-top: -60px !important;
             }
           }
         `}</style>
@@ -603,7 +619,7 @@ export function CheckInFlow() {
                 </div>
 
                 {/* Use MoodMeter component without title */}
-                <div className="complete-mood-meter" style={{ marginTop: '-60px' }}>
+                <div className="complete-mood-meter">
                   <MoodMeter
                     onComplete={(data) => {
                       setCompleteMood(data.mood_level)
@@ -624,7 +640,7 @@ export function CheckInFlow() {
                 </div>
 
                 {/* MY GARDEN Button - desktop only */}
-                <div className="hidden md:flex justify-center" style={{ marginBottom: '20px', marginTop: '-40px', position: 'relative', zIndex: 20 }}>
+                <div className="complete-desktop-button hidden md:flex justify-center" style={{ marginBottom: '20px', marginTop: '-40px', position: 'relative', zIndex: 20 }}>
                   <button
                     onClick={() => completeMood && navigate('/checkin/garden')}
                     disabled={!completeMood}
@@ -658,7 +674,7 @@ export function CheckInFlow() {
           </div>
 
           {/* MY GARDEN Button - mobile only */}
-          <div className="complete-mobile-button flex justify-center" style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
+          <div className="complete-mobile-button md:hidden flex justify-center" style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
             <button
               onClick={() => completeMood && navigate('/checkin/garden')}
               disabled={!completeMood}
