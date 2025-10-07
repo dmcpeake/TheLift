@@ -664,6 +664,9 @@ export function CheckInFlow() {
           .chart-title-container {
             margin-top: 40px;
           }
+          .chart-graph-container {
+            display: none !important;
+          }
           .chart-support-title {
             font-size: 16px !important;
           }
@@ -743,11 +746,11 @@ export function CheckInFlow() {
               <div className="flex flex-col items-center p-8"
                    style={{ paddingTop: '0' }}>
 
-                {/* Radial Graph - Reduced to 50% size */}
-                <div style={{ marginBottom: '3rem' }}>
+                {/* Radial Graph - Hidden on mobile */}
+                <div className="chart-graph-container" style={{ marginBottom: '3rem' }}>
                   <WellbeingRadialGraph
                     sections={completedData.wellbeing?.sections || []}
-                    size={window.innerWidth <= 768 ? 200 : 250}
+                    size={250}
                     theoAnimation={theoAnimation}
                   />
                 </div>
