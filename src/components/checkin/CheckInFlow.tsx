@@ -695,6 +695,10 @@ export function CheckInFlow() {
             padding-left: 0 !important;
             padding-right: 0 !important;
           }
+          .talk-title-container {
+            padding-left: 1.5rem !important;
+            padding-right: 1.5rem !important;
+          }
         }
       `}</style>
 
