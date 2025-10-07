@@ -286,6 +286,10 @@ export function CheckInGarden() {
           .garden-cards-grid button > div {
             align-items: center !important;
           }
+
+          .garden-cards-grid button > div > div:last-child {
+            margin-top: 5px !important;
+          }
         }
       `}</style>
       <div
