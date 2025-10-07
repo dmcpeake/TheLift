@@ -667,14 +667,17 @@ export function CheckInFlow() {
           .chart-graph-container {
             display: none !important;
           }
+          .chart-main-title {
+            visibility: hidden;
+            position: relative;
+          }
           .chart-main-title::before {
             content: 'Feeling down?';
-          }
-          .chart-main-title {
-            font-size: 0;
-          }
-          .chart-main-title::before {
-            font-size: 30px;
+            visibility: visible;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
           }
           .complete-done-container {
             bottom: 32px !important;
