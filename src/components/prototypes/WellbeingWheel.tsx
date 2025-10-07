@@ -541,7 +541,10 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
         }
         @media (max-width: 768px) {
           .wellbeing-title-container {
-            margin-top: -35px !important;
+            margin-top: -55px !important;
+          }
+          .wellbeing-title-inline-container {
+            margin-bottom: -10px !important;
           }
           .wellbeing-title-mobile-text {
             display: block !important;
@@ -594,7 +597,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
 
       {/* Centered title like breathing exercise */}
       <div className="text-center wellbeing-title-container" style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px' }}>
+        <div className="wellbeing-title-inline-container" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px' }}>
           <h1
             className="text-gray-900"
             style={{
