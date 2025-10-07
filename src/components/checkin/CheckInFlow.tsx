@@ -1499,8 +1499,8 @@ export function CheckInFlow() {
                 <style jsx>{`
                   @media (max-width: 767px) {
                     .lift-cards-container {
-                      padding-left: 1rem !important;
-                      padding-right: 1rem !important;
+                      padding-left: 0 !important;
+                      padding-right: 0 !important;
                     }
                     .theo-animation-mobile-hide {
                       display: none !important;
