@@ -575,6 +575,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
           .wellbeing-card-text {
             text-align: left !important;
             font-size: 16px !important;
+            margin-top: -2px !important;
           }
         }
         @media (min-width: 769px) {
