@@ -8,6 +8,7 @@ interface ThreeHappyThingsProps {
 export function ThreeHappyThings({ onClose }: ThreeHappyThingsProps) {
   const [responses, setResponses] = useState(['', '', ''])
   const [isRecording, setIsRecording] = useState<number | null>(null)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
   const handleTextChange = (index: number, value: string) => {
     const newResponses = [...responses]
@@ -37,7 +38,7 @@ export function ThreeHappyThings({ onClose }: ThreeHappyThingsProps) {
       >
         {/* Title */}
         <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-          3 things that made me happy today
+          {isMobile ? '3 things that made me happy' : '3 things that made me happy today'}
         </h2>
 
         {/* Input Fields */}

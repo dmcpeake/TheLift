@@ -9,6 +9,7 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [context, setContext] = useState<CanvasRenderingContext2D | null>(null)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -123,7 +124,7 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
             onTouchMove={draw}
             onTouchEnd={stopDrawing}
             className="border-2 border-gray-300 rounded-lg w-full cursor-crosshair"
-            style={{ touchAction: 'none', width: '100%', height: '500px', display: 'block' }}
+            style={{ touchAction: 'none', width: '100%', height: isMobile ? '300px' : '500px', display: 'block' }}
           />
         </div>
 
