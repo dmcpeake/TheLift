@@ -561,8 +561,8 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
             justify-content: flex-start !important;
             height: 60px !important;
             min-height: 60px !important;
-            width: 200px !important;
-            min-width: 200px !important;
+            width: 140px !important;
+            min-width: 140px !important;
             padding: 8px 12px !important;
             gap: 12px !important;
           }
@@ -574,7 +574,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
           }
           .wellbeing-card-text {
             text-align: left !important;
-            font-size: 14px !important;
+            font-size: 16px !important;
           }
         }
         @media (min-width: 769px) {
