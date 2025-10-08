@@ -16,7 +16,7 @@ export function CheckInHome() {
   const [showBreathing, setShowBreathing] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [showTechniqueSelector, setShowTechniqueSelector] = useState(false)
-  const [selectedTechniqueId, setSelectedTechniqueId] = useState('balloon')
+  const [selectedTechniqueId, setSelectedTechniqueId] = useState('belly')
   const [breathingStarted, setBreathingStarted] = useState(false)
   const [isBreathingRunning, setIsBreathingRunning] = useState(false)
   const [buttonAnimationKey, setButtonAnimationKey] = useState(0)

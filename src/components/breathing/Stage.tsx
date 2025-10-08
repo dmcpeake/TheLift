@@ -156,7 +156,7 @@ export function Stage({
 
   // Render technique-specific animation
   const renderAnimation = () => {
-    const techniqueId = technique?.id || 'balloon'
+    const techniqueId = technique?.id || 'belly'
 
 
     switch (techniqueId) {
@@ -341,7 +341,7 @@ export function Stage({
     }
   }
 
-  const techniqueId = technique?.id || 'balloon'
+  const techniqueId = technique?.id || 'belly'
   const shouldShowBlurredEffects = showBlurredEffects && techniqueId !== 'belly' && techniqueId !== 'box'
 
   return (

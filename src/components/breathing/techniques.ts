@@ -2,18 +2,6 @@ import { BreathingTechnique } from './types'
 
 export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
   {
-    id: 'balloon',
-    name: 'Balloon Breathing',
-    description: 'Imagine your belly is a balloon that inflates and deflates',
-    pace: { in: 4, hold: 2, out: 2, label: 'Balloon' },
-    cycles: 3,
-    theme: {
-      primaryColor: '#60a5fa', // Sky blue
-      secondaryColor: '#fbbf24', // Warm yellow
-      icon: '🎈'
-    }
-  },
-  {
     id: 'belly',
     name: 'Belly Breathing',
     description: '2s in 2s out',
@@ -35,6 +23,18 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
       primaryColor: '#3b82f6', // Blue
       secondaryColor: '#60a5fa', // Light blue
       icon: '📦'
+    }
+  },
+  {
+    id: 'balloon',
+    name: 'Balloon Breathing',
+    description: 'Imagine your belly is a balloon that inflates and deflates',
+    pace: { in: 4, hold: 2, out: 2, label: 'Balloon' },
+    cycles: 3,
+    theme: {
+      primaryColor: '#60a5fa', // Sky blue
+      secondaryColor: '#fbbf24', // Warm yellow
+      icon: '🎈'
     }
   }
 ]

@@ -69,7 +69,7 @@ export function BreathingCircles(props: BreathingCirclesProps & {
   const effectiveShowTechniqueSelector = embedded && externalShowTechniqueSelector !== undefined ? externalShowTechniqueSelector : showTechniqueSelector
   const handleTechniqueSelectorToggle = embedded && onExternalTechniqueSelectorChange ? onExternalTechniqueSelectorChange : setShowTechniqueSelector
   const [showTechniqueSelector, setShowTechniqueSelector] = useState(false)
-  const [selectedTechniqueId, setSelectedTechniqueId] = useState('balloon')
+  const [selectedTechniqueId, setSelectedTechniqueId] = useState('belly')
 
   // Use external selected technique control when embedded
   const effectiveSelectedTechniqueId = embedded && externalSelectedTechniqueId !== undefined ? externalSelectedTechniqueId : selectedTechniqueId
