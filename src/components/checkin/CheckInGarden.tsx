@@ -422,8 +422,24 @@ export function CheckInGarden() {
             </button>
           </div>
 
-          {/* Mobile Hamburger Menu - shown only on mobile */}
-          <div className="md:hidden fixed top-0 right-4 z-50 flex items-center" style={{ height: '80px' }}>
+          {/* Mobile Hamburger Menu and Check In Button - shown only on mobile */}
+          <div className="md:hidden fixed top-0 right-4 z-50 flex items-center gap-2" style={{ height: '80px' }}>
+            <button
+              onClick={() => navigate('/checkin/home')}
+              className="h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
+              style={{
+                backgroundColor: 'white',
+                border: '2px solid #147fe3',
+                paddingLeft: '16px',
+                paddingRight: '16px',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#147fe3'
+              }}
+              aria-label="Check In"
+            >
+              CHECK IN
+            </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"

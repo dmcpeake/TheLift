@@ -22,8 +22,8 @@ export function SignIn() {
 
   const handleInputBlur = () => {
     setTimeout(() => {
-      window.scrollTo(0, scrollPosition)
-    }, 100)
+      window.scrollTo({ top: scrollPosition, behavior: 'instant' as ScrollBehavior })
+    }, 300)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
