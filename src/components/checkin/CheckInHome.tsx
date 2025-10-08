@@ -378,6 +378,10 @@ export function CheckInHome() {
             margin-bottom: 24px !important;
             color: #6b7280 !important;
           }
+
+          .welcome-header {
+            margin-top: 120px !important;
+          }
         }
       `}</style>
       <div className={`min-h-screen bg-white relative overflow-hidden ${showBreathing ? 'breathing-active' : ''}`} style={{
@@ -934,7 +938,7 @@ export function CheckInHome() {
               }}
             >
               {/* Header */}
-              <div className="mb-8" style={{ marginTop: '20px', marginBottom: '20px' }}>
+              <div className="mb-8 welcome-header" style={{ marginTop: '20px', marginBottom: '20px' }}>
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">
                   Ready for your check in?
                 </h1>
