@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { LogOut } from 'lucide-react'
 
 export function SignIn() {
   const navigate = useNavigate()
@@ -17,7 +18,7 @@ export function SignIn() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (isFormValid) {
-      navigate('/checkin/home')
+      navigate('/checkin/garden')
     }
   }
 
@@ -253,13 +254,56 @@ export function SignIn() {
       <div
         className="min-h-screen bg-white relative overflow-hidden"
         style={{
-          backgroundImage: 'url(/background.svg)',
+          backgroundImage: 'url(/CheckinComplete.svg)',
           backgroundSize: window.innerWidth > 768 ? 'cover' : 'cover',
           backgroundPosition: window.innerWidth > 768 ? 'center bottom' : 'center',
           backgroundAttachment: window.innerWidth > 768 ? 'fixed' : 'scroll',
           backgroundRepeat: 'no-repeat'
         }}
       >
+        {/* Header Bar */}
+        <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'rgba(255, 255, 255, 0.3)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', minHeight: '80px', borderRadius: '0' }}>
+          {/* The Lift Logo and Dots */}
+          <div
+            className="flex items-center gap-3"
+            style={{
+              position: 'absolute',
+              left: '16px',
+              top: '40px',
+              transform: 'translateY(-50%)',
+              zIndex: 51
+            }}
+          >
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="7" cy="23" r="4" fill="#147fe3"/>
+              <circle cx="15" cy="15" r="4" fill="#147fe3"/>
+              <circle cx="23" cy="7" r="4" fill="#147fe3"/>
+            </svg>
+            <img
+              src="/TheLiftLogo.svg"
+              alt="The Lift"
+              className="h-5"
+              style={{
+                imageRendering: 'auto',
+                shapeRendering: 'geometricPrecision',
+                filter: 'brightness(0) saturate(100%) invert(11%) sepia(0%) saturate(7465%) hue-rotate(189deg) brightness(105%) contrast(86%)'
+              }}
+            />
+          </div>
+
+          {/* Exit Button */}
+          <div className="fixed top-0 right-4 flex items-center" style={{ height: '80px', zIndex: 51 }}>
+            <button
+              onClick={() => navigate('/')}
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
+              style={{ backgroundColor: 'white', border: '2px solid #147fe3' }}
+              aria-label="Exit"
+            >
+              <LogOut className="h-5 w-5" style={{ color: '#147fe3' }} />
+            </button>
+          </div>
+        </div>
+
         {/* Butterfly */}
         <div className="butterfly">
           <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">

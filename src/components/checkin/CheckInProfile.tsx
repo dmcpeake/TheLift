@@ -235,8 +235,25 @@ export function CheckInProfile() {
             bottom: 20% !important;
           }
 
-          .profile-header {
-            margin-top: 80px !important;
+          .profile-content-wrapper {
+            padding: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+          }
+
+          .profile-content-inner {
+            margin-top: 120px !important;
+            padding: 0 20px !important;
+            width: 100% !important;
+          }
+
+          .profile-title {
+            font-size: 28px !important;
+            margin-bottom: 16px !important;
+            color: #1f2937 !important;
+            font-weight: 700 !important;
           }
         }
       `}</style>
@@ -531,32 +548,31 @@ export function CheckInProfile() {
 
         {/* Profile Content */}
         <div
-          className="flex items-center justify-center"
+          className="profile-content-wrapper flex items-center justify-center"
           style={{
             minHeight: '100vh',
             padding: '80px 20px'
           }}
         >
-          <div className="max-w-md w-full">
+          <div className="profile-content-inner max-w-md w-full">
+            {/* Title */}
+            <h1 className="profile-title text-4xl font-bold text-gray-900 mb-2 text-center">
+              Hi Alex!
+            </h1>
+
             {/* Container Card */}
             <div
-              className="rounded-2xl profile-header"
+              className="rounded-2xl"
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.3)',
                 backdropFilter: 'blur(16px)',
                 border: '1px solid rgba(255, 255, 255, 0.3)',
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                padding: '20px',
+                padding: '20px 20px 0 20px',
                 position: 'relative',
                 zIndex: 10
               }}
             >
-              {/* Header */}
-              <div className="mb-6 text-center">
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                  Hi Alex!
-                </h1>
-              </div>
 
               {/* 3 things that make me feel good */}
               <div className="mb-6">
