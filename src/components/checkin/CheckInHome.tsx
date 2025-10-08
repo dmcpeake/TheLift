@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
 import { ProgressHeader } from '../shared/ProgressHeader'
 import Lottie from 'lottie-react'
@@ -11,6 +11,7 @@ import './checkin-mobile.css'
 
 export function CheckInHome() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [roseAnimation, setRoseAnimation] = useState(null)
   const [showBreathing, setShowBreathing] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
@@ -717,7 +718,7 @@ export function CheckInHome() {
           <div className="fixed top-0 right-4 z-50 flex items-center gap-4" style={{ height: '80px' }}>
             <button
               onClick={() => navigate('/checkin/garden')}
-              className="cursor-pointer transition-all hover:opacity-70"
+              className="cursor-pointer transition-all hover:opacity-70 relative"
               style={{
                 fontSize: '14px',
                 color: '#1f2937',
@@ -729,13 +730,23 @@ export function CheckInHome() {
               aria-label="My garden"
             >
               My garden
+              {location.pathname === '/checkin/garden' && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-32px',
+                  left: 0,
+                  right: 0,
+                  height: '2px',
+                  backgroundColor: '#1f2937'
+                }}></div>
+              )}
             </button>
 
             <div style={{ width: '1px', height: '20px', backgroundColor: '#d1d5db' }}></div>
 
             <button
               onClick={() => navigate('/checkin/home')}
-              className="cursor-pointer transition-all hover:opacity-70"
+              className="cursor-pointer transition-all hover:opacity-70 relative"
               style={{
                 fontSize: '14px',
                 color: '#1f2937',
@@ -747,6 +758,16 @@ export function CheckInHome() {
               aria-label="Check in"
             >
               Check in
+              {location.pathname === '/checkin/home' && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-32px',
+                  left: 0,
+                  right: 0,
+                  height: '2px',
+                  backgroundColor: '#1f2937'
+                }}></div>
+              )}
             </button>
 
             <div style={{ width: '1px', height: '20px', backgroundColor: '#d1d5db' }}></div>
