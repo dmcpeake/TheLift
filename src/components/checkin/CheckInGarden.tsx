@@ -242,17 +242,6 @@ export function CheckInGarden() {
             bottom: 20% !important;
           }
 
-          .garden-exit-button {
-            width: 3rem !important;
-            height: 3rem !important;
-            top: 20px !important;
-            right: 20px !important;
-          }
-          .garden-exit-button svg {
-            width: 1.25rem !important;
-            height: 1.25rem !important;
-          }
-
           .garden-content-wrapper {
             padding: 0 !important;
             align-items: flex-start !important;
@@ -544,24 +533,6 @@ export function CheckInGarden() {
             </svg>
           </div>
         </div>
-
-        {/* Close Button */}
-        <button
-          onClick={() => navigate('/')}
-          className="garden-exit-button fixed w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors z-50 shadow-lg"
-          style={{
-            backgroundColor: 'white',
-            border: '1px solid #147fe3',
-            top: '40px',
-            right: '40px'
-          }}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#147fe3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-        </button>
 
         {/* Content */}
         <div
