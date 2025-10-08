@@ -30,25 +30,40 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
   useEffect(() => {
     if (!onTitleChange) return
 
-    // Set title immediately for intro, complete, and first inhale
-    if (phase === 'intro' || phase === 'complete' || (phase === 'inhale' && cycle === 1)) {
+    // Set title immediately for intro and complete
+    if (phase === 'intro' || phase === 'complete') {
       const titleText = getInstructionText()
       onTitleChange(titleText.title)
-      if (phase === 'intro' || phase === 'complete') return
+      return
     }
 
-    // For breathing phases, trigger next title 200ms before phase ends
+    // For first inhale, add 200ms delay before showing title and next transition
+    if (phase === 'inhale' && cycle === 1) {
+      // Wait 200ms, then show "Inhale"
+      const initialTimer = setTimeout(() => {
+        onTitleChange('Inhale')
+      }, 200)
+
+      // Then set up transition to "Exhale" at normal time (1800ms from phase start)
+      const transitionTimer = setTimeout(() => {
+        onTitleChange('Exhale')
+      }, (pace.in * 1000) - 200)
+
+      return () => {
+        clearTimeout(initialTimer)
+        clearTimeout(transitionTimer)
+      }
+    }
+
+    // For other breathing phases, trigger next title 200ms before phase ends
     if (phase === 'inhale' || phase === 'exhale') {
       const phaseDuration = phase === 'inhale' ? pace.in : pace.out
       const nextPhase = phase === 'inhale' ? 'exhale' : (cycle < totalCycles ? 'inhale' : 'complete')
       const nextTitle = nextPhase === 'inhale' ? 'Inhale' : nextPhase === 'exhale' ? 'Exhale' : 'Well done!'
 
-      const isMobile = window.innerWidth <= 768
-      const earlyTrigger = isMobile ? 150 : 200
-
       const timer = setTimeout(() => {
         onTitleChange(nextTitle)
-      }, (phaseDuration * 1000) - earlyTrigger)
+      }, (phaseDuration * 1000) - 200)
 
       return () => clearTimeout(timer)
     }

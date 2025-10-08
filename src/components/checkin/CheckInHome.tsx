@@ -94,27 +94,24 @@ export function CheckInHome() {
 
   const handleBreathingTitleChange = useCallback((newTitle: string) => {
     setBreathingTitle(prevTitle => {
-      // Only trigger fade animation if title is actually changing
+      // Only trigger fade if title is actually changing
       if (prevTitle === newTitle) {
         return prevTitle
       }
 
-      // Fade out
+      // Start fade out
       setTitleOpacity(0)
 
-      // Faster transition on mobile
-      const isMobile = window.innerWidth <= 768
-      const transitionTime = isMobile ? 150 : 200
-
-      // Change title halfway through fade, then fade in
+      // Change title after fade completes (200ms total transition)
       setTimeout(() => {
         setBreathingTitle(newTitle)
+        // Fade in immediately
         setTimeout(() => {
           setTitleOpacity(1)
-        }, 50)
-      }, transitionTime)
+        }, 10)
+      }, 100)
 
-      return prevTitle // Keep old title while fading out
+      return prevTitle
     })
   }, [])
 
@@ -1065,9 +1062,6 @@ export function CheckInHome() {
               @media (max-width: 768px) {
                 .breathing-title-container {
                   margin-top: -40px !important;
-                }
-                .breathing-title-checkin-mobile {
-                  transition: opacity 150ms ease-in-out !important;
                 }
               }
             `}</style>

@@ -30,11 +30,19 @@ export function BoxAnimation({ phase, pace, cycle, totalCycles, running, onTitle
   useEffect(() => {
     if (!onTitleChange) return
 
-    // Set title immediately for intro, complete, and first inhale
-    if (phase === 'intro' || phase === 'complete' || (phase === 'inhale' && cycle === 1)) {
+    // Set title immediately for intro and complete
+    if (phase === 'intro' || phase === 'complete') {
       const titleText = getInstructionText()
       onTitleChange(titleText.title)
-      if (phase === 'intro' || phase === 'complete') return
+      return
+    }
+
+    // For first inhale, delay 200ms to let "Let's breathe!" show
+    if (phase === 'inhale' && cycle === 1) {
+      const timer = setTimeout(() => {
+        onTitleChange('Inhale')
+      }, 200)
+      return () => clearTimeout(timer)
     }
 
     // For breathing phases, trigger next title 200ms before phase ends
@@ -67,12 +75,9 @@ export function BoxAnimation({ phase, pace, cycle, totalCycles, running, onTitle
                        nextPhase === 'holdAfter' ? 'Hold' :
                        'Well done!'
 
-      const isMobile = window.innerWidth <= 768
-      const earlyTrigger = isMobile ? 150 : 200
-
       const timer = setTimeout(() => {
         onTitleChange(nextTitle)
-      }, (phaseDuration * 1000) - earlyTrigger)
+      }, (phaseDuration * 1000) - 200)
 
       return () => clearTimeout(timer)
     }
