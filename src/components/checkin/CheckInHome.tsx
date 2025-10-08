@@ -714,7 +714,7 @@ export function CheckInHome() {
           </div>
 
           {/* Navigation Links and Exit Button on the right */}
-          <div className="fixed top-0 right-4 z-50 flex items-center gap-6" style={{ height: '80px' }}>
+          <div className="fixed top-0 right-4 z-50 flex items-center gap-4" style={{ height: '80px' }}>
             <button
               onClick={() => navigate('/checkin/garden')}
               className="cursor-pointer transition-all hover:opacity-70"
@@ -731,6 +731,8 @@ export function CheckInHome() {
               My garden
             </button>
 
+            <div style={{ width: '1px', height: '20px', backgroundColor: '#d1d5db' }}></div>
+
             <button
               onClick={() => navigate('/checkin/home')}
               className="cursor-pointer transition-all hover:opacity-70"
@@ -746,6 +748,8 @@ export function CheckInHome() {
             >
               Check in
             </button>
+
+            <div style={{ width: '1px', height: '20px', backgroundColor: '#d1d5db' }}></div>
 
             <button
               onClick={() => navigate('/')}
