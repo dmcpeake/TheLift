@@ -733,7 +733,7 @@ export function CheckInHome() {
               {location.pathname === '/checkin/garden' && (
                 <div style={{
                   position: 'absolute',
-                  bottom: '-21px',
+                  bottom: '-22px',
                   left: 0,
                   right: 0,
                   height: '2px',
@@ -761,7 +761,7 @@ export function CheckInHome() {
               {location.pathname === '/checkin/home' && (
                 <div style={{
                   position: 'absolute',
-                  bottom: '-21px',
+                  bottom: '-22px',
                   left: 0,
                   right: 0,
                   height: '2px',
