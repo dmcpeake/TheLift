@@ -352,7 +352,7 @@ export function CheckInHome() {
           }
 
           .welcome-content-mobile .max-w-4xl {
-            margin-top: 20px !important;
+            margin-top: 60px !important;
             padding: 0 20px !important;
             width: 100% !important;
           }
