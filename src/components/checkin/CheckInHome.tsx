@@ -716,7 +716,7 @@ export function CheckInHome() {
           </div>
 
           {/* Desktop Navigation - hidden on mobile */}
-          <div className="hidden md:flex fixed top-0 right-4 z-50 items-center gap-4" style={{ height: '80px' }}>
+          <div className="hidden md:flex fixed top-0 right-4 items-center gap-4" style={{ height: '80px', zIndex: 51 }}>
             <button
               onClick={() => navigate('/checkin/garden')}
               className="cursor-pointer transition-all hover:opacity-70 relative"
