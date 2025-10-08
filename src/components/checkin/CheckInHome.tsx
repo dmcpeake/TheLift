@@ -690,14 +690,14 @@ export function CheckInHome() {
 
       {/* Header Bar - show when not breathing */}
       {!showBreathing && (
-        <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'rgba(255, 255, 255, 0.3)', backdropFilter: 'blur(16px)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', height: '80px', borderRadius: '0' }}>
+        <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'rgba(255, 255, 255, 0.3)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', minHeight: '80px', borderRadius: '0', paddingBottom: mobileMenuOpen ? '20px' : '0' }}>
           {/* The Lift Logo and Dots */}
           <div
             className="flex items-center gap-3"
             style={{
               position: 'absolute',
               left: '16px',
-              top: '50%',
+              top: '40px',
               transform: 'translateY(-50%)',
               zIndex: 51
             }}
@@ -775,6 +775,34 @@ export function CheckInHome() {
               )}
             </button>
 
+            <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}></div>
+
+            <button
+              onClick={() => navigate('/checkin/profile')}
+              className="cursor-pointer transition-all hover:opacity-70 relative"
+              style={{
+                fontSize: '14px',
+                color: '#1f2937',
+                fontWeight: '500',
+                background: 'none',
+                border: 'none',
+                padding: '8px'
+              }}
+              aria-label="My profile"
+            >
+              My profile
+              {location.pathname === '/checkin/profile' && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-22px',
+                  left: 0,
+                  right: 0,
+                  height: '2px',
+                  backgroundColor: '#1f2937'
+                }}></div>
+              )}
+            </button>
+
             <button
               onClick={() => navigate('/')}
               className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
@@ -801,27 +829,17 @@ export function CheckInHome() {
             </button>
           </div>
 
-          {/* Mobile Dropdown Menu */}
+          {/* Mobile Menu Links - Inside Header Bar */}
           {mobileMenuOpen && (
-            <div
-              className="md:hidden fixed z-40"
-              style={{
-                top: '98px',
-                left: '20px',
-                right: '20px',
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                backdropFilter: 'blur(16px)',
-                borderRadius: '8px',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                padding: '8px'
-              }}
-            >
+            <div className="md:hidden" style={{ paddingTop: '80px', paddingLeft: '20px', paddingRight: '20px' }}>
+              <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '0 0 4px 0' }}></div>
+
               <button
                 onClick={() => {
                   navigate('/checkin/garden')
                   setMobileMenuOpen(false)
                 }}
-                className="w-full text-left transition-all hover:bg-gray-100 rounded flex items-center"
+                className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center"
                 style={{
                   fontSize: '14px',
                   color: '#1f2937',
@@ -842,7 +860,7 @@ export function CheckInHome() {
                   navigate('/checkin/home')
                   setMobileMenuOpen(false)
                 }}
-                className="w-full text-left transition-all hover:bg-gray-100 rounded flex items-center"
+                className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center"
                 style={{
                   fontSize: '14px',
                   color: '#1f2937',
@@ -860,10 +878,31 @@ export function CheckInHome() {
 
               <button
                 onClick={() => {
+                  navigate('/checkin/profile')
+                  setMobileMenuOpen(false)
+                }}
+                className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center"
+                style={{
+                  fontSize: '14px',
+                  color: '#1f2937',
+                  fontWeight: '500',
+                  background: 'none',
+                  border: 'none',
+                  padding: '12px 16px',
+                  height: '40px'
+                }}
+              >
+                My profile
+              </button>
+
+              <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
+
+              <button
+                onClick={() => {
                   navigate('/')
                   setMobileMenuOpen(false)
                 }}
-                className="w-full text-left transition-all hover:bg-gray-100 rounded flex items-center gap-2"
+                className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center gap-2"
                 style={{
                   fontSize: '14px',
                   color: '#147fe3',

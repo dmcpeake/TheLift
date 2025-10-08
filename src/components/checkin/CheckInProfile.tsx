@@ -1,17 +1,10 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Menu, X, LogOut } from 'lucide-react'
-import { ThreeHappyThings } from './garden/ThreeHappyThings'
-import { ThreeGratefulThings } from './garden/ThreeGratefulThings'
-import { IfICouldBe } from './garden/IfICouldBe'
-import { DrawYourMind } from './garden/DrawYourMind'
 
-type ActivityType = 'happy' | 'grateful' | 'ifICouldBe' | 'draw' | null
-
-export function CheckInGarden() {
+export function CheckInProfile() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [activeActivity, setActiveActivity] = useState<ActivityType>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
@@ -242,52 +235,15 @@ export function CheckInGarden() {
             bottom: 20% !important;
           }
 
-          .garden-content-wrapper {
-            padding: 0 !important;
-            align-items: flex-start !important;
-            justify-content: flex-start !important;
-          }
-
-          .garden-content-inner {
-            margin-top: 120px !important;
-            padding: 0 20px !important;
-          }
-
-          .garden-title {
-            font-size: 28px !important;
-            margin-bottom: 16px !important;
-            color: #1f2937 !important;
-            font-weight: 700 !important;
-          }
-
-          .garden-subtitle {
-            font-size: 16px !important;
-            margin-bottom: 20px !important;
-            color: #6b7280 !important;
-          }
-
-          .garden-cards-grid {
-            gap: 1rem !important;
-            padding: 0 !important;
-          }
-
-          .garden-card-subtext {
-            display: none !important;
-          }
-
-          .garden-cards-grid button > div {
-            align-items: center !important;
-          }
-
-          .garden-cards-grid button > div > div:last-child {
-            margin-top: 7px !important;
+          .profile-header {
+            margin-top: 80px !important;
           }
         }
       `}</style>
       <div
-        className="min-h-screen bg-white relative overflow-hidden flex items-start justify-start"
+        className="min-h-screen bg-white relative overflow-hidden"
         style={{
-          backgroundImage: 'url(/CheckinComplete.svg)',
+          backgroundImage: 'url(/background.svg)',
           backgroundSize: window.innerWidth > 768 ? 'cover' : 'cover',
           backgroundPosition: window.innerWidth > 768 ? 'center bottom' : 'center',
           backgroundAttachment: window.innerWidth > 768 ? 'fixed' : 'scroll',
@@ -573,155 +529,46 @@ export function CheckInGarden() {
           </div>
         </div>
 
-        {/* Content */}
+        {/* Profile Content */}
         <div
-          className="garden-content-wrapper transition-opacity duration-300"
+          className="flex items-center justify-center"
           style={{
             minHeight: '100vh',
-            padding: '140px 80px 80px 80px',
-            width: '100%'
+            padding: '80px 20px'
           }}
         >
-          <div className="garden-content-inner max-w-5xl mx-auto">
-            {/* Title */}
-            <h1 className="garden-title text-4xl font-bold text-gray-900 mb-2 text-center">
-              My Garden
-            </h1>
-            <p className="garden-subtitle text-lg text-gray-700 mb-12 text-center">
-              Choose an activity to help you reflect
-            </p>
+          <div className="max-w-md w-full">
+            {/* Container Card */}
+            <div
+              className="rounded-2xl profile-header"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                padding: '40px',
+                position: 'relative',
+                zIndex: 10
+              }}
+            >
+              {/* Header */}
+              <div className="mb-8 text-center">
+                <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                  My Profile
+                </h1>
+                <p className="text-lg text-gray-900" style={{ fontWeight: 500 }}>
+                  Your personal information
+                </p>
+              </div>
 
-            {/* Activity Cards Grid */}
-            <div className="garden-cards-grid grid grid-cols-1 md:grid-cols-2 gap-6" style={{ maxWidth: '900px', margin: '0 auto' }}>
-              {/* Card 1: 3 Happy Things */}
-              <button
-                onClick={() => setActiveActivity('happy')}
-                className="rounded-2xl p-6 hover:shadow-xl transition-all duration-200 text-left"
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                  backdropFilter: 'blur(16px)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-                }}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#eab308" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-                      <line x1="9" y1="9" x2="9.01" y2="9"/>
-                      <line x1="15" y1="9" x2="15.01" y2="9"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      3 things that made me happy
-                    </h3>
-                    <p className="garden-card-subtext text-gray-700 text-sm">
-                      Reflect on the positive moments from your day
-                    </p>
-                  </div>
-                </div>
-              </button>
-
-              {/* Card 2: 3 Grateful Things */}
-              <button
-                onClick={() => setActiveActivity('grateful')}
-                className="rounded-2xl p-6 hover:shadow-xl transition-all duration-200 text-left"
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                  backdropFilter: 'blur(16px)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-                }}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      3 things I am grateful for
-                    </h3>
-                    <p className="garden-card-subtext text-gray-700 text-sm">
-                      Share what you're thankful for today
-                    </p>
-                  </div>
-                </div>
-              </button>
-
-              {/* Card 3: If I Could Be */}
-              <button
-                onClick={() => setActiveActivity('ifICouldBe')}
-                className="rounded-2xl p-6 hover:shadow-xl transition-all duration-200 text-left"
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                  backdropFilter: 'blur(16px)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-                }}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="10" r="3"/>
-                      <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      If I could be anything...
-                    </h3>
-                    <p className="garden-card-subtext text-gray-700 text-sm">
-                      Imagine being any object, animal, or vegetable
-                    </p>
-                  </div>
-                </div>
-              </button>
-
-              {/* Card 4: Draw Your Mind */}
-              <button
-                onClick={() => setActiveActivity('draw')}
-                className="rounded-2xl p-6 hover:shadow-xl transition-all duration-200 text-left"
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                  backdropFilter: 'blur(16px)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-                }}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 19l7-7 3 3-7 7-3-3z"/>
-                      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
-                      <path d="M2 2l7.586 7.586"/>
-                      <circle cx="11" cy="11" r="2"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      Draw what's on your mind
-                    </h3>
-                    <p className="garden-card-subtext text-gray-700 text-sm">
-                      Express yourself through drawing
-                    </p>
-                  </div>
-                </div>
-              </button>
+              {/* Placeholder content */}
+              <div className="text-center text-gray-700">
+                <p>Profile page coming soon...</p>
+              </div>
             </div>
           </div>
         </div>
-
       </div>
-
-      {/* Activity Modals - rendered outside main container */}
-      {activeActivity === 'happy' && <ThreeHappyThings onClose={() => setActiveActivity(null)} />}
-      {activeActivity === 'grateful' && <ThreeGratefulThings onClose={() => setActiveActivity(null)} />}
-      {activeActivity === 'ifICouldBe' && <IfICouldBe onClose={() => setActiveActivity(null)} />}
-      {activeActivity === 'draw' && <DrawYourMind onClose={() => setActiveActivity(null)} />}
     </>
   )
 }

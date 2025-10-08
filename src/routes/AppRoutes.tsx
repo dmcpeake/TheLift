@@ -58,13 +58,15 @@ import { LottieLoaderDemo } from '../pages/test/LottieLoaderDemo'
 import { CheckInHome } from '../components/checkin/CheckInHome'
 import { CheckInFlow } from '../components/checkin/CheckInFlow'
 import { CheckInGarden } from '../components/checkin/CheckInGarden'
+import { SignIn } from '../components/checkin/SignIn'
+import { CheckInProfile } from '../components/checkin/CheckInProfile'
 
 export function AppRoutes() {
   const { user } = React.useContext(AuthContext)
   const location = useLocation()
   
   // Determine if we're in a child-specific route (more specific matching)
-  const isChildApp = location.pathname.startsWith('/child/') || location.pathname === '/child/onboarding' || location.pathname.startsWith('/checkin/')
+  const isChildApp = location.pathname.startsWith('/child/') || location.pathname === '/child/onboarding' || location.pathname.startsWith('/checkin/') || location.pathname === '/signin'
   const isMarketingApp = ['/', '/about', '/how-it-works', '/pricing', '/contact', '/waitlist', '/legal', '/sitemap', '/status'].some(path =>
     location.pathname === path || location.pathname.startsWith('/legal')
   )
@@ -131,9 +133,11 @@ export function AppRoutes() {
         <Route path="/admin/waitlist" element={<WaitlistManagement />} />
 
         {/* Check-in Flow Routes - Public access for prototypes */}
+        <Route path="/signin" element={<SignIn />} />
         <Route path="/checkin/home" element={<CheckInHome />} />
         <Route path="/checkin/flow/:step" element={<CheckInFlow />} />
         <Route path="/checkin/garden" element={<CheckInGarden />} />
+        <Route path="/checkin/profile" element={<CheckInProfile />} />
 
         {/* Prototypes Route - No authentication required */}
         <Route path="/prototypes" element={<PrototypesPage />} />
