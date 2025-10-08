@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { Menu, X, LogOut } from 'lucide-react'
 import { ThreeHappyThings } from './garden/ThreeHappyThings'
 import { ThreeGratefulThings } from './garden/ThreeGratefulThings'
 import { IfICouldBe } from './garden/IfICouldBe'
@@ -9,7 +10,9 @@ type ActivityType = 'happy' | 'grateful' | 'ifICouldBe' | 'draw' | null
 
 export function CheckInGarden() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [activeActivity, setActiveActivity] = useState<ActivityType>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <>
@@ -302,6 +305,198 @@ export function CheckInGarden() {
           backgroundRepeat: 'no-repeat'
         }}
       >
+        {/* Header Bar */}
+        <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'rgba(255, 255, 255, 0.3)', backdropFilter: 'blur(16px)', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)', height: '80px', borderRadius: '0' }}>
+          {/* The Lift Logo and Dots */}
+          <div
+            className="flex items-center gap-3"
+            style={{
+              position: 'absolute',
+              left: '16px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 51
+            }}
+          >
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="7" cy="23" r="4" fill="#147fe3"/>
+              <circle cx="15" cy="15" r="4" fill="#147fe3"/>
+              <circle cx="23" cy="7" r="4" fill="#147fe3"/>
+            </svg>
+            <img
+              src="/TheLiftLogo.svg"
+              alt="The Lift"
+              className="h-5"
+              style={{
+                imageRendering: 'auto',
+                shapeRendering: 'geometricPrecision',
+                filter: 'brightness(0) saturate(100%) invert(11%) sepia(0%) saturate(7465%) hue-rotate(189deg) brightness(105%) contrast(86%)'
+              }}
+            />
+          </div>
+
+          {/* Desktop Navigation - hidden on mobile */}
+          <div className="hidden md:flex fixed top-0 right-4 items-center gap-4" style={{ height: '80px', zIndex: 51 }}>
+            <button
+              onClick={() => navigate('/checkin/garden')}
+              className="cursor-pointer transition-all hover:opacity-70 relative"
+              style={{
+                fontSize: '14px',
+                color: '#1f2937',
+                fontWeight: '500',
+                background: 'none',
+                border: 'none',
+                padding: '8px'
+              }}
+              aria-label="My garden"
+            >
+              My garden
+              {location.pathname === '/checkin/garden' && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-22px',
+                  left: 0,
+                  right: 0,
+                  height: '2px',
+                  backgroundColor: '#1f2937'
+                }}></div>
+              )}
+            </button>
+
+            <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}></div>
+
+            <button
+              onClick={() => navigate('/checkin/home')}
+              className="cursor-pointer transition-all hover:opacity-70 relative"
+              style={{
+                fontSize: '14px',
+                color: '#1f2937',
+                fontWeight: '500',
+                background: 'none',
+                border: 'none',
+                padding: '8px'
+              }}
+              aria-label="Check in"
+            >
+              Check in
+              {location.pathname === '/checkin/home' && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-22px',
+                  left: 0,
+                  right: 0,
+                  height: '2px',
+                  backgroundColor: '#1f2937'
+                }}></div>
+              )}
+            </button>
+
+            <button
+              onClick={() => navigate('/')}
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
+              style={{ backgroundColor: 'white', border: '2px solid #147fe3' }}
+              aria-label="Exit"
+            >
+              <LogOut className="h-5 w-5" style={{ color: '#147fe3' }} />
+            </button>
+          </div>
+
+          {/* Mobile Hamburger Menu - shown only on mobile */}
+          <div className="md:hidden fixed top-0 right-4 z-50 flex items-center" style={{ height: '80px' }}>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
+              style={{ backgroundColor: 'white', border: '2px solid #147fe3' }}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" style={{ color: '#147fe3' }} />
+              ) : (
+                <Menu className="h-5 w-5" style={{ color: '#147fe3' }} />
+              )}
+            </button>
+          </div>
+
+          {/* Mobile Dropdown Menu */}
+          {mobileMenuOpen && (
+            <div
+              className="md:hidden fixed z-40"
+              style={{
+                top: '98px',
+                left: '20px',
+                right: '20px',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(16px)',
+                borderRadius: '8px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                padding: '8px'
+              }}
+            >
+              <button
+                onClick={() => {
+                  navigate('/checkin/garden')
+                  setMobileMenuOpen(false)
+                }}
+                className="w-full text-left transition-all hover:bg-gray-100 rounded flex items-center"
+                style={{
+                  fontSize: '14px',
+                  color: '#1f2937',
+                  fontWeight: '500',
+                  background: 'none',
+                  border: 'none',
+                  padding: '12px 16px',
+                  height: '40px'
+                }}
+              >
+                My garden
+              </button>
+
+              <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
+
+              <button
+                onClick={() => {
+                  navigate('/checkin/home')
+                  setMobileMenuOpen(false)
+                }}
+                className="w-full text-left transition-all hover:bg-gray-100 rounded flex items-center"
+                style={{
+                  fontSize: '14px',
+                  color: '#1f2937',
+                  fontWeight: '500',
+                  background: 'none',
+                  border: 'none',
+                  padding: '12px 16px',
+                  height: '40px'
+                }}
+              >
+                Check in
+              </button>
+
+              <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
+
+              <button
+                onClick={() => {
+                  navigate('/')
+                  setMobileMenuOpen(false)
+                }}
+                className="w-full text-left transition-all hover:bg-gray-100 rounded flex items-center gap-2"
+                style={{
+                  fontSize: '14px',
+                  color: '#147fe3',
+                  fontWeight: '500',
+                  background: 'none',
+                  border: 'none',
+                  padding: '12px 16px',
+                  height: '40px'
+                }}
+              >
+                <LogOut className="h-4 w-4" />
+                Exit
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Butterfly */}
         <div className="butterfly">
           <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
