@@ -5,6 +5,7 @@ import { RainbowAnimation } from './animations/RainbowAnimation'
 import { FlowerAnimation } from './animations/FlowerAnimation'
 import { BellyAnimation } from './animations/BellyAnimation'
 import { BoxAnimation } from './animations/BoxAnimation'
+import { TestAnimation } from './animations/TestAnimation'
 
 interface StageProps {
   phase: Phase
@@ -209,6 +210,17 @@ export function Stage({
             onTitleChange={onTitleChange}
           />
         )
+      case 'test':
+        return (
+          <TestAnimation
+            phase={phase}
+            pace={pace}
+            cycle={cycle}
+            totalCycles={totalCycles}
+            running={running}
+            onTitleChange={onTitleChange}
+          />
+        )
       default:
         // Balloon breathing (default circle animation) - with radiating rings
         return (
@@ -342,7 +354,7 @@ export function Stage({
   }
 
   const techniqueId = technique?.id || 'belly'
-  const shouldShowBlurredEffects = showBlurredEffects && techniqueId !== 'belly' && techniqueId !== 'box'
+  const shouldShowBlurredEffects = showBlurredEffects && techniqueId !== 'belly' && techniqueId !== 'box' && techniqueId !== 'test'
 
   return (
     <div className="breathing-stage">

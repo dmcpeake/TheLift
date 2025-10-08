@@ -36,6 +36,18 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
       secondaryColor: '#fbbf24', // Warm yellow
       icon: '🎈'
     }
+  },
+  {
+    id: 'test',
+    name: 'Test',
+    description: '4s in 4s out',
+    pace: { in: 4, hold: 0, out: 4, label: 'Test' },
+    cycles: 3,
+    theme: {
+      primaryColor: '#8b5cf6', // Purple
+      secondaryColor: '#a78bfa', // Light purple
+      icon: '🧪'
+    }
   }
 ]
 
