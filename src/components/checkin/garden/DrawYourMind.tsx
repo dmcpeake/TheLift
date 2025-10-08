@@ -194,7 +194,7 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
         </div>
 
         {/* Toolbar */}
-        <div className="mb-3 pb-3 border-b border-gray-200">
+        <div className="mb-3">
           {/* Brush Type */}
           <div className="mb-2">
             <label className="font-medium text-gray-700 mb-1 block" style={{ fontSize: isMobile ? '12px' : '14px' }}>Tool</label>

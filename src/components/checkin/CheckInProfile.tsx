@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Menu, X, LogOut } from 'lucide-react'
+import { Menu, X, LogOut, Apple, Heart, Award, Dribbble, Palette, Music, Calendar, CheckCircle, Pencil } from 'lucide-react'
 
 export function CheckInProfile() {
   const navigate = useNavigate()
@@ -546,24 +546,103 @@ export function CheckInProfile() {
                 backdropFilter: 'blur(16px)',
                 border: '1px solid rgba(255, 255, 255, 0.3)',
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                padding: '40px',
+                padding: '20px',
                 position: 'relative',
                 zIndex: 10
               }}
             >
               {/* Header */}
-              <div className="mb-8 text-center">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                  My Profile
+              <div className="mb-6 text-center">
+                <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                  Hi Alex!
                 </h1>
-                <p className="text-lg text-gray-900" style={{ fontWeight: 500 }}>
-                  Your personal information
-                </p>
               </div>
 
-              {/* Placeholder content */}
-              <div className="text-center text-gray-700">
-                <p>Profile page coming soon...</p>
+              {/* 3 things that make me feel good */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    3 things that make me feel good
+                  </h2>
+                  <button
+                    className="w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-lg"
+                    style={{ backgroundColor: '#147fe3', border: 'none' }}
+                    aria-label="Edit"
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                  >
+                    <Pencil className="h-5 w-5" style={{ color: 'white' }} />
+                  </button>
+                </div>
+                <ul className="space-y-0">
+                  <li className="flex items-center text-gray-700 py-2" style={{ fontSize: '16px', borderBottom: '1px solid rgba(0, 0, 0, 0.2)' }}>
+                    <CheckCircle size={20} style={{ marginRight: '10px', color: '#6B7280' }} className="flex-shrink-0" />
+                    Swimming
+                  </li>
+                  <li className="flex items-center text-gray-700 py-2" style={{ fontSize: '16px', borderBottom: '1px solid rgba(0, 0, 0, 0.2)' }}>
+                    <CheckCircle size={20} style={{ marginRight: '10px', color: '#6B7280' }} className="flex-shrink-0" />
+                    Playing with my friends
+                  </li>
+                  <li className="flex items-center text-gray-700 py-2" style={{ fontSize: '16px' }}>
+                    <CheckCircle size={20} style={{ marginRight: '10px', color: '#6B7280' }} className="flex-shrink-0" />
+                    Drawing
+                  </li>
+                </ul>
+              </div>
+
+              {/* My favorites */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    My favorite...
+                  </h2>
+                  <button
+                    className="w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-lg"
+                    style={{ backgroundColor: '#147fe3', border: 'none' }}
+                    aria-label="Edit"
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                  >
+                    <Pencil className="h-5 w-5" style={{ color: 'white' }} />
+                  </button>
+                </div>
+                <div className="space-y-0 text-gray-700">
+                  <div className="flex items-center py-2" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.2)' }}>
+                    <Apple size={20} style={{ marginRight: '10px', color: '#6B7280' }} className="flex-shrink-0" />
+                    <span className="font-medium" style={{ width: '50%' }}>Food:</span>
+                    <span style={{ width: '50%' }}>Pizza</span>
+                  </div>
+                  <div className="flex items-center py-2" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.2)' }}>
+                    <Heart size={20} style={{ marginRight: '10px', color: '#6B7280' }} className="flex-shrink-0" />
+                    <span className="font-medium" style={{ width: '50%' }}>Memory:</span>
+                    <span style={{ width: '50%' }}>My first bike</span>
+                  </div>
+                  <div className="flex items-center py-2" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.2)' }}>
+                    <Award size={20} style={{ marginRight: '10px', color: '#6B7280' }} className="flex-shrink-0" />
+                    <span className="font-medium" style={{ width: '50%' }}>Achievement:</span>
+                    <span style={{ width: '50%' }}>Star of the week</span>
+                  </div>
+                  <div className="flex items-center py-2" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.2)' }}>
+                    <Dribbble size={20} style={{ marginRight: '10px', color: '#6B7280' }} className="flex-shrink-0" />
+                    <span className="font-medium" style={{ width: '50%' }}>Sport:</span>
+                    <span style={{ width: '50%' }}>Football</span>
+                  </div>
+                  <div className="flex items-center py-2" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.2)' }}>
+                    <Palette size={20} style={{ marginRight: '10px', color: '#6B7280' }} className="flex-shrink-0" />
+                    <span className="font-medium" style={{ width: '50%' }}>Colour:</span>
+                    <span style={{ width: '50%' }}>Purple</span>
+                  </div>
+                  <div className="flex items-center py-2" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.2)' }}>
+                    <Music size={20} style={{ marginRight: '10px', color: '#6B7280' }} className="flex-shrink-0" />
+                    <span className="font-medium" style={{ width: '50%' }}>Hobby:</span>
+                    <span style={{ width: '50%' }}>Guitar</span>
+                  </div>
+                  <div className="flex items-center py-2">
+                    <Calendar size={20} style={{ marginRight: '10px', color: '#6B7280' }} className="flex-shrink-0" />
+                    <span className="font-medium" style={{ width: '50%' }}>Thing this year:</span>
+                    <span style={{ width: '50%' }}>Going to Portugal</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
