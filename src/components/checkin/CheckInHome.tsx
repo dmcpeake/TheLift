@@ -108,7 +108,7 @@ export function CheckInHome() {
         setTimeout(() => {
           setTitleOpacity(1)
         }, 50)
-      }, 400)
+      }, 200)
 
       return prevTitle // Keep old title while fading out
     })
@@ -1051,7 +1051,7 @@ export function CheckInHome() {
                   fontWeight: 600,
                   letterSpacing: '0.02em',
                   opacity: titleOpacity,
-                  transition: 'opacity 400ms ease-in-out'
+                  transition: 'opacity 200ms ease-in-out'
                 }}
               >
                 {breathingTitle}

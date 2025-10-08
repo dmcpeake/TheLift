@@ -8,9 +8,10 @@ interface BoxAnimationProps {
   cycle: number
   totalCycles: number
   running: boolean
+  onTitleChange?: (title: string) => void
 }
 
-export function BoxAnimation({ phase, pace, cycle, totalCycles, running }: BoxAnimationProps) {
+export function BoxAnimation({ phase, pace, cycle, totalCycles, running, onTitleChange }: BoxAnimationProps) {
   const [boxAnimation, setBoxAnimation] = useState(null)
   const lottieRef = useRef<any>(null)
 
@@ -24,6 +25,55 @@ export function BoxAnimation({ phase, pace, cycle, totalCycles, running }: BoxAn
       })
       .catch(error => console.error('Error loading box animation:', error))
   }, [])
+
+  // Update title before phase changes to keep in sync with animation
+  useEffect(() => {
+    if (!onTitleChange) return
+
+    // Set title immediately for intro, complete, and first inhale
+    if (phase === 'intro' || phase === 'complete' || (phase === 'inhale' && cycle === 1)) {
+      const titleText = getInstructionText()
+      onTitleChange(titleText.title)
+      if (phase === 'intro' || phase === 'complete') return
+    }
+
+    // For breathing phases, trigger next title 200ms before phase ends
+    let phaseDuration = 0
+    let nextPhase: Phase = phase
+
+    switch (phase) {
+      case 'inhale':
+        phaseDuration = pace.in
+        nextPhase = 'hold'
+        break
+      case 'hold':
+        phaseDuration = pace.hold
+        nextPhase = 'exhale'
+        break
+      case 'exhale':
+        phaseDuration = pace.out
+        nextPhase = 'holdAfter'
+        break
+      case 'holdAfter':
+        phaseDuration = pace.holdAfter || 0
+        nextPhase = cycle < totalCycles ? 'inhale' : 'complete'
+        break
+    }
+
+    if (phaseDuration > 0 && (phase === 'inhale' || phase === 'hold' || phase === 'exhale' || phase === 'holdAfter')) {
+      const nextTitle = nextPhase === 'inhale' ? 'Inhale' :
+                       nextPhase === 'hold' ? 'Hold' :
+                       nextPhase === 'exhale' ? 'Exhale' :
+                       nextPhase === 'holdAfter' ? 'Hold' :
+                       'Well done!'
+
+      const timer = setTimeout(() => {
+        onTitleChange(nextTitle)
+      }, (phaseDuration * 1000) - 200)
+
+      return () => clearTimeout(timer)
+    }
+  }, [phase, pace, cycle, totalCycles, onTitleChange])
 
   // Control animation playback based on running state
   useEffect(() => {
@@ -46,12 +96,13 @@ export function BoxAnimation({ phase, pace, cycle, totalCycles, running }: BoxAn
 
   const getInstructionText = () => {
     switch (phase) {
-      case 'intro': return { title: "", subtitle: null }
+      case 'intro': return { title: "Let's breathe!", subtitle: null }
       case 'inhale': return { title: 'Inhale', subtitle: null }
       case 'hold': return { title: 'Hold', subtitle: null }
       case 'exhale': return { title: 'Exhale', subtitle: null }
+      case 'holdAfter': return { title: 'Hold', subtitle: null }
       case 'complete': return { title: 'Well done!', subtitle: null }
-      default: return { title: 'Breathe', subtitle: null }
+      default: return { title: '', subtitle: null }
     }
   }
 

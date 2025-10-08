@@ -26,13 +26,30 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       .catch(error => console.error('Error loading belly animation:', error))
   }, [])
 
-  // Update title when phase changes
+  // Update title before phase changes to keep in sync with animation
   useEffect(() => {
     if (!onTitleChange) return
 
-    const titleText = getInstructionText()
-    onTitleChange(titleText.title)
-  }, [phase, onTitleChange])
+    // Set title immediately for intro, complete, and first inhale
+    if (phase === 'intro' || phase === 'complete' || (phase === 'inhale' && cycle === 1)) {
+      const titleText = getInstructionText()
+      onTitleChange(titleText.title)
+      if (phase === 'intro' || phase === 'complete') return
+    }
+
+    // For breathing phases, trigger next title 200ms before phase ends
+    if (phase === 'inhale' || phase === 'exhale') {
+      const phaseDuration = phase === 'inhale' ? pace.in : pace.out
+      const nextPhase = phase === 'inhale' ? 'exhale' : (cycle < totalCycles ? 'inhale' : 'complete')
+      const nextTitle = nextPhase === 'inhale' ? 'Inhale' : nextPhase === 'exhale' ? 'Exhale' : 'Well done!'
+
+      const timer = setTimeout(() => {
+        onTitleChange(nextTitle)
+      }, (phaseDuration * 1000) - 200)
+
+      return () => clearTimeout(timer)
+    }
+  }, [phase, pace, cycle, totalCycles, onTitleChange])
 
   const getInstructionText = () => {
     switch (phase) {

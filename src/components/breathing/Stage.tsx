@@ -206,6 +206,7 @@ export function Stage({
             cycle={cycle}
             totalCycles={totalCycles}
             running={running}
+            onTitleChange={onTitleChange}
           />
         )
       default:
