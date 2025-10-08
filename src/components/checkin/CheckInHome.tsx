@@ -713,8 +713,40 @@ export function CheckInHome() {
             />
           </div>
 
-          {/* Exit Button on the right */}
-          <div className="fixed top-0 right-4 z-50 flex items-center" style={{ height: '80px' }}>
+          {/* Navigation Links and Exit Button on the right */}
+          <div className="fixed top-0 right-4 z-50 flex items-center gap-6" style={{ height: '80px' }}>
+            <button
+              onClick={() => navigate('/checkin/garden')}
+              className="cursor-pointer transition-all hover:opacity-70"
+              style={{
+                fontSize: '14px',
+                color: '#1f2937',
+                fontWeight: '500',
+                background: 'none',
+                border: 'none',
+                padding: '8px'
+              }}
+              aria-label="My garden"
+            >
+              My garden
+            </button>
+
+            <button
+              onClick={() => navigate('/checkin/home')}
+              className="cursor-pointer transition-all hover:opacity-70"
+              style={{
+                fontSize: '14px',
+                color: '#1f2937',
+                fontWeight: '500',
+                background: 'none',
+                border: 'none',
+                padding: '8px'
+              }}
+              aria-label="Check in"
+            >
+              Check in
+            </button>
+
             <button
               onClick={() => navigate('/')}
               className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
