@@ -742,7 +742,7 @@ export function CheckInHome() {
               )}
             </button>
 
-            <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(255, 255, 255, 0.5)' }}></div>
+            <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.05)' }}></div>
 
             <button
               onClick={() => navigate('/checkin/home')}
@@ -770,7 +770,7 @@ export function CheckInHome() {
               )}
             </button>
 
-            <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(255, 255, 255, 0.5)' }}></div>
+            <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.05)' }}></div>
 
             <button
               onClick={() => navigate('/')}
