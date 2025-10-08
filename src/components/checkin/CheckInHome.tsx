@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
 import { ProgressHeader } from '../shared/ProgressHeader'
 import Lottie from 'lottie-react'
-import { Settings, SkipForward, Play, Pause, Users, Sparkles, Star, Plus, LogOut, X, Heart, Smile } from 'lucide-react'
+import { Settings, SkipForward, Play, Pause, Users, Sparkles, Star, Plus, LogOut, X, Heart, Smile, Menu } from 'lucide-react'
 import { BreathingCircles } from '../breathing/BreathingCircles'
 import './checkin-mobile.css'
 
@@ -20,6 +20,7 @@ export function CheckInHome() {
   const [breathingStarted, setBreathingStarted] = useState(false)
   const [isBreathingRunning, setIsBreathingRunning] = useState(false)
   const [buttonAnimationKey, setButtonAnimationKey] = useState(0)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const breathingStartRef = useRef<(() => void) | null>(null)
   const breathingPauseRef = useRef<(() => void) | null>(null)
   const breathingResumeRef = useRef<(() => void) | null>(null)
@@ -714,8 +715,8 @@ export function CheckInHome() {
             />
           </div>
 
-          {/* Navigation Links and Exit Button on the right */}
-          <div className="fixed top-0 right-4 z-50 flex items-center gap-4" style={{ height: '80px' }}>
+          {/* Desktop Navigation - hidden on mobile */}
+          <div className="hidden md:flex fixed top-0 right-4 z-50 items-center gap-4" style={{ height: '80px' }}>
             <button
               onClick={() => navigate('/checkin/garden')}
               className="cursor-pointer transition-all hover:opacity-70 relative"
@@ -779,6 +780,95 @@ export function CheckInHome() {
               <LogOut className="h-5 w-5" style={{ color: '#147fe3' }} />
             </button>
           </div>
+
+          {/* Mobile Hamburger Menu - shown only on mobile */}
+          <div className="md:hidden fixed top-0 right-4 z-50 flex items-center" style={{ height: '80px' }}>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
+              style={{ backgroundColor: 'white', border: '2px solid #147fe3' }}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" style={{ color: '#147fe3' }} />
+              ) : (
+                <Menu className="h-5 w-5" style={{ color: '#147fe3' }} />
+              )}
+            </button>
+          </div>
+
+          {/* Mobile Dropdown Menu */}
+          {mobileMenuOpen && (
+            <div
+              className="md:hidden fixed right-4 z-40"
+              style={{
+                top: '88px',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(16px)',
+                borderRadius: '8px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                padding: '8px',
+                minWidth: '180px'
+              }}
+            >
+              <button
+                onClick={() => {
+                  navigate('/checkin/garden')
+                  setMobileMenuOpen(false)
+                }}
+                className="w-full text-left transition-all hover:bg-gray-100 rounded"
+                style={{
+                  fontSize: '14px',
+                  color: '#1f2937',
+                  fontWeight: '500',
+                  background: 'none',
+                  border: 'none',
+                  padding: '12px 16px'
+                }}
+              >
+                My garden
+              </button>
+
+              <button
+                onClick={() => {
+                  navigate('/checkin/home')
+                  setMobileMenuOpen(false)
+                }}
+                className="w-full text-left transition-all hover:bg-gray-100 rounded"
+                style={{
+                  fontSize: '14px',
+                  color: '#1f2937',
+                  fontWeight: '500',
+                  background: 'none',
+                  border: 'none',
+                  padding: '12px 16px'
+                }}
+              >
+                Check in
+              </button>
+
+              <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
+
+              <button
+                onClick={() => {
+                  navigate('/')
+                  setMobileMenuOpen(false)
+                }}
+                className="w-full text-left transition-all hover:bg-gray-100 rounded flex items-center gap-2"
+                style={{
+                  fontSize: '14px',
+                  color: '#147fe3',
+                  fontWeight: '500',
+                  background: 'none',
+                  border: 'none',
+                  padding: '12px 16px'
+                }}
+              >
+                <LogOut className="h-4 w-4" />
+                Exit
+              </button>
+            </div>
+          )}
         </div>
       )}
 
