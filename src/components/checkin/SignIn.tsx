@@ -6,6 +6,7 @@ export function SignIn() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [scrollPosition, setScrollPosition] = useState(0)
 
   // Simple email validation
   const isValidEmail = (email: string) => {
@@ -15,9 +16,20 @@ export function SignIn() {
 
   const isFormValid = isValidEmail(email) && password.length > 0
 
+  const handleInputFocus = () => {
+    setScrollPosition(window.scrollY)
+  }
+
+  const handleInputBlur = () => {
+    setTimeout(() => {
+      window.scrollTo(0, scrollPosition)
+    }, 100)
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (isFormValid) {
+      window.scrollTo(0, 0)
       navigate('/checkin/garden')
     }
   }
@@ -249,6 +261,33 @@ export function SignIn() {
             height: 28px !important;
             bottom: 20% !important;
           }
+
+          .signin-content-wrapper {
+            padding: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+          }
+
+          .signin-content-inner {
+            margin-top: 120px !important;
+            padding: 0 20px !important;
+            width: 100% !important;
+          }
+
+          .signin-title {
+            font-size: 28px !important;
+            margin-bottom: 16px !important;
+            color: #1f2937 !important;
+            font-weight: 700 !important;
+          }
+
+          .signin-subtitle {
+            font-size: 16px !important;
+            margin-bottom: 24px !important;
+            color: #6b7280 !important;
+          }
         }
       `}</style>
       <div
@@ -354,13 +393,21 @@ export function SignIn() {
 
         {/* Sign In Form */}
         <div
-          className="flex items-center justify-center"
+          className="signin-content-wrapper flex items-center justify-center"
           style={{
             minHeight: '100vh',
             padding: '80px 20px'
           }}
         >
-          <div className="max-w-md w-full">
+          <div className="signin-content-inner max-w-md w-full">
+            {/* Title and Subtitle */}
+            <h1 className="signin-title text-4xl font-bold text-gray-900 mb-2 text-center">
+              Sign In
+            </h1>
+            <p className="signin-subtitle text-lg text-gray-700 mb-12 text-center" style={{ fontWeight: 500 }}>
+              Enter your details to continue
+            </p>
+
             {/* Container Card */}
             <div
               className="rounded-2xl"
@@ -374,15 +421,6 @@ export function SignIn() {
                 zIndex: 10
               }}
             >
-              {/* Header */}
-              <div className="mb-8 text-center">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                  Sign In
-                </h1>
-                <p className="text-lg text-gray-900" style={{ fontWeight: 500 }}>
-                  Enter your details to continue
-                </p>
-              </div>
 
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -396,6 +434,8 @@ export function SignIn() {
                     id="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
                     className="w-full px-4 py-3 focus:outline-none transition-colors"
                     style={{
                       backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -418,6 +458,8 @@ export function SignIn() {
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
                     className="w-full px-4 py-3 focus:outline-none transition-colors"
                     style={{
                       backgroundColor: 'rgba(255, 255, 255, 0.9)',

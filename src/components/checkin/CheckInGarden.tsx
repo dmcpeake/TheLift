@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Menu, X, LogOut } from 'lucide-react'
 import { ThreeHappyThings } from './garden/ThreeHappyThings'
@@ -13,6 +13,10 @@ export function CheckInGarden() {
   const location = useLocation()
   const [activeActivity, setActiveActivity] = useState<ActivityType>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
 
   return (
     <>
