@@ -88,7 +88,8 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       width: '480px',
       height: '480px',
       position: 'relative',
-      zIndex: 10
+      zIndex: 10,
+      marginTop: '40px'
     }}>
       {/* Lottie Animation */}
       {bellyAnimation && (
