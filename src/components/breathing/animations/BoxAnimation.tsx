@@ -2,47 +2,28 @@ import React, { useEffect, useState, useRef } from 'react'
 import Lottie from 'lottie-react'
 import { Phase, Pace } from '../types'
 
-interface BellyAnimationProps {
+interface BoxAnimationProps {
   phase: Phase
   pace: Pace
   cycle: number
   totalCycles: number
   running: boolean
-  onTitleChange?: (title: string) => void
 }
 
-export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTitleChange }: BellyAnimationProps) {
-  const [bellyAnimation, setBellyAnimation] = useState(null)
+export function BoxAnimation({ phase, pace, cycle, totalCycles, running }: BoxAnimationProps) {
+  const [boxAnimation, setBoxAnimation] = useState(null)
   const lottieRef = useRef<any>(null)
 
   // Load the Lottie animation
   useEffect(() => {
-    fetch('/Breathe01.json')
+    fetch('/box breathing 4-4-4.json')
       .then(response => response.json())
       .then(data => {
-        console.log('Belly animation loaded:', data)
-        setBellyAnimation(data)
+        console.log('Box animation loaded:', data)
+        setBoxAnimation(data)
       })
-      .catch(error => console.error('Error loading belly animation:', error))
+      .catch(error => console.error('Error loading box animation:', error))
   }, [])
-
-  // Update title when phase changes
-  useEffect(() => {
-    if (!onTitleChange) return
-
-    const titleText = getInstructionText()
-    onTitleChange(titleText.title)
-  }, [phase, onTitleChange])
-
-  const getInstructionText = () => {
-    switch (phase) {
-      case 'intro': return { title: "Let's breathe!", subtitle: null }
-      case 'inhale': return { title: 'Inhale', subtitle: null }
-      case 'exhale': return { title: 'Exhale', subtitle: null }
-      case 'complete': return { title: 'Well done!', subtitle: null }
-      default: return { title: '', subtitle: null }
-    }
-  }
 
   // Control animation playback based on running state
   useEffect(() => {
@@ -63,8 +44,19 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
     }
   }, [phase, running])
 
+  const getInstructionText = () => {
+    switch (phase) {
+      case 'intro': return { title: "", subtitle: null }
+      case 'inhale': return { title: 'Inhale', subtitle: null }
+      case 'hold': return { title: 'Hold', subtitle: null }
+      case 'exhale': return { title: 'Exhale', subtitle: null }
+      case 'complete': return { title: 'Well done!', subtitle: null }
+      default: return { title: 'Breathe', subtitle: null }
+    }
+  }
+
   return (
-    <div className="breathing-belly-container" style={{
+    <div className="breathing-box-container" style={{
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -74,7 +66,7 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       zIndex: 10
     }}>
       {/* Lottie Animation */}
-      {bellyAnimation && (
+      {boxAnimation && (
         <div style={{
           position: 'absolute',
           width: '100%',
@@ -85,7 +77,7 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
           zIndex: 1
         }}>
           <Lottie
-            animationData={bellyAnimation}
+            animationData={boxAnimation}
             loop={true}
             autoplay={false}
             lottieRef={lottieRef}
@@ -97,9 +89,11 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
         </div>
       )}
 
+      {/* Center text - hidden for box breathing */}
+
       <style jsx>{`
         @media (max-width: 768px) {
-          .breathing-belly-container {
+          .breathing-box-container {
             width: 100% !important;
             height: 100% !important;
           }

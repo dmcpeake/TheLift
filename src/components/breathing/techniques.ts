@@ -14,27 +14,27 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
     }
   },
   {
-    id: 'square',
-    name: 'Square Breathing',
-    description: 'Breathe along the sides of a square - in, hold, out, hold',
-    pace: { in: 4, hold: 4, out: 4, holdAfter: 4, label: 'Square' },
-    cycles: 4,
-    theme: {
-      primaryColor: '#a78bfa', // Purple
-      secondaryColor: '#c084fc', // Light purple
-      icon: '◻️'
-    }
-  },
-  {
     id: 'belly',
     name: 'Belly Breathing',
-    description: 'Focus on breathing deeply into your belly',
-    pace: { in: 4, hold: 2, out: 6, label: 'Belly' },
-    cycles: 3,
+    description: '2s in 2s out',
+    pace: { in: 2, hold: 0, out: 2, label: 'Belly' },
+    cycles: 4,
     theme: {
       primaryColor: '#34d399', // Green
       secondaryColor: '#6ee7b7', // Light green
       icon: '🫁'
+    }
+  },
+  {
+    id: 'box',
+    name: 'Box Breathing',
+    description: '4s in 4s hold 4s out',
+    pace: { in: 4, hold: 4, out: 4, label: 'Box' },
+    cycles: 4,
+    theme: {
+      primaryColor: '#3b82f6', // Blue
+      secondaryColor: '#60a5fa', // Light blue
+      icon: '📦'
     }
   }
 ]

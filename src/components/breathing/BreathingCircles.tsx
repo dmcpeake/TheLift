@@ -22,6 +22,7 @@ export function BreathingCircles(props: BreathingCirclesProps & {
   onExternalSelectedTechniqueIdChange?: (id: string) => void;
   externalBreathingStarted?: boolean;
   onExternalBreathingStartedChange?: (started: boolean) => void;
+  onBreathingTitleChange?: (title: string) => void;
   onExternalStart?: (startFn: () => void) => void;
   onExternalPause?: (pauseFn: () => void) => void;
   onExternalResume?: (resumeFn: () => void) => void;
@@ -43,6 +44,7 @@ export function BreathingCircles(props: BreathingCirclesProps & {
     onExternalSelectedTechniqueIdChange,
     externalBreathingStarted,
     onExternalBreathingStartedChange,
+    onBreathingTitleChange,
     onExternalStart,
     onExternalPause,
     onExternalResume,
@@ -244,7 +246,7 @@ export function BreathingCircles(props: BreathingCirclesProps & {
           ts: new Date().toISOString()
         })
         setRunning(false)
-        setTimeout(() => onComplete?.(), 1500)
+        setTimeout(() => onComplete?.(), 4000)
         return
     }
 
@@ -531,6 +533,7 @@ export function BreathingCircles(props: BreathingCirclesProps & {
             captions={settings.captions}
             highContrast={settings.highContrast}
             running={running}
+            onTitleChange={onBreathingTitleChange}
           />
         </div>
 

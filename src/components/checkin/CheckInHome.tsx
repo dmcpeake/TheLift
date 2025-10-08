@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
 import { ProgressHeader } from '../shared/ProgressHeader'
@@ -21,6 +21,8 @@ export function CheckInHome() {
   const [isBreathingRunning, setIsBreathingRunning] = useState(false)
   const [buttonAnimationKey, setButtonAnimationKey] = useState(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [breathingTitle, setBreathingTitle] = useState("Let's breathe!")
+  const [titleOpacity, setTitleOpacity] = useState(1)
   const breathingStartRef = useRef<(() => void) | null>(null)
   const breathingPauseRef = useRef<(() => void) | null>(null)
   const breathingResumeRef = useRef<(() => void) | null>(null)
@@ -89,6 +91,28 @@ export function CheckInHome() {
       navigate('/checkin/flow/mood')
     }
   }
+
+  const handleBreathingTitleChange = useCallback((newTitle: string) => {
+    setBreathingTitle(prevTitle => {
+      // Only trigger fade animation if title is actually changing
+      if (prevTitle === newTitle) {
+        return prevTitle
+      }
+
+      // Fade out
+      setTitleOpacity(0)
+
+      // Change title halfway through fade, then fade in
+      setTimeout(() => {
+        setBreathingTitle(newTitle)
+        setTimeout(() => {
+          setTitleOpacity(1)
+        }, 50)
+      }, 400)
+
+      return prevTitle // Keep old title while fading out
+    })
+  }, [])
 
   return (
     <>
@@ -1020,7 +1044,18 @@ export function CheckInHome() {
           <div className="max-w-7xl mx-auto px-6 w-full">
             {/* Title header for breathing - positioned like mood page */}
             <div className="text-center" style={{ marginBottom: '1rem', position: 'relative', zIndex: 50 }}>
-              <h1 className="breathing-title-checkin-mobile text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>Let's breathe!</h1>
+              <h1
+                className="breathing-title-checkin-mobile text-gray-900 mb-2"
+                style={{
+                  fontSize: '30px',
+                  fontWeight: 600,
+                  letterSpacing: '0.02em',
+                  opacity: titleOpacity,
+                  transition: 'opacity 400ms ease-in-out'
+                }}
+              >
+                {breathingTitle}
+              </h1>
             </div>
 
             <div
@@ -1048,6 +1083,7 @@ export function CheckInHome() {
             onExternalSelectedTechniqueIdChange={setSelectedTechniqueId}
             externalBreathingStarted={breathingStarted}
             onExternalBreathingStartedChange={setBreathingStarted}
+            onBreathingTitleChange={handleBreathingTitleChange}
             onExternalStart={(startFn) => {
               breathingStartRef.current = () => {
                 startFn()

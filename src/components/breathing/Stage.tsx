@@ -4,6 +4,7 @@ import { SquareAnimation } from './animations/SquareAnimation'
 import { RainbowAnimation } from './animations/RainbowAnimation'
 import { FlowerAnimation } from './animations/FlowerAnimation'
 import { BellyAnimation } from './animations/BellyAnimation'
+import { BoxAnimation } from './animations/BoxAnimation'
 
 interface StageProps {
   phase: Phase
@@ -15,6 +16,7 @@ interface StageProps {
   captions: boolean
   highContrast: boolean
   running: boolean
+  onTitleChange?: (title: string) => void
 }
 
 export function Stage({
@@ -26,7 +28,8 @@ export function Stage({
   reducedMotion,
   captions,
   highContrast,
-  running
+  running,
+  onTitleChange
 }: StageProps) {
   const [circleClass, setCircleClass] = useState('')
   const [phaseProgress, setPhaseProgress] = useState(0)
@@ -192,6 +195,17 @@ export function Stage({
             cycle={cycle}
             totalCycles={totalCycles}
             running={running}
+            onTitleChange={onTitleChange}
+          />
+        )
+      case 'box':
+        return (
+          <BoxAnimation
+            phase={phase}
+            pace={pace}
+            cycle={cycle}
+            totalCycles={totalCycles}
+            running={running}
           />
         )
       default:
@@ -327,12 +341,12 @@ export function Stage({
   }
 
   const techniqueId = technique?.id || 'balloon'
-  const shouldShowBlurredEffects = showBlurredEffects && techniqueId !== 'belly'
+  const shouldShowBlurredEffects = showBlurredEffects && techniqueId !== 'belly' && techniqueId !== 'box'
 
   return (
     <div className="breathing-stage">
       {/* Large animated color shapes radiating from breathing circle center */}
-      {techniqueId !== 'belly' && (
+      {techniqueId !== 'belly' && techniqueId !== 'box' && (
         <>
           <div
             style={{
