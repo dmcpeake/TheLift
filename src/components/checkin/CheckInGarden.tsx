@@ -286,6 +286,16 @@ export function CheckInGarden() {
           .garden-cards-grid button > div > div:last-child {
             margin-top: 7px !important;
           }
+
+          .mobile-nav-buttons {
+            display: flex !important;
+          }
+        }
+
+        @media (min-width: 769px) {
+          .mobile-nav-buttons {
+            display: none !important;
+          }
         }
       `}</style>
       <div
@@ -423,7 +433,7 @@ export function CheckInGarden() {
           </div>
 
           {/* Mobile Hamburger Menu and Check In Button - shown only on mobile */}
-          <div className="md:hidden fixed top-0 right-4 z-50 flex items-center gap-2" style={{ height: '80px' }}>
+          <div className="mobile-nav-buttons fixed top-0 right-4 z-50 flex items-center gap-2" style={{ height: '80px' }}>
             <button
               onClick={() => navigate('/checkin/home')}
               className="h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
