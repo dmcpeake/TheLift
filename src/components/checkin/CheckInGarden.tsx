@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Menu, X, LogOut } from 'lucide-react'
+import Lottie from 'lottie-react'
 import { ThreeHappyThings } from './garden/ThreeHappyThings'
 import { ThreeGratefulThings } from './garden/ThreeGratefulThings'
 import { IfICouldBe } from './garden/IfICouldBe'
@@ -13,9 +14,18 @@ export function CheckInGarden() {
   const location = useLocation()
   const [activeActivity, setActiveActivity] = useState<ActivityType>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [roseAnimation, setRoseAnimation] = useState(null)
 
   useEffect(() => {
     window.scrollTo(0, 0)
+  }, [])
+
+  // Load the Lottie animation
+  useEffect(() => {
+    fetch('/theo-rose.json')
+      .then(response => response.json())
+      .then(data => setRoseAnimation(data))
+      .catch(error => console.error('Error loading rose animation:', error))
   }, [])
 
   return (
@@ -289,6 +299,13 @@ export function CheckInGarden() {
 
           .mobile-nav-buttons {
             display: flex !important;
+          }
+        }
+
+        /* Hide Theo animation on mobile */
+        @media (max-width: 768px) {
+          .theo-animation {
+            display: none !important;
           }
         }
 
@@ -622,7 +639,7 @@ export function CheckInGarden() {
             </p>
 
             {/* Activity Cards Grid */}
-            <div className="garden-cards-grid grid grid-cols-1 md:grid-cols-2 gap-6" style={{ maxWidth: '900px', margin: '0 auto' }}>
+            <div className="garden-cards-grid grid grid-cols-1 md:grid-cols-2 gap-6" style={{ maxWidth: '900px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
               {/* Card 1: 3 Happy Things */}
               <button
                 onClick={() => setActiveActivity('happy')}
@@ -631,7 +648,9 @@ export function CheckInGarden() {
                   backgroundColor: 'rgba(255, 255, 255, 0.3)',
                   backdropFilter: 'blur(16px)',
                   border: '1px solid rgba(255, 255, 255, 0.3)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  position: 'relative',
+                  zIndex: 10
                 }}
               >
                 <div className="flex items-start gap-4">
@@ -662,7 +681,9 @@ export function CheckInGarden() {
                   backgroundColor: 'rgba(255, 255, 255, 0.3)',
                   backdropFilter: 'blur(16px)',
                   border: '1px solid rgba(255, 255, 255, 0.3)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  position: 'relative',
+                  zIndex: 10
                 }}
               >
                 <div className="flex items-start gap-4">
@@ -690,7 +711,9 @@ export function CheckInGarden() {
                   backgroundColor: 'rgba(255, 255, 255, 0.3)',
                   backdropFilter: 'blur(16px)',
                   border: '1px solid rgba(255, 255, 255, 0.3)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  position: 'relative',
+                  zIndex: 10
                 }}
               >
                 <div className="flex items-start gap-4">
@@ -719,7 +742,9 @@ export function CheckInGarden() {
                   backgroundColor: 'rgba(255, 255, 255, 0.3)',
                   backdropFilter: 'blur(16px)',
                   border: '1px solid rgba(255, 255, 255, 0.3)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                  position: 'relative',
+                  zIndex: 10
                 }}
               >
                 <div className="flex items-start gap-4">
@@ -746,6 +771,30 @@ export function CheckInGarden() {
         </div>
 
       </div>
+
+      {/* Theo Rose Animation - desktop only */}
+      {roseAnimation && (
+        <div
+          className="theo-animation"
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            left: 'calc(50% + 120px)',
+            transform: 'translateX(-50%)',
+            width: '300px',
+            height: '300px',
+            zIndex: 1,
+            transition: 'opacity 300ms ease-in-out',
+            pointerEvents: 'none'
+          }}
+        >
+          <Lottie
+            animationData={roseAnimation}
+            loop={true}
+            autoplay={true}
+          />
+        </div>
+      )}
 
       {/* Activity Modals - rendered outside main container */}
       {activeActivity === 'happy' && <ThreeHappyThings onClose={() => setActiveActivity(null)} />}

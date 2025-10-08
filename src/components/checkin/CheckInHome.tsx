@@ -56,10 +56,10 @@ export function CheckInHome() {
 
   // Load the Lottie animation
   useEffect(() => {
-    fetch('/theo-rose.json')
+    fetch('/theo-thumb-up.json')
       .then(response => response.json())
       .then(data => setRoseAnimation(data))
-      .catch(error => console.error('Error loading rose animation:', error))
+      .catch(error => console.error('Error loading thumb up animation:', error))
   }, [])
 
   // Trigger button animation when breathing UI first appears
