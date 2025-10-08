@@ -530,6 +530,7 @@ export function BreathingCircles(props: BreathingCirclesProps & {
             reducedMotion={settings.reducedMotion}
             captions={settings.captions}
             highContrast={settings.highContrast}
+            running={running}
           />
         </div>
 

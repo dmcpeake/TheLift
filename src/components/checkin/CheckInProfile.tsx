@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Menu, X, LogOut, Apple, Heart, Award, Dribbble, Palette, Music, Calendar, CheckCircle, Pencil } from 'lucide-react'
+import { Menu, X, LogOut, Apple, Heart, Dribbble, Palette, Music, Calendar, CheckCircle, Pencil } from 'lucide-react'
 
 export function CheckInProfile() {
   const navigate = useNavigate()
@@ -250,10 +250,18 @@ export function CheckInProfile() {
           }
 
           .profile-title {
+            position: absolute !important;
+            top: -60px !important;
+            left: 0 !important;
+            right: 0 !important;
             font-size: 28px !important;
-            margin-bottom: 16px !important;
+            margin-bottom: 0 !important;
             color: #1f2937 !important;
             font-weight: 700 !important;
+          }
+
+          .rounded-2xl {
+            margin-top: 60px !important;
           }
         }
       `}</style>
@@ -555,11 +563,6 @@ export function CheckInProfile() {
           }}
         >
           <div className="profile-content-inner max-w-md w-full">
-            {/* Title */}
-            <h1 className="profile-title text-4xl font-bold text-gray-900 mb-2 text-center">
-              Hi Alex!
-            </h1>
-
             {/* Container Card */}
             <div
               className="rounded-2xl"
@@ -573,9 +576,13 @@ export function CheckInProfile() {
                 zIndex: 10
               }}
             >
+              {/* Title */}
+              <h1 className="profile-title text-4xl font-bold text-gray-900 mb-6 text-center">
+                Hi Alex!
+              </h1>
 
               {/* 3 things that make me feel good */}
-              <div className="mb-6">
+              <div className="mb-2">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-gray-900">
                     3 things that make me feel good
@@ -632,11 +639,6 @@ export function CheckInProfile() {
                     <Heart size={20} style={{ marginRight: '10px', color: '#6B7280' }} className="flex-shrink-0" />
                     <span className="font-medium" style={{ width: '50%' }}>Memory:</span>
                     <span style={{ width: '50%' }}>My first bike</span>
-                  </div>
-                  <div className="flex items-center py-2" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.2)' }}>
-                    <Award size={20} style={{ marginRight: '10px', color: '#6B7280' }} className="flex-shrink-0" />
-                    <span className="font-medium" style={{ width: '50%' }}>Achievement:</span>
-                    <span style={{ width: '50%' }}>Star of the week</span>
                   </div>
                   <div className="flex items-center py-2" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.2)' }}>
                     <Dribbble size={20} style={{ marginRight: '10px', color: '#6B7280' }} className="flex-shrink-0" />

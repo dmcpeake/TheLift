@@ -24,6 +24,18 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
       secondaryColor: '#c084fc', // Light purple
       icon: '◻️'
     }
+  },
+  {
+    id: 'belly',
+    name: 'Belly Breathing',
+    description: 'Focus on breathing deeply into your belly',
+    pace: { in: 4, hold: 2, out: 6, label: 'Belly' },
+    cycles: 3,
+    theme: {
+      primaryColor: '#34d399', // Green
+      secondaryColor: '#6ee7b7', // Light green
+      icon: '🫁'
+    }
   }
 ]
 

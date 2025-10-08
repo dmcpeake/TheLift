@@ -3,6 +3,7 @@ import { Phase, Pace, BreathingTechnique } from './types'
 import { SquareAnimation } from './animations/SquareAnimation'
 import { RainbowAnimation } from './animations/RainbowAnimation'
 import { FlowerAnimation } from './animations/FlowerAnimation'
+import { BellyAnimation } from './animations/BellyAnimation'
 
 interface StageProps {
   phase: Phase
@@ -13,6 +14,7 @@ interface StageProps {
   reducedMotion: boolean
   captions: boolean
   highContrast: boolean
+  running: boolean
 }
 
 export function Stage({
@@ -23,7 +25,8 @@ export function Stage({
   technique,
   reducedMotion,
   captions,
-  highContrast
+  highContrast,
+  running
 }: StageProps) {
   const [circleClass, setCircleClass] = useState('')
   const [phaseProgress, setPhaseProgress] = useState(0)
@@ -181,6 +184,16 @@ export function Stage({
             totalCycles={totalCycles}
           />
         )
+      case 'belly':
+        return (
+          <BellyAnimation
+            phase={phase}
+            pace={pace}
+            cycle={cycle}
+            totalCycles={totalCycles}
+            running={running}
+          />
+        )
       default:
         // Balloon breathing (default circle animation) - with radiating rings
         return (
@@ -313,60 +326,67 @@ export function Stage({
     }
   }
 
+  const techniqueId = technique?.id || 'balloon'
+  const shouldShowBlurredEffects = showBlurredEffects && techniqueId !== 'belly'
+
   return (
     <div className="breathing-stage">
       {/* Large animated color shapes radiating from breathing circle center */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          width: '300px',
-          height: '300px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255, 215, 0, 1.0) 0%, rgba(255, 215, 0, 0.6) 70%)',
-          filter: 'blur(30px)',
-          zIndex: 1,
-          animation: 'radiate1 4s ease-in-out infinite',
-          transform: 'translate(-50%, -50%)',
-          opacity: showBlurredEffects ? 1 : 0,
-          transition: 'opacity 2s ease-in-out'
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          width: '375px',
-          height: '225px',
-          borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(255, 140, 0, 0.9) 0%, rgba(255, 140, 0, 0.4) 80%)',
-          filter: 'blur(38px)',
-          zIndex: 2,
-          animation: 'radiate2 5s ease-in-out infinite 1s',
-          transform: 'translate(-50%, -50%)',
-          opacity: showBlurredEffects ? 1 : 0,
-          transition: 'opacity 2s ease-in-out'
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          width: '450px',
-          height: '450px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255, 69, 0, 1.0) 0%, rgba(255, 69, 0, 0.5) 60%)',
-          filter: 'blur(45px)',
-          zIndex: 1,
-          animation: 'radiate3 6s ease-in-out infinite 2s',
-          transform: 'translate(-50%, -50%)',
-          opacity: showBlurredEffects ? 1 : 0,
-          transition: 'opacity 2s ease-in-out'
-        }}
-      />
+      {techniqueId !== 'belly' && (
+        <>
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              width: '300px',
+              height: '300px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(255, 215, 0, 1.0) 0%, rgba(255, 215, 0, 0.6) 70%)',
+              filter: 'blur(30px)',
+              zIndex: 1,
+              animation: 'radiate1 4s ease-in-out infinite',
+              transform: 'translate(-50%, -50%)',
+              opacity: shouldShowBlurredEffects ? 1 : 0,
+              transition: 'opacity 2s ease-in-out'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              width: '375px',
+              height: '225px',
+              borderRadius: '50%',
+              background: 'radial-gradient(ellipse, rgba(255, 140, 0, 0.9) 0%, rgba(255, 140, 0, 0.4) 80%)',
+              filter: 'blur(38px)',
+              zIndex: 2,
+              animation: 'radiate2 5s ease-in-out infinite 1s',
+              transform: 'translate(-50%, -50%)',
+              opacity: shouldShowBlurredEffects ? 1 : 0,
+              transition: 'opacity 2s ease-in-out'
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              width: '450px',
+              height: '450px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(255, 69, 0, 1.0) 0%, rgba(255, 69, 0, 0.5) 60%)',
+              filter: 'blur(45px)',
+              zIndex: 1,
+              animation: 'radiate3 6s ease-in-out infinite 2s',
+              transform: 'translate(-50%, -50%)',
+              opacity: shouldShowBlurredEffects ? 1 : 0,
+              transition: 'opacity 2s ease-in-out'
+            }}
+          />
+        </>
+      )}
       {renderAnimation()}
 
       <style jsx>{`
