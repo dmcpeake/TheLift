@@ -750,11 +750,11 @@ export function CheckInHome() {
           <div className="fixed top-0 right-4 z-50 flex items-center" style={{ height: '80px' }}>
             <button
               onClick={() => navigate('/')}
-              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#1066c2] transition-colors shadow-lg"
-              style={{ backgroundColor: '#147fe3' }}
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
+              style={{ backgroundColor: 'white', border: '2px solid #147fe3' }}
               aria-label="Exit"
             >
-              <LogOut className="h-5 w-5 text-white" />
+              <LogOut className="h-5 w-5" style={{ color: '#147fe3' }} />
             </button>
           </div>
 
