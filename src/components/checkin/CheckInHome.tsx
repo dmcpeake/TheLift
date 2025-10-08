@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
 import { ProgressHeader } from '../shared/ProgressHeader'
-import { GuideModal } from '../shared/GuideModal'
 import Lottie from 'lottie-react'
 import { Settings, SkipForward, Play, Pause, Users, Sparkles, Star, Plus, LogOut, X, Heart, Smile } from 'lucide-react'
 import { BreathingCircles } from '../breathing/BreathingCircles'
@@ -13,7 +12,6 @@ import './checkin-mobile.css'
 export function CheckInHome() {
   const navigate = useNavigate()
   const [roseAnimation, setRoseAnimation] = useState(null)
-  const [theoAnimation, setTheoAnimation] = useState(null)
   const [showBreathing, setShowBreathing] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [showTechniqueSelector, setShowTechniqueSelector] = useState(false)
@@ -24,7 +22,6 @@ export function CheckInHome() {
   const breathingStartRef = useRef<(() => void) | null>(null)
   const breathingPauseRef = useRef<(() => void) | null>(null)
   const breathingResumeRef = useRef<(() => void) | null>(null)
-  const [isGuideModalOpen, setIsGuideModalOpen] = useState(false)
 
   // Garden card states
   const [gratefulItems, setGratefulItems] = useState<string[]>([])
@@ -55,17 +52,12 @@ export function CheckInHome() {
     }
   }
 
-  // Load the Lottie animations
+  // Load the Lottie animation
   useEffect(() => {
     fetch('/theo-rose.json')
       .then(response => response.json())
       .then(data => setRoseAnimation(data))
       .catch(error => console.error('Error loading rose animation:', error))
-
-    fetch('/theo-waving.json')
-      .then(response => response.json())
-      .then(data => setTheoAnimation(data))
-      .catch(error => console.error('Error loading Theo animation:', error))
   }, [])
 
   // Trigger button animation when breathing UI first appears
@@ -693,58 +685,33 @@ export function CheckInHome() {
       {/* Header Bar - show when not breathing */}
       {!showBreathing && (
         <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', height: '80px', borderRadius: '0' }}>
-          {/* Theo Avatar and My Guide text */}
-          {theoAnimation && (
-            <>
-              <button
-                onClick={() => setIsGuideModalOpen(true)}
-                className="cursor-pointer transition-all hover:opacity-80"
-                style={{
-                  position: 'absolute',
-                  left: '16px',
-                  top: '10px',
-                  width: '60px',
-                  height: '60px',
-                  zIndex: 51,
-                  backgroundColor: 'rgba(232, 126, 103, 0.1)',
-                  borderRadius: '50%',
-                  border: 'none',
-                  padding: '0',
-                  boxSizing: 'border-box'
-                }}
-                aria-label="Open guide"
-              >
-                <Lottie
-                  animationData={theoAnimation}
-                  loop={true}
-                  autoplay={true}
-                  style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
-                />
-              </button>
-
-              {/* "My guide" text - hidden on mobile */}
-              <button
-                onClick={() => setIsGuideModalOpen(true)}
-                className="hidden md:block cursor-pointer transition-all hover:opacity-80"
-                style={{
-                  position: 'absolute',
-                  left: '86px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  zIndex: 51,
-                  fontSize: '14px',
-                  color: '#3a7ddc',
-                  fontWeight: '500',
-                  background: 'none',
-                  border: 'none',
-                  padding: '8px'
-                }}
-                aria-label="Open guide"
-              >
-                My guide
-              </button>
-            </>
-          )}
+          {/* The Lift Logo and Dots */}
+          <div
+            className="flex items-center gap-3"
+            style={{
+              position: 'absolute',
+              left: '16px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 51
+            }}
+          >
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="7" cy="23" r="4" fill="#147fe3"/>
+              <circle cx="15" cy="15" r="4" fill="#147fe3"/>
+              <circle cx="23" cy="7" r="4" fill="#147fe3"/>
+            </svg>
+            <img
+              src="/TheLiftLogo.svg"
+              alt="The Lift"
+              className="h-5"
+              style={{
+                imageRendering: 'auto',
+                shapeRendering: 'geometricPrecision',
+                filter: 'brightness(0) saturate(100%) invert(11%) sepia(0%) saturate(7465%) hue-rotate(189deg) brightness(105%) contrast(86%)'
+              }}
+            />
+          </div>
 
           {/* Exit Button on the right */}
           <div className="fixed top-0 right-4 z-50 flex items-center" style={{ height: '80px' }}>
@@ -757,13 +724,6 @@ export function CheckInHome() {
               <LogOut className="h-5 w-5" style={{ color: '#147fe3' }} />
             </button>
           </div>
-
-          {/* Guide Modal */}
-          <GuideModal
-            isOpen={isGuideModalOpen}
-            onClose={() => setIsGuideModalOpen(false)}
-            section="breathing"
-          />
         </div>
       )}
 
