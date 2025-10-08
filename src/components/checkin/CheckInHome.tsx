@@ -1043,7 +1043,7 @@ export function CheckInHome() {
         <div className="bg-white min-h-screen" style={{ paddingTop: '140px' }}>
           <div className="max-w-7xl mx-auto px-6 w-full">
             {/* Title header for breathing - positioned like mood page */}
-            <div className="text-center" style={{ marginBottom: '1rem', position: 'relative', zIndex: 50 }}>
+            <div className="breathing-title-container text-center" style={{ marginBottom: '1rem', position: 'relative', zIndex: 50 }}>
               <h1
                 className="breathing-title-checkin-mobile text-gray-900 mb-2"
                 style={{
@@ -1057,6 +1057,13 @@ export function CheckInHome() {
                 {breathingTitle}
               </h1>
             </div>
+            <style jsx>{`
+              @media (max-width: 768px) {
+                .breathing-title-container {
+                  margin-top: -40px !important;
+                }
+              }
+            `}</style>
 
             <div
               className="breathing-container-mobile"
