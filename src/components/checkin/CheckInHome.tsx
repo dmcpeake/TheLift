@@ -102,13 +102,17 @@ export function CheckInHome() {
       // Fade out
       setTitleOpacity(0)
 
+      // Faster transition on mobile
+      const isMobile = window.innerWidth <= 768
+      const transitionTime = isMobile ? 150 : 200
+
       // Change title halfway through fade, then fade in
       setTimeout(() => {
         setBreathingTitle(newTitle)
         setTimeout(() => {
           setTitleOpacity(1)
         }, 50)
-      }, 200)
+      }, transitionTime)
 
       return prevTitle // Keep old title while fading out
     })
@@ -1061,6 +1065,9 @@ export function CheckInHome() {
               @media (max-width: 768px) {
                 .breathing-title-container {
                   margin-top: -40px !important;
+                }
+                .breathing-title-checkin-mobile {
+                  transition: opacity 150ms ease-in-out !important;
                 }
               }
             `}</style>

@@ -67,9 +67,12 @@ export function BoxAnimation({ phase, pace, cycle, totalCycles, running, onTitle
                        nextPhase === 'holdAfter' ? 'Hold' :
                        'Well done!'
 
+      const isMobile = window.innerWidth <= 768
+      const earlyTrigger = isMobile ? 150 : 200
+
       const timer = setTimeout(() => {
         onTitleChange(nextTitle)
-      }, (phaseDuration * 1000) - 200)
+      }, (phaseDuration * 1000) - earlyTrigger)
 
       return () => clearTimeout(timer)
     }

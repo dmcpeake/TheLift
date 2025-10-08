@@ -43,9 +43,12 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       const nextPhase = phase === 'inhale' ? 'exhale' : (cycle < totalCycles ? 'inhale' : 'complete')
       const nextTitle = nextPhase === 'inhale' ? 'Inhale' : nextPhase === 'exhale' ? 'Exhale' : 'Well done!'
 
+      const isMobile = window.innerWidth <= 768
+      const earlyTrigger = isMobile ? 150 : 200
+
       const timer = setTimeout(() => {
         onTitleChange(nextTitle)
-      }, (phaseDuration * 1000) - 200)
+      }, (phaseDuration * 1000) - earlyTrigger)
 
       return () => clearTimeout(timer)
     }
