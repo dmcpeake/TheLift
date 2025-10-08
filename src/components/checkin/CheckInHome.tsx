@@ -802,7 +802,7 @@ export function CheckInHome() {
             <div
               className="md:hidden fixed z-40"
               style={{
-                top: '88px',
+                top: '98px',
                 left: '20px',
                 right: '20px',
                 backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -817,32 +817,36 @@ export function CheckInHome() {
                   navigate('/checkin/garden')
                   setMobileMenuOpen(false)
                 }}
-                className="w-full text-left transition-all hover:bg-gray-100 rounded"
+                className="w-full text-left transition-all hover:bg-gray-100 rounded flex items-center"
                 style={{
                   fontSize: '14px',
                   color: '#1f2937',
                   fontWeight: '500',
                   background: 'none',
                   border: 'none',
-                  padding: '12px 16px'
+                  padding: '12px 16px',
+                  height: '40px'
                 }}
               >
                 My garden
               </button>
+
+              <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
 
               <button
                 onClick={() => {
                   navigate('/checkin/home')
                   setMobileMenuOpen(false)
                 }}
-                className="w-full text-left transition-all hover:bg-gray-100 rounded"
+                className="w-full text-left transition-all hover:bg-gray-100 rounded flex items-center"
                 style={{
                   fontSize: '14px',
                   color: '#1f2937',
                   fontWeight: '500',
                   background: 'none',
                   border: 'none',
-                  padding: '12px 16px'
+                  padding: '12px 16px',
+                  height: '40px'
                 }}
               >
                 Check in
@@ -862,7 +866,8 @@ export function CheckInHome() {
                   fontWeight: '500',
                   background: 'none',
                   border: 'none',
-                  padding: '12px 16px'
+                  padding: '12px 16px',
+                  height: '40px'
                 }}
               >
                 <LogOut className="h-4 w-4" />
