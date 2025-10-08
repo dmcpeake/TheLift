@@ -102,14 +102,14 @@ export function CheckInHome() {
       // Start fade out
       setTitleOpacity(0)
 
-      // Change title after fade completes (400ms total transition)
+      // Change title after fade completes (200ms total transition)
       setTimeout(() => {
         setBreathingTitle(newTitle)
         // Fade in immediately
         setTimeout(() => {
           setTitleOpacity(1)
         }, 10)
-      }, 200)
+      }, 100)
 
       return prevTitle
     })
@@ -1052,7 +1052,7 @@ export function CheckInHome() {
                   fontWeight: 600,
                   letterSpacing: '0.02em',
                   opacity: titleOpacity,
-                  transition: 'opacity 400ms ease-in-out'
+                  transition: 'opacity 200ms ease-in-out'
                 }}
               >
                 {breathingTitle}

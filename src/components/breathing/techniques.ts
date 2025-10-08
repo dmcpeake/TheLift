@@ -40,8 +40,8 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
   {
     id: 'test',
     name: 'Test',
-    description: '4s in 4s out',
-    pace: { in: 4, hold: 0, out: 4, label: 'Test' },
+    description: '2s in 6s hold 2s out',
+    pace: { in: 1.933, hold: 5.634, out: 1.833, label: 'Test' },
     cycles: 3,
     theme: {
       primaryColor: '#8b5cf6', // Purple

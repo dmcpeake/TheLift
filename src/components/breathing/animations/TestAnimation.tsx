@@ -37,17 +37,17 @@ export function TestAnimation({ phase, pace, cycle, totalCycles, running, onTitl
       return
     }
 
-    // For first inhale, add 200ms delay before showing title, then transition at 3600ms
+    // For first inhale, add 200ms delay before showing title
     if (phase === 'inhale' && cycle === 1) {
       // Wait 200ms, then show "Inhale"
       const initialTimer = setTimeout(() => {
         onTitleChange('Inhale')
       }, 200)
 
-      // Then transition to "Exhale" at 3600ms from phase start
+      // Then transition to "Hold" 200ms before inhale phase ends
       const transitionTimer = setTimeout(() => {
-        onTitleChange('Exhale')
-      }, 3600)
+        onTitleChange('Hold')
+      }, (pace.in * 1000) - 200)
 
       return () => {
         clearTimeout(initialTimer)
@@ -55,22 +55,34 @@ export function TestAnimation({ phase, pace, cycle, totalCycles, running, onTitl
       }
     }
 
-    // For other inhale phases, show Inhale immediately then transition at 3600ms
-    if (phase === 'inhale') {
-      const timer = setTimeout(() => {
-        onTitleChange('Exhale')
-      }, 3600)
+    // For breathing phases, trigger next title 200ms before phase ends
+    if (phase === 'inhale' || phase === 'hold' || phase === 'exhale') {
+      let phaseDuration = 0
+      let nextPhase: Phase = phase
 
-      return () => clearTimeout(timer)
-    }
+      switch (phase) {
+        case 'inhale':
+          phaseDuration = pace.in
+          nextPhase = 'hold'
+          break
+        case 'hold':
+          phaseDuration = pace.hold
+          nextPhase = 'exhale'
+          break
+        case 'exhale':
+          phaseDuration = pace.out
+          nextPhase = cycle < totalCycles ? 'inhale' : 'complete'
+          break
+      }
 
-    // For exhale phase, show Exhale for 3600ms then transition to next
-    if (phase === 'exhale') {
-      const nextTitle = cycle < totalCycles ? 'Inhale' : 'Well done!'
+      const nextTitle = nextPhase === 'inhale' ? 'Inhale' :
+                       nextPhase === 'hold' ? 'Hold' :
+                       nextPhase === 'exhale' ? 'Exhale' :
+                       'Well done!'
 
       const timer = setTimeout(() => {
         onTitleChange(nextTitle)
-      }, 3600)
+      }, (phaseDuration * 1000) - 200)
 
       return () => clearTimeout(timer)
     }
@@ -80,6 +92,7 @@ export function TestAnimation({ phase, pace, cycle, totalCycles, running, onTitl
     switch (phase) {
       case 'intro': return { title: "Let's breathe!", subtitle: null }
       case 'inhale': return { title: 'Inhale', subtitle: null }
+      case 'hold': return { title: 'Hold', subtitle: null }
       case 'exhale': return { title: 'Exhale', subtitle: null }
       case 'complete': return { title: 'Well done!', subtitle: null }
       default: return { title: '', subtitle: null }
