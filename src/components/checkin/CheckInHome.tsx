@@ -380,7 +380,7 @@ export function CheckInHome() {
           }
 
           .welcome-header {
-            margin-top: 120px !important;
+            margin-top: 80px !important;
           }
         }
       `}</style>
