@@ -37,17 +37,17 @@ export function TestAnimation({ phase, pace, cycle, totalCycles, running, onTitl
       return
     }
 
-    // For first inhale, add 200ms delay before showing title, then transition at 2800ms
+    // For first inhale, add 200ms delay before showing title, then transition at 3000ms
     if (phase === 'inhale' && cycle === 1) {
       // Wait 200ms, then show "Inhale"
       const initialTimer = setTimeout(() => {
         onTitleChange('Inhale')
       }, 200)
 
-      // Then transition to "Exhale" at 2800ms from phase start
+      // Then transition to "Exhale" at 3000ms from phase start
       const transitionTimer = setTimeout(() => {
         onTitleChange('Exhale')
-      }, 2800)
+      }, 3000)
 
       return () => {
         clearTimeout(initialTimer)
@@ -55,22 +55,22 @@ export function TestAnimation({ phase, pace, cycle, totalCycles, running, onTitl
       }
     }
 
-    // For other inhale phases, show Inhale immediately then transition at 2800ms
+    // For other inhale phases, show Inhale immediately then transition at 3000ms
     if (phase === 'inhale') {
       const timer = setTimeout(() => {
         onTitleChange('Exhale')
-      }, 2800)
+      }, 3000)
 
       return () => clearTimeout(timer)
     }
 
-    // For exhale phase, show Exhale for 2800ms then transition to next
+    // For exhale phase, show Exhale for 3000ms then transition to next
     if (phase === 'exhale') {
       const nextTitle = cycle < totalCycles ? 'Inhale' : 'Well done!'
 
       const timer = setTimeout(() => {
         onTitleChange(nextTitle)
-      }, 2800)
+      }, 3000)
 
       return () => clearTimeout(timer)
     }
