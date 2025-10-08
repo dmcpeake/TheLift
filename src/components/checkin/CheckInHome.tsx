@@ -747,30 +747,16 @@ export function CheckInHome() {
           )}
 
           {/* Exit Button on the right */}
-          <button
-            onClick={() => navigate('/')}
-            className="cursor-pointer transition-all hover:opacity-80"
-            style={{
-              position: 'absolute',
-              right: '16px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: '48px',
-              height: '48px',
-              backgroundColor: 'white',
-              border: '1px solid #147fe3',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 51,
-              padding: '0',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-            }}
-            aria-label="Exit"
-          >
-            <LogOut style={{ width: '20px', height: '20px', color: '#147fe3' }} />
-          </button>
+          <div className="fixed top-0 right-4 z-50 flex items-center" style={{ height: '80px' }}>
+            <button
+              onClick={() => navigate('/')}
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#1066c2] transition-colors shadow-lg"
+              style={{ backgroundColor: '#147fe3' }}
+              aria-label="Exit"
+            >
+              <LogOut className="h-5 w-5 text-white" />
+            </button>
+          </div>
 
           {/* Guide Modal */}
           <GuideModal
