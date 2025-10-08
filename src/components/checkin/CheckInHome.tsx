@@ -800,15 +800,16 @@ export function CheckInHome() {
           {/* Mobile Dropdown Menu */}
           {mobileMenuOpen && (
             <div
-              className="md:hidden fixed right-4 z-40"
+              className="md:hidden fixed z-40"
               style={{
                 top: '88px',
+                left: '20px',
+                right: '20px',
                 backgroundColor: 'rgba(255, 255, 255, 0.95)',
                 backdropFilter: 'blur(16px)',
                 borderRadius: '8px',
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                padding: '8px',
-                minWidth: '180px'
+                padding: '8px'
               }}
             >
               <button
