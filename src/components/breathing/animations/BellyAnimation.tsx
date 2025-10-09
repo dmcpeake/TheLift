@@ -62,11 +62,7 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       timersRef.current.push(setTimeout(() => onTitleChange('Exhale'), 16900))     // At 17000ms: top of cycle 4
       timersRef.current.push(setTimeout(() => {
         onTitleChange('Well done!')
-        // Stop animation immediately when complete
-        if (lottieRef.current) {
-          lottieRef.current.stop()
-        }
-      }, 19900)) // At 20000ms: complete
+      }, 20000)) // At 20000ms: complete
     }
   }, [phase, cycle, onTitleChange])
 
@@ -123,7 +119,7 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
         }}>
           <Lottie
             animationData={bellyAnimation}
-            loop={true}
+            loop={cycle < totalCycles}
             autoplay={false}
             lottieRef={lottieRef}
             style={{
