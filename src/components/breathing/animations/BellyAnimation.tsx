@@ -15,6 +15,7 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
   const [bellyAnimation, setBellyAnimation] = useState(null)
   const lottieRef = useRef<any>(null)
   const sequenceSetupRef = useRef(false)
+  const timersRef = useRef<NodeJS.Timeout[]>([])
 
   // Load the Lottie animation
   useEffect(() => {
@@ -35,7 +36,10 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
     if (phase === 'intro' || phase === 'complete') {
       const titleText = getInstructionText()
       onTitleChange(titleText.title)
-      sequenceSetupRef.current = false // Reset for next breathing session
+      // Clear any running timers and reset for next session
+      timersRef.current.forEach(timer => clearTimeout(timer))
+      timersRef.current = []
+      sequenceSetupRef.current = false
       return
     }
 
@@ -48,20 +52,15 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
 
       // Explicit sequence: 2s up, 2s down, 1s pause = 5s per cycle
       // Trigger 100ms before keyframes for mid-fade sync
-      const timers: NodeJS.Timeout[] = []
-
-      timers.push(setTimeout(() => onTitleChange('Exhale'), 1900))      // At 2000ms: top of cycle 1
-      timers.push(setTimeout(() => onTitleChange('Inhale'), 4900))      // At 5000ms: start of cycle 2
-      timers.push(setTimeout(() => onTitleChange('Exhale'), 6900))      // At 7000ms: top of cycle 2
-      timers.push(setTimeout(() => onTitleChange('Inhale'), 9900))      // At 10000ms: start of cycle 3
-      timers.push(setTimeout(() => onTitleChange('Exhale'), 11900))     // At 12000ms: top of cycle 3
-      timers.push(setTimeout(() => onTitleChange('Inhale'), 14900))     // At 15000ms: start of cycle 4
-      timers.push(setTimeout(() => onTitleChange('Exhale'), 16900))     // At 17000ms: top of cycle 4
-      timers.push(setTimeout(() => onTitleChange('Well done!'), 19900)) // At 20000ms: complete
-
-      return () => {
-        timers.forEach(timer => clearTimeout(timer))
-      }
+      timersRef.current = []
+      timersRef.current.push(setTimeout(() => onTitleChange('Exhale'), 1900))      // At 2000ms: top of cycle 1
+      timersRef.current.push(setTimeout(() => onTitleChange('Inhale'), 4900))      // At 5000ms: start of cycle 2
+      timersRef.current.push(setTimeout(() => onTitleChange('Exhale'), 6900))      // At 7000ms: top of cycle 2
+      timersRef.current.push(setTimeout(() => onTitleChange('Inhale'), 9900))      // At 10000ms: start of cycle 3
+      timersRef.current.push(setTimeout(() => onTitleChange('Exhale'), 11900))     // At 12000ms: top of cycle 3
+      timersRef.current.push(setTimeout(() => onTitleChange('Inhale'), 14900))     // At 15000ms: start of cycle 4
+      timersRef.current.push(setTimeout(() => onTitleChange('Exhale'), 16900))     // At 17000ms: top of cycle 4
+      timersRef.current.push(setTimeout(() => onTitleChange('Well done!'), 19900)) // At 20000ms: complete
     }
   }, [phase, cycle, onTitleChange])
 
