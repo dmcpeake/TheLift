@@ -37,21 +37,13 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       return
     }
 
-    // For first inhale, show title immediately when play is pressed
-    if (phase === 'inhale' && cycle === 1) {
-      // Immediately show "Inhale" when animation starts
-      onTitleChange('Inhale')
-
-      // Then trigger "Exhale" 100ms before reaching top (at 1900ms)
-      const timer = setTimeout(() => {
-        onTitleChange('Exhale')
-      }, (pace.in * 1000) - 100)
-
-      return () => clearTimeout(timer)
-    }
-
-    // For all other breathing phases, trigger next title 100ms before phase ends
+    // For all breathing phases
     if (phase === 'inhale' || phase === 'exhale') {
+      // Show current phase title immediately
+      const currentTitle = phase === 'inhale' ? 'Inhale' : 'Exhale'
+      onTitleChange(currentTitle)
+
+      // Then set up timer for next title 100ms before phase ends
       const phaseDuration = phase === 'inhale' ? pace.in : pace.out
       const nextPhase = phase === 'inhale' ? 'exhale' : (cycle < totalCycles ? 'inhale' : 'complete')
       const nextTitle = nextPhase === 'inhale' ? 'Inhale' : nextPhase === 'exhale' ? 'Exhale' : 'Well done!'
