@@ -45,50 +45,41 @@ export function BoxAnimation({ phase, pace, cycle, totalCycles, running, onTitle
       return () => clearTimeout(timer)
     }
 
-    // For breathing phases, show current phase title immediately, then trigger next title 200ms before phase ends
-    if (phase === 'inhale' || phase === 'hold' || phase === 'exhale' || phase === 'holdAfter') {
-      // Immediately show current phase title
-      const currentTitle = phase === 'inhale' ? 'Inhale' :
-                          phase === 'hold' ? 'Hold' :
-                          phase === 'exhale' ? 'Exhale' :
-                          'Hold'
-      onTitleChange(currentTitle)
+    // For breathing phases, trigger next title 200ms before phase ends
+    let phaseDuration = 0
+    let nextPhase: Phase = phase
 
-      let phaseDuration = 0
-      let nextPhase: Phase = phase
+    switch (phase) {
+      case 'inhale':
+        phaseDuration = pace.in
+        nextPhase = 'hold'
+        break
+      case 'hold':
+        phaseDuration = pace.hold
+        nextPhase = 'exhale'
+        break
+      case 'exhale':
+        phaseDuration = pace.out
+        nextPhase = 'holdAfter'
+        break
+      case 'holdAfter':
+        phaseDuration = pace.holdAfter || 0
+        nextPhase = cycle < totalCycles ? 'inhale' : 'complete'
+        break
+    }
 
-      switch (phase) {
-        case 'inhale':
-          phaseDuration = pace.in
-          nextPhase = 'hold'
-          break
-        case 'hold':
-          phaseDuration = pace.hold
-          nextPhase = 'exhale'
-          break
-        case 'exhale':
-          phaseDuration = pace.out
-          nextPhase = 'holdAfter'
-          break
-        case 'holdAfter':
-          phaseDuration = pace.holdAfter || 0
-          nextPhase = cycle < totalCycles ? 'inhale' : 'complete'
-          break
-      }
+    if (phaseDuration > 0 && (phase === 'inhale' || phase === 'hold' || phase === 'exhale' || phase === 'holdAfter')) {
+      const nextTitle = nextPhase === 'inhale' ? 'Inhale' :
+                       nextPhase === 'hold' ? 'Hold' :
+                       nextPhase === 'exhale' ? 'Exhale' :
+                       nextPhase === 'holdAfter' ? 'Hold' :
+                       'Well done!'
 
-      if (phaseDuration > 0) {
-        const nextTitle = nextPhase === 'inhale' ? 'Inhale' :
-                         nextPhase === 'hold' ? 'Hold' :
-                         nextPhase === 'exhale' ? 'Exhale' :
-                         nextPhase === 'holdAfter' ? 'Hold' :
-                         'Well done!'
+      const timer = setTimeout(() => {
+        onTitleChange(nextTitle)
+      }, (phaseDuration * 1000) - 200)
 
-        const timer = setTimeout(() => {
-          onTitleChange(nextTitle)
-        }, (phaseDuration * 1000) - 200)
-
-        return () => clearTimeout(timer)
-      }
+      return () => clearTimeout(timer)
     }
   }, [phase, pace, cycle, totalCycles, onTitleChange])
 

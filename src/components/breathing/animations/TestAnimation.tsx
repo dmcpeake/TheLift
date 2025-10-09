@@ -55,14 +55,8 @@ export function TestAnimation({ phase, pace, cycle, totalCycles, running, onTitl
       }
     }
 
-    // For breathing phases, show current phase title immediately, then trigger next title 200ms before phase ends
+    // For breathing phases, trigger next title 200ms before phase ends
     if (phase === 'inhale' || phase === 'hold' || phase === 'exhale') {
-      // Immediately show current phase title
-      const currentTitle = phase === 'inhale' ? 'Inhale' :
-                          phase === 'hold' ? 'Hold' :
-                          'Exhale'
-      onTitleChange(currentTitle)
-
       let phaseDuration = 0
       let nextPhase: Phase = phase
 
