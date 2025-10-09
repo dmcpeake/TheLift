@@ -26,7 +26,7 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       .catch(error => console.error('Error loading belly animation:', error))
   }, [])
 
-  // Update title before phase changes to keep in sync with animation
+  // Explicit sequence - set up all timers at once when breathing starts
   useEffect(() => {
     if (!onTitleChange) return
 
@@ -37,27 +37,28 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       return
     }
 
-    // Only show title immediately for very first inhale, then let timers handle everything
+    // Only set up the entire sequence once when first inhale starts
     if (phase === 'inhale' && cycle === 1) {
+      // Immediate
       onTitleChange('Inhale')
-    }
 
-    // Set up timer for next title transition - both at 1700ms
-    if (phase === 'inhale') {
-      const timer = setTimeout(() => {
-        onTitleChange('Exhale')
-      }, 1700)
-      return () => clearTimeout(timer)
-    }
+      // Explicit sequence: 1900ms pause, then transition
+      const timers: NodeJS.Timeout[] = []
 
-    if (phase === 'exhale') {
-      const nextTitle = cycle < totalCycles ? 'Inhale' : 'Well done!'
-      const timer = setTimeout(() => {
-        onTitleChange(nextTitle)
-      }, 1700)
-      return () => clearTimeout(timer)
+      timers.push(setTimeout(() => onTitleChange('Exhale'), 1900))      // Cycle 1: Exhale
+      timers.push(setTimeout(() => onTitleChange('Inhale'), 3800))      // Cycle 2: Inhale
+      timers.push(setTimeout(() => onTitleChange('Exhale'), 5700))      // Cycle 2: Exhale
+      timers.push(setTimeout(() => onTitleChange('Inhale'), 7600))      // Cycle 3: Inhale
+      timers.push(setTimeout(() => onTitleChange('Exhale'), 9500))      // Cycle 3: Exhale
+      timers.push(setTimeout(() => onTitleChange('Inhale'), 11400))     // Cycle 4: Inhale
+      timers.push(setTimeout(() => onTitleChange('Exhale'), 13300))     // Cycle 4: Exhale
+      timers.push(setTimeout(() => onTitleChange('Well done!'), 15200)) // Complete
+
+      return () => {
+        timers.forEach(timer => clearTimeout(timer))
+      }
     }
-  }, [phase, pace, cycle, totalCycles, onTitleChange])
+  }, [phase, cycle, onTitleChange])
 
   const getInstructionText = () => {
     switch (phase) {
