@@ -62,10 +62,9 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       timersRef.current.push(setTimeout(() => onTitleChange('Exhale'), 16900))     // At 17000ms: top of cycle 4
       timersRef.current.push(setTimeout(() => {
         onTitleChange('Well done!')
-        // Force stop the animation
+        // Use pause() just like the pause button does
         if (lottieRef.current) {
-          lottieRef.current.setLoop(false)
-          lottieRef.current.goToAndStop(0, true) // Go to first frame and stop
+          lottieRef.current.pause()
         }
       }, 20000)) // At 20000ms: complete
     }
