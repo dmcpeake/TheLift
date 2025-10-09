@@ -17,6 +17,9 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
   const sequenceSetupRef = useRef(false)
   const timersRef = useRef<NodeJS.Timeout[]>([])
 
+  // Debug logging
+  console.log(`BellyAnimation render: phase=${phase}, cycle=${cycle}/${totalCycles}, running=${running}`)
+
   // Load the Lottie animation
   useEffect(() => {
     fetch('/Breathe01.json')
@@ -61,10 +64,14 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       timersRef.current.push(setTimeout(() => onTitleChange('Inhale'), 14900))     // At 15000ms: start of cycle 4
       timersRef.current.push(setTimeout(() => onTitleChange('Exhale'), 16900))     // At 17000ms: top of cycle 4
       timersRef.current.push(setTimeout(() => {
+        console.log('20s timer fired - showing Well done and pausing animation')
         onTitleChange('Well done!')
         // Use pause() just like the pause button does
         if (lottieRef.current) {
+          console.log('Calling lottieRef.current.pause()')
           lottieRef.current.pause()
+        } else {
+          console.log('ERROR: lottieRef.current is null!')
         }
       }, 20000)) // At 20000ms: complete
     }
