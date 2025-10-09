@@ -474,7 +474,7 @@ export function BreathingCircles(props: BreathingCirclesProps & {
                 gap: '12px',
                 marginTop: '-90px'
               }}>
-                {BREATHING_TECHNIQUES.map(technique => {
+                {BREATHING_TECHNIQUES.filter(t => t.id !== 'test').map(technique => {
                   const isSelected = technique.id === effectiveSelectedTechniqueId
                   return (
                     <button

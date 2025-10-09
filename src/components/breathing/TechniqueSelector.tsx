@@ -62,7 +62,7 @@ export function TechniqueSelector({
             maxWidth: '320px'
           }}
         >
-            {BREATHING_TECHNIQUES.map(technique => {
+            {BREATHING_TECHNIQUES.filter(t => t.id !== 'test').map(technique => {
               const isSelected = technique.id === selectedId
               return (
                 <button
