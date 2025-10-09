@@ -42,17 +42,18 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       // Immediate
       onTitleChange('Inhale')
 
-      // Explicit sequence: 1900ms pause, then transition
+      // Explicit sequence: 2s up, 2s down, 1s pause = 5s per cycle
+      // Trigger 100ms before keyframes for mid-fade sync
       const timers: NodeJS.Timeout[] = []
 
-      timers.push(setTimeout(() => onTitleChange('Exhale'), 1900))      // Cycle 1: Exhale
-      timers.push(setTimeout(() => onTitleChange('Inhale'), 3800))      // Cycle 2: Inhale
-      timers.push(setTimeout(() => onTitleChange('Exhale'), 5700))      // Cycle 2: Exhale
-      timers.push(setTimeout(() => onTitleChange('Inhale'), 7600))      // Cycle 3: Inhale
-      timers.push(setTimeout(() => onTitleChange('Exhale'), 9500))      // Cycle 3: Exhale
-      timers.push(setTimeout(() => onTitleChange('Inhale'), 11400))     // Cycle 4: Inhale
-      timers.push(setTimeout(() => onTitleChange('Exhale'), 13300))     // Cycle 4: Exhale
-      timers.push(setTimeout(() => onTitleChange('Well done!'), 15200)) // Complete
+      timers.push(setTimeout(() => onTitleChange('Exhale'), 1900))      // At 2000ms: top of cycle 1
+      timers.push(setTimeout(() => onTitleChange('Inhale'), 4900))      // At 5000ms: start of cycle 2
+      timers.push(setTimeout(() => onTitleChange('Exhale'), 6900))      // At 7000ms: top of cycle 2
+      timers.push(setTimeout(() => onTitleChange('Inhale'), 9900))      // At 10000ms: start of cycle 3
+      timers.push(setTimeout(() => onTitleChange('Exhale'), 11900))     // At 12000ms: top of cycle 3
+      timers.push(setTimeout(() => onTitleChange('Inhale'), 14900))     // At 15000ms: start of cycle 4
+      timers.push(setTimeout(() => onTitleChange('Exhale'), 16900))     // At 17000ms: top of cycle 4
+      timers.push(setTimeout(() => onTitleChange('Well done!'), 19900)) // At 20000ms: complete
 
       return () => {
         timers.forEach(timer => clearTimeout(timer))
