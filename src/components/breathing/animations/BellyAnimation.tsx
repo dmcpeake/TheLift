@@ -31,51 +31,25 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       .catch(error => console.error('Error loading belly animation:', error))
   }, [])
 
-  // Explicit sequence - set up all timers at once when breathing starts
+  // Update title based on phase changes
   useEffect(() => {
     if (!onTitleChange) return
 
-    // Set title immediately for intro and complete
-    if (phase === 'intro' || phase === 'complete') {
-      const titleText = getInstructionText()
-      onTitleChange(titleText.title)
-      // Clear any running timers and reset for next session
-      timersRef.current.forEach(timer => clearTimeout(timer))
-      timersRef.current = []
-      sequenceSetupRef.current = false
-      return
-    }
-
-    // Only set up the entire sequence once when first inhale starts
-    if (phase === 'inhale' && cycle === 1 && !sequenceSetupRef.current) {
-      sequenceSetupRef.current = true
-
-      // Immediate
+    // Set title based on current phase and cycle
+    if (phase === 'intro') {
+      onTitleChange("Let's breathe!")
+    } else if (phase === 'inhale') {
       onTitleChange('Inhale')
-
-      // Explicit sequence: 2s up, 2s down, 1s pause = 5s per cycle
-      // Trigger 100ms before keyframes for mid-fade sync
-      timersRef.current = []
-      timersRef.current.push(setTimeout(() => onTitleChange('Exhale'), 1900))      // At 2000ms: top of cycle 1
-      timersRef.current.push(setTimeout(() => onTitleChange('Inhale'), 4900))      // At 5000ms: start of cycle 2
-      timersRef.current.push(setTimeout(() => onTitleChange('Exhale'), 6900))      // At 7000ms: top of cycle 2
-      timersRef.current.push(setTimeout(() => onTitleChange('Inhale'), 9900))      // At 10000ms: start of cycle 3
-      timersRef.current.push(setTimeout(() => onTitleChange('Exhale'), 11900))     // At 12000ms: top of cycle 3
-      timersRef.current.push(setTimeout(() => onTitleChange('Inhale'), 14900))     // At 15000ms: start of cycle 4
-      timersRef.current.push(setTimeout(() => onTitleChange('Exhale'), 16900))     // At 17000ms: top of cycle 4
-      timersRef.current.push(setTimeout(() => {
-        console.log('20s timer fired - showing Well done and pausing animation')
-        onTitleChange('Well done!')
-        // Use pause() just like the pause button does
-        if (lottieRef.current) {
-          console.log('Calling lottieRef.current.pause()')
-          lottieRef.current.pause()
-        } else {
-          console.log('ERROR: lottieRef.current is null!')
-        }
-      }, 20000)) // At 20000ms: complete
+    } else if (phase === 'exhale') {
+      onTitleChange('Exhale')
+    } else if (phase === 'holdAfter' && cycle === totalCycles) {
+      // Show "Well done!" on final cycle's holdAfter
+      onTitleChange('Well done!')
+    } else if (phase === 'complete') {
+      onTitleChange('Well done!')
     }
-  }, [phase, cycle, onTitleChange])
+    // Don't change title during hold phase (keep showing previous)
+  }, [phase, cycle, totalCycles, onTitleChange])
 
   const getInstructionText = () => {
     switch (phase) {
@@ -95,16 +69,22 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
 
     if (phase === 'intro' || phase === 'complete') {
       // Stop at first frame when not started or finished
+      console.log('Animation stopped - phase is intro or complete')
       instance.stop()
     } else if (!running) {
       // Pause when user presses pause button - keeps current position
+      console.log('Animation paused - running is false')
+      instance.pause()
+    } else if (phase === 'holdAfter' && cycle === totalCycles) {
+      // Pause on final cycle's holdAfter phase
+      console.log('Animation paused - final cycle holdAfter')
       instance.pause()
     } else {
       // Play when running - during all breathing phases (inhale, hold, exhale)
       // Just let it loop continuously, don't restart
       instance.play()
     }
-  }, [phase, running])
+  }, [phase, running, cycle, totalCycles])
 
   return (
     <div className="breathing-belly-container" style={{
