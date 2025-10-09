@@ -37,25 +37,24 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       return
     }
 
-    // For all breathing phases, use the same logic that works for first cycle
-    if (phase === 'inhale') {
+    // Only show title immediately for very first inhale, then let timers handle everything
+    if (phase === 'inhale' && cycle === 1) {
       onTitleChange('Inhale')
+    }
 
+    // Set up timer for next title transition
+    if (phase === 'inhale') {
       const timer = setTimeout(() => {
         onTitleChange('Exhale')
       }, (pace.in * 1000) - 100)
-
       return () => clearTimeout(timer)
     }
 
     if (phase === 'exhale') {
-      onTitleChange('Exhale')
-
       const nextTitle = cycle < totalCycles ? 'Inhale' : 'Well done!'
       const timer = setTimeout(() => {
         onTitleChange(nextTitle)
       }, (pace.out * 1000) - 100)
-
       return () => clearTimeout(timer)
     }
   }, [phase, pace, cycle, totalCycles, onTitleChange])
