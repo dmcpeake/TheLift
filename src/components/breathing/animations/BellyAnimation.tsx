@@ -14,6 +14,7 @@ interface BellyAnimationProps {
 export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTitleChange }: BellyAnimationProps) {
   const [bellyAnimation, setBellyAnimation] = useState(null)
   const lottieRef = useRef<any>(null)
+  const sequenceSetupRef = useRef(false)
 
   // Load the Lottie animation
   useEffect(() => {
@@ -34,11 +35,14 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
     if (phase === 'intro' || phase === 'complete') {
       const titleText = getInstructionText()
       onTitleChange(titleText.title)
+      sequenceSetupRef.current = false // Reset for next breathing session
       return
     }
 
     // Only set up the entire sequence once when first inhale starts
-    if (phase === 'inhale' && cycle === 1) {
+    if (phase === 'inhale' && cycle === 1 && !sequenceSetupRef.current) {
+      sequenceSetupRef.current = true
+
       // Immediate
       onTitleChange('Inhale')
 
