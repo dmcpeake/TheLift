@@ -4,7 +4,7 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
   {
     id: 'belly',
     name: 'Belly Breathing',
-    description: '2s in • 3s out',
+    description: '2s in • 1s hold • 2s out',
     pace: { in: 2, hold: 0, out: 2.167, holdAfter: 0.833, label: 'Belly' },
     cycles: 4,
     theme: {

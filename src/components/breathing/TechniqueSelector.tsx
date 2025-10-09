@@ -113,7 +113,7 @@ export function TechniqueSelector({
                         overflow: 'hidden',
                         textOverflow: 'ellipsis'
                       }}>
-                        {technique.pace.in}s in • {technique.pace.hold}s hold • {technique.pace.out}s out
+                        {technique.description}
                       </p>
                     </div>
                   </div>

@@ -510,7 +510,7 @@ export function BreathingCircles(props: BreathingCirclesProps & {
                         {technique.name}
                       </div>
                       <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                        {technique.pace.in}s in • {technique.pace.hold}s hold • {technique.pace.out}s out
+                        {technique.description}
                       </div>
                     </button>
                   )
