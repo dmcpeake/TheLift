@@ -4,7 +4,7 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
   {
     id: 'belly',
     name: 'Belly Breathing',
-    description: '2s in 2s out',
+    description: '2s in • 3s out',
     pace: { in: 2, hold: 0, out: 2.167, holdAfter: 0.833, label: 'Belly' },
     cycles: 4,
     theme: {
@@ -16,8 +16,8 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
   {
     id: 'box',
     name: 'Box Breathing',
-    description: '2s in 2s hold 2s out 2s hold',
-    pace: { in: 2, hold: 2, out: 2, holdAfter: 2, label: 'Box' },
+    description: '4s in • 4s hold • 4s out • 4s hold',
+    pace: { in: 4, hold: 4, out: 4, holdAfter: 4, label: 'Box' },
     cycles: 4,
     theme: {
       primaryColor: '#3b82f6', // Blue
@@ -28,8 +28,8 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
   {
     id: 'balloon',
     name: 'Balloon Breathing',
-    description: 'Imagine your belly is a balloon that inflates and deflates',
-    pace: { in: 4, hold: 2, out: 2, label: 'Balloon' },
+    description: '3s in • 2s hold • 3s out',
+    pace: { in: 3, hold: 2, out: 3, label: 'Balloon' },
     cycles: 3,
     theme: {
       primaryColor: '#60a5fa', // Sky blue
@@ -40,7 +40,7 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
   {
     id: 'test',
     name: 'Test',
-    description: '2s in 6s hold 2s out',
+    description: '1.933s in • 5.634s hold • 1.833s out',
     pace: { in: 1.933, hold: 5.634, out: 1.833, label: 'Test' },
     cycles: 3,
     theme: {
