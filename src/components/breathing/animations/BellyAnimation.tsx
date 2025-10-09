@@ -37,25 +37,15 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       return
     }
 
-    // For first inhale, add 200ms delay before showing title and next transition
+    // For first inhale, add 200ms delay before showing title
     if (phase === 'inhale' && cycle === 1) {
-      // Wait 200ms, then show "Inhale"
-      const initialTimer = setTimeout(() => {
+      const timer = setTimeout(() => {
         onTitleChange('Inhale')
       }, 200)
-
-      // Then set up transition to "Exhale" at normal time (1800ms from phase start)
-      const transitionTimer = setTimeout(() => {
-        onTitleChange('Exhale')
-      }, (pace.in * 1000) - 200)
-
-      return () => {
-        clearTimeout(initialTimer)
-        clearTimeout(transitionTimer)
-      }
+      return () => clearTimeout(timer)
     }
 
-    // For other breathing phases, trigger next title 200ms before phase ends
+    // For all breathing phases, trigger next title exactly when phase ends
     if (phase === 'inhale' || phase === 'exhale') {
       const phaseDuration = phase === 'inhale' ? pace.in : pace.out
       const nextPhase = phase === 'inhale' ? 'exhale' : (cycle < totalCycles ? 'inhale' : 'complete')
@@ -63,7 +53,7 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
 
       const timer = setTimeout(() => {
         onTitleChange(nextTitle)
-      }, (phaseDuration * 1000) - 200)
+      }, phaseDuration * 1000)
 
       return () => clearTimeout(timer)
     }
