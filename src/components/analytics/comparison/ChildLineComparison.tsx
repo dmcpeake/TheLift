@@ -21,6 +21,7 @@ interface ChildData {
 interface ChildLineComparisonProps {
   children: ChildData[]
   moodHistory: Record<string, any[]>
+  wellbeingData?: Record<string, any[]>
 }
 
 // SEND-appropriate color palette
@@ -33,26 +34,24 @@ const CHILD_COLORS = [
   '#14B8A6', // Teal
 ]
 
-// Mood emoticons mapping
-const MOOD_EMOJIS: Record<number, string> = {
+// Wellbeing emoticons mapping (1-4 scale)
+const WELLBEING_EMOJIS: Record<number, string> = {
   1: '😢',
   2: '😟',
-  3: '😐',
-  4: '😊',
-  5: '😄'
+  3: '😊',
+  4: '😄'
 }
 
-const MOOD_LABELS: Record<number, string> = {
-  1: 'Very Sad',
-  2: 'Sad',
-  3: 'Okay',
-  4: 'Happy',
-  5: 'Very Happy'
+const WELLBEING_LABELS: Record<number, string> = {
+  1: 'Struggling',
+  2: 'Okay',
+  3: 'Good',
+  4: 'Thriving'
 }
 
 // Custom Y-axis tick component to show number and emoticon
 const CustomYAxisTick = ({ x, y, payload }: any) => {
-  const emoji = MOOD_EMOJIS[payload.value] || ''
+  const emoji = WELLBEING_EMOJIS[payload.value] || ''
   return (
     <g transform={`translate(${x},${y})`}>
       <text
@@ -69,15 +68,15 @@ const CustomYAxisTick = ({ x, y, payload }: any) => {
   )
 }
 
-export function ChildLineComparison({ children, moodHistory }: ChildLineComparisonProps) {
+export function ChildLineComparison({ children, moodHistory, wellbeingData }: ChildLineComparisonProps) {
   // Prepare time series data
   const lineData = useMemo(() => {
-    // Get all unique dates from all children
+    // Get all unique dates from all children's wellbeing check-ins
     const allDates = new Set<string>()
     children.forEach(child => {
-      const childMoods = moodHistory[child.id] || []
-      childMoods.forEach(mood => {
-        const date = new Date(mood.selected_at)
+      const childWellbeing = wellbeingData?.[child.id] || []
+      childWellbeing.forEach(checkIn => {
+        const date = new Date(checkIn.completed_at || checkIn.created_at)
         const dateStr = date.toISOString().split('T')[0]
         allDates.add(dateStr)
       })
@@ -98,36 +97,76 @@ export function ChildLineComparison({ children, moodHistory }: ChildLineComparis
         })
       }
 
-      // Add each child's mood for this date
+      // Add each child's average wellbeing score for this date
       children.forEach(child => {
-        const childMoods = moodHistory[child.id] || []
-        const moodForDate = childMoods.find(mood => {
-          const moodDate = new Date(mood.selected_at).toISOString().split('T')[0]
-          return moodDate === dateStr
+        const childWellbeing = wellbeingData?.[child.id] || []
+        const checkInForDate = childWellbeing.find(checkIn => {
+          const checkInDate = new Date(checkIn.completed_at || checkIn.created_at).toISOString().split('T')[0]
+          return checkInDate === dateStr
         })
 
-        // Use the mood value or null if no data
-        dataPoint[child.id] = moodForDate ? moodForDate.mood_numeric : null
+        // Calculate average score from all sections
+        if (checkInForDate && checkInForDate.wellbeing_sections) {
+          let totalScore = 0
+          let sectionCount = 0
+
+          checkInForDate.wellbeing_sections.forEach((section: any) => {
+            totalScore += section.mood_numeric
+            sectionCount++
+          })
+
+          dataPoint[child.id] = sectionCount > 0 ? totalScore / sectionCount : null
+        } else {
+          dataPoint[child.id] = null
+        }
       })
 
       return dataPoint
     })
-  }, [children, moodHistory])
+  }, [children, wellbeingData])
 
   // Calculate statistics for each child
   const childStats = useMemo(() => {
     return children.map(child => {
-      const childMoods = moodHistory[child.id] || []
-      const recentMoods = childMoods.slice(0, 10) // Last 10 check-ins
-      const olderMoods = childMoods.slice(10, 20) // Previous 10 check-ins
+      const childWellbeing = wellbeingData?.[child.id] || []
+      const recentCheckIns = childWellbeing.slice(0, 5) // Last 5 check-ins
+      const olderCheckIns = childWellbeing.slice(5, 10) // Previous 5 check-ins
 
-      const recentAvg = recentMoods.length > 0
-        ? recentMoods.reduce((sum, m) => sum + m.mood_numeric, 0) / recentMoods.length
-        : 0
+      // Calculate recent average
+      let recentAvg = 0
+      if (recentCheckIns.length > 0) {
+        let totalScore = 0
+        let sectionCount = 0
 
-      const olderAvg = olderMoods.length > 0
-        ? olderMoods.reduce((sum, m) => sum + m.mood_numeric, 0) / olderMoods.length
-        : 0
+        recentCheckIns.forEach(checkIn => {
+          if (checkIn.wellbeing_sections) {
+            checkIn.wellbeing_sections.forEach((section: any) => {
+              totalScore += section.mood_numeric
+              sectionCount++
+            })
+          }
+        })
+
+        recentAvg = sectionCount > 0 ? totalScore / sectionCount : 0
+      }
+
+      // Calculate older average
+      let olderAvg = 0
+      if (olderCheckIns.length > 0) {
+        let totalScore = 0
+        let sectionCount = 0
+
+        olderCheckIns.forEach(checkIn => {
+          if (checkIn.wellbeing_sections) {
+            checkIn.wellbeing_sections.forEach((section: any) => {
+              totalScore += section.mood_numeric
+              sectionCount++
+            })
+          }
+        })
+
+        olderAvg = sectionCount > 0 ? totalScore / sectionCount : 0
+      }
 
       const trend = recentAvg > olderAvg + 0.3 ? 'improving'
         : recentAvg < olderAvg - 0.3 ? 'developing'
@@ -141,7 +180,7 @@ export function ChildLineComparison({ children, moodHistory }: ChildLineComparis
         totalCheckIns: child.checkInCount || 0
       }
     })
-  }, [children, moodHistory])
+  }, [children, wellbeingData])
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -150,8 +189,8 @@ export function ChildLineComparison({ children, moodHistory }: ChildLineComparis
           <p className="font-semibold text-gray-900 mb-2">{label}</p>
           {payload.map((entry: any) => {
             if (!entry.value) return null
-            const emoji = MOOD_EMOJIS[Math.round(entry.value)] || ''
-            const moodLabel = MOOD_LABELS[Math.round(entry.value)] || ''
+            const emoji = WELLBEING_EMOJIS[Math.round(entry.value)] || ''
+            const wellbeingLabel = WELLBEING_LABELS[Math.round(entry.value)] || ''
             return (
               <div key={entry.name} className="flex items-center justify-between space-x-3">
                 <div className="flex items-center space-x-2">
@@ -164,7 +203,7 @@ export function ChildLineComparison({ children, moodHistory }: ChildLineComparis
                 <span className="font-medium flex items-center gap-1">
                   <span className="text-base">{emoji}</span>
                   <span className="text-sm">{entry.value.toFixed(1)}</span>
-                  <span className="text-xs text-gray-500">({moodLabel})</span>
+                  <span className="text-xs text-gray-500">({wellbeingLabel})</span>
                 </span>
               </div>
             )
@@ -190,7 +229,7 @@ export function ChildLineComparison({ children, moodHistory }: ChildLineComparis
           Wellbeing Timeline
         </h3>
         <p className="text-xs text-gray-600">
-          Daily mood trends over the last 30 days
+          Average wellbeing scores over the last 30 check-in dates
         </p>
       </div>
 
@@ -209,8 +248,8 @@ export function ChildLineComparison({ children, moodHistory }: ChildLineComparis
             height={60}
           />
           <YAxis
-            domain={[1, 5]}
-            ticks={[1, 2, 3, 4, 5]}
+            domain={[1, 4]}
+            ticks={[1, 2, 3, 4]}
             tick={<CustomYAxisTick />}
             width={50}
           />

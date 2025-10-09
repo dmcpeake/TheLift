@@ -11,14 +11,15 @@ interface ChildData {
 interface ChildHeatMapComparisonProps {
   children: ChildData[]
   moodHistory: Record<string, any[]>
+  wellbeingData?: Record<string, any[]>
 }
 
-// Color functions for heat map cells - SEND appropriate colors
+// Color functions for heat map cells - SEND appropriate colors (1-4 scale for wellbeing wheel)
 const getHeatMapColor = (score: number): string => {
-  if (score >= 4.5) return '#10B981' // Green - Thriving
-  if (score >= 3.5) return '#3B82F6' // Blue - Doing well
-  if (score >= 2.5) return '#F59E0B' // Orange - Variable
-  if (score >= 1.5) return '#EF4444' // Red - Needs support
+  if (score >= 3.5) return '#10B981' // Green - Thriving
+  if (score >= 2.5) return '#3B82F6' // Blue - Doing well
+  if (score >= 1.5) return '#F59E0B' // Orange - Variable
+  if (score >= 1.0) return '#EF4444' // Red - Needs support
   return '#9CA3AF' // Gray - No data
 }
 
@@ -47,27 +48,19 @@ const calculateTrend = (moods: any[]): number => {
   return 3 // stable
 }
 
-export function ChildHeatMapComparison({ children, moodHistory }: ChildHeatMapComparisonProps) {
+export function ChildHeatMapComparison({ children, moodHistory, wellbeingData }: ChildHeatMapComparisonProps) {
   // Prepare heat map data with weekly breakdowns
   const heatMapData = useMemo(() => {
-    // Debug: Log what data we're receiving
-    console.log('HeatMap - Children:', children.map(c => ({ id: c.id, name: c.name })))
-    console.log('HeatMap - MoodHistory keys:', Object.keys(moodHistory))
-    children.forEach(child => {
-      const childMoods = moodHistory[child.id] || []
-      console.log(`HeatMap - ${child.name} (${child.id}): ${childMoods.length} moods`)
-    })
-
-    // First, find the date range across all children
+    // First, find the date range across all children using wellbeing data
     let earliestDate: Date | null = null
     let latestDate: Date | null = null
 
     children.forEach(child => {
-      const childMoods = moodHistory[child.id] || []
-      childMoods.forEach(mood => {
-        const moodDate = new Date(mood.selected_at)
-        if (!earliestDate || moodDate < earliestDate) earliestDate = moodDate
-        if (!latestDate || moodDate > latestDate) latestDate = moodDate
+      const childWellbeing = wellbeingData?.[child.id] || []
+      childWellbeing.forEach(checkIn => {
+        const checkInDate = new Date(checkIn.completed_at || checkIn.created_at)
+        if (!earliestDate || checkInDate < earliestDate) earliestDate = checkInDate
+        if (!latestDate || checkInDate > latestDate) latestDate = checkInDate
       })
     })
 
@@ -76,9 +69,9 @@ export function ChildHeatMapComparison({ children, moodHistory }: ChildHeatMapCo
     if (!earliestDate) earliestDate = new Date()
 
     return children.map(child => {
-      const childMoods = moodHistory[child.id] || []
+      const childWellbeing = wellbeingData?.[child.id] || []
 
-      // Group moods by week for the last 12 weeks with data
+      // Group wellbeing scores by week for the last 12 weeks with data
       const weeklyScores: { [key: string]: number } = {}
 
       // Start from the latest date with data
@@ -88,39 +81,97 @@ export function ChildHeatMapComparison({ children, moodHistory }: ChildHeatMapCo
         const weekEnd = new Date(weekStart)
         weekEnd.setDate(weekStart.getDate() - 7)
 
-        const weekMoods = childMoods.filter(mood => {
-          const moodDate = new Date(mood.selected_at)
-          return moodDate >= weekEnd && moodDate < weekStart
+        const weekCheckIns = childWellbeing.filter(checkIn => {
+          const checkInDate = new Date(checkIn.completed_at || checkIn.created_at)
+          return checkInDate >= weekEnd && checkInDate < weekStart
         })
 
-        const weekAvg = weekMoods.length > 0
-          ? weekMoods.reduce((sum, m) => sum + m.mood_numeric, 0) / weekMoods.length
-          : 0
+        // Calculate average wellbeing score for the week
+        let weekAvg = 0
+        if (weekCheckIns.length > 0) {
+          let totalScore = 0
+          let sectionCount = 0
+
+          weekCheckIns.forEach(checkIn => {
+            if (checkIn.wellbeing_sections) {
+              checkIn.wellbeing_sections.forEach((section: any) => {
+                totalScore += section.mood_numeric
+                sectionCount++
+              })
+            }
+          })
+
+          weekAvg = sectionCount > 0 ? totalScore / sectionCount : 0
+        }
 
         weeklyScores[`W${12-i}`] = Math.round(weekAvg * 10) / 10
       }
 
-      // Calculate additional metrics
-      const consistency = childMoods.length > 1
-        ? calculateConsistency(childMoods)
-        : 0
+      // Calculate average wellbeing score (1-4 scale)
+      let avgScore = 0
+      if (childWellbeing.length > 0) {
+        let totalScore = 0
+        let sectionCount = 0
 
-      const engagement = child.checkInCount || 0
-      const trend = calculateTrend(childMoods)
+        childWellbeing.forEach(checkIn => {
+          if (checkIn.wellbeing_sections) {
+            checkIn.wellbeing_sections.forEach((section: any) => {
+              totalScore += section.mood_numeric
+              sectionCount++
+            })
+          }
+        })
+
+        avgScore = sectionCount > 0 ? totalScore / sectionCount : 0
+      }
+
+      // Calculate trend using recent vs older check-ins
+      const recentCheckIns = childWellbeing.slice(0, Math.floor(childWellbeing.length / 2))
+      const olderCheckIns = childWellbeing.slice(Math.floor(childWellbeing.length / 2))
+
+      let recentAvg = 0
+      let olderAvg = 0
+
+      if (recentCheckIns.length > 0) {
+        let total = 0
+        let count = 0
+        recentCheckIns.forEach(ci => {
+          ci.wellbeing_sections?.forEach((s: any) => {
+            total += s.mood_numeric
+            count++
+          })
+        })
+        recentAvg = count > 0 ? total / count : 0
+      }
+
+      if (olderCheckIns.length > 0) {
+        let total = 0
+        let count = 0
+        olderCheckIns.forEach(ci => {
+          ci.wellbeing_sections?.forEach((s: any) => {
+            total += s.mood_numeric
+            count++
+          })
+        })
+        olderAvg = count > 0 ? total / count : 0
+      }
+
+      const diff = recentAvg - olderAvg
+      const trend = diff > 0.5 ? 5 : diff < -0.5 ? 1 : 3
 
       return {
         childId: child.id,
         name: child.name,
         initials: child.initials,
         scores: weeklyScores,
-        averageMood: child.averageMood || 0,
-        consistency,
-        engagement,
+        averageMood: avgScore,
+        consistency: 0,
+        engagement: child.checkInCount || 0,
         trend,
         totalCheckIns: child.checkInCount || 0
       }
     })
-  }, [children, moodHistory])
+  }, [children, wellbeingData])
 
   // Sort by average mood descending
   const sortedData = useMemo(() => {
@@ -142,7 +193,7 @@ export function ChildHeatMapComparison({ children, moodHistory }: ChildHeatMapCo
           Wellbeing Heat Map
         </h3>
         <p className="text-xs text-gray-600">
-          Weekly mood patterns over 12 weeks (ranked by average wellbeing)
+          Weekly wellbeing patterns over 12 weeks (ranked by average score across all categories)
         </p>
       </div>
 
@@ -192,7 +243,7 @@ export function ChildHeatMapComparison({ children, moodHistory }: ChildHeatMapCo
                             backgroundColor: getHeatMapColor(score),
                             color: getTextColor(score)
                           }}
-                          title={`Week ${week}: ${score}/5`}
+                          title={`Week ${week}: ${score}/4`}
                         >
                           {score}
                         </div>
@@ -235,19 +286,19 @@ export function ChildHeatMapComparison({ children, moodHistory }: ChildHeatMapCo
       <div className="mt-4 flex items-center justify-center space-x-4 text-xs">
         <div className="flex items-center space-x-1">
           <div className="w-4 h-4 rounded" style={{ backgroundColor: '#10B981' }}></div>
-          <span className="text-gray-600">Thriving (4.5+)</span>
+          <span className="text-gray-600">Thriving (3.5-4)</span>
         </div>
         <div className="flex items-center space-x-1">
           <div className="w-4 h-4 rounded" style={{ backgroundColor: '#3B82F6' }}></div>
-          <span className="text-gray-600">Doing well (3.5+)</span>
+          <span className="text-gray-600">Doing well (2.5-3.5)</span>
         </div>
         <div className="flex items-center space-x-1">
           <div className="w-4 h-4 rounded" style={{ backgroundColor: '#F59E0B' }}></div>
-          <span className="text-gray-600">Variable (2.5+)</span>
+          <span className="text-gray-600">Variable (1.5-2.5)</span>
         </div>
         <div className="flex items-center space-x-1">
           <div className="w-4 h-4 rounded" style={{ backgroundColor: '#EF4444' }}></div>
-          <span className="text-gray-600">Needs support</span>
+          <span className="text-gray-600">Needs support (1-1.5)</span>
         </div>
       </div>
     </div>

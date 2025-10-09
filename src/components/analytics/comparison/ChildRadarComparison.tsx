@@ -26,6 +26,7 @@ interface ChildData {
 interface ChildRadarComparisonProps {
   children: ChildData[]
   moodHistory: Record<string, any[]>
+  wellbeingData?: Record<string, any[]>
 }
 
 // SEND-appropriate color palette
@@ -38,80 +39,89 @@ const CHILD_COLORS = [
   '#14B8A6', // Teal
 ]
 
-export function ChildRadarComparison({ children, moodHistory }: ChildRadarComparisonProps) {
+const CATEGORY_LABELS = {
+  my_friends: 'Friends',
+  my_work: 'Work/School',
+  my_health: 'Health',
+  my_family: 'Family',
+  my_fun_play: 'Fun & Play',
+  my_safety: 'Safety',
+  my_emotions: 'Emotions'
+}
+
+export function ChildRadarComparison({ children, moodHistory, wellbeingData }: ChildRadarComparisonProps) {
   // Calculate wellbeing dimensions for each child
   const radarData = useMemo(() => {
-    // Define dimensions with SEND-sensitive naming
+    // Debug logging
+    console.log('ChildRadarComparison - wellbeingData:', wellbeingData)
+    console.log('ChildRadarComparison - children:', children)
+
+    // Use the 7 wellbeing wheel categories
     const dimensions = [
-      'Emotional Wellbeing',
-      'Engagement',
-      'Consistency',
-      'Emotional Expression',
-      'Positive Experiences',
-      'Resilience'
+      'Friends',
+      'Work/School',
+      'Health',
+      'Family',
+      'Fun & Play',
+      'Safety',
+      'Emotions'
     ]
 
-    // Calculate scores for each dimension
+    // Calculate average scores for each wellbeing category
     const calculateScores = (child: ChildData) => {
-      const childMoods = moodHistory[child.id] || []
+      const childWellbeing = wellbeingData?.[child.id] || []
 
-      // Emotional Wellbeing (based on average mood)
-      const emotionalWellbeing = child.averageMood
-        ? Math.round(child.averageMood * 20) // Convert 1-5 to 0-100
-        : 50
+      console.log(`Processing ${child.name} (${child.id}):`, {
+        checkInCount: childWellbeing.length,
+        hasWellbeingSections: childWellbeing.some(c => c.wellbeing_sections && c.wellbeing_sections.length > 0),
+        firstCheckIn: childWellbeing[0],
+        sectionNames: childWellbeing[0]?.wellbeing_sections?.map((s: any) => s.section_name)
+      })
 
-      // Engagement (based on check-in frequency)
-      const maxCheckIns = Math.max(...children.map(c => c.checkInCount || 0))
-      const engagement = child.checkInCount && maxCheckIns > 0
-        ? Math.round((child.checkInCount / maxCheckIns) * 100)
-        : 50
-
-      // Consistency (mood stability - lower variance is higher score)
-      let consistency = 50
-      if (childMoods.length > 1) {
-        const moodValues = childMoods.map(m => m.mood_numeric)
-        const mean = moodValues.reduce((a, b) => a + b, 0) / moodValues.length
-        const variance = moodValues.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / moodValues.length
-        // Convert variance (0-4 scale) to consistency score (0-100)
-        consistency = Math.round(Math.max(0, 100 - (variance * 25)))
+      // Calculate average score for each category
+      const categoryScores: Record<string, number> = {
+        my_friends: 50,
+        my_work: 50,
+        my_health: 50,
+        my_family: 50,
+        my_fun_play: 50,
+        my_safety: 50,
+        my_emotions: 50
       }
 
-      // Emotional Expression (range of emotions experienced)
-      const uniqueMoods = new Set(childMoods.map(m => m.mood_numeric)).size
-      const emotionalExpression = Math.round((uniqueMoods / 5) * 100)
-
-      // Positive Experiences (percentage of moods 4 or 5)
-      const positiveMoods = childMoods.filter(m => m.mood_numeric >= 4).length
-      const positiveExperiences = childMoods.length > 0
-        ? Math.round((positiveMoods / childMoods.length) * 100)
-        : 50
-
-      // Resilience (recovery from low moods)
-      let resilience = 50
-      if (childMoods.length > 2) {
-        let recoveries = 0
-        let lowMoods = 0
-        for (let i = 0; i < childMoods.length - 1; i++) {
-          if (childMoods[i].mood_numeric <= 2) {
-            lowMoods++
-            if (childMoods[i + 1].mood_numeric > childMoods[i].mood_numeric) {
-              recoveries++
-            }
-          }
+      if (childWellbeing.length > 0) {
+        // Collect all scores for each category
+        const categoryValues: Record<string, number[]> = {
+          my_friends: [],
+          my_work: [],
+          my_health: [],
+          my_family: [],
+          my_fun_play: [],
+          my_safety: [],
+          my_emotions: []
         }
-        resilience = lowMoods > 0
-          ? Math.round((recoveries / lowMoods) * 100)
-          : 75 // Default high if no low moods
+
+        childWellbeing.forEach(checkIn => {
+          if (checkIn.wellbeing_sections) {
+            checkIn.wellbeing_sections.forEach((section: any) => {
+              if (categoryValues[section.section_name]) {
+                categoryValues[section.section_name].push(section.mood_numeric)
+              }
+            })
+          }
+        })
+
+        // Calculate averages and convert to 0-100 scale
+        Object.keys(categoryValues).forEach(category => {
+          const values = categoryValues[category]
+          if (values.length > 0) {
+            const avg = values.reduce((sum, val) => sum + val, 0) / values.length
+            categoryScores[category] = Math.round((avg / 4) * 100) // Convert 1-4 scale to 0-100
+          }
+        })
       }
 
-      return {
-        emotionalWellbeing,
-        engagement,
-        consistency,
-        emotionalExpression,
-        positiveExperiences,
-        resilience
-      }
+      return categoryScores
     }
 
     // Transform data for radar chart
@@ -125,25 +135,13 @@ export function ChildRadarComparison({ children, moodHistory }: ChildRadarCompar
         const scores = calculateScores(child)
         let value = 50 // default
 
-        switch(dimension) {
-          case 'Emotional Wellbeing':
-            value = scores.emotionalWellbeing
-            break
-          case 'Engagement':
-            value = scores.engagement
-            break
-          case 'Consistency':
-            value = scores.consistency
-            break
-          case 'Emotional Expression':
-            value = scores.emotionalExpression
-            break
-          case 'Positive Experiences':
-            value = scores.positiveExperiences
-            break
-          case 'Resilience':
-            value = scores.resilience
-            break
+        // Map dimension labels to category keys
+        const categoryKey = Object.entries(CATEGORY_LABELS).find(
+          ([_, label]) => label === dimension
+        )?.[0]
+
+        if (categoryKey && scores[categoryKey] !== undefined) {
+          value = scores[categoryKey]
         }
 
         dataPoint[`child_${index}`] = value
@@ -151,7 +149,7 @@ export function ChildRadarComparison({ children, moodHistory }: ChildRadarCompar
 
       return dataPoint
     })
-  }, [children, moodHistory])
+  }, [children, wellbeingData])
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -189,7 +187,7 @@ export function ChildRadarComparison({ children, moodHistory }: ChildRadarCompar
           Wellbeing Profile Comparison
         </h3>
         <p className="text-xs text-gray-600">
-          Comparing {children.length} {children.length === 1 ? 'child' : 'children'} across six wellbeing dimensions
+          Comparing {children.length} {children.length === 1 ? 'child' : 'children'} across seven wellbeing dimensions
         </p>
       </div>
 
@@ -248,30 +246,34 @@ export function ChildRadarComparison({ children, moodHistory }: ChildRadarCompar
       </div>
 
       {/* Dimension Explanations */}
-      <div className="mt-4 grid grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
+      <div className="mt-4 grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
         <div className="bg-blue-50 rounded-lg p-2">
-          <div className="font-medium text-blue-900">Emotional Wellbeing</div>
-          <div className="text-blue-700 text-[10px]">Overall mood levels</div>
-        </div>
-        <div className="bg-green-50 rounded-lg p-2">
-          <div className="font-medium text-green-900">Engagement</div>
-          <div className="text-green-700 text-[10px]">Check-in frequency</div>
+          <div className="font-medium text-blue-900">Friends</div>
+          <div className="text-blue-700 text-[10px]">Social connections</div>
         </div>
         <div className="bg-purple-50 rounded-lg p-2">
-          <div className="font-medium text-purple-900">Consistency</div>
-          <div className="text-purple-700 text-[10px]">Mood stability</div>
+          <div className="font-medium text-purple-900">Work/School</div>
+          <div className="text-purple-700 text-[10px]">Learning & achievement</div>
+        </div>
+        <div className="bg-red-50 rounded-lg p-2">
+          <div className="font-medium text-red-900">Health</div>
+          <div className="text-red-700 text-[10px]">Physical wellbeing</div>
         </div>
         <div className="bg-orange-50 rounded-lg p-2">
-          <div className="font-medium text-orange-900">Emotional Expression</div>
-          <div className="text-orange-700 text-[10px]">Range of feelings</div>
+          <div className="font-medium text-orange-900">Family</div>
+          <div className="text-orange-700 text-[10px]">Family relationships</div>
+        </div>
+        <div className="bg-green-50 rounded-lg p-2">
+          <div className="font-medium text-green-900">Fun & Play</div>
+          <div className="text-green-700 text-[10px]">Enjoyment & activities</div>
+        </div>
+        <div className="bg-indigo-50 rounded-lg p-2">
+          <div className="font-medium text-indigo-900">Safety</div>
+          <div className="text-indigo-700 text-[10px]">Feeling secure</div>
         </div>
         <div className="bg-pink-50 rounded-lg p-2">
-          <div className="font-medium text-pink-900">Positive Experiences</div>
-          <div className="text-pink-700 text-[10px]">Frequency of positive moods</div>
-        </div>
-        <div className="bg-teal-50 rounded-lg p-2">
-          <div className="font-medium text-teal-900">Resilience</div>
-          <div className="text-teal-700 text-[10px]">Recovery from challenges</div>
+          <div className="font-medium text-pink-900">Emotions</div>
+          <div className="text-pink-700 text-[10px]">Emotional processing</div>
         </div>
       </div>
     </div>

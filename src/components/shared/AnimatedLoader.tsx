@@ -116,10 +116,41 @@ export function AnimatedLoader({
 }
 
 // Preset loaders for common use cases
-export function PageAnimatedLoader({ message = "Loading..." }: { message?: string }) {
+export function PageAnimatedLoader({
+  message = "Loading...",
+  progress
+}: {
+  message?: string
+  progress?: number
+}) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
-      <AnimatedLoader variant="spinner" size="large" message={message} />
+      <div className="flex flex-col items-center">
+        <AnimatedLoader variant="spinner" size="large" message={message} />
+
+        {/* Progress indicator */}
+        {progress !== undefined && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-6 w-64"
+          >
+            <div className="flex justify-between text-sm text-gray-600 mb-2">
+              <span>Progress</span>
+              <span className="font-semibold">{Math.round(progress)}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <motion.div
+                className="bg-gradient-to-r from-blue-500 to-purple-600 h-full rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </div>
     </div>
   )
 }

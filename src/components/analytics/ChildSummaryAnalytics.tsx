@@ -5,15 +5,29 @@ import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { projectId, publicAnonKey } from '../../utils/supabase/info.tsx'
 import { PageAnimatedLoader } from '../shared/AnimatedLoader'
 import { ComparisonView } from './comparison/ComparisonView'
-import { CriticalSupportAlert } from './CriticalSupportAlert'
+import { WellbeingTreemap } from './WellbeingTreemap'
+import { SafeguardingModal } from './SafeguardingModal'
+import { WellbeingWheelHeatmap } from './WellbeingWheelHeatmap'
+import { WellbeingTooltip } from './WellbeingTooltip'
 import {
   ChevronDown, ChevronRight, TrendingUp, TrendingDown,
   Calendar, Heart, Brain, MessageSquare, Sparkles,
   User, Activity, AlertCircle, Clock, Minus, BarChart3,
-  AlertTriangle
+  Users, Briefcase, HeartPulse, Home, Laugh, Shield
 } from 'lucide-react'
 
 const supabase = getSupabaseClient()
+
+// Wellbeing category definitions with colors and icons
+const WELLBEING_CATEGORIES = {
+  my_friends: { label: 'Friends', color: '#3B82F6', icon: Users, emoji: '👥' },
+  my_work: { label: 'Work/School', color: '#8B5CF6', icon: Briefcase, emoji: '📚' },
+  my_health: { label: 'Health', color: '#EF4444', icon: HeartPulse, emoji: '❤️' },
+  my_family: { label: 'Family', color: '#F59E0B', icon: Home, emoji: '🏠' },
+  my_fun_play: { label: 'Fun & Play', color: '#10B981', icon: Laugh, emoji: '🎨' },
+  my_safety: { label: 'Safety', color: '#6366F1', icon: Shield, emoji: '🛡️' },
+  my_emotions: { label: 'Emotions', color: '#EC4899', icon: Brain, emoji: '💭' }
+}
 
 interface Organization {
   id: string
@@ -30,6 +44,7 @@ interface Child {
   averageMood?: number
   recentMood?: number
   checkInCount?: number
+  latestNote?: string
 }
 
 interface CheckIn {
@@ -40,6 +55,12 @@ interface CheckIn {
   notes?: string
   feelings?: string[]
   explanation?: string
+  wellbeing_score?: number
+  wellbeing_sections?: {
+    section_name: string
+    mood_numeric: number
+    text_response: string
+  }[]
 }
 
 interface AIInsights {
@@ -113,16 +134,24 @@ export function ChildSummaryAnalytics() {
   const [loading, setLoading] = useState(true)
   const [loadingInsights, setLoadingInsights] = useState<Record<string, boolean>>({})
   const [aiLoadingProgress, setAILoadingProgress] = useState<Record<string, number>>({})
+  const [selectedCheckInIds, setSelectedCheckInIds] = useState<Record<string, string>>({})
   // Removed aiAnalysisProgress to prevent excessive re-renders
   const [loadingStages, setLoadingStages] = useState<Array<{ name: string; status: 'pending' | 'loading' | 'complete' | 'error' }>>([
     { name: 'Loading organizations', status: 'loading' },
     { name: 'Loading children profiles', status: 'pending' },
     { name: 'Loading check-in data', status: 'pending' },
     { name: 'Loading mood history', status: 'pending' },
+    { name: 'Loading wellbeing wheel data', status: 'pending' },
     { name: 'Preparing analytics', status: 'pending' }
   ])
+  const [wellbeingWheelData, setWellbeingWheelData] = useState<Record<string, any[]>>({})
   const [currentLoadingStage, setCurrentLoadingStage] = useState(0)
   const [showComparison, setShowComparison] = useState(false)
+  const [safeguardingModal, setSafeguardingModal] = useState<{ isOpen: boolean; childId: string | null }>({
+    isOpen: false,
+    childId: null
+  })
+  const [acknowledgedSafeguarding, setAcknowledgedSafeguarding] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     loadOrganizations()
@@ -133,6 +162,20 @@ export function ChildSummaryAnalytics() {
       loadChildren()
     }
   }, [selectedOrg])
+
+  // Auto-select most recent check-in when checkInHistory updates
+  useEffect(() => {
+    if (expandedChild && checkInHistory[expandedChild]) {
+      const checkIns = checkInHistory[expandedChild]
+      if (checkIns.length > 0 && !selectedCheckInIds[expandedChild]) {
+        const mostRecent = checkIns[0]
+        setSelectedCheckInIds(prev => ({
+          ...prev,
+          [expandedChild]: mostRecent.id
+        }))
+      }
+    }
+  }, [checkInHistory, expandedChild])
 
   const loadOrganizations = async () => {
     try {
@@ -162,9 +205,7 @@ export function ChildSummaryAnalytics() {
 
       if (data && data.length > 0) {
         setOrganizations(data)
-        if (selectedOrg === 'all') {
-          setSelectedOrg(data[0].id)
-        }
+        // Keep selectedOrg as 'all' by default - don't auto-select first org
       } else {
         // If no organizations exist, create a default
         setOrganizations([{ id: 'default', name: 'All Children' }])
@@ -196,16 +237,23 @@ export function ChildSummaryAnalytics() {
         .eq('role', 'Child')
         .order('name')
 
-      // Only filter by org if it's not the default fallback
-      if (selectedOrg !== 'all' && selectedOrg !== 'default') {
+      // Only filter by org if it's not the default fallback or parent view
+      if (selectedOrg !== 'all' && selectedOrg !== 'default' && selectedOrg !== 'parent') {
         childQuery = childQuery.eq('org_id', selectedOrg)
       }
 
-      const { data: childProfiles } = await childQuery
+      let { data: childProfiles } = await childQuery
 
       if (!childProfiles) {
         setChildren([])
         return
+      }
+
+      // If parent view is selected, randomly select 2 children
+      if (selectedOrg === 'parent' && childProfiles.length > 2) {
+        // Shuffle and take first 2
+        const shuffled = [...childProfiles].sort(() => Math.random() - 0.5)
+        childProfiles = shuffled.slice(0, 2)
       }
 
       // Update loading stage - moving to check-in data
@@ -255,8 +303,26 @@ export function ChildSummaryAnalytics() {
 
         // Determine trend
         let trend: 'improving' | 'developing' | 'stable' = 'stable'
-        if (recentAvg > olderAvg + 0.3) trend = 'improving'
-        else if (recentAvg < olderAvg - 0.3) trend = 'developing'
+        // Only calculate trend if we have enough data (at least 10 check-ins)
+        if (childMoods.length >= 10) {
+          if (recentAvg > olderAvg + 0.3) trend = 'improving'
+          else if (recentAvg < olderAvg - 0.3) trend = 'developing'
+        }
+
+        // Debug logging for Jayden
+        if (child.name === 'Jayden Martinez') {
+          console.log('Jayden Martinez complete data:', {
+            totalCheckIns: childMoods.length,
+            recentMoodsCount: recentMoods.length,
+            olderMoodsCount: olderMoods.length,
+            recentAvg,
+            olderAvg,
+            difference: recentAvg - olderAvg,
+            trend,
+            recentMoodValues: recentMoods.map(m => m.mood_numeric),
+            olderMoodValues: olderMoods.map(m => m.mood_numeric)
+          })
+        }
 
         // Get initials for avatar
         const nameParts = child.name?.split(' ') || []
@@ -279,7 +345,8 @@ export function ChildSummaryAnalytics() {
           moodTrend: trend,
           averageMood: recentAvg,
           recentMood: childMoods[0]?.mood_numeric,
-          checkInCount: childMoods.length
+          checkInCount: childMoods.length,
+          latestNote: childMoods[0]?.explanation_text || childMoods[0]?.notes
         }
       })
 
@@ -312,6 +379,19 @@ export function ChildSummaryAnalytics() {
         status: i <= 3 ? 'complete' : i === 4 ? 'loading' : 'pending'
       })))
 
+      // Load check-in history for all children (for Priority Support Card)
+      await loadAllCheckInHistory(childIds)
+
+      // Update loading stage - loading wellbeing wheel data
+      setCurrentLoadingStage(5)
+      setLoadingStages(prev => prev.map((s, i) => ({
+        ...s,
+        status: i <= 4 ? 'complete' : i === 5 ? 'loading' : 'pending'
+      })))
+
+      // Load all wellbeing wheel data for Over Time tab
+      await loadAllWellbeingWheelData(childIds)
+
       // Small delay to show the final stage
       await new Promise(resolve => setTimeout(resolve, 500))
 
@@ -330,93 +410,177 @@ export function ChildSummaryAnalytics() {
     }
   }
 
+  const loadAllCheckInHistory = async (childIds: string[]) => {
+    console.log(`Loading check-in history for ${childIds.length} children...`)
+
+    try {
+      // Fetch wellbeing wheel check-ins for all children
+      const { data: wellbeingWheelData } = await supabase
+        .from('wellbeing_wheel_usage')
+        .select('id, child_id, session_id, completed_at, overall_score, started_at')
+        .in('child_id', childIds)
+        .order('completed_at', { ascending: false })
+
+      // Group data by child
+      const checkInsByChild: Record<string, CheckIn[]> = {}
+
+      // Process each child
+      for (const childId of childIds) {
+        const childWellbeingData = wellbeingWheelData?.filter(w => w.child_id === childId).slice(0, 10) || []
+        const childCheckIns: CheckIn[] = []
+
+        // For each wellbeing wheel check-in, fetch sections
+        for (const wheel of childWellbeingData) {
+          const { data: sections } = await supabase
+            .from('wellbeing_wheel_sections')
+            .select('section_name, mood_numeric, text_response')
+            .eq('wellbeing_wheel_id', wheel.id)
+            .order('created_at', { ascending: true })
+
+          if (sections && sections.length > 0) {
+            childCheckIns.push({
+              id: wheel.id,
+              created_at: wheel.completed_at,
+              mood_numeric: wheel.overall_score,
+              mood_level: wheel.overall_score <= 1.5 ? 'Very Sad' : wheel.overall_score <= 2.5 ? 'Sad' : wheel.overall_score <= 3.5 ? 'OK' : 'Happy',
+              notes: `Wellbeing Score: ${wheel.overall_score.toFixed(1)}`,
+              wellbeing_score: wheel.overall_score,
+              wellbeing_sections: sections
+            })
+          }
+        }
+
+        checkInsByChild[childId] = childCheckIns
+      }
+
+      setCheckInHistory(checkInsByChild)
+      console.log('Check-in history loaded for all children:', Object.keys(checkInsByChild).length, 'children')
+      console.log('Sample check-in data:', checkInsByChild[childIds[0]]?.slice(0, 2))
+    } catch (error) {
+      console.error('Error loading check-in history:', error)
+    }
+  }
+
+  const loadAllWellbeingWheelData = async (childIds: string[]) => {
+    console.log(`Loading wellbeing wheel data for Over Time tab (${childIds.length} children)...`)
+
+    try {
+      // Fetch ALL wellbeing wheel check-ins for Jan-Mar 2025 period
+      const { data: wellbeingWheelData, error } = await supabase
+        .from('wellbeing_wheel_usage')
+        .select('id, child_id, completed_at, overall_score')
+        .in('child_id', childIds)
+        .gte('completed_at', '2025-01-01')
+        .lte('completed_at', '2025-03-31')
+        .order('completed_at', { ascending: true })
+
+      if (error) {
+        console.error('Error loading wellbeing wheel data:', error)
+        return
+      }
+
+      if (!wellbeingWheelData) {
+        console.log('No wellbeing wheel data found')
+        return
+      }
+
+      console.log(`Loaded ${wellbeingWheelData.length} wellbeing wheel check-ins`)
+
+      // Fetch all sections in one batch query
+      const wheelIds = wellbeingWheelData.map(w => w.id)
+      const { data: allSections } = await supabase
+        .from('wellbeing_wheel_sections')
+        .select('wellbeing_wheel_id, section_name, mood_numeric, text_response')
+        .in('wellbeing_wheel_id', wheelIds)
+
+      console.log(`Loaded ${allSections?.length || 0} wellbeing sections`)
+
+      // Group sections by wellbeing_wheel_id for fast lookup
+      const sectionsByWheelId: Record<string, any[]> = {}
+      allSections?.forEach(section => {
+        if (!sectionsByWheelId[section.wellbeing_wheel_id]) {
+          sectionsByWheelId[section.wellbeing_wheel_id] = []
+        }
+        sectionsByWheelId[section.wellbeing_wheel_id].push(section)
+      })
+
+      // Group by child
+      const dataByChild: Record<string, any[]> = {}
+      childIds.forEach(childId => {
+        const childWheels = wellbeingWheelData.filter(w => w.child_id === childId)
+        dataByChild[childId] = childWheels.map(wheel => ({
+          ...wheel,
+          sections: sectionsByWheelId[wheel.id] || []
+        }))
+      })
+
+      setWellbeingWheelData(dataByChild)
+      console.log('Wellbeing wheel data loaded for all children:', Object.keys(dataByChild).length, 'children')
+    } catch (error) {
+      console.error('Error loading wellbeing wheel data:', error)
+    }
+  }
+
   const loadCheckInHistory = async (childId: string) => {
-    // Check if already loaded
-    if (checkInHistory[childId]) return
+    // Check if already loaded with detailed data (check for mood_level which is only in detailed load)
+    const existingData = checkInHistory[childId]
+    if (existingData && existingData[0]?.mood_level) {
+      console.log(`Check-in history already loaded for child: ${childId}`)
+      return
+    }
 
-    console.log(`Loading check-in history for child: ${childId}`)
+    console.log(`Loading detailed check-in history for child: ${childId}`)
 
-    // Fetch check-in sessions with notes from various tools
-    const [sessionsResponse, moodResponse] = await Promise.all([
-      // Get recent check-in sessions
-      supabase
-        .from('checkin_sessions')
-        .select('*')
-        .eq('child_id', childId)
-        .order('started_at', { ascending: false })
-        .limit(5),
+    const supabase = getSupabaseClient()
 
-      // Get mood meter data for the heatmap
-      supabase
-        .from('mood_meter_usage')
-        .select('*')
-        .eq('child_id', childId)
-        .order('selected_at', { ascending: false })
-        .limit(30)
-    ])
+    // Fetch wellbeing wheel check-ins directly (they're more comprehensive than mood meter)
+    const { data: wellbeingWheelData, error: wellbeingError } = await supabase
+      .from('wellbeing_wheel_usage')
+      .select('id, child_id, session_id, completed_at, overall_score, started_at')
+      .eq('child_id', childId)
+      .order('completed_at', { ascending: false })
+      .limit(10)
 
-    const { data: sessionsData, error: sessionsError } = sessionsResponse
-    const { data: moodData, error: moodError } = moodResponse
+    if (wellbeingError) {
+      console.error('Error loading wellbeing wheel data:', wellbeingError)
+      return
+    }
 
-    // For each session, fetch associated tool notes
+    // Also get mood meter data for backwards compatibility and heatmap
+    const { data: moodData, error: moodError } = await supabase
+      .from('mood_meter_usage')
+      .select('*')
+      .eq('child_id', childId)
+      .order('selected_at', { ascending: false })
+      .limit(30)
+
+    // For each wellbeing wheel check-in, fetch the detailed sections
     const checkIns: CheckIn[] = []
 
-    if (sessionsData) {
-      for (const session of sessionsData) {
-        // Fetch all tool usage data for this session
-        const [moodUsage, emotionUsage, wellbeingUsage] = await Promise.all([
-          supabase
-            .from('mood_meter_usage')
-            .select('mood_level, mood_numeric, notes')
-            .eq('session_id', session.id)
-            .single(),
+    if (wellbeingWheelData) {
+      for (const wheel of wellbeingWheelData) {
+        // Fetch sections for this wellbeing wheel check-in
+        const { data: sections, error: sectionsError } = await supabase
+          .from('wellbeing_wheel_sections')
+          .select('section_name, mood_numeric, text_response')
+          .eq('wellbeing_wheel_id', wheel.id)
+          .order('created_at', { ascending: true })
 
-          supabase
-            .from('emotion_grid_usage')
-            .select('explanation_text')
-            .eq('session_id', session.id)
-            .single()
-            .then(result => {
-              // Handle 406 errors gracefully
-              if (result.error && result.error.code === 'PGRST301') {
-                console.log('emotion_grid_usage not accessible, skipping')
-                return { data: null, error: null }
-              }
-              return result
-            }),
+        if (!sectionsError && sections && sections.length > 0) {
+          // Check if there are any meaningful text responses
+          const hasNotes = sections.some(s => s.text_response && s.text_response.trim() !== '')
 
-          supabase
-            .from('wellbeing_wheel_usage')
-            .select('overall_score')
-            .eq('session_id', session.id)
-            .single()
-            .then(result => {
-              // Handle 406 errors gracefully
-              if (result.error && result.error.code === 'PGRST301') {
-                console.log('wellbeing_wheel_usage not accessible, skipping')
-                return { data: null, error: null }
-              }
-              return result
+          if (hasNotes) {
+            checkIns.push({
+              id: wheel.id,
+              created_at: wheel.completed_at,
+              mood_numeric: wheel.overall_score,
+              mood_level: wheel.overall_score <= 1.5 ? 'Very Sad' : wheel.overall_score <= 2.5 ? 'Sad' : wheel.overall_score <= 3.5 ? 'OK' : 'Happy',
+              notes: `Wellbeing Score: ${wheel.overall_score.toFixed(1)}`,
+              wellbeing_score: wheel.overall_score,
+              wellbeing_sections: sections
             })
-        ])
-
-        // Combine all notes and information
-        const notes = []
-        if (moodUsage.data?.notes) notes.push(`Mood: ${moodUsage.data.notes}`)
-        if (emotionUsage && emotionUsage.data?.explanation_text) notes.push(`Feelings: ${emotionUsage.data.explanation_text}`)
-
-        // Only add check-in if there are actual notes
-        const combinedNotes = notes.join(' | ')
-        if (combinedNotes && combinedNotes.trim() !== '') {
-          checkIns.push({
-            id: session.id,
-            created_at: session.started_at, // Use started_at instead of created_at
-            mood_numeric: moodUsage.data?.mood_numeric,
-            mood_level: moodUsage.data?.mood_level,
-            notes: combinedNotes,
-            feelings: [],
-            explanation: emotionUsage.data?.explanation_text
-          })
+          }
         }
       }
     }
@@ -764,10 +928,42 @@ export function ChildSummaryAnalytics() {
     if (expandedChild === childId) {
       setExpandedChild(null)
     } else {
-      setExpandedChild(childId)
-      await loadCheckInHistory(childId)
-      await loadAIInsights(childId)
+      // Check if child needs safeguarding check
+      const child = children.find(c => c.id === childId)
+      const needsSafeguarding = child && child.averageMood && child.averageMood < 2.5
+
+      if (needsSafeguarding && !acknowledgedSafeguarding.has(childId)) {
+        // Show safeguarding modal first
+        setSafeguardingModal({ isOpen: true, childId })
+      } else {
+        // Proceed normally
+        setExpandedChild(childId)
+        await loadCheckInHistory(childId)
+        await loadAIInsights(childId)
+      }
     }
+  }
+
+  const handleSafeguardingAction = async (childId: string, action: string, notes?: string) => {
+    console.log('Safeguarding action taken:', { childId, action, notes })
+
+    // TODO: Log to database
+    // await supabase.from('safeguarding_actions').insert({
+    //   child_id: childId,
+    //   practitioner_id: user.id,
+    //   action_taken: action,
+    //   notes: notes,
+    //   triggered_at: new Date().toISOString()
+    // })
+
+    // Mark as acknowledged for this session
+    setAcknowledgedSafeguarding(prev => new Set(prev).add(childId))
+
+    // Close modal and expand child card
+    setSafeguardingModal({ isOpen: false, childId: null })
+    setExpandedChild(childId)
+    await loadCheckInHistory(childId)
+    await loadAIInsights(childId)
   }
 
   const getAvatarStyle = (childId: string) => {
@@ -776,25 +972,71 @@ export function ChildSummaryAnalytics() {
     return AVATAR_STYLES[hash % AVATAR_STYLES.length]
   }
 
-  const getTrendIcon = (trend?: 'improving' | 'developing' | 'stable') => {
+  const getTrendIcon = (trend?: 'improving' | 'developing' | 'stable', childName?: string) => {
+    // Debug logging
+    if (childName === 'Jayden Martinez') {
+      console.log('getTrendIcon called for Jayden:', { trend, childName })
+      console.log('Returning Minus icon for stable trend')
+    }
+
     switch (trend) {
       case 'improving':
         return <TrendingUp className="h-4 w-4 text-green-600" />
       case 'developing':
         return <TrendingDown className="h-4 w-4 text-amber-600" />
+      case 'stable':
+        return <Minus className="h-4 w-4 text-gray-600" strokeWidth={2} />
       default:
-        return <Minus className="h-4 w-4 text-gray-400" />
+        return <Minus className="h-4 w-4 text-gray-600" strokeWidth={2} />
     }
   }
 
   if (loading) {
-    return <PageAnimatedLoader message="Loading analytics data..." />
+    // Calculate progress based on completed loading stages
+    const totalStages = loadingStages.length
+    const completedStages = loadingStages.filter(s => s.status === 'complete').length
+    const loadingStage = loadingStages.find(s => s.status === 'loading')
+
+    // Give partial credit for the currently loading stage
+    const progress = ((completedStages + (loadingStage ? 0.5 : 0)) / totalStages) * 100
+
+    return <PageAnimatedLoader message="Loading analytics data..." progress={progress} />
   }
 
   return (
     <div className="max-w-7xl mx-auto p-6">
       {/* Force Tailwind to include avatar colors */}
       {FORCE_TAILWIND_CLASSES}
+
+      {/* Safeguarding Modal */}
+      {safeguardingModal.isOpen && safeguardingModal.childId && (() => {
+        const child = children.find(c => c.id === safeguardingModal.childId)
+        if (!child) return null
+
+        // Get recent moods from mood history
+        const recentMoods = moodHistory[child.id]?.slice(0, 5).map(m => m.mood_numeric) || []
+
+        // Get concerning notes from check-in history
+        const concerningNotes = checkInHistory[child.id]
+          ?.filter(c => c.notes && c.notes !== 'No notes available')
+          .slice(0, 3)
+          .map(c => c.notes || '') || []
+
+        return (
+          <SafeguardingModal
+            isOpen={true}
+            onClose={() => setSafeguardingModal({ isOpen: false, childId: null })}
+            child={{
+              id: child.id,
+              name: child.name,
+              averageMood: child.averageMood || 0,
+              recentMoods,
+              concerningNotes
+            }}
+            onActionTaken={(action, notes) => handleSafeguardingAction(child.id, action, notes)}
+          />
+        )
+      })()}
 
       {/* Header */}
       <div className="mb-8">
@@ -810,13 +1052,15 @@ export function ChildSummaryAnalytics() {
             onChange={(e) => setSelectedOrg(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
+            <option value="all">All Children</option>
+            <option value="parent">Parent View (2 Children)</option>
             {organizations.map(org => (
               <option key={org.id} value={org.id}>{org.name}</option>
             ))}
           </select>
 
           {/* Organization Logo */}
-          {selectedOrg !== 'all' && (() => {
+          {selectedOrg !== 'all' && selectedOrg !== 'parent' && (() => {
             const currentOrg = organizations.find(org => org.id === selectedOrg)
             let logoPath = ''
 
@@ -853,7 +1097,7 @@ export function ChildSummaryAnalytics() {
           })()}
         </div>
 
-        {children.length >= 2 && !showComparison && (
+        {children.length >= 2 && !showComparison && selectedOrg !== 'parent' && (
           <button
             onClick={() => setShowComparison(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
@@ -870,6 +1114,7 @@ export function ChildSummaryAnalytics() {
           <ComparisonView
             children={children}
             moodHistory={moodHistory}
+            wellbeingData={checkInHistory}
             organizationName={
               selectedOrg === 'all'
                 ? 'All Organizations'
@@ -880,51 +1125,24 @@ export function ChildSummaryAnalytics() {
         )}
       </AnimatePresence>
 
-      {/* Critical Support Summary Banner */}
-      {(() => {
-        const criticalChildren = children.filter(child => (child.averageMood || 5) < 2.5)
-        if (criticalChildren.length > 0) {
-          return (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-red-50 border-2 border-red-300 rounded-lg p-4 mb-6 flex items-center justify-between"
-            >
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-red-400 rounded-full animate-ping opacity-75"></div>
-                  <AlertTriangle className="relative h-6 w-6 text-red-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-red-900">
-                    {criticalChildren.length} {criticalChildren.length === 1 ? 'child requires' : 'children require'} urgent wellbeing support
-                  </h3>
-                  <p className="text-sm text-red-700">
-                    Average mood scores below 2.5 indicate immediate intervention is needed
-                  </p>
-                </div>
-              </div>
-              <button
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-sm"
-                onClick={() => {
-                  // Scroll to first critical child
-                  const firstCritical = criticalChildren[0]
-                  if (firstCritical && expandedChild !== firstCritical.id) {
-                    toggleChildExpansion(firstCritical.id)
-                  }
-                }}
-              >
-                Review Now
-              </button>
-            </motion.div>
-          )
-        }
-        return null
-      })()}
+      {/* Wellbeing Treemap - Visual overview of wellbeing */}
+      <WellbeingTreemap
+        children={children}
+        checkInHistory={checkInHistory}
+        onChildClick={toggleChildExpansion}
+        selectedChildId={expandedChild}
+        moodHistory={moodHistory}
+        preloadedWellbeingData={wellbeingWheelData}
+      />
 
-      {/* Children List */}
+      {/* Children List - Selected child first if any, then rest */}
       <div className="space-y-4">
-        {children.map((child, index) => {
+        {(() => {
+          const selectedChild = expandedChild ? children.find(c => c.id === expandedChild) : null
+          const otherChildren = children.filter(c => c.id !== expandedChild)
+          const orderedChildren = selectedChild ? [selectedChild, ...otherChildren] : children
+
+          return orderedChildren.map((child, index) => {
           const isCritical = (child.averageMood || 5) < 2.5
           const criticalMoodCount = moodHistory[child.id]?.filter(m => m.mood_numeric <= 2).length || 0
 
@@ -935,26 +1153,6 @@ export function ChildSummaryAnalytics() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
             >
-              {/* Show Critical Support Alert for children with average mood < 2.5 */}
-              {isCritical && (
-                <CriticalSupportAlert
-                  childName={child.name}
-                  averageMood={child.averageMood || 0}
-                  lastCheckIn={child.lastCheckIn || 'Never'}
-                  checkInCount={child.checkInCount || 0}
-                  criticalCheckIns={criticalMoodCount}
-                  onViewDetails={() => toggleChildExpansion(child.id)}
-                  onContactSupport={() => {
-                    // TODO: Implement contact support functionality
-                    alert('Contact support feature coming soon')
-                  }}
-                  onGenerateReport={() => {
-                    // TODO: Implement report generation
-                    alert('Report generation feature coming soon')
-                  }}
-                />
-              )}
-
               <div className={`bg-white rounded-lg shadow-sm overflow-hidden ${
                 isCritical ? 'border-2 border-red-400' : 'border border-gray-200'
               }`}
@@ -1071,7 +1269,7 @@ export function ChildSummaryAnalytics() {
 
                   {/* Trend */}
                   <div className="flex items-center space-x-1">
-                    {getTrendIcon(child.moodTrend)}
+                    {getTrendIcon(child.moodTrend, child.name)}
                     <span className="text-sm text-gray-600">Trend</span>
                   </div>
 
@@ -1101,90 +1299,166 @@ export function ChildSummaryAnalytics() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {/* Check-in History Column */}
                       <div className="space-y-6">
-                        {/* Mood Meter Heatmap */}
+                        {/* Wellbeing Wheel Category Heatmap */}
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
                             <Activity className="h-4 w-4 mr-2" />
-                            Mood Meter Calendar (Jan - Apr 2025)
+                            Wellbeing Categories Over Time
                           </h4>
 
                           <div className="bg-white p-4 rounded-lg border border-gray-200">
-                            {moodHistory[child.id] && moodHistory[child.id].length > 0 ? (
-                              <MoodHeatmap
-                                moodData={moodHistory[child.id]}
-                                MOOD_EMOJIS={MOOD_EMOJIS}
+                            {checkInHistory[child.id] && checkInHistory[child.id].length > 0 ? (
+                              <WellbeingWheelHeatmap
+                                checkIns={checkInHistory[child.id]}
+                                selectedCheckInId={selectedCheckInIds[child.id]}
+                                onCheckInSelect={(checkInId) => {
+                                  setSelectedCheckInIds(prev => ({
+                                    ...prev,
+                                    [child.id]: checkInId
+                                  }))
+                                }}
                               />
                             ) : (
-                              <p className="text-sm text-gray-500">No mood data available</p>
+                              <p className="text-sm text-gray-500">No wellbeing wheel data available</p>
                             )}
                           </div>
                         </div>
 
-                        {/* Qualitative Check-ins */}
+                        {/* Check-in Details */}
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
                             <Calendar className="h-4 w-4 mr-2" />
-                            Latest Check-ins
+                            Check-in Details
                           </h4>
 
-                          <div className="space-y-3 max-h-64 overflow-y-auto">
+                          <div className="min-h-[300px]">
                             {(() => {
+                              const selectedCheckInId = selectedCheckInIds[child.id]
                               const filteredCheckIns = checkInHistory[child.id]?.filter(
                                 checkIn => checkIn.notes && checkIn.notes !== 'No notes available'
                               ) || []
 
-                              return filteredCheckIns.length > 0 ? (
-                                filteredCheckIns.slice(0, 5).map(checkIn => (
-                                <div key={checkIn.id} className="bg-white p-3 rounded-lg border border-gray-200">
-                                  <div className="flex items-start">
-                                    <div className="flex-1">
-                                      <div className="flex items-center space-x-2 mb-1">
-                                        <Clock className="h-3 w-3 text-gray-400" />
-                                        <span className="text-xs text-gray-600">
-                                          {new Date(checkIn.created_at).toLocaleDateString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric',
-                                            year: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                          })}
-                                        </span>
-                                      </div>
+                              // Show selected check-in if available, otherwise show instruction
+                              const checkInsToShow = selectedCheckInId
+                                ? filteredCheckIns.filter(c => c.id === selectedCheckInId)
+                                : []
 
-                                      {checkIn.mood_level && (
-                                        <div className="flex items-center space-x-2 mb-2">
-                                          <span className="text-sm font-medium text-gray-600">Mood:</span>
-                                          <span className="px-2 py-1 text-xs rounded-full" style={{
-                                            backgroundColor: MOOD_COLORS[checkIn.mood_numeric || 3] + '20',
-                                            color: MOOD_COLORS[checkIn.mood_numeric || 3]
-                                          }}>
-                                            {MOOD_EMOJIS[checkIn.mood_numeric || 3]} {formatMoodLabel(checkIn.mood_level)}
-                                          </span>
-                                        </div>
-                                      )}
-
-                                      {checkIn.feelings && checkIn.feelings.length > 0 && (
-                                        <div className="flex flex-wrap gap-1 mb-2">
-                                          {checkIn.feelings.map((feeling, idx) => (
-                                            <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
-                                              {feeling}
-                                            </span>
-                                          ))}
-                                        </div>
-                                      )}
-
-                                      {checkIn.notes && checkIn.notes !== 'No notes available' && (
-                                        <p className="text-sm text-gray-700 italic">
-                                          "{checkIn.notes}"
-                                        </p>
-                                      )}
-                                    </div>
+                              if (checkInsToShow.length === 0 && !selectedCheckInId) {
+                                return (
+                                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center min-h-[300px] flex items-center justify-center">
+                                    <p className="text-sm text-blue-700">
+                                      Click on a check-in date in the calendar above to view details
+                                    </p>
                                   </div>
-                                </div>
-                              ))
-                            ) : (
-                              <p className="text-sm text-gray-500">No check-ins with notes available</p>
-                            )
+                                )
+                              }
+
+                              if (checkInsToShow.length === 0 && selectedCheckInId) {
+                                return (
+                                  <div className="min-h-[300px] flex items-center justify-center">
+                                    <p className="text-sm text-gray-500">Selected check-in not found</p>
+                                  </div>
+                                )
+                              }
+
+                              return checkInsToShow.map(checkIn => {
+                                const CategoryIcon = (props: { section: string }) => {
+                                  const category = WELLBEING_CATEGORIES[props.section as keyof typeof WELLBEING_CATEGORIES]
+                                  const Icon = category?.icon
+                                  return Icon ? <Icon className="h-4 w-4" /> : null
+                                }
+
+                                return (
+                                  <div key={checkIn.id} className="bg-white p-4 rounded-lg border border-gray-200 space-y-4">
+                                    {/* Date */}
+                                    <div className="flex items-center space-x-2 text-gray-500">
+                                      <Clock className="h-4 w-4" />
+                                      <span className="text-sm">
+                                        {new Date(checkIn.created_at).toLocaleDateString('en-US', {
+                                          weekday: 'long',
+                                          month: 'long',
+                                          day: 'numeric',
+                                          year: 'numeric',
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        })}
+                                      </span>
+                                    </div>
+
+                                    {/* Overall Mood Bar */}
+                                    {checkIn.wellbeing_score && (
+                                      <div>
+                                        <div className="flex items-center justify-between mb-2">
+                                          <span className="text-sm font-semibold text-gray-700">Overall Wellbeing</span>
+                                          <span className="text-sm font-bold text-gray-900">{checkIn.wellbeing_score.toFixed(1)}/4</span>
+                                        </div>
+                                        <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                                          <div
+                                            className="h-full rounded-full transition-all"
+                                            style={{
+                                              width: `${(checkIn.wellbeing_score / 4) * 100}%`,
+                                              backgroundColor: MOOD_COLORS[Math.round(checkIn.wellbeing_score) as keyof typeof MOOD_COLORS]
+                                            }}
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Wellbeing Categories */}
+                                    {checkIn.wellbeing_sections && checkIn.wellbeing_sections.length > 0 && (
+                                      <div className="space-y-3">
+                                        {checkIn.wellbeing_sections.map((section, idx) => {
+                                          const category = WELLBEING_CATEGORIES[section.section_name as keyof typeof WELLBEING_CATEGORIES]
+                                          if (!category) return null
+
+                                          const categoryContent = (
+                                            <div>
+                                              <div className="flex items-center justify-between mb-1">
+                                                <div className="flex items-center space-x-2">
+                                                  <span style={{ color: category.color }}>
+                                                    <CategoryIcon section={section.section_name} />
+                                                  </span>
+                                                  <span className="text-sm font-medium" style={{ color: category.color }}>
+                                                    {category.label}
+                                                  </span>
+                                                </div>
+                                                <span className="text-xs font-semibold text-gray-700">{section.mood_numeric}/4</span>
+                                              </div>
+                                              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden cursor-help">
+                                                <div
+                                                  className="h-full rounded-full transition-all"
+                                                  style={{
+                                                    width: `${(section.mood_numeric / 4) * 100}%`,
+                                                    backgroundColor: category.color
+                                                  }}
+                                                />
+                                              </div>
+                                            </div>
+                                          )
+
+                                          return (
+                                            <div key={idx}>
+                                              {section.text_response ? (
+                                                <WellbeingTooltip
+                                                  date={new Date(checkIn.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                  categoryName={category.label}
+                                                  categoryColor={category.color}
+                                                  score={section.mood_numeric}
+                                                  textResponse={section.text_response}
+                                                >
+                                                  {categoryContent}
+                                                </WellbeingTooltip>
+                                              ) : (
+                                                categoryContent
+                                              )}
+                                            </div>
+                                          )
+                                        })}
+                                      </div>
+                                    )}
+                                  </div>
+                                )
+                              })
                             })()}
                           </div>
                         </div>
@@ -1391,7 +1665,8 @@ export function ChildSummaryAnalytics() {
               </div>
             </motion.div>
           )
-        })}
+          })
+        })()}
       </div>
 
       {children.length === 0 && (

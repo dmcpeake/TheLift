@@ -22,6 +22,7 @@ interface ChildData {
 interface ChildScatterComparisonProps {
   children: ChildData[]
   moodHistory: Record<string, any[]>
+  wellbeingData?: Record<string, any[]>
 }
 
 // SEND-appropriate color palette
@@ -34,82 +35,88 @@ const CHILD_COLORS = [
   '#14B8A6', // Teal
 ]
 
-type MetricOption = 'consistency' | 'positivity' | 'engagement' | 'resilience'
+type MetricOption = 'friends' | 'work' | 'health' | 'family' | 'fun' | 'safety' | 'emotions'
 
-export function ChildScatterComparison({ children, moodHistory }: ChildScatterComparisonProps) {
-  const [selectedMetric, setSelectedMetric] = useState<MetricOption>('consistency')
+const CATEGORY_LABELS: Record<MetricOption, string> = {
+  friends: 'Friends',
+  work: 'Work/School',
+  health: 'Health',
+  family: 'Family',
+  fun: 'Fun & Play',
+  safety: 'Safety',
+  emotions: 'Emotions'
+}
+
+const CATEGORY_KEYS: Record<MetricOption, string> = {
+  friends: 'my_friends',
+  work: 'my_work',
+  health: 'my_health',
+  family: 'my_family',
+  fun: 'my_fun_play',
+  safety: 'my_safety',
+  emotions: 'my_emotions'
+}
+
+export function ChildScatterComparison({ children, moodHistory, wellbeingData }: ChildScatterComparisonProps) {
+  const [selectedMetric, setSelectedMetric] = useState<MetricOption>('emotions')
 
   // Transform data for scatter plot
   const scatterData = useMemo(() => {
     return children.map((child, index) => {
-      const childMoods = moodHistory[child.id] || []
+      const childWellbeing = wellbeingData?.[child.id] || []
 
-      let yValue: number = 0
-      let metricLabel: string = ''
+      // Calculate overall average wellbeing score
+      let overallAvg = 50
+      if (childWellbeing.length > 0) {
+        let totalScore = 0
+        let sectionCount = 0
 
-      switch(selectedMetric) {
-        case 'consistency':
-          // Calculate mood consistency (lower variance = higher consistency)
-          if (childMoods.length > 1) {
-            const values = childMoods.map(m => m.mood_numeric)
-            const mean = values.reduce((a, b) => a + b, 0) / values.length
-            const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length
-            yValue = Math.round((100 - (variance * 25)) * 10) / 10 // Convert to 0-100 scale
-          } else {
-            yValue = 50
+        childWellbeing.forEach(checkIn => {
+          if (checkIn.wellbeing_sections) {
+            checkIn.wellbeing_sections.forEach((section: any) => {
+              totalScore += section.mood_numeric
+              sectionCount++
+            })
           }
-          metricLabel = 'Mood Consistency'
-          break
+        })
 
-        case 'positivity':
-          // Calculate percentage of positive moods (4 or 5)
-          const positiveMoods = childMoods.filter(m => m.mood_numeric >= 4).length
-          yValue = childMoods.length > 0
-            ? Math.round((positiveMoods / childMoods.length) * 100)
-            : 0
-          metricLabel = 'Positive Experiences'
-          break
+        overallAvg = sectionCount > 0 ? Math.round(((totalScore / sectionCount) / 4) * 100) : 50
+      }
 
-        case 'engagement':
-          // Engagement based on check-in frequency
-          const maxCheckIns = Math.max(...children.map(c => c.checkInCount || 0))
-          yValue = child.checkInCount && maxCheckIns > 0
-            ? Math.round((child.checkInCount / maxCheckIns) * 100)
-            : 0
-          metricLabel = 'Engagement Level'
-          break
+      // Calculate category-specific average
+      const categoryKey = CATEGORY_KEYS[selectedMetric]
+      let categoryAvg = 50
 
-        case 'resilience':
-          // Recovery rate from low moods
-          let recoveries = 0
-          let lowMoods = 0
-          for (let i = 0; i < childMoods.length - 1; i++) {
-            if (childMoods[i].mood_numeric <= 2) {
-              lowMoods++
-              if (childMoods[i + 1].mood_numeric > childMoods[i].mood_numeric) {
-                recoveries++
-              }
+      if (childWellbeing.length > 0) {
+        const categoryScores: number[] = []
+
+        childWellbeing.forEach(checkIn => {
+          if (checkIn.wellbeing_sections) {
+            const section = checkIn.wellbeing_sections.find((s: any) => s.section_name === categoryKey)
+            if (section) {
+              categoryScores.push(section.mood_numeric)
             }
           }
-          yValue = lowMoods > 0
-            ? Math.round((recoveries / lowMoods) * 100)
-            : 75 // Default if no low moods
-          metricLabel = 'Resilience Score'
-          break
+        })
+
+        if (categoryScores.length > 0) {
+          const avg = categoryScores.reduce((sum, val) => sum + val, 0) / categoryScores.length
+          categoryAvg = Math.round((avg / 4) * 100) // Convert 1-4 scale to 0-100
+        }
       }
 
       return {
-        x: (child.averageMood || 2.5) * 20, // Convert 1-5 scale to 20-100
-        y: yValue,
+        x: overallAvg,
+        y: categoryAvg,
         name: child.name,
         childId: child.id,
         color: CHILD_COLORS[index % CHILD_COLORS.length],
         totalCheckIns: child.checkInCount || 0,
-        metricValue: yValue,
-        metricLabel
+        metricValue: categoryAvg,
+        metricLabel: CATEGORY_LABELS[selectedMetric]
       }
     })
-  }, [children, selectedMetric, moodHistory])
+  }, [children, selectedMetric, wellbeingData])
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -133,10 +140,13 @@ export function ChildScatterComparison({ children, moodHistory }: ChildScatterCo
   }
 
   const metricOptions: { value: MetricOption; label: string; description: string }[] = [
-    { value: 'consistency', label: 'Consistency', description: 'How stable mood patterns are' },
-    { value: 'positivity', label: 'Positivity', description: 'Frequency of positive moods' },
-    { value: 'engagement', label: 'Engagement', description: 'Check-in participation rate' },
-    { value: 'resilience', label: 'Resilience', description: 'Recovery from challenges' }
+    { value: 'friends', label: 'Friends', description: 'Social connections and peer relationships' },
+    { value: 'work', label: 'Work/School', description: 'Learning, achievement, and school experience' },
+    { value: 'health', label: 'Health', description: 'Physical wellbeing and health concerns' },
+    { value: 'family', label: 'Family', description: 'Family relationships and home life' },
+    { value: 'fun', label: 'Fun & Play', description: 'Enjoyment, activities, and recreation' },
+    { value: 'safety', label: 'Safety', description: 'Feeling secure and protected' },
+    { value: 'emotions', label: 'Emotions', description: 'Emotional processing and regulation' }
   ]
 
   if (children.length === 0) {
@@ -153,10 +163,10 @@ export function ChildScatterComparison({ children, moodHistory }: ChildScatterCo
         <div className="flex items-start justify-between mb-2">
           <div>
             <h3 className="text-base font-semibold text-gray-900 mb-1">
-              Wellbeing Correlation Analysis
+              Category Correlation Analysis
             </h3>
             <p className="text-xs text-gray-600">
-              Exploring relationships between wellbeing score and {selectedMetric}
+              Exploring relationship between overall wellbeing and {CATEGORY_LABELS[selectedMetric]}
             </p>
           </div>
 
@@ -244,19 +254,19 @@ export function ChildScatterComparison({ children, moodHistory }: ChildScatterCo
       {/* Quadrant Analysis */}
       <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
         <div className="p-2 bg-green-50 rounded-lg">
-          <span className="font-medium text-green-900">High Wellbeing + High {selectedMetric}:</span>
-          <span className="text-green-700 ml-1">Thriving children</span>
+          <span className="font-medium text-green-900">High Overall + High {CATEGORY_LABELS[selectedMetric]}:</span>
+          <span className="text-green-700 ml-1">Thriving in this area</span>
         </div>
         <div className="p-2 bg-blue-50 rounded-lg">
-          <span className="font-medium text-blue-900">High Wellbeing + Low {selectedMetric}:</span>
-          <span className="text-blue-700 ml-1">Monitor for support</span>
+          <span className="font-medium text-blue-900">High Overall + Low {CATEGORY_LABELS[selectedMetric]}:</span>
+          <span className="text-blue-700 ml-1">Specific area needs support</span>
         </div>
         <div className="p-2 bg-orange-50 rounded-lg">
-          <span className="font-medium text-orange-900">Low Wellbeing + High {selectedMetric}:</span>
-          <span className="text-orange-700 ml-1">Hidden struggles</span>
+          <span className="font-medium text-orange-900">Low Overall + High {CATEGORY_LABELS[selectedMetric]}:</span>
+          <span className="text-orange-700 ml-1">Strength to build on</span>
         </div>
         <div className="p-2 bg-red-50 rounded-lg">
-          <span className="font-medium text-red-900">Low Wellbeing + Low {selectedMetric}:</span>
+          <span className="font-medium text-red-900">Low Overall + Low {CATEGORY_LABELS[selectedMetric]}:</span>
           <span className="text-red-700 ml-1">Priority support needed</span>
         </div>
       </div>

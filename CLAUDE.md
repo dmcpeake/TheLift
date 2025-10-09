@@ -316,7 +316,94 @@ All three organization-specific prompts updated with:
 - Deployed across all major loading states in the app
 - Fixed duplicate loader issue by removing progress animation state updates
 
-### 5. Adding New Test Children to Database (IMPORTANT PROCESS)
+### 5. Wellbeing Wheel Data Generation (2025-01-08, Updated 2025-10-09)
+
+**Status**: Partially completed - Rainbow School and Evelina Hospital have data. The Soke children need data.
+
+**Overview**: Creating comprehensive wellbeing wheel check-in data for all children across 12 weeks (Jan 3 - Mar 28, 2025).
+
+**Requirements**:
+- 12 weekly check-ins per child (every Friday)
+- 7 sections per check-in: my_friends, my_work, my_health, my_family, my_fun_play, my_safety, my_emotions
+- 1-4 scoring scale (wellbeing wheel uses 1-4, NOT 1-5)
+- Realistic text responses in each child's voice
+- Child-specific patterns
+
+**Schema Requirements** (CRITICAL):
+```sql
+-- wellbeing_wheel_usage table requires:
+INSERT INTO wellbeing_wheel_usage (
+  id, child_id, org_id, session_id, started_at, completed_at,
+  overall_score, sections_completed, total_sections_completed,
+  completion_status, created_at, updated_at
+)
+
+-- wellbeing_wheel_sections table requires:
+INSERT INTO wellbeing_wheel_sections (
+  id, wellbeing_wheel_id, child_id, section_name, mood_level,
+  mood_numeric, text_response, text_response_length,
+  completed_at, created_at
+)
+```
+
+**Completed Files**:
+- `sql-combined/wellbeing_wheel_complete_data.sql` - ✅ Rainbow School (Jayden Martinez, Amelia Thompson, Ava Davis, Lucas Williams, Oliver Johnson)
+- `sql-combined/wellbeing_wheel_evelina_hospital.sql` - ✅ Evelina Hospital (Emma Thompson, Aisha Patel, Sophia Chen)
+
+**Pending Files**:
+- `sql-combined/wellbeing_wheel_the_soke.sql` - ⏳ PENDING (Sebastian Clarke, Maya Rodriguez, Charlie Brown)
+
+**Organizations**:
+- **The Rainbow School**: ID `61f8c1e3-29f1-4e3c-af8b-ffaff5c3a455` (type: school-primary)
+- **Evelina Hospital**: ID `d3859fa2-4719-40db-8abf-9c6bf982272d` (type: hospital)
+- **The Soke**: ID `0e233a3b-e007-4eae-a9a5-4586c59b2faf` (type: clinic-private) - formerly Wellmind Children's Clinic
+
+**Child Patterns**:
+1. **Jayden Martinez** (Rainbow School): Declining pattern 2.0 → 1.3 → 2.1 (bullying, family issues)
+2. **Amelia Thompson** (Rainbow School): Stable-struggling 2.8-3.2 (anxiety, perfectionism)
+3. **Ava Davis** (Rainbow School): Similar to Amelia, stable-struggling pattern
+4. **Lucas Williams** (Rainbow School): Positive, stable ~3.4 average
+5. **Oliver Johnson** (Rainbow School): Very positive ~3.3 average
+6. **Emma Thompson** (Evelina Hospital): Trauma recovery 2.5 → 3.7
+7. **Aisha Patel** (Evelina Hospital): Chronic illness management
+8. **Sophia Chen** (Evelina Hospital): Hospital patient recovery
+9. **Sebastian Clarke** (The Soke): ⏳ NEEDS PATTERN
+10. **Maya Rodriguez** (The Soke): ⏳ NEEDS PATTERN
+11. **Charlie Brown** (The Soke): ⏳ NEEDS PATTERN
+
+**Prompt for Creating The Soke Wellbeing Wheel Data**:
+```
+I need to create wellbeing wheel check-in data for The Soke children (Sebastian Clarke, Maya Rodriguez, Charlie Brown).
+
+IMPORTANT: The wellbeing wheel uses a 1-4 scale, NOT 1-5.
+
+Organization Details:
+- Name: The Soke
+- ID: 0e233a3b-e007-4eae-a9a5-4586c59b2faf
+- Type: clinic-private (mental health clinic)
+
+Children (you'll need to look up their IDs in the profiles table):
+1. Sebastian Clarke
+2. Maya Rodriguez
+3. Charlie Brown
+
+Requirements:
+- 12 weekly check-ins per child (Fridays: Jan 3, 10, 17, 24, 31, Feb 7, 14, 21, 28, Mar 7, 14, 21, 2025)
+- 7 sections per check-in: my_friends, my_work, my_health, my_family, my_fun_play, my_safety, my_emotions
+- 1-4 scoring scale (1=struggling, 2=okay, 3=good, 4=thriving)
+- Realistic text responses reflecting mental health clinic context
+- Child-specific patterns appropriate for therapy clients
+
+Create realistic wellbeing patterns for each child that would be typical for young people receiving mental health support at a private clinic. Consider:
+- Building therapeutic relationships over time
+- Gradual improvements with occasional setbacks
+- Mental health challenges appropriate for their ages
+- Therapy-related progress indicators
+
+Output: SQL file `sql-combined/wellbeing_wheel_the_soke.sql` following the exact schema format used in the other wellbeing wheel files.
+```
+
+### 6. Adding New Test Children to Database (IMPORTANT PROCESS)
 
 **Example: Jayden Martinez Addition**
 
@@ -423,3 +510,443 @@ END $$;
 - **Timestamps should be realistic** (past dates for test data)
 - EHCP and SEN Code of Practice alignment
 - Westfield Primary School is now "The Rainbow School"
+
+## Wellbeing Wheel Analytics Implementation (2025-01-08)
+
+### Overview
+The analytics system has been updated to use **Wellbeing Wheel check-in data** instead of Mood Meter data as the primary data source. This provides richer insights across 7 life categories instead of just overall mood.
+
+### Core Components
+
+#### 1. WellbeingWheelHeatmap Component
+**File**: `src/components/analytics/WellbeingWheelHeatmap.tsx`
+
+**Purpose**: Interactive heatmap showing wellbeing check-ins over time with category drill-down
+
+**Features**:
+- Shows up to 10 most recent check-ins as columns (oldest→newest, left to right)
+- Date headers in stacked format (Month / Day)
+- Clickable cells with selection state
+- Selected check-in highlighted with blue gradient + shadow
+- Full-width responsive design
+- Hover tooltips with category details
+
+**Usage**:
+```tsx
+<WellbeingWheelHeatmap
+  checkIns={checkInHistory[child.id]}
+  selectedCheckInId={selectedCheckInIds[child.id]}
+  onCheckInSelect={(checkInId) => setSelectedCheckInIds({...prev, [child.id]: checkInId})}
+/>
+```
+
+#### 2. WellbeingWheelOverviewCard Component
+**File**: `src/components/analytics/WellbeingWheelOverviewCard.tsx`
+
+**Purpose**: Dashboard card showing aggregated wellbeing wheel statistics
+
+**Features**:
+- Summary stats: total check-ins, average score, children needing support
+- Expandable drill-down with category summaries
+- Individual child trends with bar charts showing all 7 categories
+- Color-coded by category
+- Filters by organization and date range
+
+**Data Sources**:
+- `wellbeing_wheel_usage` table (overall scores)
+- `wellbeing_wheel_sections` table (category-specific scores)
+
+#### 3. Child Details Card Redesign
+**File**: `src/components/analytics/ChildSummaryAnalytics.tsx` (lines 1273-1377)
+
+**Major Changes**:
+- Replaced "Latest Check-ins" with interactive "Check-in Details"
+- Auto-selects most recent check-in on child expansion
+- Overall Wellbeing bar (colored by mood meter scale)
+- Category-specific progress bars (7 categories)
+- Removed emoticons, kept Lucide icons only
+- Min-height matches AI section for visual consistency
+
+**Category Definitions** (lines 21-30):
+```typescript
+const WELLBEING_CATEGORIES = {
+  my_friends: { label: 'Friends', color: '#3B82F6', icon: Users, emoji: '👥' },
+  my_work: { label: 'Work/School', color: '#8B5CF6', icon: Briefcase, emoji: '📚' },
+  my_health: { label: 'Health', color: '#EF4444', icon: HeartPulse, emoji: '❤️' },
+  my_family: { label: 'Family', color: '#F59E0B', icon: Home, emoji: '🏠' },
+  my_fun_play: { label: 'Fun & Play', color: '#10B981', icon: Laugh, emoji: '🎨' },
+  my_safety: { label: 'Safety', color: '#6366F1', icon: Shield, emoji: '🛡️' },
+  my_emotions: { label: 'Emotions', color: '#EC4899', icon: Brain, emoji: '💭' }
+}
+```
+
+#### 4. Data Loading Pattern
+**File**: `src/components/analytics/ChildSummaryAnalytics.tsx` (lines 432-487)
+
+**Implementation**:
+```typescript
+// Fetches wellbeing wheel check-ins with sections
+const { data: wellbeingWheelData } = await supabase
+  .from('wellbeing_wheel_usage')
+  .select('id, child_id, session_id, completed_at, overall_score')
+  .eq('child_id', childId)
+  .order('completed_at', { ascending: false })
+  .limit(10)
+
+// For each check-in, fetch the 7 category sections
+for (const wheel of wellbeingWheelData) {
+  const { data: sections } = await supabase
+    .from('wellbeing_wheel_sections')
+    .select('section_name, mood_numeric, text_response')
+    .eq('wellbeing_wheel_id', wheel.id)
+}
+```
+
+**Auto-Selection** (lines 165-176):
+```typescript
+// Auto-select most recent check-in when data loads
+useEffect(() => {
+  if (expandedChild && checkInHistory[expandedChild]) {
+    const checkIns = checkInHistory[expandedChild]
+    if (checkIns.length > 0 && !selectedCheckInIds[expandedChild]) {
+      const mostRecent = checkIns[0]
+      setSelectedCheckInIds(prev => ({...prev, [expandedChild]: mostRecent.id}))
+    }
+  }
+}, [checkInHistory, expandedChild])
+```
+
+### 5. "Over Time" Tab - Multi-Child Heatmaps
+**File**: `src/components/analytics/WellbeingTreemap.tsx` (lines 379-490)
+
+**Major Overhaul**:
+- Replaced mood meter heatmaps with wellbeing wheel category heatmaps
+- Shows **all children** in selected organization simultaneously
+- Compact format: 7 category rows per child
+- Time period: Jan-Mar 2025
+- Color-coded cells (Red→Orange→Yellow→Green for scores 1-4)
+
+**Smart Trend Detection**:
+- **Declining indicator** (orange, TrendingDown icon): Categories dropping ≥1 point over last 3 check-ins
+- **Concern indicator** (red, AlertTriangle icon): Categories scoring ≤2 in most recent check-in
+- Alerts shown in child header for quick scanning
+
+**Data Loading** (lines 132-172):
+```typescript
+useEffect(() => {
+  const loadWellbeingData = async () => {
+    for (const child of children) {
+      const { data: wheelData } = await supabase
+        .from('wellbeing_wheel_usage')
+        .select('id, completed_at, overall_score')
+        .eq('child_id', child.id)
+        .gte('completed_at', '2025-01-01')
+        .lte('completed_at', '2025-03-31')
+        .order('completed_at', { ascending: true })
+
+      // Fetch sections for each check-in...
+    }
+  }
+
+  if (children.length > 0 && activeTab === 'over-time') {
+    loadWellbeingData()
+  }
+}, [children, activeTab])
+```
+
+### 6. AI Prompts Updated for Wellbeing Wheel
+**Files**:
+- `supabase/functions/analyze-qualitative-data-optimized/prompts/teacher.md`
+- `supabase/functions/analyze-qualitative-data-optimized/prompts/clinic.md`
+- `supabase/functions/analyze-qualitative-data-optimized/prompts/hospital.md`
+
+**Key Changes**:
+- Prompts now reference all 7 wellbeing categories explicitly
+- Ask AI to analyze patterns across categories
+- Request cross-category insights (e.g., how Family impacts Work/School)
+- Focus on category-specific strengths and support needs
+
+**Example from teacher.md**:
+```markdown
+Looking at {child_name}'s wellbeing wheel data, help me understand:
+
+**How is {child_name} experiencing their wellbeing across different areas of life?**
+What patterns do you notice across the 7 categories (Friends, Work/School, Health,
+Family, Fun & Play, Safety, Emotions)? Which areas are consistently strong? Which
+areas show challenges or declining trends? How do these different areas connect and
+influence each other?
+```
+
+### 7. Compare Children Modal (In Progress)
+**File**: `src/components/analytics/comparison/ComparisonView.tsx`
+
+**Status**: Props infrastructure updated
+- Added `wellbeingData` prop to ComparisonView
+- Passed wellbeing wheel data to all visualization components (Radar, Heatmap, Scatter, Timeline)
+- Individual visualization components need updates to display 7 categories
+
+**Next Steps**:
+- Update ChildRadarComparison to show 7 category axes instead of just mood
+- Update other comparison visualizations to use wellbeing categories
+
+### Key Color Schemes
+
+**Mood Meter Colors** (1-4 scale for wellbeing wheel):
+```typescript
+const MOOD_COLORS = {
+  1: '#EF4444',  // Red - Very Sad
+  2: '#F97316',  // Orange - Sad
+  3: '#FCD34D',  // Yellow - OK
+  4: '#10B981'   // Green - Happy
+}
+```
+
+**Wellbeing Category Colors**:
+- Friends: Blue (#3B82F6)
+- Work/School: Purple (#8B5CF6)
+- Health: Red (#EF4444)
+- Family: Orange (#F59E0B)
+- Fun & Play: Green (#10B981)
+- Safety: Indigo (#6366F1)
+- Emotions: Pink (#EC4899)
+
+### Database Schema
+
+**wellbeing_wheel_usage table**:
+- `id` (UUID, primary key)
+- `child_id` (UUID, FK to profiles)
+- `org_id` (UUID, FK to organisations)
+- `session_id` (UUID, FK to checkin_sessions)
+- `started_at`, `completed_at` (timestamps)
+- `overall_score` (numeric, average of 7 category scores)
+- `sections_completed` (text array)
+- `total_sections_completed` (integer, should be 7)
+- `completion_status` (text, 'completed')
+
+**wellbeing_wheel_sections table**:
+- `id` (UUID, primary key)
+- `wellbeing_wheel_id` (UUID, FK to wellbeing_wheel_usage)
+- `child_id` (UUID, FK to profiles)
+- `section_name` (text: my_friends, my_work, my_health, my_family, my_fun_play, my_safety, my_emotions)
+- `mood_level` (text: very_sad, sad, ok, happy)
+- `mood_numeric` (integer: 1-4)
+- `text_response` (text, child's qualitative response)
+- `text_response_length` (integer)
+- `completed_at`, `created_at` (timestamps)
+
+### Testing Data
+- See `sql-combined/WELLBEING_WHEEL_README.md` for complete test data documentation
+- 9 children with 12 weekly check-ins each (Jan-Mar 2025)
+- Each check-in has 7 sections with scores and text responses
+- Realistic narrative arcs (declining, stable, improving patterns)
+
+### Routes for Testing
+- `/test/analytics` - Main analytics page with child cards and wellbeing wheel heatmaps
+- Click "Compare Children" to see comparison modal (visualizations in progress)
+- Click "Over Time" tab to see multi-child category heatmaps with trend indicators
+
+## "Over Time" Tab Implementation (2025-10-09)
+
+### Overview
+The "Over Time" tab in `/test/analytics` provides a comprehensive view of all children's wellbeing data in a compact matrix format with expandable historical timelines.
+
+### Design Pattern: Matrix + Expandable Timeline
+
+**Default View - Latest Scores Matrix**:
+- Header row with 7 category icons (Friends, Work, Health, Family, Fun, Safety, Emotions)
+- Child names listed vertically down the left (180px fixed width)
+- Latest wellbeing score shown for each child × category combination
+- Color-coded boxes (1-4 scale): Red → Orange → Yellow → Green
+- Compact spacing (`space-y-1`, `gap-2`, `p-2`) to maximize data density
+
+**Expanded View - Historical Timeline**:
+- Click child row to expand full 12-week history
+- Shows all 7 categories as rows
+- Time flows left→right (Jan → Feb → Mar)
+- Color-coded cells with scores displayed
+- Overall wellbeing row at bottom
+- Beautiful tooltips on hover (see below)
+
+### Data Preloading Architecture
+
+**Problem Solved**: Original implementation loaded wellbeing data on-demand when clicking "Over Time" tab, causing blank states and loading delays.
+
+**Solution - Batch Preload on Initial Page Load**:
+
+1. **New Loading Stage** (6th stage):
+   - Added "Loading wellbeing wheel data" to initial loading sequence
+   - Shows in progress bar with other stages
+
+2. **Batch Query Function** (`loadAllWellbeingWheelData`):
+   ```typescript
+   // Single query for ALL check-ins (Jan-Mar 2025)
+   const { data: wellbeingWheelData } = await supabase
+     .from('wellbeing_wheel_usage')
+     .select('id, child_id, completed_at, overall_score')
+     .in('child_id', childIds)
+     .gte('completed_at', '2025-01-01')
+     .lte('completed_at', '2025-03-31')
+
+   // Batch query for ALL sections
+   const { data: allSections } = await supabase
+     .from('wellbeing_wheel_sections')
+     .select('wellbeing_wheel_id, section_name, mood_numeric, text_response')
+     .in('wellbeing_wheel_id', wheelIds)
+   ```
+
+3. **Data Flow**:
+   - `ChildSummaryAnalytics` loads data upfront → stores in `wellbeingWheelData` state
+   - Passed as `preloadedWellbeingData` prop to `WellbeingTreemap`
+   - "Over Time" tab displays instantly with no loading
+
+**Files Modified**:
+- `src/components/analytics/ChildSummaryAnalytics.tsx`:
+  - Added `wellbeingWheelData` state
+  - Added `loadAllWellbeingWheelData()` function
+  - Added 6th loading stage
+  - Passes data to WellbeingTreemap
+
+- `src/components/analytics/WellbeingTreemap.tsx`:
+  - Added `preloadedWellbeingData` prop
+  - Removed `useEffect` data loading hook
+  - Uses preloaded data directly
+
+### Enhanced Wellbeing Tooltips
+
+**Component**: `src/components/analytics/WellbeingTooltip.tsx`
+
+**Built With**: Radix UI Tooltip (@radix-ui/react-tooltip)
+
+**Visual Design**:
+- **Border**: Color-coded to match wellbeing category
+- **Header Section**:
+  - Category dot (colored circle) + category name
+  - Calendar icon + check-in date
+- **Score Badge**:
+  - Large color-coded pill (1-4 scale)
+  - Descriptive label:
+    - 1 = "Struggling" (Red #EF4444)
+    - 2 = "Finding it hard" (Orange #F97316)
+    - 3 = "OK" (Yellow #FCD34D)
+    - 4 = "Doing well" (Green #10B981)
+- **Text Response**:
+  - Gradient background (blue-to-purple, `from-blue-50 to-purple-50`)
+  - Message icon
+  - Child's words in italics with quotes
+  - Border for definition
+
+**Applied To**:
+- ✅ Summary row cells (latest scores)
+- ✅ Expanded timeline cells (historical scores)
+- Only renders when `text_response` exists
+
+**Animation**:
+- Smooth fade-in + zoom animation
+- `data-[state=closed]:fade-out` on close
+- 200ms delay before appearing
+
+**Example Usage**:
+```tsx
+<WellbeingTooltip
+  date="Jan 24"
+  categoryName="Friends"
+  categoryColor="#3B82F6"
+  score={3}
+  textResponse="i had fun playing with my friends today"
+>
+  <div className="w-7 h-7 rounded bg-yellow-400">3</div>
+</WellbeingTooltip>
+```
+
+**Why This Matters**:
+- Brings children's voices to the forefront
+- Makes qualitative data instantly accessible
+- No need to expand cards to read responses
+- Practitioners can quickly scan and understand context
+
+### UI Specifications
+
+**Grid Layout**:
+```css
+gridTemplateColumns: '180px repeat(7, 1fr)'
+```
+
+**Spacing**:
+- Between rows: `space-y-1` (4px)
+- Grid gaps: `gap-2` (8px)
+- Padding: `p-2` (8px)
+
+**Score Boxes**:
+- Summary row: `w-7 h-7` (28px × 28px)
+- Expanded timeline: `h-10` (40px height)
+- Font: `text-xs font-bold`
+
+**Category Icons**:
+- Size: `h-3 w-3` (12px)
+- Color: Matches category color scheme
+- Positioned next to labels in header
+
+**Cursor States**:
+- Summary row: `cursor-pointer` (entire row clickable)
+- Score cells with tooltips: `cursor-help`
+- Expanded cells: `hover:ring-2 hover:ring-blue-400`
+
+### Performance Optimizations
+
+1. **Batch Queries**:
+   - Single query for all check-ins (not per-child)
+   - Single query for all sections (not per-check-in)
+   - Reduces database round trips from N×M to 2
+
+2. **Client-Side Grouping**:
+   - Group sections by `wellbeing_wheel_id` in memory
+   - Fast lookups using Record<string, any[]>
+
+3. **Conditional Tooltips**:
+   - Only wraps cells that have `text_response`
+   - Reduces DOM nodes for empty data
+
+### Key Constants
+
+```typescript
+const WELLBEING_COLORS = {
+  my_friends: '#3B82F6',
+  my_work: '#8B5CF6',
+  my_health: '#EF4444',
+  my_family: '#F59E0B',
+  my_fun_play: '#10B981',
+  my_safety: '#6366F1',
+  my_emotions: '#EC4899'
+}
+
+const CATEGORY_LABELS = {
+  my_friends: 'Friends',
+  my_work: 'Work',
+  my_health: 'Health',
+  my_family: 'Family',
+  my_fun_play: 'Fun',
+  my_safety: 'Safety',
+  my_emotions: 'Emotions'
+}
+
+const MOOD_COLORS = {
+  1: '#EF4444',  // Red
+  2: '#F97316',  // Orange
+  3: '#FCD34D',  // Yellow
+  4: '#10B981'   // Green
+}
+```
+
+### Testing Checklist
+
+When testing "Over Time" tab:
+- ✅ Matrix loads instantly (no loading spinner)
+- ✅ All children show latest scores
+- ✅ Click child expands timeline view
+- ✅ Historical data shows all 12 weeks
+- ✅ Hover tooltips appear with rich formatting
+- ✅ Tooltips show child's text responses
+- ✅ Colors match category/score properly
+- ✅ Expand/collapse animation smooth
+- ✅ No console errors
+- ✅ Data persists when switching tabs

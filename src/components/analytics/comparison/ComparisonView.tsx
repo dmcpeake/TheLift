@@ -18,6 +18,7 @@ interface Child {
 interface ComparisonViewProps {
   children: Child[]
   moodHistory: Record<string, any[]>
+  wellbeingData?: Record<string, any[]> // Add wellbeing wheel data
   organizationName?: string
   onClose: () => void
 }
@@ -27,6 +28,7 @@ type VisualizationType = 'radar' | 'heatmap' | 'scatter' | 'timeline'
 export function ComparisonView({
   children,
   moodHistory,
+  wellbeingData,
   organizationName,
   onClose
 }: ComparisonViewProps) {
@@ -126,24 +128,28 @@ export function ComparisonView({
                         <ChildRadarComparison
                           children={selectedChildData}
                           moodHistory={moodHistory}
+                          wellbeingData={wellbeingData}
                         />
                       )}
                       {activeVisualization === 'heatmap' && (
                         <ChildHeatMapComparison
                           children={selectedChildData}
                           moodHistory={moodHistory}
+                          wellbeingData={wellbeingData}
                         />
                       )}
                       {activeVisualization === 'scatter' && (
                         <ChildScatterComparison
                           children={selectedChildData}
                           moodHistory={moodHistory}
+                          wellbeingData={wellbeingData}
                         />
                       )}
                       {activeVisualization === 'timeline' && (
                         <ChildLineComparison
                           children={selectedChildData}
                           moodHistory={moodHistory}
+                          wellbeingData={wellbeingData}
                         />
                       )}
                     </motion.div>

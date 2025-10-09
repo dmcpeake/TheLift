@@ -1,0 +1,737 @@
+import React, { useState, useMemo, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { treemap, hierarchy, treemapSquarify } from 'd3-hierarchy'
+import { Activity, Calendar, Clock, Sparkles, Heart, TrendingUp, TrendingDown, Minus, X, ChevronDown, ChevronRight } from 'lucide-react'
+import { MoodHeatmap } from './MoodHeatmap'
+
+interface Child {
+  id: string
+  name: string
+  initials?: string
+  averageMood?: number
+  recentMood?: number
+  moodTrend?: 'improving' | 'developing' | 'stable'
+  lastCheckIn?: string
+  checkInCount?: number
+}
+
+interface CheckIn {
+  id: string
+  created_at: string
+  selected_at?: string
+  mood_numeric?: number
+  mood_level?: string
+  notes?: string
+  feelings?: string[]
+  explanation?: string
+}
+
+interface MoodHistoryEntry {
+  date: string
+  mood_numeric: number
+}
+
+interface AIInsights {
+  summary: string
+  concerns?: string[]
+  strengths?: string[]
+  recommendations?: string[]
+  lastAnalyzed?: string
+}
+
+interface ChildrenSupportGridProps {
+  children: Child[]
+  checkInHistory: Record<string, CheckIn[]>
+  moodHistory?: Record<string, MoodHistoryEntry[]>
+  aiInsights?: Record<string, AIInsights>
+  onChildClick: (childId: string) => void
+  organizationName?: string
+}
+
+// Map mood scores to emotion categories
+const getMoodEmotionCategory = (moodScore: number): {
+  category: string
+  color: string
+  bgColor: string
+  borderColor: string
+  emoji: string
+} => {
+  if (moodScore <= 2) {
+    // Very low mood = High Energy Uncomfortable (red) - brighter
+    return {
+      category: 'high-energy-uncomfortable',
+      color: 'text-red-700',
+      bgColor: '#fca5a5', // red-300 instead of red-100
+      borderColor: 'border-red-400',
+      emoji: '😢'
+    }
+  } else if (moodScore <= 3) {
+    // Low mood = Low Energy Uncomfortable (gray) - brighter
+    return {
+      category: 'low-energy-uncomfortable',
+      color: 'text-gray-700',
+      bgColor: '#d1d5db', // gray-300 instead of gray-100
+      borderColor: 'border-gray-400',
+      emoji: '😕'
+    }
+  } else if (moodScore <= 4) {
+    // Good mood = Low Energy Comfortable (blue) - brighter
+    return {
+      category: 'low-energy-comfortable',
+      color: 'text-blue-700',
+      bgColor: '#93c5fd', // blue-300 instead of blue-100
+      borderColor: 'border-blue-400',
+      emoji: '😌'
+    }
+  } else {
+    // Great mood = High Energy Comfortable (green) - brighter
+    return {
+      category: 'high-energy-comfortable',
+      color: 'text-green-700',
+      bgColor: '#86efac', // green-300 instead of green-100
+      borderColor: 'border-green-400',
+      emoji: '😊'
+    }
+  }
+}
+
+// Calculate support urgency score (inverse - higher score = more support needed)
+const calculateUrgencyScore = (child: Child, checkIns: CheckIn[]): number => {
+  let score = 0
+
+  // Factor 1: Average mood - heavily weighted tiers (3-4 is NORMAL baseline)
+  if (child.averageMood) {
+    if (child.averageMood < 2) {
+      // CRITICAL: < 2 = 100-140 points (massive priority)
+      score += 100 + ((2 - child.averageMood) * 40)
+    } else if (child.averageMood < 3) {
+      // HIGH PRIORITY: 2-3 = 50-80 points
+      score += 50 + ((3 - child.averageMood) * 30)
+    } else if (child.averageMood <= 4) {
+      // NORMAL/HEALTHY: 3-4 = 8-18 points (baseline - most kids here)
+      // Use exact decimal scoring to differentiate properly
+      score += 8 + ((4 - child.averageMood) * 10)
+    } else {
+      // VERY GOOD: 4-5 = 3-8 points (exceptional - smaller presence)
+      score += 3 + ((5 - child.averageMood) * 5)
+    }
+  } else {
+    score += 15 // Default if no data (treat as healthy until proven otherwise)
+  }
+
+  // Factor 2: Trend multiplier (adjust existing score)
+  if (child.moodTrend === 'developing') {
+    score *= 1.3 // +30% if declining - this is very concerning
+  } else if (child.moodTrend === 'improving') {
+    score *= 0.85 // -15% if improving
+  }
+
+  // Factor 3: Recent critical check-ins boost
+  const recentCritical = checkIns.slice(0, 5).filter(c => c.mood_numeric && c.mood_numeric <= 2).length
+  if (recentCritical > 0) {
+    score += recentCritical * 15 // Significant boost for each recent critical check-in
+  }
+
+  // Ensure minimum score so everyone is visible, cap at reasonable max
+  return Math.max(3, Math.min(200, score))
+}
+
+interface TreemapNode {
+  x0: number
+  y0: number
+  x1: number
+  y1: number
+  data: {
+    child: Child
+    urgencyScore: number
+    moodCategory: ReturnType<typeof getMoodEmotionCategory>
+  }
+}
+
+const MOOD_COLORS = {
+  1: '#EF4444', // Red
+  2: '#F97316', // Orange
+  3: '#FCD34D', // Yellow
+  4: '#86EFAC', // Light Green
+  5: '#10B981'  // Green
+}
+
+const MOOD_EMOJIS = {
+  1: '😢',
+  2: '😕',
+  3: '😐',
+  4: '🙂',
+  5: '😊'
+}
+
+// Format mood labels to be human-readable
+function formatMoodLabel(label: string | undefined): string {
+  if (!label) return ''
+  return label
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+}
+
+export function ChildrenSupportGrid({
+  children,
+  checkInHistory,
+  moodHistory,
+  aiInsights,
+  onChildClick,
+  organizationName
+}: ChildrenSupportGridProps) {
+  const [selectedChild, setSelectedChild] = useState<string | null>(null)
+  const [hoveredChild, setHoveredChild] = useState<string | null>(null)
+  const [expandedInsightsSections, setExpandedInsightsSections] = useState<{
+    concerns: boolean
+    strengths: boolean
+    recommendations: boolean
+  }>({
+    concerns: true,
+    strengths: false,
+    recommendations: false
+  })
+
+  // Auto-select child with lowest mood score on load or when children change
+  // But don't auto-open the drawer - let user click to view details
+  useEffect(() => {
+    if (children.length > 0 && !selectedChild) {
+      const lowestMoodChild = children.reduce((lowest, child) => {
+        const childMood = child.averageMood ?? 5
+        const lowestMood = lowest.averageMood ?? 5
+        return childMood < lowestMood ? child : lowest
+      })
+      // Store the suggested child but don't open drawer
+      // Could add visual pulse to this child's rectangle
+    }
+  }, [children, selectedChild])
+
+  const toggleInsightsSection = (section: 'concerns' | 'strengths' | 'recommendations') => {
+    setExpandedInsightsSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }))
+  }
+
+  // Calculate treemap layout
+  const treemapData = useMemo(() => {
+    if (children.length === 0) return []
+
+    // Prepare child data with urgency scores
+    const childrenWithUrgency = children.map(child => {
+      const checkIns = checkInHistory[child.id] || []
+      const urgencyScore = calculateUrgencyScore(child, checkIns)
+      const moodCategory = getMoodEmotionCategory(child.averageMood || 3)
+
+      return {
+        child,
+        urgencyScore,
+        moodCategory
+      }
+    })
+
+    // Create hierarchy for treemap
+    const root = hierarchy({
+      name: 'root',
+      children: childrenWithUrgency.map(c => ({
+        name: c.child.name,
+        value: c.urgencyScore,
+        child: c.child,
+        urgencyScore: c.urgencyScore,
+        moodCategory: c.moodCategory
+      }))
+    })
+      .sum(d => (d as any).value || 0)
+      .sort((a, b) => (b.value || 0) - (a.value || 0))
+
+    // Generate treemap layout - wider rectangle for full-width display
+    const treemapLayout = treemap<any>()
+      .size([1000, 500]) // Wide rectangle for full-width display
+      .padding(2)
+      .tile(treemapSquarify)
+
+    const tree = treemapLayout(root)
+
+    return tree.leaves() as TreemapNode[]
+  }, [children, checkInHistory])
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">
+              Wellbeing Overview
+              {organizationName && organizationName !== 'All Organizations' && (
+                <span className="text-base font-normal text-gray-600 ml-2">
+                  • {organizationName}
+                </span>
+              )}
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Larger areas indicate children who may need more support
+            </p>
+          </div>
+
+          {/* Legend */}
+          <div className="flex gap-3 text-xs">
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
+              <span className="text-gray-600">High distress</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 bg-gray-100 border border-gray-300 rounded"></div>
+              <span className="text-gray-600">Low mood</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded"></div>
+              <span className="text-gray-600">Calm</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
+              <span className="text-gray-600">Positive</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Full-width treemap */}
+      <div className="relative">
+        {/* Treemap Container - Full width, fixed height */}
+        <div className="relative w-full bg-gray-50 rounded-lg border-2 border-gray-200" style={{ height: '500px' }}>
+          {treemapData.length > 0 ? (
+            <svg
+              viewBox="0 0 1000 500"
+              className="w-full h-full"
+              style={{ display: 'block' }}
+            >
+              {treemapData.map((node, index) => {
+                const { child, moodCategory } = node.data
+                const width = node.x1 - node.x0
+                const height = node.y1 - node.y0
+                const isHovered = hoveredChild === child.id
+
+                // Calculate font sizes based on rectangle size
+                const area = width * height
+                const emojiFontSize = Math.min(width, height) * 0.3
+                const nameFontSize = Math.min(width, height) * 0.12
+                const moodFontSize = Math.min(width, height) * 0.1
+
+                // Determine if we have enough space to show text
+                const showText = area > 4000
+
+                return (
+                  <g key={child.id}>
+                    {/* Rectangle */}
+                    <motion.rect
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: index * 0.05 }}
+                      x={node.x0}
+                      y={node.y0}
+                      width={width}
+                      height={height}
+                      className={`cursor-pointer transition-all duration-200`}
+                      fill={moodCategory.bgColor}
+                      stroke={selectedChild === child.id ? '#1f2937' : moodCategory.borderColor.replace('border-red-400', '#f87171').replace('border-gray-400', '#9ca3af').replace('border-blue-400', '#60a5fa').replace('border-green-400', '#4ade80')}
+                      strokeWidth={selectedChild === child.id ? 4 : 2}
+                      onMouseEnter={() => setHoveredChild(child.id)}
+                      onMouseLeave={() => setHoveredChild(null)}
+                      onClick={() => setSelectedChild(child.id)}
+                      style={{
+                        filter: isHovered ? 'brightness(0.95)' : 'none'
+                      }}
+                    />
+
+                    {/* Hover overlay */}
+                    {isHovered && (
+                      <rect
+                        x={node.x0}
+                        y={node.y0}
+                        width={width}
+                        height={height}
+                        fill="black"
+                        opacity={0.05}
+                        pointerEvents="none"
+                      />
+                    )}
+
+                    {/* Content */}
+                    <g pointerEvents="none">
+                      {/* Emoji */}
+                      <text
+                        x={node.x0 + width / 2}
+                        y={node.y0 + height / 2 - emojiFontSize * 0.2}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fontSize={emojiFontSize}
+                      >
+                        {moodCategory.emoji}
+                      </text>
+
+                      {/* Name */}
+                      {showText && (
+                        <text
+                          x={node.x0 + width / 2}
+                          y={node.y0 + height / 2 + emojiFontSize * 0.6}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fontSize={nameFontSize}
+                          fontWeight="600"
+                          className={moodCategory.color}
+                          fill="currentColor"
+                        >
+                          {child.name.split(' ')[0]}
+                        </text>
+                      )}
+
+                      {/* Mood score */}
+                      {child.averageMood && showText && (
+                        <text
+                          x={node.x0 + width / 2}
+                          y={node.y0 + height / 2 + emojiFontSize * 0.6 + nameFontSize * 1.3}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fontSize={moodFontSize}
+                          fill="#6b7280"
+                        >
+                          {child.averageMood.toFixed(1)}
+                        </text>
+                      )}
+
+                      {/* Developing trend indicator */}
+                      {child.moodTrend === 'developing' && width > 40 && height > 40 && (
+                        <circle
+                          cx={node.x0 + 10}
+                          cy={node.y0 + 10}
+                          r={5}
+                          fill="#ef4444"
+                        >
+                          <animate
+                            attributeName="opacity"
+                            values="1;0.3;1"
+                            dur="2s"
+                            repeatCount="indefinite"
+                          />
+                        </circle>
+                      )}
+                    </g>
+                  </g>
+                )
+              })}
+            </svg>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+              <p>No children found in this organization</p>
+            </div>
+          )}
+        </div>
+
+        {/* Slide-out Drawer for Child Details */}
+        <AnimatePresence>
+          {selectedChild && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setSelectedChild(null)}
+                className="fixed inset-0 bg-black/20 z-40"
+              />
+
+              {/* Drawer */}
+              <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed right-0 top-0 bottom-0 w-full md:w-2/3 lg:w-1/2 bg-white shadow-2xl z-50 overflow-hidden flex flex-col"
+              >
+                {/* Sticky Header */}
+                {(() => {
+                  const child = children.find(c => c.id === selectedChild)
+                  if (!child) return null
+
+                  return (
+                    <div className="sticky top-0 bg-white border-b border-gray-200 p-4 shadow-sm z-10">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h2 className="text-2xl font-bold text-gray-900">{child.name}</h2>
+                          <div className="flex items-center space-x-3 mt-2 text-sm text-gray-600">
+                            <span className="flex items-center">
+                              <Calendar className="h-3 w-3 mr-1" />
+                              {child.lastCheckIn || 'No check-ins'}
+                            </span>
+                            <span>•</span>
+                            <span>{child.checkInCount || 0} check-ins</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setSelectedChild(null)}
+                          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                          aria-label="Close drawer"
+                        >
+                          <X className="h-5 w-5 text-gray-500" />
+                        </button>
+                      </div>
+
+                      {/* Quick Stats */}
+                      <div className="flex items-center space-x-6 mt-4">
+                        <div className="text-center">
+                          <div className="text-3xl mb-1">
+                            {child.recentMood ? MOOD_EMOJIS[child.recentMood as keyof typeof MOOD_EMOJIS] : '—'}
+                          </div>
+                          <div className="text-xs text-gray-600">Current</div>
+                        </div>
+                        <div className="text-center">
+                          <Heart className="h-6 w-6 mx-auto mb-1" style={{
+                            color: child.averageMood ? MOOD_COLORS[Math.round(child.averageMood) as keyof typeof MOOD_COLORS] : '#9CA3AF',
+                            fill: child.averageMood ? MOOD_COLORS[Math.round(child.averageMood) as keyof typeof MOOD_COLORS] : 'none',
+                            fillOpacity: 0.15
+                          }} />
+                          <div className="text-lg font-semibold text-gray-700">
+                            {child.averageMood ? child.averageMood.toFixed(1) : '—'}
+                          </div>
+                          <div className="text-xs text-gray-600">Average</div>
+                        </div>
+                        <div className="text-center">
+                          {(() => {
+                            if (child.moodTrend === 'improving') {
+                              return <TrendingUp className="h-6 w-6 mx-auto text-green-600 mb-1" />
+                            } else if (child.moodTrend === 'developing') {
+                              return <TrendingDown className="h-6 w-6 mx-auto text-amber-600 mb-1" />
+                            }
+                            return <Minus className="h-6 w-6 mx-auto text-gray-400 mb-1" />
+                          })()}
+                          <div className="text-xs text-gray-600">
+                            {child.moodTrend === 'improving' ? 'Improving' : child.moodTrend === 'developing' ? 'Developing' : 'Stable'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })()}
+
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto">
+                  <div className="space-y-4 p-6">
+                    {(() => {
+                      const child = children.find(c => c.id === selectedChild)
+                      if (!child) return null
+
+                      const childCheckIns = checkInHistory[selectedChild] || []
+                      const childMoodHistory = moodHistory?.[selectedChild] || []
+                      const childInsights = aiInsights?.[selectedChild]
+                      const filteredCheckIns = childCheckIns.filter(
+                        checkIn => checkIn.notes && checkIn.notes !== 'No notes available'
+                      )
+
+                      return (
+                        <>
+                {/* Mood Meter Heatmap */}
+                {childMoodHistory.length > 0 && (
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                      <Activity className="h-4 w-4 mr-2" />
+                      Mood Meter Calendar
+                    </h4>
+                    <MoodHeatmap
+                      moodData={childMoodHistory}
+                      MOOD_EMOJIS={MOOD_EMOJIS}
+                    />
+                  </div>
+                )}
+
+                {/* Latest Check-ins */}
+                <div className="bg-white p-4 rounded-lg border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Latest Check-ins
+                  </h4>
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {filteredCheckIns.length > 0 ? (
+                      filteredCheckIns.slice(0, 5).map(checkIn => (
+                        <div key={checkIn.id} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                          <div className="flex items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <Clock className="h-3 w-3 text-gray-400" />
+                                <span className="text-xs text-gray-600">
+                                  {new Date(checkIn.selected_at || checkIn.created_at).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                  })}
+                                </span>
+                              </div>
+
+                              {checkIn.mood_level && (
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <span className="text-sm font-medium text-gray-600">Mood:</span>
+                                  <span className="px-2 py-1 text-xs rounded-full" style={{
+                                    backgroundColor: MOOD_COLORS[checkIn.mood_numeric || 3] + '20',
+                                    color: MOOD_COLORS[checkIn.mood_numeric || 3]
+                                  }}>
+                                    {MOOD_EMOJIS[checkIn.mood_numeric || 3]} {formatMoodLabel(checkIn.mood_level)}
+                                  </span>
+                                </div>
+                              )}
+
+                              {checkIn.notes && (
+                                <p className="text-sm text-gray-700 italic">"{checkIn.notes}"</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500">No check-ins with notes available</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* AI Insights - Collapsible Sections */}
+                {childInsights && (
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Support Insights
+                    </h4>
+
+                    <div className="space-y-3">
+                      {/* Summary - Always Visible */}
+                      {childInsights.summary && (
+                        <div className="pb-3 border-b border-gray-200">
+                          <p className="text-sm text-gray-700 leading-relaxed">{childInsights.summary}</p>
+                        </div>
+                      )}
+
+                      {/* Areas for Additional Support - Collapsible */}
+                      {childInsights.concerns && childInsights.concerns.length > 0 && (
+                        <div>
+                          <button
+                            onClick={() => toggleInsightsSection('concerns')}
+                            className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 rounded transition-colors"
+                          >
+                            <h5 className="text-sm font-semibold text-gray-700 flex items-center">
+                              Areas for Additional Support
+                              <span className="ml-2 text-xs text-gray-500">({childInsights.concerns.length})</span>
+                            </h5>
+                            {expandedInsightsSections.concerns ? (
+                              <ChevronDown className="h-4 w-4 text-gray-500" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-gray-500" />
+                            )}
+                          </button>
+                          <AnimatePresence>
+                            {expandedInsightsSections.concerns && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                              >
+                                <ul className="list-disc list-inside space-y-1 mt-2 pl-2">
+                                  {childInsights.concerns.map((concern, i) => (
+                                    <li key={i} className="text-sm text-gray-700">{concern}</li>
+                                  ))}
+                                </ul>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )}
+
+                      {/* Strengths - Collapsible */}
+                      {childInsights.strengths && childInsights.strengths.length > 0 && (
+                        <div>
+                          <button
+                            onClick={() => toggleInsightsSection('strengths')}
+                            className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 rounded transition-colors"
+                          >
+                            <h5 className="text-sm font-semibold text-gray-700 flex items-center">
+                              Strengths
+                              <span className="ml-2 text-xs text-gray-500">({childInsights.strengths.length})</span>
+                            </h5>
+                            {expandedInsightsSections.strengths ? (
+                              <ChevronDown className="h-4 w-4 text-gray-500" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-gray-500" />
+                            )}
+                          </button>
+                          <AnimatePresence>
+                            {expandedInsightsSections.strengths && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                              >
+                                <ul className="list-disc list-inside space-y-1 mt-2 pl-2">
+                                  {childInsights.strengths.map((strength, i) => (
+                                    <li key={i} className="text-sm text-gray-700">{strength}</li>
+                                  ))}
+                                </ul>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )}
+
+                      {/* Recommendations - Collapsible */}
+                      {childInsights.recommendations && childInsights.recommendations.length > 0 && (
+                        <div>
+                          <button
+                            onClick={() => toggleInsightsSection('recommendations')}
+                            className="w-full flex items-center justify-between py-2 text-left hover:bg-gray-50 rounded transition-colors"
+                          >
+                            <h5 className="text-sm font-semibold text-gray-700 flex items-center">
+                              Recommendations
+                              <span className="ml-2 text-xs text-gray-500">({childInsights.recommendations.length})</span>
+                            </h5>
+                            {expandedInsightsSections.recommendations ? (
+                              <ChevronDown className="h-4 w-4 text-gray-500" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-gray-500" />
+                            )}
+                          </button>
+                          <AnimatePresence>
+                            {expandedInsightsSections.recommendations && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                              >
+                                <ul className="list-disc list-inside space-y-1 mt-2 pl-2">
+                                  {childInsights.recommendations.map((rec, i) => (
+                                    <li key={i} className="text-sm text-gray-700">{rec}</li>
+                                  ))}
+                                </ul>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                        </>
+                      )
+                    })()}
+                  </div>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}

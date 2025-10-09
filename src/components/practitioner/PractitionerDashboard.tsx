@@ -14,9 +14,9 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { BulkReassignDialog } from './BulkReassignDialog'
 import { BulkArchiveDialog } from './BulkArchiveDialog'
 import { PageLoader } from '../shared/LottieLoader'
-import { 
-  Users, 
-  UserPlus, 
+import {
+  Users,
+  UserPlus,
   AlertTriangle,
   Plus,
   UserCheck,
@@ -85,6 +85,7 @@ export function PractitionerDashboard() {
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedChildren, setSelectedChildren] = useState<string[]>([])
   const [bulkActionLoading, setBulkActionLoading] = useState(false)
+  const [selectedOrg, setSelectedOrg] = useState<string>('all')
   
   const downloadCredentials = () => {
     const selectedChildrenData = children.filter(child => selectedChildren.includes(child.id))
