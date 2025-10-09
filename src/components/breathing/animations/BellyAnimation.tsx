@@ -60,7 +60,13 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       timersRef.current.push(setTimeout(() => onTitleChange('Exhale'), 11900))     // At 12000ms: top of cycle 3
       timersRef.current.push(setTimeout(() => onTitleChange('Inhale'), 14900))     // At 15000ms: start of cycle 4
       timersRef.current.push(setTimeout(() => onTitleChange('Exhale'), 16900))     // At 17000ms: top of cycle 4
-      timersRef.current.push(setTimeout(() => onTitleChange('Well done!'), 19900)) // At 20000ms: complete
+      timersRef.current.push(setTimeout(() => {
+        onTitleChange('Well done!')
+        // Stop animation immediately when complete
+        if (lottieRef.current) {
+          lottieRef.current.stop()
+        }
+      }, 19900)) // At 20000ms: complete
     }
   }, [phase, cycle, onTitleChange])
 
