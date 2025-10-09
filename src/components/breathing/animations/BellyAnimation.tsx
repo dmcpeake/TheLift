@@ -55,8 +55,12 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       }
     }
 
-    // For other breathing phases, trigger next title 200ms before phase ends
+    // For other breathing phases, show current phase title immediately, then trigger next title 200ms before phase ends
     if (phase === 'inhale' || phase === 'exhale') {
+      // Immediately show current phase title
+      const currentTitle = phase === 'inhale' ? 'Inhale' : 'Exhale'
+      onTitleChange(currentTitle)
+
       const phaseDuration = phase === 'inhale' ? pace.in : pace.out
       const nextPhase = phase === 'inhale' ? 'exhale' : (cycle < totalCycles ? 'inhale' : 'complete')
       const nextTitle = nextPhase === 'inhale' ? 'Inhale' : nextPhase === 'exhale' ? 'Exhale' : 'Well done!'
