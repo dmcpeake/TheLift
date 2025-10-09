@@ -42,11 +42,11 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       onTitleChange('Inhale')
     }
 
-    // Set up timer for next title transition - both at 1900ms
+    // Set up timer for next title transition - both at 1700ms
     if (phase === 'inhale') {
       const timer = setTimeout(() => {
         onTitleChange('Exhale')
-      }, 1900)
+      }, 1700)
       return () => clearTimeout(timer)
     }
 
@@ -54,7 +54,7 @@ export function BellyAnimation({ phase, pace, cycle, totalCycles, running, onTit
       const nextTitle = cycle < totalCycles ? 'Inhale' : 'Well done!'
       const timer = setTimeout(() => {
         onTitleChange(nextTitle)
-      }, 1900)
+      }, 1700)
       return () => clearTimeout(timer)
     }
   }, [phase, pace, cycle, totalCycles, onTitleChange])
