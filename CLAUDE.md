@@ -1259,3 +1259,244 @@ When testing Data Viz tab:
 2. **AI Parsing**: Uses simplified text cleanup (not full ChildSummaryAnalytics parser)
 3. **Auto-scroll**: Card doesn't auto-scroll into view on expand
 4. **Mobile Layout**: Two-column may need adjustment for small screens
+
+## AI Insights Loading UX Improvements (2025-10-11)
+
+### Skeleton Loader Implementation
+
+**Date**: 2025-10-11
+
+**Issue**: When clicking different treemap cells to switch between children, the AI insights "Support Insights" section did not display a loading indicator. This created a jarring UX where content appeared instantly without visual feedback, especially when switching to children with cached insights.
+
+**Root Cause**:
+- The `loadAIInsights` function had an early return if insights were already cached
+- The UI was using a complex progress bar overlay that only showed during actual API calls
+- When switching to a child with cached insights, `loadingInsights[childId]` was never set to true
+
+**Solution Implemented**:
+
+1. **Import Added** (ChildSummaryAnalytics.tsx:12):
+```typescript
+import { AIInsightsSkeleton } from '../shared/AIInsightsSkeleton'
+```
+
+2. **Conditional Rendering** (ChildSummaryAnalytics.tsx:1525-1527):
+```typescript
+{/* Show skeleton loader when loading */}
+{loadingInsights[child.id] ? (
+  <AIInsightsSkeleton />
+) : (
+  <div className="space-y-4">
+    {/* AI insights content */}
+  </div>
+)}
+```
+
+3. **Removed Code**:
+- Removed the entire progress bar overlay section (previously at lines 1664-1705)
+- The overlay used blur effects and absolute positioning
+- This approach wasn't showing when switching to children with cached insights
+
+**How It Works**:
+- When user clicks on a child in the treemap, `loadAIInsights` function is called
+- The function sets `loadingInsights[child.id] = true` immediately
+- The skeleton loader displays instantly, providing visual feedback
+- Once AI insights are loaded or retrieved from cache, `loadingInsights[child.id]` is set to false
+- The skeleton smoothly transitions to the actual content
+
+**Files Modified**:
+- `src/components/analytics/ChildSummaryAnalytics.tsx` - Added AIInsightsSkeleton import and conditional rendering
+- `src/components/shared/AIInsightsSkeleton.tsx` - Pre-existing component with animated placeholders
+
+**Testing**: Application at `http://localhost:3000/test/analytics`
+- ✅ Click different children in treemap visualization
+- ✅ Skeleton loader shows during transitions
+- ✅ Skeleton appears for both cached and non-cached insights
+- ✅ Smooth transition to actual content
+- ✅ No console errors
+
+## Word Cloud Feature (2025-10-11)
+
+### Overview
+The Word Cloud feature is planned for the Data Viz tab to visualize recurring themes and emotional patterns from children's check-in text responses.
+
+### Current Status: PENDING
+
+**Frontend Implementation**: ✅ Complete
+- Word cloud component created: `src/components/analytics/WordCloudCard.tsx`
+- Uses `@isoterik/react-word-cloud` package
+- Displays animated word cloud with size based on frequency
+- Child selector dropdown for filtering
+- Loading states and empty states handled
+
+**Backend Implementation**: ⏳ PENDING
+- Edge function needs to be created in Supabase
+- Function name: `generate-word-cloud`
+- Purpose: Extract themes and keywords from check-in text responses using AI
+
+### Required Edge Function
+
+**Function Name**: `generate-word-cloud`
+
+**Supabase Dashboard URL**: https://supabase.com/dashboard/project/lwxrsufqnxlwiotkolfc/functions
+
+**Purpose**:
+Analyze wellbeing wheel text responses to extract recurring themes, emotional keywords, and patterns that can be visualized in a word cloud format.
+
+**Input Parameters**:
+```typescript
+{
+  childId?: string,        // Optional - specific child or all children
+  orgId?: string,          // Optional - filter by organization
+  dateRange?: {
+    start: string,         // ISO date string
+    end: string           // ISO date string
+  },
+  limit?: number          // Max number of words to return (default: 50)
+}
+```
+
+**Database Tables to Query**:
+1. `wellbeing_wheel_sections` - Primary source for text responses
+   - Columns: `child_id`, `text_response`, `section_name`, `mood_numeric`, `completed_at`
+   - Filter by date range and child/org if specified
+2. `profiles` - For child name and org_id
+3. `organisations` - For org type (affects AI prompt)
+
+**Processing Logic**:
+1. Query all relevant text responses from `wellbeing_wheel_sections`
+2. Concatenate text responses into analysis corpus
+3. Use Claude AI (Anthropic API) to:
+   - Identify recurring themes and emotional patterns
+   - Extract significant keywords and phrases
+   - Assign frequency/importance scores to each word
+   - Filter out common stop words and filler phrases
+4. Return structured word list with scores
+
+**AI Prompt Structure**:
+```markdown
+You are analyzing check-in data from children's wellbeing assessments. Extract the most significant themes, emotional keywords, and recurring patterns from the following text responses.
+
+Context:
+- These are responses from {child_name || "multiple children"} in a {org_type} setting
+- Date range: {start_date} to {end_date}
+- Categories covered: Friends, Work/School, Health, Family, Fun & Play, Safety, Emotions
+
+Text Responses:
+{concatenated_text_responses}
+
+Extract 50-100 keywords/phrases with these guidelines:
+- Focus on emotional states, activities, relationships, and concerns
+- Include both single words and 2-3 word phrases
+- Preserve child-friendly language (don't translate to clinical terms)
+- Assign scores based on frequency and emotional significance (1-100)
+- Exclude generic words like "the", "and", "very", "really"
+
+Return a JSON array of objects:
+[
+  {"text": "friends", "value": 85},
+  {"text": "worried about school", "value": 72},
+  {"text": "happy", "value": 90}
+]
+
+Order by importance/frequency score (highest first).
+```
+
+**Response Format**:
+```typescript
+{
+  words: Array<{
+    text: string,      // The word or phrase
+    value: number      // Frequency/importance score (1-100)
+  }>,
+  metadata: {
+    childCount: number,      // Number of children analyzed
+    responseCount: number,   // Total text responses analyzed
+    dateRange: {
+      start: string,
+      end: string
+    },
+    generatedAt: string     // ISO timestamp
+  }
+}
+```
+
+**Example Response**:
+```json
+{
+  "words": [
+    {"text": "friends", "value": 95},
+    {"text": "worried", "value": 87},
+    {"text": "playing outside", "value": 82},
+    {"text": "sad", "value": 78},
+    {"text": "school work", "value": 75},
+    {"text": "mum and dad", "value": 73},
+    {"text": "happy", "value": 70},
+    {"text": "tired", "value": 68}
+  ],
+  "metadata": {
+    "childCount": 8,
+    "responseCount": 96,
+    "dateRange": {
+      "start": "2025-01-01T00:00:00Z",
+      "end": "2025-03-31T23:59:59Z"
+    },
+    "generatedAt": "2025-10-11T20:00:00Z"
+  }
+}
+```
+
+**Error Handling**:
+- Return 400 if invalid parameters
+- Return 404 if no text responses found
+- Return 500 if AI analysis fails (with fallback to simple word frequency count)
+
+**Performance Considerations**:
+- Cache results for common queries (org-level, date ranges)
+- Limit text corpus size (max 50 KB per request)
+- Set timeout at 30 seconds for AI processing
+
+**Deployment Steps**:
+1. Create new edge function in Supabase dashboard
+2. Add Anthropic API key to Supabase secrets (`ANTHROPIC_API_KEY`)
+3. Test with sample child IDs from database
+4. Deploy to production
+5. Update frontend to call edge function endpoint
+
+**Frontend Integration** (Already Complete):
+- Component: `src/components/analytics/WordCloudCard.tsx`
+- Fetch call: `POST /functions/v1/generate-word-cloud`
+- Loading state: Lottie animation
+- Empty state: "No themes found" message
+- Error state: "Failed to load themes" with retry button
+
+**Testing Checklist**:
+- [ ] Edge function deployed to Supabase
+- [ ] Test with single child ID
+- [ ] Test with organization ID (all children)
+- [ ] Test with date range filters
+- [ ] Verify word frequencies make sense
+- [ ] Check caching works correctly
+- [ ] Test error handling (invalid params, no data)
+- [ ] Frontend displays word cloud correctly
+- [ ] Child selector filters work
+- [ ] Word cloud animates smoothly
+
+**Related Files**:
+- `src/components/analytics/WordCloudCard.tsx` - Frontend component
+- `src/components/analytics/WellbeingTreemap.tsx` - Parent component (Data Viz tab)
+- `supabase/functions/generate-word-cloud/` - Edge function directory (TO BE CREATED)
+
+**Dependencies**:
+- Anthropic API (@anthropic-ai/sdk)
+- Supabase client
+- TypeScript types for request/response
+
+**Priority**: HIGH - Required for Data Viz tab completion
+
+**Next Steps**:
+1. Create edge function boilerplate in Supabase dashboard
+2. Implement database query logic
+3. Add Anthropic AI integration
+4. Test with real data
+5. Deploy and integrate with frontend
