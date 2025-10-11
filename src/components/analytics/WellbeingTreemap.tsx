@@ -3,8 +3,9 @@ import { motion } from 'framer-motion'
 import { treemap, hierarchy, treemapSquarify } from 'd3-hierarchy'
 import { MoodHeatmap } from './MoodHeatmap'
 import { getSupabaseClient } from '../../utils/supabase/client'
-import { TrendingDown, AlertTriangle, ChevronRight, ChevronDown, Users, Briefcase, HeartPulse, Home, Laugh, Shield, Brain } from 'lucide-react'
+import { TrendingDown, AlertTriangle, ChevronRight, ChevronDown, Users, Briefcase, HeartPulse, Home, Laugh, Shield, Brain, Cloud } from 'lucide-react'
 import { WellbeingTooltip } from './WellbeingTooltip'
+import { WordCloudCard } from './WordCloudCard'
 
 interface Child {
   id: string
@@ -26,6 +27,9 @@ interface WellbeingTreemapProps {
   selectedChildId?: string | null
   moodHistory?: Record<string, any[]>
   preloadedWellbeingData?: Record<string, any[]>
+  orgId?: string
+  activeTab: 'priorities' | 'over-time'
+  onTabChange: (tab: 'priorities' | 'over-time') => void
 }
 
 const getWellbeingEmotionCategory = (wellbeingScore: number) => {
@@ -133,8 +137,7 @@ const MOOD_COLORS = {
   4: '#10B981'
 }
 
-export function WellbeingTreemap({ children, checkInHistory, onChildClick, selectedChildId, moodHistory, preloadedWellbeingData }: WellbeingTreemapProps) {
-  const [activeTab, setActiveTab] = useState<'priorities' | 'over-time'>('priorities')
+export function WellbeingTreemap({ children, checkInHistory, onChildClick, selectedChildId, moodHistory, preloadedWellbeingData, orgId, activeTab, onTabChange }: WellbeingTreemapProps) {
   // Use preloaded data if available, otherwise initialize empty
   const wellbeingData = preloadedWellbeingData || {}
 
@@ -181,24 +184,24 @@ export function WellbeingTreemap({ children, checkInHistory, onChildClick, selec
         <div className="flex items-center space-x-6">
           <div className="flex border-b border-gray-200">
             <button
-              onClick={() => setActiveTab('priorities')}
-              className={`px-4 py-2 text-lg font-bold transition-colors ${
-                activeTab === 'priorities'
-                  ? 'text-gray-900 border-b-2 border-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              🚨 Weekly Priorities
-            </button>
-            <button
-              onClick={() => setActiveTab('over-time')}
+              onClick={() => onTabChange('over-time')}
               className={`px-4 py-2 text-lg font-bold transition-colors ${
                 activeTab === 'over-time'
                   ? 'text-gray-900 border-b-2 border-blue-600'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              🔍 Overview
+              🔍 Weekly Overview
+            </button>
+            <button
+              onClick={() => onTabChange('priorities')}
+              className={`px-4 py-2 text-lg font-bold transition-colors ${
+                activeTab === 'priorities'
+                  ? 'text-gray-900 border-b-2 border-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              📊 Data Viz
             </button>
           </div>
         </div>
@@ -228,117 +231,130 @@ export function WellbeingTreemap({ children, checkInHistory, onChildClick, selec
 
       {/* Tab Content */}
       {activeTab === 'priorities' ? (
-        // Priorities Tab - Treemap
-        <div className="space-y-1">
-          <div className="relative w-full rounded-lg" style={{ height: '270px' }}>
-            {treemapData.length > 0 ? (
-              <svg viewBox="0 0 1200 270" className="w-full h-full">
-            {treemapData.map((node: any, index) => {
-              const { child, moodCategory } = node.data
-              const width = node.x1 - node.x0
-              const height = node.y1 - node.y0
-              const isSelected = selectedChildId === child.id
-              const area = width * height
-              const emojiFontSize = Math.min(width, height) * 0.12
-              const nameFontSize = Math.min(width, height) * 0.14
-              const moodScoreFontSize = Math.min(width, height) * 0.11
-              const showText = area > 3000
-
-              // Create unique gradient IDs for each square
-              const gradientId = `gradient-${child.id}`
-
-              return (
-                <g key={child.id}>
-                  <defs>
-                    <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-                      {isSelected ? (
-                        <>
-                          <stop offset="0%" style={{ stopColor: moodCategory.selectedGradient.match(/#[0-9a-f]{6}/gi)?.[0] || '#000', stopOpacity: 1 }} />
-                          <stop offset="100%" style={{ stopColor: moodCategory.selectedGradient.match(/#[0-9a-f]{6}/gi)?.[1] || '#000', stopOpacity: 1 }} />
-                        </>
-                      ) : (
-                        <>
-                          <stop offset="0%" style={{ stopColor: moodCategory.gradient.match(/#[0-9a-f]{6}/gi)?.[0] || '#000', stopOpacity: 1 }} />
-                          <stop offset="100%" style={{ stopColor: moodCategory.gradient.match(/#[0-9a-f]{6}/gi)?.[1] || '#000', stopOpacity: 1 }} />
-                        </>
-                      )}
-                    </linearGradient>
-                  </defs>
-                  <motion.rect
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: index * 0.03 }}
-                    x={node.x0}
-                    y={node.y0}
-                    width={width}
-                    height={height}
-                    rx={8}
-                    ry={8}
-                    className="cursor-pointer transition-all duration-300"
-                    fill={`url(#${gradientId})`}
-                    onClick={() => onChildClick(child.id)}
-                  />
-
-                  <g pointerEvents="none">
-                    {/* Emoji */}
-                    <text
-                      x={node.x0 + width / 2}
-                      y={node.y0 + (showText ? height * 0.3 : height * 0.4)}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fontSize={emojiFontSize}
-                    >
-                      {moodCategory.emoji}
-                    </text>
-
-                    {/* Child name */}
-                    {showText && (
-                      <text
-                        x={node.x0 + width / 2}
-                        y={node.y0 + height * 0.55}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fontSize={nameFontSize}
-                        fontWeight="700"
-                        fill="#1f2937"
-                      >
-                        {child.name.split(' ')[0]}
-                      </text>
-                    )}
-
-                    {/* Mood score */}
-                    {child.averageMood && showText && (
-                      <text
-                        x={node.x0 + width / 2}
-                        y={node.y0 + height * 0.75}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fontSize={moodScoreFontSize}
-                        fontWeight="600"
-                        fill="#374151"
-                      >
-                        {child.averageMood.toFixed(1)}
-                      </text>
-                    )}
-
-                    {/* Critical alert indicator (pulsing red dot) */}
-                    {child.moodTrend === 'developing' && child.averageMood && child.averageMood < 2.5 && width > 30 && height > 30 && (
-                      <circle cx={node.x0 + 8} cy={node.y0 + 8} r={4} fill="#ef4444" opacity={0.8}>
-                        <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite" />
-                      </circle>
-                    )}
-                  </g>
-                </g>
-              )
-            })}
-          </svg>
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-              <p className="text-sm">No children found</p>
+        // Data Viz Tab - Full Width Stacked Cards
+        <div className="mt-4 space-y-4">
+          {/* Treemap Card */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-900">Children by Support Priority</h3>
             </div>
-          )}
+              <div className="relative w-full rounded-lg" style={{ height: '270px' }}>
+                {treemapData.length > 0 ? (
+                  <svg viewBox="0 0 1200 270" className="w-full h-full">
+                {treemapData.map((node: any, index) => {
+                  const { child, moodCategory } = node.data
+                  const width = node.x1 - node.x0
+                  const height = node.y1 - node.y0
+                  const isSelected = selectedChildId === child.id
+                  const area = width * height
+                  const emojiFontSize = Math.min(width, height) * 0.12
+                  const nameFontSize = Math.min(width, height) * 0.14
+                  const moodScoreFontSize = Math.min(width, height) * 0.11
+                  const showText = area > 3000
+
+                  // Create unique gradient IDs for each square
+                  const gradientId = `gradient-${child.id}`
+
+                  return (
+                    <g key={child.id}>
+                      <defs>
+                        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+                          {isSelected ? (
+                            <>
+                              <stop offset="0%" style={{ stopColor: moodCategory.selectedGradient.match(/#[0-9a-f]{6}/gi)?.[0] || '#000', stopOpacity: 1 }} />
+                              <stop offset="100%" style={{ stopColor: moodCategory.selectedGradient.match(/#[0-9a-f]{6}/gi)?.[1] || '#000', stopOpacity: 1 }} />
+                            </>
+                          ) : (
+                            <>
+                              <stop offset="0%" style={{ stopColor: moodCategory.gradient.match(/#[0-9a-f]{6}/gi)?.[0] || '#000', stopOpacity: 1 }} />
+                              <stop offset="100%" style={{ stopColor: moodCategory.gradient.match(/#[0-9a-f]{6}/gi)?.[1] || '#000', stopOpacity: 1 }} />
+                            </>
+                          )}
+                        </linearGradient>
+                      </defs>
+                      <motion.rect
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: index * 0.03 }}
+                        x={node.x0}
+                        y={node.y0}
+                        width={width}
+                        height={height}
+                        rx={8}
+                        ry={8}
+                        className="cursor-pointer transition-all duration-300"
+                        fill={`url(#${gradientId})`}
+                        onClick={() => onChildClick(child.id)}
+                      />
+
+                      <g pointerEvents="none">
+                        {/* Emoji */}
+                        <text
+                          x={node.x0 + width / 2}
+                          y={node.y0 + (showText ? height * 0.3 : height * 0.4)}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fontSize={emojiFontSize}
+                        >
+                          {moodCategory.emoji}
+                        </text>
+
+                        {/* Child name */}
+                        {showText && (
+                          <text
+                            x={node.x0 + width / 2}
+                            y={node.y0 + height * 0.55}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fontSize={nameFontSize}
+                            fontWeight="700"
+                            fill="#1f2937"
+                          >
+                            {child.name.split(' ')[0]}
+                          </text>
+                        )}
+
+                        {/* Mood score */}
+                        {child.averageMood && showText && (
+                          <text
+                            x={node.x0 + width / 2}
+                            y={node.y0 + height * 0.75}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fontSize={moodScoreFontSize}
+                            fontWeight="600"
+                            fill="#374151"
+                          >
+                            {child.averageMood.toFixed(1)}
+                          </text>
+                        )}
+
+                        {/* Critical alert indicator (pulsing red dot) */}
+                        {child.moodTrend === 'developing' && child.averageMood && child.averageMood < 2.5 && width > 30 && height > 30 && (
+                          <circle cx={node.x0 + 8} cy={node.y0 + 8} r={4} fill="#ef4444" opacity={0.8}>
+                            <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite" />
+                          </circle>
+                        )}
+                      </g>
+                    </g>
+                  )
+                })}
+              </svg>
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+                  <p className="text-sm">No children found</p>
+                </div>
+              )}
+              </div>
+            <p className="text-xs text-gray-500 mt-2">Larger areas indicate children who may need more support. Click a child to view details.</p>
           </div>
-          <p className="text-xs text-gray-500">Larger areas indicate children who may need more support. Click a child to view details.</p>
+
+          {/* Word Cloud Card */}
+          <WordCloudCard
+            orgId={orgId}
+            dateRange="all"
+            title="Key Themes from Check-ins"
+          />
         </div>
       ) : (
         // Over Time Tab - Simple Matrix View

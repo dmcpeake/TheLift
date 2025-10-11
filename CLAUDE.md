@@ -950,3 +950,312 @@ When testing "Over Time" tab:
 - ✅ Expand/collapse animation smooth
 - ✅ No console errors
 - ✅ Data persists when switching tabs
+
+## Recent Code Management (2025-10-11)
+
+### Rollback: Individual Child Cards Restoration
+
+**Date**: 2025-10-11
+
+**Issue**: Attempted to modify the Weekly Overview tab with new features (overall score column, urgent attention indicators, expandable views), but multiple implementation attempts resulted in incorrect styling and layout that didn't match the existing design patterns.
+
+**User Feedback**:
+- "What the heck is that. The styling is completely wrong. Also the columns and rows are the back to front."
+- "Nearly. Look at the text sizes and alignment in the live version though."
+- "No. Just no. Are you able to roll back the code changes to this time yesterday but keep the new tab titles?"
+
+**Solution**: Rolled back `ChildSummaryAnalytics.tsx` to commit `b77900a` (before the "Update ChildSummaryAnalytics.tsx" commit).
+
+**Command Used**:
+```bash
+git checkout b77900a -- src/components/analytics/ChildSummaryAnalytics.tsx
+```
+
+**What Was Restored**:
+- Full children list section with expandable cards below the Weekly Overview table
+- Avatar display with color mapping
+- Mood indicators (Current, Average, Trend)
+- Expandable sections showing:
+  - Wellbeing Wheel Category Heatmap
+  - Check-in Details with category breakdowns
+  - AI Insights with loading animations
+
+**What Was Preserved**:
+- Tab title changes in `WellbeingTreemap.tsx`:
+  - "🔍 Weekly Overview" (formerly "Over Time")
+  - "📊 Data Viz" (formerly "Priorities")
+
+**Files Modified**:
+- ✅ `src/components/analytics/ChildSummaryAnalytics.tsx` - Reverted to b77900a
+- ✅ `src/components/analytics/WellbeingTreemap.tsx` - Tab titles preserved
+
+**Build Status**: Application builds successfully with no compilation errors.
+
+**Lessons Learned**:
+1. When modifying existing UI components, always check the live version first to understand the current design patterns
+2. Use git history to identify working states before attempting major modifications
+3. Preserve intentional changes (like tab titles) when rolling back other changes
+4. When in doubt, revert to known working code rather than attempting multiple fixes
+
+**Current State**: The analytics page is back to its stable, working state from 2025-10-10, with updated tab titles for improved clarity.
+
+## Data Viz Tab Implementation (2025-10-11)
+
+### Overview
+The Data Viz tab (📊 Data Viz) in `/test/analytics` displays the Support Priority Treemap with an expandable detail card that shows comprehensive wellbeing data when a child is clicked.
+
+### Architecture: Treemap + Expandable Detail Card
+
+**Treemap Visualization** (`WellbeingTreemap.tsx:323-435`):
+- Color-coded squares showing all children
+- Size based on support urgency score
+- Gradient colors reflect wellbeing (Red=struggling, Orange=hard, Yellow=OK, Green=well)
+- Clickable squares trigger detail card expansion below
+
+**Expandable Detail Card** (`WellbeingTreemap.tsx:437-831`):
+- Animates smoothly below treemap (Framer Motion)
+- Shows when `showDetailPanel` state is true
+- Two-column responsive layout (lg:grid-cols-2)
+- Clean background (`bg-gray-50 p-6 rounded-lg`)
+
+### Components Created
+
+#### 1. ChildDetailPanel Component (NOT USED)
+**File**: `src/components/analytics/ChildDetailPanel.tsx`
+
+**Status**: Created but NOT used. Initially designed as a modal overlay, but implementation switched to inline expandable card pattern instead.
+
+**Note**: This component may be useful for future modal implementations but is currently not imported or used in the codebase.
+
+#### 2. Inline Detail Card (CURRENT IMPLEMENTATION)
+**Location**: `src/components/analytics/WellbeingTreemap.tsx:437-831`
+
+**Structure**:
+```tsx
+<AnimatePresence>
+  {showDetailPanel && detailPanelChild && (
+    <motion.div
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: 'auto', opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
+      className="border-t border-gray-200"
+    >
+      <div className="bg-gray-50 p-6 rounded-lg">
+        {/* Header with child info and close button */}
+        {/* Two-column grid: check-ins + AI insights */}
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
+```
+
+### Data Flow & State Management
+
+**Click Handler** (`handleTreemapClick` - lines 208-269):
+```typescript
+const handleTreemapClick = async (childId: string) => {
+  // 1. Clear old data first (prevents messy overlay)
+  setDetailCheckInHistory([])
+  setDetailAIInsights(undefined)
+  setSelectedDetailCheckInId(undefined)
+
+  // 2. Set new child and show panel
+  setDetailPanelChild(child)
+  setShowDetailPanel(true)
+
+  // 3. Load wellbeing wheel check-ins
+  const { data: wellbeingWheelData } = await supabase
+    .from('wellbeing_wheel_usage')
+    .select('id, child_id, session_id, completed_at, overall_score')
+    .eq('child_id', childId)
+    .order('completed_at', { ascending: false })
+    .limit(10)
+
+  // 4. Fetch sections for each check-in
+  // 5. Auto-select most recent check-in
+  // 6. Load AI insights
+  loadDetailAIInsights(childId)
+}
+```
+
+**Key State Variables**:
+- `showDetailPanel`: Boolean to show/hide detail card
+- `detailPanelChild`: Selected child object
+- `detailCheckInHistory`: Array of check-in data with wellbeing sections
+- `detailAIInsights`: AI analysis results
+- `selectedDetailCheckInId`: Currently selected check-in for detail view
+- `loadingDetailInsights`: Boolean for AI loading state
+- `detailAILoadingProgress`: Number 0-100 for progress bar
+
+### Left Column: Check-in Data
+
+**Wellbeing Categories Over Time** (lines 477-494):
+- Uses `WellbeingWheelHeatmap` component
+- Shows up to 10 most recent check-ins
+- Interactive calendar with clickable dates
+- Color-coded by category
+
+**Check-in Details** (lines 496-696):
+- Displays selected check-in when clicked
+- Overall Wellbeing bar (1-4 scale)
+- 7 category progress bars with emojis:
+  - Friends (👥), Work/School (📚), Health (❤️)
+  - Family (🏠), Fun & Play (🎨), Safety (🛡️), Emotions (💭)
+- Shows child's text responses inline
+
+### Right Column: AI Insights
+
+**AI Analysis** (`loadDetailAIInsights` - lines 271-356):
+```typescript
+const loadDetailAIInsights = async (childId: string) => {
+  setLoadingDetailInsights(true)
+  setDetailAILoadingProgress(0)
+
+  // Progress simulation
+  const progressInterval = setInterval(() => {
+    setDetailAILoadingProgress(prev => prev >= 90 ? prev : prev + 10)
+  }, 300)
+
+  // Call AI edge function
+  const response = await fetch(
+    `https://${projectId}.supabase.co/functions/v1/analyze-qualitative-data-optimized`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${publicAnonKey}`
+      },
+      body: JSON.stringify({
+        childId,
+        dateRange: 'all',
+        analysisType: 'comprehensive'
+      })
+    }
+  )
+
+  // Parse AI response into structured insights
+  const insights: AIInsights = {
+    summary: ...,
+    concerns: ...,
+    strengths: ...,
+    recommendations: ...
+  }
+}
+```
+
+**AI Insights Display** (lines 699-825):
+- **Wellbeing Overview** (Executive Summary) - white card with Brain icon
+- **Areas for Additional Support** (Concerns) - amber card with AlertCircle icon
+- **Positive Indicators** (Strengths) - green card with Activity icon
+- **Recommendations** - blue card with MessageSquare icon
+- Loading overlay with progress bar and animated dots
+
+### Loading States & Animations
+
+**Loading Overlay** (lines 786-823):
+- Centered over AI insights section
+- Progress bar with percentage (0-100%)
+- Stage-based messages:
+  - <30%: "Gathering check-in data..."
+  - <60%: "Processing emotional patterns..."
+  - <90%: "Generating personalized insights..."
+  - ≥90%: "Finalizing analysis..."
+- Animated bouncing dots (blue-purple-blue)
+
+**Blur Effect** (line 709-711):
+```tsx
+<div className={`space-y-4 transition-all duration-700 ${
+  loadingDetailInsights ? 'filter blur-[3px] opacity-30' : 'filter blur-0 opacity-100'
+}`}>
+```
+
+### Critical Implementation Details
+
+**Data Clearing on Child Switch** (lines 217-220):
+```typescript
+// CRITICAL: Clear old data first before loading new child
+// This prevents messy overlay of old content with new loading spinner
+setDetailCheckInHistory([])
+setDetailAIInsights(undefined)
+setSelectedDetailCheckInId(undefined)
+```
+
+**Why This Matters**: When clicking a new child, the old child's data is cleared immediately, preventing visual confusion where old AI insights blur while new data loads.
+
+**Category Definitions** (inline at lines 566-574):
+```typescript
+const category = {
+  my_friends: { label: 'Friends', color: '#3B82F6', emoji: '👥' },
+  my_work: { label: 'Work/School', color: '#8B5CF6', emoji: '📚' },
+  my_health: { label: 'Health', color: '#EF4444', emoji: '❤️' },
+  my_family: { label: 'Family', color: '#F59E0B', emoji: '🏠' },
+  my_fun_play: { label: 'Fun & Play', color: '#10B981', emoji: '🎨' },
+  my_safety: { label: 'Safety', color: '#6366F1', emoji: '🛡️' },
+  my_emotions: { label: 'Emotions', color: '#EC4899', emoji: '💭' }
+}[section.section_name as any]
+```
+
+### Imports Required
+
+```typescript
+import { projectId, publicAnonKey } from '../../utils/supabase/info'
+import { WellbeingWheelHeatmap } from './WellbeingWheelHeatmap'
+import {
+  Activity, Clock, Sparkles, MessageSquare, AlertCircle,
+  Brain, ChevronDown
+} from 'lucide-react'
+```
+
+### Visual Design Specifications
+
+**Header** (lines 448-470):
+- Gradient avatar circle: `bg-gradient-to-r from-blue-600 to-purple-600`
+- Child name: `text-xl font-bold text-gray-900`
+- Subtitle: "Detailed Wellbeing Overview"
+- Close button: ChevronDown icon (collapses card)
+
+**Grid Layout**:
+- Two columns: `grid-cols-1 lg:grid-cols-2 gap-6`
+- Left column: `space-y-6` (check-in data)
+- Right column: AI insights with relative positioning for overlay
+
+**Score Bars**:
+- Overall Wellbeing: Height `h-3`, rounded full
+- Category bars: Height `h-2`, rounded full
+- Width calculated: `${(score / 4) * 100}%`
+- Colors from MOOD_COLORS constant
+
+**Card Styling**:
+- White cards: `bg-white p-4 rounded-lg border border-gray-200`
+- Colored cards (insights): `bg-amber-50`, `bg-green-50`, `bg-blue-50`
+- Section headers: `font-medium` with colored icons
+
+### Future Enhancements (Not Implemented)
+
+1. **Word Cloud Component**: Planned for Data Viz tab
+2. **Card Layout Restructure**: Wrap treemap and word cloud in separate cards
+3. **Edge Function for Word Generation**: AI-powered theme extraction
+4. **Child Selector Dropdown**: For word cloud filtering
+
+### Testing Checklist
+
+When testing Data Viz tab:
+- ✅ Treemap displays all children
+- ✅ Click child expands detail card below treemap
+- ✅ Old data clears before new data loads
+- ✅ Wellbeing heatmap shows check-ins
+- ✅ Click date in heatmap shows detail
+- ✅ AI insights load with progress animation
+- ✅ Progress bar updates smoothly
+- ✅ All 7 categories display with colors
+- ✅ Text responses show inline
+- ✅ Close button collapses card
+- ✅ Click different child switches cleanly
+- ✅ No console errors
+
+### Known Limitations
+
+1. **ChildDetailPanel Component**: Created but unused (modal pattern abandoned)
+2. **AI Parsing**: Uses simplified text cleanup (not full ChildSummaryAnalytics parser)
+3. **Auto-scroll**: Card doesn't auto-scroll into view on expand
+4. **Mobile Layout**: Two-column may need adjustment for small screens

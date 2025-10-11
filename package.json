@@ -3,6 +3,7 @@
     "version": "0.1.1",
     "private": true,
     "dependencies": {
+        "@isoterik/react-word-cloud": "^1.2.0",
         "@lottiefiles/dotlottie-react": "^0.17.1",
         "@radix-ui/react-accordion": "^1.2.3",
         "@radix-ui/react-alert-dialog": "^1.1.6",

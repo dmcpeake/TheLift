@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getSupabaseClient } from '../../utils/supabase/client.tsx'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { DataLoader } from '../shared/LottieLoader'
+import { WellbeingCardSkeleton } from '../shared/WellbeingCardSkeleton'
 import {
   TrendingUp, TrendingDown, Heart, Activity,
   ChevronDown, ChevronUp, Calendar, User, Users,
@@ -326,9 +326,7 @@ export function WellbeingWheelOverviewCard({ selectedOrg = 'all', dateRange = 'w
   if (loading) {
     return (
       <Card>
-        <CardContent className="p-6">
-          <DataLoader message="Loading wellbeing data..." />
-        </CardContent>
+        <WellbeingCardSkeleton />
       </Card>
     )
   }

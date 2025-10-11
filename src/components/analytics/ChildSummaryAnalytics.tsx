@@ -9,6 +9,7 @@ import { WellbeingTreemap } from './WellbeingTreemap'
 import { SafeguardingModal } from './SafeguardingModal'
 import { WellbeingWheelHeatmap } from './WellbeingWheelHeatmap'
 import { WellbeingTooltip } from './WellbeingTooltip'
+import { AIInsightsSkeleton } from '../shared/AIInsightsSkeleton'
 import {
   ChevronDown, ChevronRight, TrendingUp, TrendingDown,
   Calendar, Heart, Brain, MessageSquare, Sparkles,
@@ -152,6 +153,7 @@ export function ChildSummaryAnalytics() {
     childId: null
   })
   const [acknowledgedSafeguarding, setAcknowledgedSafeguarding] = useState<Set<string>>(new Set())
+  const [activeTab, setActiveTab] = useState<'priorities' | 'over-time'>('priorities')
 
   useEffect(() => {
     loadOrganizations()
@@ -176,6 +178,17 @@ export function ChildSummaryAnalytics() {
       }
     }
   }, [checkInHistory, expandedChild])
+
+  // Auto-select child with highest urgency (first in sorted list) when Data Viz tab loads
+  useEffect(() => {
+    if (activeTab === 'priorities' && children.length > 0 && !expandedChild) {
+      // The children array is already sorted by urgency (highest first)
+      const highestUrgencyChild = children[0]
+      if (highestUrgencyChild) {
+        toggleChildExpansion(highestUrgencyChild.id)
+      }
+    }
+  }, [activeTab, children])
 
   const loadOrganizations = async () => {
     try {
@@ -1163,16 +1176,20 @@ export function ChildSummaryAnalytics() {
         selectedChildId={expandedChild}
         moodHistory={moodHistory}
         preloadedWellbeingData={wellbeingWheelData}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       />
 
-      {/* Children List - Selected child first if any, then rest */}
-      <div className="space-y-4">
-        {(() => {
-          const selectedChild = expandedChild ? children.find(c => c.id === expandedChild) : null
-          const otherChildren = children.filter(c => c.id !== expandedChild)
-          const orderedChildren = selectedChild ? [selectedChild, ...otherChildren] : children
+      {/* Children List - Conditional rendering based on active tab */}
+      {activeTab === 'priorities' && (
+        <div className="space-y-4">
+          {(() => {
+            // On Data Viz tab, only show the expanded child
+            const childrenToShow = expandedChild
+              ? children.filter(c => c.id === expandedChild)
+              : children
 
-          return orderedChildren.map((child, index) => {
+            return childrenToShow.map((child, index) => {
           const isCritical = (child.averageMood || 5) < 2.5
           const criticalMoodCount = moodHistory[child.id]?.filter(m => m.mood_numeric <= 2).length || 0
 
@@ -1504,10 +1521,11 @@ export function ChildSummaryAnalytics() {
                         <div className="relative">
                           {/* Minimum height container for content */}
                           <div className="min-h-[300px]">
-                            {/* Content with blur effect when loading */}
-                            <div className={`space-y-4 transition-all duration-700 ${
-                              loadingInsights[child.id] ? 'filter blur-[3px] opacity-30' : 'filter blur-0 opacity-100'
-                            }`}>
+                            {/* Show skeleton loader when loading */}
+                            {loadingInsights[child.id] ? (
+                              <AIInsightsSkeleton />
+                            ) : (
+                            <div className="space-y-4">
                             {/* Summary */}
                             {aiInsights[child.id] && (
                             <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -1641,50 +1659,8 @@ export function ChildSummaryAnalytics() {
                             </p>
                             )}
                             </div>
+                            )}
                           </div>
-
-                          {/* Loading Overlay with progress bar - positioned over content area only */}
-                          {loadingInsights[child.id] && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 rounded-lg z-10" style={{ top: '50px' }}>
-                              <div className="px-8 py-6 max-w-sm w-full">
-                                <div className="space-y-6">
-                                  {/* Main loading title */}
-                                  <div className="text-center">
-                                    <h5 className="text-sm font-medium text-gray-900 mb-1">Analyzing Wellbeing Data</h5>
-                                    <p className="text-xs text-gray-500">
-                                      {aiLoadingProgress[child.id] < 30 ? 'Gathering check-in data...' :
-                                       aiLoadingProgress[child.id] < 60 ? 'Processing emotional patterns...' :
-                                       aiLoadingProgress[child.id] < 90 ? 'Generating personalized insights...' :
-                                       'Finalizing analysis...'}
-                                    </p>
-                                  </div>
-
-                                  {/* Progress bar */}
-                                  <div className="w-full">
-                                    <div className="flex justify-between text-xs text-gray-600 mb-2">
-                                      <span>Progress</span>
-                                      <span>{aiLoadingProgress[child.id] || 0}%</span>
-                                    </div>
-                                    <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                                      <div
-                                        className="bg-gradient-to-r from-blue-500 to-purple-600 h-full rounded-full transition-all duration-300 ease-out"
-                                        style={{ width: `${aiLoadingProgress[child.id] || 0}%` }}
-                                      />
-                                    </div>
-                                  </div>
-
-                                  {/* Loading animation dots */}
-                                  <div className="flex justify-center">
-                                    <div className="flex space-x-2">
-                                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                                      <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -1698,6 +1674,8 @@ export function ChildSummaryAnalytics() {
           })
         })()}
       </div>
+      )}
+      {/* End of activeTab === 'priorities' conditional */}
 
       {children.length === 0 && (
         <div className="text-center py-12">
