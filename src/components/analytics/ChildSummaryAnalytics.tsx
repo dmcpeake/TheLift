@@ -421,23 +421,52 @@ export function ChildSummaryAnalytics() {
         .in('child_id', childIds)
         .order('completed_at', { ascending: false })
 
-      // Group data by child
+      if (!wellbeingWheelData || wellbeingWheelData.length === 0) {
+        console.log('No wellbeing wheel data found')
+        setCheckInHistory({})
+        return
+      }
+
+      // Get top 10 check-ins per child
+      const childWheelMap: Record<string, typeof wellbeingWheelData> = {}
+      childIds.forEach(childId => {
+        childWheelMap[childId] = wellbeingWheelData
+          .filter(w => w.child_id === childId)
+          .slice(0, 10)
+      })
+
+      // Collect all wheel IDs we need sections for (batch optimization)
+      const wheelIds = Object.values(childWheelMap).flat().map(w => w.id)
+
+      // BATCH QUERY: Fetch all sections in one query instead of 100+ individual queries
+      const { data: allSections } = await supabase
+        .from('wellbeing_wheel_sections')
+        .select('wellbeing_wheel_id, section_name, mood_numeric, text_response, created_at')
+        .in('wellbeing_wheel_id', wheelIds)
+        .order('created_at', { ascending: true })
+
+      console.log(`Batch loaded ${allSections?.length || 0} sections for ${wheelIds.length} check-ins`)
+
+      // Group sections by wellbeing_wheel_id for fast lookup
+      const sectionsByWheelId: Record<string, typeof allSections> = {}
+      allSections?.forEach(section => {
+        if (!sectionsByWheelId[section.wellbeing_wheel_id]) {
+          sectionsByWheelId[section.wellbeing_wheel_id] = []
+        }
+        sectionsByWheelId[section.wellbeing_wheel_id].push(section)
+      })
+
+      // Build check-in history for each child
       const checkInsByChild: Record<string, CheckIn[]> = {}
 
-      // Process each child
-      for (const childId of childIds) {
-        const childWellbeingData = wellbeingWheelData?.filter(w => w.child_id === childId).slice(0, 10) || []
+      childIds.forEach(childId => {
+        const childWheels = childWheelMap[childId] || []
         const childCheckIns: CheckIn[] = []
 
-        // For each wellbeing wheel check-in, fetch sections
-        for (const wheel of childWellbeingData) {
-          const { data: sections } = await supabase
-            .from('wellbeing_wheel_sections')
-            .select('section_name, mood_numeric, text_response')
-            .eq('wellbeing_wheel_id', wheel.id)
-            .order('created_at', { ascending: true })
+        childWheels.forEach(wheel => {
+          const sections = sectionsByWheelId[wheel.id] || []
 
-          if (sections && sections.length > 0) {
+          if (sections.length > 0) {
             childCheckIns.push({
               id: wheel.id,
               created_at: wheel.completed_at,
@@ -448,13 +477,13 @@ export function ChildSummaryAnalytics() {
               wellbeing_sections: sections
             })
           }
-        }
+        })
 
         checkInsByChild[childId] = childCheckIns
-      }
+      })
 
       setCheckInHistory(checkInsByChild)
-      console.log('Check-in history loaded for all children:', Object.keys(checkInsByChild).length, 'children')
+      console.log('✅ Check-in history loaded for all children:', Object.keys(checkInsByChild).length, 'children')
       console.log('Sample check-in data:', checkInsByChild[childIds[0]]?.slice(0, 2))
     } catch (error) {
       console.error('Error loading check-in history:', error)
