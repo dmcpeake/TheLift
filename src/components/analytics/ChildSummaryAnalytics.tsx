@@ -1065,11 +1065,12 @@ export function ChildSummaryAnalytics() {
             let logoPath = ''
 
             if (currentOrg) {
-              // Map organization names to logo files
-              if (currentOrg.name === 'The Rainbow School') {
+              // Map organization IDs or names to logo files
+              if (currentOrg.id === '0e233a3b-e007-4eae-a9a5-4586c59b2faf') {
+                // Nationwide Children's Hospital
+                logoPath = '/NC Stacked Logo_sm.png'
+              } else if (currentOrg.name === 'The Rainbow School') {
                 logoPath = '/trs.png'
-              } else if (currentOrg.name === 'The Soke') {
-                logoPath = '/the_soke.webp'
               } else if (currentOrg.name === 'Evelina Hospital') {
                 logoPath = '/evelina.png'
               }
