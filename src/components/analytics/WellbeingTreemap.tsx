@@ -236,7 +236,7 @@ export function WellbeingTreemap({ children, checkInHistory, onChildClick, selec
           {/* Treemap Card */}
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-900">Children by Support Priority</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Children by Support Priority</h3>
             </div>
               <div className="relative w-full rounded-lg" style={{ height: '270px' }}>
                 {treemapData.length > 0 ? (
@@ -352,8 +352,9 @@ export function WellbeingTreemap({ children, checkInHistory, onChildClick, selec
           {/* Word Cloud Card */}
           <WordCloudCard
             orgId={orgId}
+            childId={selectedChildId || undefined}
             dateRange="all"
-            title="Key Themes from Check-ins"
+            title={selectedChildId ? `Key Themes from ${children.find(c => c.id === selectedChildId)?.name || 'Selected Child'}` : "Key Themes from All Check-ins"}
           />
         </div>
       ) : (

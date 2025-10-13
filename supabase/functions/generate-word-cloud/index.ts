@@ -274,25 +274,26 @@ Generate the word cloud JSON now.`
 
     console.log(`✅ Generated ${words.length} words for word cloud`)
 
-    // Store the word cloud data (optional)
-    const insertData = {
-      org_id: orgIdToUse,
-      child_id: childId,
-      date_range: dateRange,
-      word_data: words,
-      data_points_analyzed: allText.length,
-      created_at: new Date().toISOString()
-    }
+    // Store the word cloud data (optional) - wrapped in try/catch
+    try {
+      const insertData = {
+        org_id: orgIdToUse,
+        child_id: childId,
+        date_range: dateRange,
+        word_data: words,
+        data_points_analyzed: allText.length,
+        created_at: new Date().toISOString()
+      }
 
-    await supabaseClient
-      .from('word_cloud_cache')
-      .insert(insertData)
-      .select()
-      .single()
-      .catch(err => {
-        // Ignore cache errors
-        console.warn('⚠️ Failed to cache word cloud (table may not exist):', err.message)
-      })
+      await supabaseClient
+        .from('word_cloud_cache')
+        .insert(insertData)
+        .select()
+        .single()
+    } catch (cacheError: any) {
+      // Ignore cache errors (table may not exist)
+      console.warn('⚠️ Failed to cache word cloud:', cacheError.message)
+    }
 
     return new Response(
       JSON.stringify({

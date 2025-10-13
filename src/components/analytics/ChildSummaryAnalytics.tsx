@@ -6,7 +6,6 @@ import { projectId, publicAnonKey } from '../../utils/supabase/info.tsx'
 import { PageAnimatedLoader } from '../shared/AnimatedLoader'
 import { ComparisonView } from './comparison/ComparisonView'
 import { WellbeingTreemap } from './WellbeingTreemap'
-import { SafeguardingModal } from './SafeguardingModal'
 import { WellbeingWheelHeatmap } from './WellbeingWheelHeatmap'
 import { WellbeingTooltip } from './WellbeingTooltip'
 import { AIInsightsSkeleton } from '../shared/AIInsightsSkeleton'
@@ -148,21 +147,18 @@ export function ChildSummaryAnalytics() {
   const [wellbeingWheelData, setWellbeingWheelData] = useState<Record<string, any[]>>({})
   const [currentLoadingStage, setCurrentLoadingStage] = useState(0)
   const [showComparison, setShowComparison] = useState(false)
-  const [safeguardingModal, setSafeguardingModal] = useState<{ isOpen: boolean; childId: string | null }>({
-    isOpen: false,
-    childId: null
-  })
-  const [acknowledgedSafeguarding, setAcknowledgedSafeguarding] = useState<Set<string>>(new Set())
   const [activeTab, setActiveTab] = useState<'priorities' | 'over-time'>('priorities')
+  const [isLoadingChildren, setIsLoadingChildren] = useState(false)
 
   useEffect(() => {
     loadOrganizations()
   }, [])
 
   useEffect(() => {
-    if (selectedOrg) {
+    if (selectedOrg && !isLoadingChildren) {
       loadChildren()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedOrg])
 
   // Auto-select most recent check-in when checkInHistory updates
@@ -178,17 +174,6 @@ export function ChildSummaryAnalytics() {
       }
     }
   }, [checkInHistory, expandedChild])
-
-  // Auto-select child with highest urgency (first in sorted list) when Data Viz tab loads
-  useEffect(() => {
-    if (activeTab === 'priorities' && children.length > 0 && !expandedChild) {
-      // The children array is already sorted by urgency (highest first)
-      const highestUrgencyChild = children[0]
-      if (highestUrgencyChild) {
-        toggleChildExpansion(highestUrgencyChild.id)
-      }
-    }
-  }, [activeTab, children])
 
   const loadOrganizations = async () => {
     try {
@@ -235,7 +220,14 @@ export function ChildSummaryAnalytics() {
   }
 
   const loadChildren = async () => {
+    // Prevent concurrent calls
+    if (isLoadingChildren) {
+      console.log('⚠️ loadChildren already in progress, skipping...')
+      return
+    }
+
     try {
+      setIsLoadingChildren(true)
       setLoading(true)
       setCurrentLoadingStage(1)
       setLoadingStages(prev => prev.map((s, i) => ({
@@ -420,6 +412,7 @@ export function ChildSummaryAnalytics() {
       })))
     } finally {
       setLoading(false)
+      setIsLoadingChildren(false)
     }
   }
 
@@ -574,6 +567,7 @@ export function ChildSummaryAnalytics() {
     console.log(`Loading detailed check-in history for child: ${childId}`)
 
     const supabase = getSupabaseClient()
+    console.log('🔄 ChildSummaryAnalytics: Supabase client initialized')
 
     // Fetch wellbeing wheel check-ins directly (they're more comprehensive than mood meter)
     const { data: wellbeingWheelData, error: wellbeingError } = await supabase
@@ -648,11 +642,7 @@ export function ChildSummaryAnalytics() {
     // Check if already loading or loaded
     if (loadingInsights[childId] || aiInsights[childId]) return
 
-    console.log('🔵 STARTING AI insights loading for child:', childId)
-    setLoadingInsights(prev => {
-      console.log('🔵 Setting loadingInsights to TRUE for child:', childId)
-      return { ...prev, [childId]: true }
-    })
+    setLoadingInsights(prev => ({ ...prev, [childId]: true }))
     setAILoadingProgress(prev => ({ ...prev, [childId]: 0 }))
 
     // Simulate progress updates
@@ -671,7 +661,6 @@ export function ChildSummaryAnalytics() {
       // Use the correct Supabase URL and key
       const supabaseUrl = `https://${projectId}.supabase.co`
 
-      console.log('Calling AI analysis edge function...')
       // Call the optimized AI analysis edge function with new comprehensive prompt
       const response = await fetch(
         `${supabaseUrl}/functions/v1/analyze-qualitative-data-optimized`,
@@ -689,49 +678,30 @@ export function ChildSummaryAnalytics() {
         }
       )
 
-      console.log('AI analysis response:', response.status, response.ok)
       if (response.ok) {
         const data = await response.json()
-        console.log('AI analysis data:', data)
-
-        // Log debug info if available
-        if (data.debug) {
-          console.log('🔍 DEBUG INFO FROM EDGE FUNCTION:')
-          console.log(`  Organization Type: ${data.debug.orgType}`)
-          console.log(`  Prompt File Used: ${data.debug.promptFile}.md`)
-          console.log(`  Child Name: ${data.debug.childName}`)
-          console.log(`  System Prompt Type: ${data.debug.systemPromptType}`)
-        }
 
         // Parse the AI response into structured insights
         const analysis = cleanupText(data.analysis || '')
 
-        // Debug: Log the raw AI response
-        console.log('Raw AI analysis response:', analysis.substring(0, 500) + '...')
-        console.log('Full AI response for debugging:', analysis)
-
         // Parse the new comprehensive AI response format
         const insights: AIInsights = {
           summary: cleanupText(extractSection(analysis, 'EXECUTIVE SUMMARY') ||
-                   extractSection(analysis, 'Executive Summary') ||
-                   analysis.split('\n')[0] || // First line as fallback
-                   'Analysis in progress...'),
+                    extractSection(analysis, 'Executive Summary') ||
+                    analysis.split('\n')[0] || // First line as fallback
+                    'Analysis in progress...'),
           concerns: extractBulletPoints(analysis, 'RED FLAGS & EARLY WARNING SIGNS') ||
-                   extractBulletPoints(analysis, 'RED FLAGS') ||
-                   extractBulletPoints(analysis, 'IMMEDIATE ACTION REQUIRED') ||
-                   extractBulletPoints(analysis, 'Key Concerns'),
+                    extractBulletPoints(analysis, 'RED FLAGS') ||
+                    extractBulletPoints(analysis, 'IMMEDIATE ACTION REQUIRED') ||
+                    extractBulletPoints(analysis, 'Key Concerns'),
           strengths: extractBulletPoints(analysis, 'STRENGTHS & PROTECTIVE FACTORS') ||
-                    extractBulletPoints(analysis, 'STRENGTHS') ||
-                    extractBulletPoints(analysis, 'Positive Indicators'),
+                     extractBulletPoints(analysis, 'STRENGTHS') ||
+                     extractBulletPoints(analysis, 'Positive Indicators'),
           recommendations: extractBulletPoints(analysis, 'SUPPORT RECOMMENDATIONS') ||
-                          extractBulletPoints(analysis, 'Recommendations') ||
-                          extractBulletPoints(analysis, 'IMMEDIATE ACTION REQUIRED'),
+                           extractBulletPoints(analysis, 'Recommendations') ||
+                           extractBulletPoints(analysis, 'IMMEDIATE ACTION REQUIRED'),
           lastAnalyzed: new Date().toLocaleDateString()
         }
-
-        console.log('Parsed insights:', insights)
-
-        // AI analysis complete
 
         setAIInsights(prev => ({
           ...prev,
@@ -740,13 +710,11 @@ export function ChildSummaryAnalytics() {
       }
     } catch (error) {
       console.error('Error loading AI insights:', error)
-      // Error handling
     } finally {
       // Set progress to 100% before hiding
       setAILoadingProgress(prev => ({ ...prev, [childId]: 100 }))
 
       setTimeout(() => {
-        console.log('🔵 Setting loadingInsights to FALSE for child:', childId)
         setLoadingInsights(prev => ({ ...prev, [childId]: false }))
         setAILoadingProgress(prev => ({ ...prev, [childId]: 0 }))
       }, 500) // Small delay to show 100% briefly
@@ -970,42 +938,10 @@ export function ChildSummaryAnalytics() {
     if (expandedChild === childId) {
       setExpandedChild(null)
     } else {
-      // Check if child needs safeguarding check
-      const child = children.find(c => c.id === childId)
-      const needsSafeguarding = child && child.averageMood && child.averageMood < 2.5
-
-      if (needsSafeguarding && !acknowledgedSafeguarding.has(childId)) {
-        // Show safeguarding modal first
-        setSafeguardingModal({ isOpen: true, childId })
-      } else {
-        // Proceed normally
-        setExpandedChild(childId)
-        await loadCheckInHistory(childId)
-        await loadAIInsights(childId)
-      }
+      setExpandedChild(childId)
+      await loadCheckInHistory(childId)
+      await loadAIInsights(childId)
     }
-  }
-
-  const handleSafeguardingAction = async (childId: string, action: string, notes?: string) => {
-    console.log('Safeguarding action taken:', { childId, action, notes })
-
-    // TODO: Log to database
-    // await supabase.from('safeguarding_actions').insert({
-    //   child_id: childId,
-    //   practitioner_id: user.id,
-    //   action_taken: action,
-    //   notes: notes,
-    //   triggered_at: new Date().toISOString()
-    // })
-
-    // Mark as acknowledged for this session
-    setAcknowledgedSafeguarding(prev => new Set(prev).add(childId))
-
-    // Close modal and expand child card
-    setSafeguardingModal({ isOpen: false, childId: null })
-    setExpandedChild(childId)
-    await loadCheckInHistory(childId)
-    await loadAIInsights(childId)
   }
 
   const getAvatarStyle = (childId: string) => {
@@ -1049,36 +985,6 @@ export function ChildSummaryAnalytics() {
     <div className="max-w-7xl mx-auto p-6">
       {/* Force Tailwind to include avatar colors */}
       {FORCE_TAILWIND_CLASSES}
-
-      {/* Safeguarding Modal */}
-      {safeguardingModal.isOpen && safeguardingModal.childId && (() => {
-        const child = children.find(c => c.id === safeguardingModal.childId)
-        if (!child) return null
-
-        // Get recent moods from mood history
-        const recentMoods = moodHistory[child.id]?.slice(0, 5).map(m => m.mood_numeric) || []
-
-        // Get concerning notes from check-in history
-        const concerningNotes = checkInHistory[child.id]
-          ?.filter(c => c.notes && c.notes !== 'No notes available')
-          .slice(0, 3)
-          .map(c => c.notes || '') || []
-
-        return (
-          <SafeguardingModal
-            isOpen={true}
-            onClose={() => setSafeguardingModal({ isOpen: false, childId: null })}
-            child={{
-              id: child.id,
-              name: child.name,
-              averageMood: child.averageMood || 0,
-              recentMoods,
-              concerningNotes
-            }}
-            onActionTaken={(action, notes) => handleSafeguardingAction(child.id, action, notes)}
-          />
-        )
-      })()}
 
       {/* Header */}
       <div className="mb-8">

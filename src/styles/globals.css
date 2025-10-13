@@ -267,7 +267,7 @@ html {
   [class*="bg-red-5"],
   [class*="bg-red-6"],
   .bg-destructive {
-    /* Keep original colors */
+    Keep original colors
   }
 */
 
@@ -438,53 +438,57 @@ html {
   // }
   */
 
-  // Ensure important utilities work
-  // .text-white {
-  //   color: #ffffff !important;
-  // }
+/* Ensure important utilities work
+.text-white {
+  color: #ffffff !important;
+}
 
-  // .bg-white {
-  //   background-color: #ffffff !important;
-  // }
+.bg-white {
+  background-color: #ffffff !important;
+}
 
-  // .bg-gray-50 {
-  //   background-color: #f9fafb !important;
-  // }
+.bg-gray-50 {
+  background-color: #f9fafb !important;
+}
 
-  // .bg-gray-100 {
-  //   background-color: #f3f4f6 !important;
-  // }
+.bg-gray-100 {
+  background-color: #f3f4f6 !important;
+}
 
-  // .bg-gray-200 {
-  //   background-color: #e5e7eb !important;
-  // }
+.bg-gray-200 {
+  background-color: #e5e7eb !important;
+}
 
-  // .bg-gray-300 {
-  //   background-color: #d1d5db !important;
-  // }
+.bg-gray-300 {
+  background-color: #d1d5db !important;
+}
 
-  // .bg-gray-400 {
-  //   background-color: #9ca3af !important;
-  // }
+.bg-gray-400 {
+  background-color: #9ca3af !important;
+}
 
-  // .bg-gray-500 {
-  //   background-color: #6b7280 !important;
-  // }
+.bg-gray-500 {
+  background-color: #6b7280 !important;
+}
 
-  // .bg-gray-600 {
-  //   background-color: #4b5563 !important;
-  // }
+.bg-gray-600 {
+  background-color: #4b5563 !important;
+}
 
-  // .bg-gray-700 {
-  //   background-color: #374151 !important;
-  // }
+.bg-gray-700 {
+  background-color: #374151 !important;
+}
 
-  // .bg-gray-800 {
-  //   background-color: #1f2937 !important;
-  // }
+.bg-gray-800 {
+  background-color: #1f2937 !important;
+}
 
-  // .bg-gray-900 {
-  //   background-color: #111827 !important;
-  // }
-// }
+.bg-gray-900 {
+  background-color: #111827 !important;
+}
 */
+@layer components {
+  .card-title {
+    @apply text-lg font-semibold text-gray-900;
+  }
+}
