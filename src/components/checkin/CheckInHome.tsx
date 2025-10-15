@@ -15,17 +15,87 @@ export function CheckInHome() {
   const [roseAnimation, setRoseAnimation] = useState(null)
   const [showBreathing, setShowBreathing] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
-  const [showTechniqueSelector, setShowTechniqueSelector] = useState(false)
-  const [selectedTechniqueId, setSelectedTechniqueId] = useState('belly')
+  const [showTechniqueSelector, setShowTechniqueSelector] = useState(true)
+  const [selectedTechniqueId, setSelectedTechniqueId] = useState('balloon')
+  const [showBreathingSettings, setShowBreathingSettings] = useState(true)
   const [breathingStarted, setBreathingStarted] = useState(false)
   const [isBreathingRunning, setIsBreathingRunning] = useState(false)
   const [buttonAnimationKey, setButtonAnimationKey] = useState(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [breathingTitle, setBreathingTitle] = useState("Let's breathe!")
+  const [breathingTitle, setBreathingTitle] = useState("Choose a breathing exercise")
   const [titleOpacity, setTitleOpacity] = useState(1)
+  const [showGuide, setShowGuide] = useState(false)
   const breathingStartRef = useRef<(() => void) | null>(null)
   const breathingPauseRef = useRef<(() => void) | null>(null)
   const breathingResumeRef = useRef<(() => void) | null>(null)
+
+  // Update title when technique selector visibility changes
+  useEffect(() => {
+    if (showTechniqueSelector) {
+      setBreathingTitle("Choose a breathing exercise")
+    } else {
+      setBreathingTitle("Let's breathe!")
+    }
+  }, [showTechniqueSelector])
+
+  // Get guide content based on selected technique
+  const getGuideContent = () => {
+    switch (selectedTechniqueId) {
+      case 'balloon':
+        return {
+          title: 'Balloon Breathing (Slow, Continuous Breaths In and Out)',
+          whatItIs: 'Unbroken, smooth, slow breathing — no pause between inhale and exhale. Can also be called cyclical breathing or coherent breathing.',
+          greatFor: [
+            'Inducing calm and presence',
+            'Regulating the nervous system gently',
+            'Entering a meditative or flow state',
+            'Helping children relax without structured patterns'
+          ],
+          bestUsedWhen: [
+            'Practising mindfulness or gentle grounding',
+            'Calming down gradually (e.g. after a meltdown or busy environment)',
+            'Working with younger children or neurodivergent individuals'
+          ]
+        }
+      case 'belly':
+        return {
+          title: 'Belly Breathing (Diaphragmatic Breathing)',
+          whatItIs: 'Breathing deeply into your abdomen (not your chest), engaging the diaphragm.',
+          greatFor: [
+            'Reducing anxiety & stress',
+            'Activating the parasympathetic nervous system (rest & digest)',
+            'Improving focus and emotional regulation',
+            'Helping kids & adults with sensory overload, panic, or ADHD',
+            'Regulating heart rate'
+          ],
+          bestUsedWhen: [
+            'You feel anxious, overwhelmed, or unfocused',
+            'Before sleep or in calming routines',
+            'In trauma-informed or grounding interventions'
+          ]
+        }
+      case 'box':
+        return {
+          title: 'Box Breathing (Square Breathing)',
+          whatItIs: 'Breathing in a structured rhythm:\nInhale — Hold — Exhale — Hold — typically 4 seconds each.',
+          greatFor: [
+            'Improving focus & concentration',
+            'Reducing stress & high-performance moments',
+            'Managing anxiety',
+            'Training emotional control (used by Navy SEALs, athletes, etc.)',
+            'Grounding when overwhelmed',
+            'Regulating nerves without getting too relaxed'
+          ],
+          bestUsedWhen: [
+            'Before a test, performance, or stressful event',
+            'During moments of emotional dysregulation',
+            'When you need to stay alert but calm'
+          ]
+        }
+      default:
+        return null
+    }
+  }
 
   // Garden card states
   const [gratefulItems, setGratefulItems] = useState<string[]>([])
@@ -746,61 +816,93 @@ export function CheckInHome() {
 
           {/* Desktop Navigation - hidden on mobile */}
           <div className="hidden md:flex fixed top-0 right-4 items-center gap-4" style={{ height: '80px', zIndex: 51 }}>
-            <button
-              onClick={() => navigate('/checkin/garden')}
-              className="cursor-pointer transition-all hover:opacity-70 relative"
-              style={{
-                fontSize: '14px',
-                color: '#1f2937',
-                fontWeight: '500',
-                background: 'none',
-                border: 'none',
-                padding: '8px'
-              }}
-              aria-label="My garden"
-            >
-              My garden
-              {location.pathname === '/checkin/garden' && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: '-22px',
-                  left: 0,
-                  right: 0,
-                  height: '2px',
-                  backgroundColor: '#1f2937'
-                }}></div>
-              )}
-            </button>
+            {location.pathname !== '/checkin/home' && (
+              <>
+                <button
+                  onClick={() => navigate('/checkin/garden')}
+                  className="cursor-pointer transition-all hover:opacity-70 relative"
+                  style={{
+                    fontSize: '14px',
+                    color: '#1f2937',
+                    fontWeight: '500',
+                    background: 'none',
+                    border: 'none',
+                    padding: '8px'
+                  }}
+                  aria-label="My garden"
+                >
+                  My garden
+                  {location.pathname === '/checkin/garden' && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '-22px',
+                      left: 0,
+                      right: 0,
+                      height: '2px',
+                      backgroundColor: '#1f2937'
+                    }}></div>
+                  )}
+                </button>
 
-            <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}></div>
+                <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}></div>
 
-            <button
-              onClick={() => navigate('/checkin/home')}
-              className="cursor-pointer transition-all hover:opacity-70 relative"
-              style={{
-                fontSize: '14px',
-                color: '#1f2937',
-                fontWeight: '500',
-                background: 'none',
-                border: 'none',
-                padding: '8px'
-              }}
-              aria-label="Check in"
-            >
-              Check in
-              {location.pathname === '/checkin/home' && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: '-22px',
-                  left: 0,
-                  right: 0,
-                  height: '2px',
-                  backgroundColor: '#1f2937'
-                }}></div>
-              )}
-            </button>
+                <button
+                  onClick={() => navigate('/checkin/home')}
+                  className="cursor-pointer transition-all hover:opacity-70 relative"
+                  style={{
+                    fontSize: '14px',
+                    color: '#1f2937',
+                    fontWeight: '500',
+                    background: 'none',
+                    border: 'none',
+                    padding: '8px'
+                  }}
+                  aria-label="Check in"
+                >
+                  Check in
+                  {location.pathname === '/checkin/home' && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '-22px',
+                      left: 0,
+                      right: 0,
+                      height: '2px',
+                      backgroundColor: '#1f2937'
+                    }}></div>
+                  )}
+                </button>
 
-            <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}></div>
+                <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}></div>
+
+                <button
+                  onClick={() => navigate('/checkin/feel-good-list')}
+                  className="cursor-pointer transition-all hover:opacity-70 relative"
+                  style={{
+                    fontSize: '14px',
+                    color: '#1f2937',
+                    fontWeight: '500',
+                    background: 'none',
+                    border: 'none',
+                    padding: '8px'
+                  }}
+                  aria-label="Feel good list"
+                >
+                  Feel good list
+                  {location.pathname === '/checkin/feel-good-list' && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '-22px',
+                      left: 0,
+                      right: 0,
+                      height: '2px',
+                      backgroundColor: '#1f2937'
+                    }}></div>
+                  )}
+                </button>
+
+                <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}></div>
+              </>
+            )}
 
             <button
               onClick={() => navigate('/checkin/profile')}
@@ -857,49 +959,82 @@ export function CheckInHome() {
           {/* Mobile Menu Links - Inside Header Bar */}
           {mobileMenuOpen && (
             <div className="md:hidden" style={{ paddingTop: '80px', paddingLeft: '20px', paddingRight: '20px' }}>
-              <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '0 0 4px 0' }}></div>
+              {location.pathname !== '/checkin/home' && (
+                <>
+                  <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '0 0 4px 0' }}></div>
 
-              <button
-                onClick={() => {
-                  navigate('/checkin/garden')
-                  setMobileMenuOpen(false)
-                }}
-                className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center"
-                style={{
-                  fontSize: '14px',
-                  color: '#1f2937',
-                  fontWeight: '500',
-                  background: 'none',
-                  border: 'none',
-                  padding: '12px 16px',
-                  height: '40px'
-                }}
-              >
-                My garden
-              </button>
+                  <button
+                    onClick={() => {
+                      navigate('/checkin/garden')
+                      setMobileMenuOpen(false)
+                    }}
+                    className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center"
+                    style={{
+                      fontSize: '14px',
+                      color: '#1f2937',
+                      fontWeight: '500',
+                      background: 'none',
+                      border: 'none',
+                      padding: '12px 16px',
+                      height: '40px'
+                    }}
+                  >
+                    My garden
+                  </button>
 
-              <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
+                  <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
 
-              <button
-                onClick={() => {
-                  navigate('/checkin/home')
-                  setMobileMenuOpen(false)
-                }}
-                className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center"
-                style={{
-                  fontSize: '14px',
-                  color: '#1f2937',
-                  fontWeight: '500',
-                  background: 'none',
-                  border: 'none',
-                  padding: '12px 16px',
-                  height: '40px'
-                }}
-              >
-                Check in
-              </button>
+                  <button
+                    onClick={() => {
+                      navigate('/checkin/home')
+                      setMobileMenuOpen(false)
+                    }}
+                    className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center"
+                    style={{
+                      fontSize: '14px',
+                      color: '#1f2937',
+                      fontWeight: '500',
+                      background: 'none',
+                      border: 'none',
+                      padding: '12px 16px',
+                      height: '40px'
+                    }}
+                  >
+                    Check in
+                  </button>
 
-              <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
+                  <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
+                </>
+              )}
+
+              {location.pathname === '/checkin/home' && (
+                <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '0 0 4px 0' }}></div>
+              )}
+
+              {location.pathname !== '/checkin/home' && (
+                <>
+                  <button
+                    onClick={() => {
+                      navigate('/checkin/feel-good-list')
+                      setMobileMenuOpen(false)
+                    }}
+                    className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center"
+                    style={{
+                      fontSize: '14px',
+                      color: '#1f2937',
+                      fontWeight: '500',
+                      background: 'none',
+                      border: 'none',
+                      padding: '12px 16px',
+                      height: '40px'
+                    }}
+                  >
+                    Feel good list
+                  </button>
+
+                  <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
+                </>
+              )}
 
               <button
                 onClick={() => {
@@ -955,6 +1090,7 @@ export function CheckInHome() {
             currentStepHasSelection={false}
             emotionGridStep={1}
             // No navigation on breathing page
+            onGuideClick={() => setShowGuide(true)}
           />
 
           {/* Close button positioned at vertical center right */}
@@ -1089,6 +1225,8 @@ export function CheckInHome() {
             onExternalTechniqueSelectorChange={setShowTechniqueSelector}
             externalSelectedTechniqueId={selectedTechniqueId}
             onExternalSelectedTechniqueIdChange={setSelectedTechniqueId}
+            externalShowSettings={showBreathingSettings}
+            onExternalSettingsChange={setShowBreathingSettings}
             externalBreathingStarted={breathingStarted}
             onExternalBreathingStartedChange={setBreathingStarted}
             onBreathingTitleChange={handleBreathingTitleChange}
@@ -1152,7 +1290,7 @@ export function CheckInHome() {
               }}
               aria-label="Open settings"
             >
-              <Settings style={{ width: '24px', height: '24px', color: '#3a7ddc' }} />
+              <Menu style={{ width: '24px', height: '24px', color: '#3a7ddc' }} />
             </button>
 
             {/* Play/Pause Button */}
@@ -1161,6 +1299,7 @@ export function CheckInHome() {
               onClick={() => {
                 if (!breathingStarted) {
                   console.log('Play clicked!');
+                  setShowTechniqueSelector(false); // Close technique selector cards when starting
                   if (breathingStartRef.current) {
                     breathingStartRef.current();
                   }
@@ -1239,6 +1378,177 @@ export function CheckInHome() {
         </>
       )}
 
+
+      {/* Guide Overlay */}
+      {showGuide && showBreathing && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 2000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+          onClick={() => setShowGuide(false)}
+        >
+          <div
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '16px',
+              maxWidth: '500px',
+              width: '100%',
+              maxHeight: '80vh',
+              overflow: 'auto',
+              padding: '32px',
+              position: 'relative',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setShowGuide(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              aria-label="Close guide"
+            >
+              <X style={{ width: '24px', height: '24px', color: '#6b7280' }} />
+            </button>
+
+            {/* Guide content */}
+            {(() => {
+              const content = getGuideContent()
+              if (!content) return null
+
+              return (
+                <>
+                  <h2 style={{
+                    fontSize: '20px',
+                    fontWeight: '700',
+                    color: '#1f2937',
+                    marginBottom: '24px',
+                    paddingRight: '32px',
+                    lineHeight: '1.4'
+                  }}>
+                    {content.title}
+                  </h2>
+
+                  <div style={{ marginBottom: '24px' }}>
+                    <h3 style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1f2937',
+                      marginBottom: '8px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em'
+                    }}>
+                      What it is:
+                    </h3>
+                    <p style={{
+                      fontSize: '15px',
+                      color: '#4b5563',
+                      lineHeight: '1.6',
+                      whiteSpace: 'pre-line'
+                    }}>
+                      {content.whatItIs}
+                    </p>
+                  </div>
+
+                  <div style={{ marginBottom: '24px' }}>
+                    <h3 style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1f2937',
+                      marginBottom: '12px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em'
+                    }}>
+                      Great for:
+                    </h3>
+                    <ul style={{
+                      listStyle: 'none',
+                      padding: 0,
+                      margin: 0
+                    }}>
+                      {content.greatFor.map((item, index) => (
+                        <li key={index} style={{
+                          fontSize: '15px',
+                          color: '#4b5563',
+                          lineHeight: '1.6',
+                          marginBottom: '8px',
+                          paddingLeft: '20px',
+                          position: 'relative'
+                        }}>
+                          <span style={{
+                            position: 'absolute',
+                            left: '0',
+                            color: '#3a7ddc',
+                            fontWeight: '600'
+                          }}>•</span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1f2937',
+                      marginBottom: '12px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em'
+                    }}>
+                      Best used when:
+                    </h3>
+                    <ul style={{
+                      listStyle: 'none',
+                      padding: 0,
+                      margin: 0
+                    }}>
+                      {content.bestUsedWhen.map((item, index) => (
+                        <li key={index} style={{
+                          fontSize: '15px',
+                          color: '#4b5563',
+                          lineHeight: '1.6',
+                          marginBottom: '8px',
+                          paddingLeft: '20px',
+                          position: 'relative'
+                        }}>
+                          <span style={{
+                            position: 'absolute',
+                            left: '0',
+                            color: '#3a7ddc',
+                            fontWeight: '600'
+                          }}>•</span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* Yellow swoosh section at bottom - only show when breathing */}
       {showBreathing && (

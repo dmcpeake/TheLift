@@ -883,8 +883,8 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
               </button>
             )}
 
-            {/* Next Button - only show if emotions are selected AND "why" has been completed */}
-            {selectedEmotions.length > 0 && hasCompletedWhy && (
+            {/* Next Button - only show if emotions are selected */}
+            {selectedEmotions.length > 0 && (
               <button
                 key={`next-${buttonAnimationKey}`}
                 onClick={() => {
@@ -1109,10 +1109,10 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                     </button>
                   )}
 
-                  {/* WHY button - shown when emotions are selected, replaces back button with animation */}
+                  {/* DONE button - shown when emotions are selected, replaces back button with animation */}
                   {hasSelectedEmotions && (
                     <button
-                      key={`why-${buttonAnimationKey}`}
+                      key={`done-${buttonAnimationKey}`}
                       onClick={() => {
                         if (onPartialSave) {
                           const data = {
@@ -1124,7 +1124,8 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                           }
                           onPartialSave(data)
                         }
-                        setCurrentStep(3)
+                        setHasCompletedWhy(true) // Mark that emotions are completed
+                        setCurrentStep(1) // Return to quadrant selection
                       }}
                       style={{
                         width: '140px',
@@ -1133,22 +1134,30 @@ export function EmotionGrid({ onComplete, showNextButton = false, onSelectionMad
                         alignItems: 'center',
                         justifyContent: 'center',
                         borderRadius: '28px',
-                        backgroundColor: '#3a7ddc',
+                        backgroundColor: 'white',
                         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                        border: 'none',
+                        border: '2px solid #3a7ddc',
                         cursor: 'pointer',
-                        transition: 'background-color 0.3s ease',
-                        color: 'white',
+                        transition: 'all 0.3s ease',
+                        color: '#3a7ddc',
                         fontSize: '16px',
                         fontWeight: '600',
                         animation: 'emotionCircleExpand 0.4s ease-out'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
-                      aria-label="Continue to why"
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f8fafc'
+                        e.currentTarget.style.borderColor = '#2e6bc7'
+                        e.currentTarget.style.color = '#2e6bc7'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'white'
+                        e.currentTarget.style.borderColor = '#3a7ddc'
+                        e.currentTarget.style.color = '#3a7ddc'
+                      }}
+                      aria-label="Done selecting emotions"
                     >
                       <span style={{ animation: 'emotionTextFadeIn 0.4s ease-out' }}>
-                        WHY?
+                        DONE
                       </span>
                     </button>
                   )}

@@ -72,7 +72,7 @@ export function SquareAnimation({ phase, pace, cycle, totalCycles }: SquareAnima
 
   const getInstructionText = () => {
     switch (phase) {
-      case 'intro': return { title: "", subtitle: 'Tap play to begin' }
+      case 'intro': return { title: "", subtitle: null }
       case 'inhale': return { title: 'Inhale', subtitle: null }
       case 'hold': return { title: 'Hold', subtitle: null }
       case 'exhale': return { title: 'Exhale', subtitle: null }

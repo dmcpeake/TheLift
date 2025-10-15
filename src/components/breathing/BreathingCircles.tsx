@@ -76,6 +76,7 @@ export function BreathingCircles(props: BreathingCirclesProps & {
   const handleSelectedTechniqueIdChange = embedded && onExternalSelectedTechniqueIdChange ? onExternalSelectedTechniqueIdChange : setSelectedTechniqueId
   const [sessionId] = useState(() => crypto.randomUUID())
   const [roseAnimation, setRoseAnimation] = useState(null)
+  const [techniqueAnimations, setTechniqueAnimations] = useState<Record<string, any>>({})
   const startTimeRef = useRef<number>(Date.now())
   const phaseTimerRef = useRef<NodeJS.Timeout>()
 
@@ -114,6 +115,33 @@ export function BreathingCircles(props: BreathingCirclesProps & {
       .then(response => response.json())
       .then(data => setRoseAnimation(data))
       .catch(error => console.error('Error loading rose animation:', error))
+  }, [])
+
+  // Load technique animations for preview
+  useEffect(() => {
+    const animationFiles: Record<string, string> = {
+      belly: '/Breathe01.json',
+      box: '/box breathing 4-4-4.json',
+      balloon: '/BreatheCircle.json'
+    }
+
+    const loadAnimations = async () => {
+      const loadedAnimations: Record<string, any> = {}
+
+      for (const [id, file] of Object.entries(animationFiles)) {
+        try {
+          const response = await fetch(file)
+          const data = await response.json()
+          loadedAnimations[id] = data
+        } catch (error) {
+          console.error(`Error loading animation for ${id}:`, error)
+        }
+      }
+
+      setTechniqueAnimations(loadedAnimations)
+    }
+
+    loadAnimations()
   }, [])
 
   // Save settings to localStorage
@@ -506,11 +534,36 @@ export function BreathingCircles(props: BreathingCirclesProps & {
                         boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
                       }}
                     >
-                      <div style={{ fontSize: '1rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.25rem' }}>
-                        {technique.name}
-                      </div>
-                      <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                        {technique.description}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '1rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.25rem' }}>
+                            {technique.name}
+                          </div>
+                          <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                            {technique.description}
+                          </div>
+                        </div>
+                        {/* Lottie Animation Preview */}
+                        {techniqueAnimations[technique.id] && (
+                          <div style={{
+                            width: '60px',
+                            height: '60px',
+                            flexShrink: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <Lottie
+                              animationData={techniqueAnimations[technique.id]}
+                              loop={true}
+                              autoplay={true}
+                              style={{
+                                width: '100%',
+                                height: '100%'
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
                     </button>
                   )

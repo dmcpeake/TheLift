@@ -45,7 +45,7 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation, onCe
       case 5: return '#95c5c8' // Very Happy - light blue/teal
       case 4: return '#caded0' // Happy - light green
       case 3: return '#f8d678' // OK - yellow
-      case 2: return '#e38d3b' // Sad - orange
+      case 2: return '#edb07a' // Sad - orange
       case 1: return '#e38bac' // Very Sad - pink
       default: return '#d1d5db' // Default gray for no selection
     }
@@ -55,7 +55,7 @@ export function WellbeingRadialGraph({ sections, size = 400, theoAnimation, onCe
   // Mood level colors (matching mood meter)
   const moodColors = {
     'very_sad': '#e38bac',    // Ring 1 (center)
-    'sad': '#e38d3b',         // Ring 2
+    'sad': '#edb07a',         // Ring 2
     'ok': '#f8d678',          // Ring 3
     'happy': '#caded0',       // Ring 4
     'very_happy': '#95c5c8'   // Ring 5 (outer)

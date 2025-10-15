@@ -46,6 +46,16 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
         ctx.lineWidth = brushSize
         ctx.strokeStyle = color
         setContext(ctx)
+
+        // Restore saved canvas data
+        const savedDrawing = sessionStorage.getItem('drawYourMind')
+        if (savedDrawing) {
+          const img = new Image()
+          img.onload = () => {
+            ctx.drawImage(img, 0, 0)
+          }
+          img.src = savedDrawing
+        }
       }
     }
   }, [])
@@ -154,13 +164,21 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
     setLastY(y)
   }
 
+  const saveCanvas = () => {
+    if (!canvasRef.current) return
+    const dataURL = canvasRef.current.toDataURL()
+    sessionStorage.setItem('drawYourMind', dataURL)
+  }
+
   const stopDrawing = () => {
     setIsDrawing(false)
+    saveCanvas()
   }
 
   const clearCanvas = () => {
     if (!context || !canvasRef.current) return
     context.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+    saveCanvas()
   }
 
   return (

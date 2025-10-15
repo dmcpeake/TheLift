@@ -102,7 +102,7 @@ export function Stage({
   const getInstructionText = () => {
     switch (phase) {
       case 'intro':
-        return { title: "", subtitle: 'Tap play to begin' }
+        return { title: "", subtitle: null }
       case 'inhale':
         return { title: 'Breathe in', subtitle: null }
       case 'hold':
@@ -115,6 +115,22 @@ export function Stage({
         return { title: 'Breathe', subtitle: null }
     }
   }
+
+  // Update title for balloon breathing
+  useEffect(() => {
+    if (!onTitleChange) return
+
+    // Only update title for balloon breathing (default case)
+    const techniqueId = technique?.id || 'belly'
+    if (techniqueId !== 'balloon') return
+
+    const instructionText = getInstructionText()
+    if (instructionText.title) {
+      onTitleChange(instructionText.title)
+    } else if (phase === 'intro') {
+      onTitleChange("Let's breathe!")
+    }
+  }, [phase, technique, onTitleChange])
 
   // Calculate progress for the outer ring based on time
   const getProgressPercent = () => {
@@ -327,26 +343,7 @@ export function Stage({
                 </>
               )}
 
-              <div className="breathing-text" style={{
-                position: 'relative',
-                zIndex: 5,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%'
-              }}>
-                <h2 className="breathing-instruction" style={{
-                  fontSize: getInstructionText().title === "Let's breathe!" ? '20px' : undefined,
-                  fontWeight: getInstructionText().title === "Let's breathe!" ? 'bold' : undefined,
-                  margin: 0
-                }}>{getInstructionText().title}</h2>
-                {getInstructionText().subtitle && (
-                  <p className="breathing-subtitle" style={{ fontSize: '16px', opacity: 0.8 }}>
-                    {getInstructionText().subtitle}
-                  </p>
-                )}
-              </div>
+              {/* Text removed - title updates handled via onTitleChange */}
             </div>
           </div>
         )

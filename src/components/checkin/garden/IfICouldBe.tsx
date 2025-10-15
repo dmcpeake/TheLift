@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 
 interface IfICouldBeProps {
@@ -6,9 +6,19 @@ interface IfICouldBeProps {
 }
 
 export function IfICouldBe({ onClose }: IfICouldBeProps) {
-  const [whatIWouldBe, setWhatIWouldBe] = useState('')
-  const [whyReason, setWhyReason] = useState('')
+  const [whatIWouldBe, setWhatIWouldBe] = useState(() => {
+    const saved = sessionStorage.getItem('ifICouldBe')
+    return saved ? JSON.parse(saved).whatIWouldBe : ''
+  })
+  const [whyReason, setWhyReason] = useState(() => {
+    const saved = sessionStorage.getItem('ifICouldBe')
+    return saved ? JSON.parse(saved).whyReason : ''
+  })
   const [isRecording, setIsRecording] = useState<'what' | 'why' | null>(null)
+
+  useEffect(() => {
+    sessionStorage.setItem('ifICouldBe', JSON.stringify({ whatIWouldBe, whyReason }))
+  }, [whatIWouldBe, whyReason])
 
   const handleVoiceCapture = (field: 'what' | 'why') => {
     // Voice capture functionality - placeholder for now

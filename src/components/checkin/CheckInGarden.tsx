@@ -414,6 +414,34 @@ export function CheckInGarden() {
             <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}></div>
 
             <button
+              onClick={() => navigate('/checkin/feel-good-list')}
+              className="cursor-pointer transition-all hover:opacity-70 relative"
+              style={{
+                fontSize: '14px',
+                color: '#1f2937',
+                fontWeight: '500',
+                background: 'none',
+                border: 'none',
+                padding: '8px'
+              }}
+              aria-label="Feel good list"
+            >
+              Feel good list
+              {location.pathname === '/checkin/feel-good-list' && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-22px',
+                  left: 0,
+                  right: 0,
+                  height: '2px',
+                  backgroundColor: '#1f2937'
+                }}></div>
+              )}
+            </button>
+
+            <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}></div>
+
+            <button
               onClick={() => navigate('/checkin/profile')}
               className="cursor-pointer transition-all hover:opacity-70 relative"
               style={{
@@ -530,6 +558,27 @@ export function CheckInGarden() {
 
               <button
                 onClick={() => {
+                  navigate('/checkin/feel-good-list')
+                  setMobileMenuOpen(false)
+                }}
+                className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center"
+                style={{
+                  fontSize: '14px',
+                  color: '#1f2937',
+                  fontWeight: '500',
+                  background: 'none',
+                  border: 'none',
+                  padding: '12px 16px',
+                  height: '40px'
+                }}
+              >
+                Feel good list
+              </button>
+
+              <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
+
+              <button
+                onClick={() => {
                   navigate('/checkin/profile')
                   setMobileMenuOpen(false)
                 }}
@@ -632,10 +681,10 @@ export function CheckInGarden() {
           <div className="garden-content-inner max-w-5xl mx-auto">
             {/* Title */}
             <h1 className="garden-title text-4xl font-bold text-gray-900 mb-2 text-center">
-              My Garden
+              This is your positive mindset practice
             </h1>
             <p className="garden-subtitle text-lg text-gray-700 mb-12 text-center">
-              Choose an activity to help you reflect
+              Choose an activity to help you reflect on the good things of your day
             </p>
 
             {/* Activity Cards Grid */}

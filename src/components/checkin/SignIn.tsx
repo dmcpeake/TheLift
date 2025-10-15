@@ -30,7 +30,7 @@ export function SignIn() {
     e.preventDefault()
     if (isFormValid) {
       window.scrollTo(0, 0)
-      navigate('/checkin/garden')
+      navigate('/checkin/home')
     }
   }
 

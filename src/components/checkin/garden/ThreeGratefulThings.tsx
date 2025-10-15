@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 
 interface ThreeGratefulThingsProps {
@@ -6,8 +6,15 @@ interface ThreeGratefulThingsProps {
 }
 
 export function ThreeGratefulThings({ onClose }: ThreeGratefulThingsProps) {
-  const [responses, setResponses] = useState(['', '', ''])
+  const [responses, setResponses] = useState<string[]>(() => {
+    const saved = sessionStorage.getItem('threeGratefulThings')
+    return saved ? JSON.parse(saved) : ['', '', '']
+  })
   const [isRecording, setIsRecording] = useState<number | null>(null)
+
+  useEffect(() => {
+    sessionStorage.setItem('threeGratefulThings', JSON.stringify(responses))
+  }, [responses])
 
   const handleTextChange = (index: number, value: string) => {
     const newResponses = [...responses]

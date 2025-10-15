@@ -9,6 +9,7 @@ interface ProgressHeaderProps {
   currentStepHasSelection: boolean
   emotionGridStep: number
   onNavigateToStep?: (stepId: string) => void
+  onGuideClick?: () => void
 }
 
 const progressSegments = [
@@ -28,7 +29,8 @@ export function ProgressHeader({
   completedData,
   currentStepHasSelection,
   emotionGridStep,
-  onNavigateToStep
+  onNavigateToStep,
+  onGuideClick
 }: ProgressHeaderProps) {
   const [theoAnimation, setTheoAnimation] = useState(null)
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false)
@@ -58,7 +60,11 @@ export function ProgressHeader({
   }
 
   const handleGuideClick = () => {
-    setIsGuideModalOpen(true)
+    if (onGuideClick) {
+      onGuideClick()
+    } else {
+      setIsGuideModalOpen(true)
+    }
   }
 
   return (

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Lottie from 'lottie-react'
 import { Volume2 } from 'lucide-react'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
+import { WellbeingRadialGraph } from '../shared/WellbeingRadialGraph'
 import BlushingShaded from '../../assets/animations/Blushing_Shaded.json'
 import HappyShaded from '../../assets/animations/Happy_Shaded.json'
 import MehShaded from '../../assets/animations/Meh_Shaded.json'
@@ -38,6 +39,7 @@ interface WellbeingWheelProps {
 
 export function WellbeingWheel({ onComplete, showNextButton = false, onSelectionMade, hideDebugInfo = false, triggerCompletion = false, initialData, onPartialSave }: WellbeingWheelProps = {}) {
   const navigate = useNavigate()
+  const [showIntro, setShowIntro] = useState(true)
   const [sections, setSections] = useState<Record<string, SectionData>>({})
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
   const [finalData, setFinalData] = useState<WheelData | null>(null)
@@ -116,6 +118,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
         })
         setSections(sectionsMap)
         if (Object.keys(sectionsMap).length > 0) {
+          setShowIntro(false) // Skip intro if we have existing data
           onSelectionMade?.()
         }
       }
@@ -165,7 +168,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
       case 'work':
         return 'If you think about your home or schoolwork - how was it today?<br>Has it been easy, hard, fun, boring or just ok?'
       case 'health':
-        return 'How healthy are you today? Think about your sleep, food, water, exercise.<br>Have you had the energy you need for all the things you wanted to do?'
+        return 'How healthy are you feeling today? Think about your sleep, food, water, exercise.<br>Have you had the energy you need for all the things you wanted to do?'
       case 'family':
         return 'Think about your special family and all the love and support you have between you.<br>How connected are you feeling today?'
       case 'fun':
@@ -224,7 +227,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
     { animation: BlushingShaded, level: 'very_happy', numeric: 5, color: '#95c5c8' },
     { animation: HappyShaded, level: 'happy', numeric: 4, color: '#caded0' },
     { animation: MehShaded, level: 'ok', numeric: 3, color: '#f8d678' },
-    { animation: SadTearShaded, level: 'sad', numeric: 2, color: '#e38d3b' },
+    { animation: SadTearShaded, level: 'sad', numeric: 2, color: '#edb07a' },
     { animation: CryingShaded, level: 'very_sad', numeric: 1, color: '#e38bac' }
   ]
 
@@ -618,8 +621,69 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
         }
       `}</style>
 
-      {/* Centered title like breathing exercise */}
-      <div className="text-center wellbeing-title-container" style={{ marginBottom: '2rem' }}>
+      {/* Intro view */}
+      {showIntro && (
+        <div className="flex flex-col items-center justify-center min-h-[500px] p-4">
+          <div className="text-center mb-8" style={{ marginTop: '0px' }}>
+            <h1 className="text-gray-900 mb-3" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+              Now, how do you feel about different areas of your life?
+            </h1>
+            <p className="text-gray-600 mx-auto px-4" style={{ fontSize: '16px', fontWeight: 400, lineHeight: '1.5', maxWidth: '600px' }}>
+              Each section helps you think about different aspects of your day.
+            </p>
+          </div>
+
+          {/* Example wheel */}
+          <div className="mb-8">
+            <WellbeingRadialGraph
+              sections={[
+                { name: 'My friends', mood_level: 'very_happy', mood_numeric: 5 },
+                { name: 'My work', mood_level: 'happy', mood_numeric: 4 },
+                { name: 'My health', mood_level: 'ok', mood_numeric: 3 },
+                { name: 'My family', mood_level: 'very_happy', mood_numeric: 5 },
+                { name: 'My fun & play', mood_level: 'sad', mood_numeric: 2 },
+                { name: 'My safety', mood_level: 'happy', mood_numeric: 4 },
+                { name: 'My emotions', mood_level: 'ok', mood_numeric: 3 }
+              ]}
+              size={360}
+            />
+          </div>
+
+          {/* NEXT button */}
+          <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center" style={{ zIndex: 1000 }}>
+            <button
+              onClick={() => setShowIntro(false)}
+              style={{
+                width: '140px',
+                height: '56px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '28px',
+                backgroundColor: '#3a7ddc',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s ease',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '600'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
+              aria-label="Continue to wellbeing wheel"
+            >
+              NEXT
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Main wellbeing wheel content */}
+      {!showIntro && (
+        <>
+          {/* Centered title like breathing exercise */}
+          <div className="text-center wellbeing-title-container" style={{ marginBottom: '2rem' }}>
         <div className="wellbeing-title-inline-container" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px' }}>
           <h1
             className="text-gray-900"
@@ -1030,7 +1094,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                       opacity: sections[currentSection.id]?.mood_level ? 0 : 1,
                       transform: sections[currentSection.id]?.mood_level ? 'scale(0.8)' : 'scale(1)',
                       pointerEvents: sections[currentSection.id]?.mood_level ? 'none' : 'auto',
-                      transitionDelay: sections[currentSection.id]?.mood_level ? '0.7s' : '0s'
+                      transitionDelay: sections[currentSection.id]?.mood_level ? '0.35s' : '0s'
                     }}
                   >
                     <div style={{ position: 'absolute', left: '50%', top: '50%', transform: `translate(-50%, -50%) rotate(${rotationOffset}deg)`, zIndex: 4, transition: 'transform 0.8s ease-in-out' }}>
@@ -1080,11 +1144,9 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                             }}
                             onMouseEnter={(e) => {
                               e.currentTarget.style.fillOpacity = '1.0'
-                              setHoveredMood(mood.level)
                             }}
                             onMouseLeave={(e) => {
                               e.currentTarget.style.fillOpacity = isSelected ? '1.0' : '0.8'
-                              setHoveredMood(null)
                             }}
                             onClick={() => selectMood(currentSection.id, mood, index)}
                           />
@@ -1108,8 +1170,6 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                             height="70"
                             className="cursor-pointer"
                             onClick={() => selectMood(currentSection.id, mood, index)}
-                            onMouseEnter={() => setHoveredMood(mood.level)}
-                            onMouseLeave={() => setHoveredMood(null)}
                           >
                             <div style={{
                               width: '70px',
@@ -1142,15 +1202,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                       style={{ pointerEvents: 'none' }}
                     >
                       <div className="text-center">
-                        {hoveredMood ? (
-                          <span className="text-lg font-medium text-gray-800 capitalize">
-                            {hoveredMood.replace('_', ' ')}
-                          </span>
-                        ) : sections[currentSection.id]?.mood_level ? (
-                          <span className="text-lg font-medium text-gray-800 capitalize">
-                            {sections[currentSection.id].mood_level.replace('_', ' ')}
-                          </span>
-                        ) : (
+                        {!sections[currentSection.id]?.mood_level && (
                           <span className="text-base text-gray-500">
                             Choose
                           </span>
@@ -1165,7 +1217,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                       className="wellbeing-text-input"
                       style={{
                         opacity: 0,
-                        animation: 'fadeInDelayed 0.3s ease-in-out 1.5s forwards',
+                        animation: 'fadeInDelayed 0.3s ease-in-out 0.65s forwards',
                         position: 'absolute',
                         top: '40px',
                         left: 0,
@@ -1176,7 +1228,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
                     >
                       <div className="w-full max-w-sm">
                         <h3 className="text-lg font-medium text-gray-800 mb-4 text-center">
-                          Why are you feeling {sections[currentSection.id]?.mood_level?.replace('_', ' ')}?
+                          Why are you feeling this way?
                         </h3>
                         <div className="relative">
                           <textarea
@@ -1457,11 +1509,14 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
           </button>
         </div>
       )}
+        </>
+      )}
 
       {/* Yellow swoosh section at bottom */}
       <div className="yellow-swoosh-mobile-hide">
         <YellowSwoosh />
       </div>
+
     </>
   )
 }

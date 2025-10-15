@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, TreePine, X } from 'lucide-react'
 import { BreathingCircles } from '../breathing/BreathingCircles'
@@ -14,6 +14,7 @@ import HappyShaded from '../../assets/animations/Happy_Shaded.json'
 import MehShaded from '../../assets/animations/Meh_Shaded.json'
 import SadTearShaded from '../../assets/animations/Sad_Tear_Shaded.json'
 import CryingShaded from '../../assets/animations/Crying_Shaded.json'
+import { AuthContext } from '../../utils/auth/context'
 
 type FlowStep = 'checkin' | 'mood' | 'emotions' | 'wellbeing' | 'chart' | 'talk' | 'garden' | 'complete'
 
@@ -28,6 +29,7 @@ const steps = [
 export function CheckInFlow() {
   const { step } = useParams<{ step: string }>()
   const navigate = useNavigate()
+  const { logout } = useContext(AuthContext)
   const [completeMood, setCompleteMood] = useState<string | null>(null)
   const [completedData, setCompletedData] = useState<Record<string, any>>({})
   const [currentStepHasSelection, setCurrentStepHasSelection] = useState(false)
@@ -41,8 +43,14 @@ export function CheckInFlow() {
   const [showSupportLightbox, setShowSupportLightbox] = useState(false)
   const [theoDocumentAnimation, setTheoDocumentAnimation] = useState<any>(null)
   const [activeCardIndex, setActiveCardIndex] = useState(0)
+  const [cardFadeState, setCardFadeState] = useState<'in' | 'out'>('in')
+  const [flippedCards, setFlippedCards] = useState<boolean[]>([false, false, false])
   const [theoSuccessAnimation, setTheoSuccessAnimation] = useState<any>(null)
   const [theoThumbsUpAnimation, setTheoThumbsUpAnimation] = useState<any>(null)
+  const [theoPuzzleAnimation, setTheoPuzzleAnimation] = useState<any>(null)
+  const [theoFlyingAnimation, setTheoFlyingAnimation] = useState<any>(null)
+  const [theoRocketAnimation, setTheoRocketAnimation] = useState<any>(null)
+  const [currentTheoAnimation, setCurrentTheoAnimation] = useState<any>(null)
 
   const currentStep = (step || 'mood') as FlowStep
   const currentStepIndex = steps.findIndex(s => s.id === currentStep)
@@ -66,8 +74,42 @@ export function CheckInFlow() {
 
     fetch('/theo-thumb-up.json')
       .then(response => response.json())
-      .then(data => setTheoThumbsUpAnimation(data))
+      .then(data => {
+        setTheoThumbsUpAnimation(data)
+        setCurrentTheoAnimation(data) // Set default animation
+      })
       .catch(error => console.error('Error loading Theo thumbs up animation:', error))
+
+    fetch('/theo-puzzle.json')
+      .then(response => response.json())
+      .then(data => setTheoPuzzleAnimation(data))
+      .catch(error => console.error('Error loading Theo puzzle animation:', error))
+
+    fetch('/theo-flying.json')
+      .then(response => response.json())
+      .then(data => setTheoFlyingAnimation(data))
+      .catch(error => console.error('Error loading Theo flying animation:', error))
+
+    fetch('/theo-rocket.json')
+      .then(response => response.json())
+      .then(data => setTheoRocketAnimation(data))
+      .catch(error => console.error('Error loading Theo rocket animation:', error))
+  }, [])
+
+  // Cycle through support tip cards
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Fade out
+      setCardFadeState('out')
+
+      // Wait for fade out, then change card and fade in
+      setTimeout(() => {
+        setActiveCardIndex((prev) => (prev + 1) % 3)
+        setCardFadeState('in')
+      }, 500) // 0.5s fade out duration
+    }, 5500) // 5s display + 0.5s fade = 5.5s total
+
+    return () => clearInterval(interval)
   }, [])
 
   // Reset selection state when step changes
@@ -635,7 +677,7 @@ export function CheckInFlow() {
                 </div>
 
                 {/* MY GARDEN Button - desktop only */}
-                <div className="complete-desktop-button hidden md:flex justify-center" style={{ marginBottom: '20px', marginTop: '-40px', position: 'relative', zIndex: 20 }}>
+                <div className="complete-desktop-button hidden md:flex justify-center" style={{ marginBottom: '20px', marginTop: '-40px', position: 'relative', zIndex: 20, gap: '16px' }}>
                   <button
                     onClick={() => completeMood && navigate('/checkin/garden')}
                     disabled={!completeMood}
@@ -663,13 +705,45 @@ export function CheckInFlow() {
                   >
                     MY GARDEN
                   </button>
+                  <button
+                    onClick={() => {
+                      if (completeMood) {
+                        logout()
+                        navigate('/child/login')
+                      }
+                    }}
+                    disabled={!completeMood}
+                    className="font-semibold text-lg transition-all duration-200"
+                    style={{
+                      backgroundColor: '#e87e67',
+                      color: 'white',
+                      height: '60px',
+                      borderRadius: '30px',
+                      paddingLeft: '50px',
+                      paddingRight: '50px',
+                      border: '2px solid white',
+                      cursor: completeMood ? 'pointer' : 'not-allowed',
+                      boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)',
+                      position: 'relative',
+                      zIndex: 20,
+                      opacity: completeMood ? 1 : 0.3
+                    }}
+                    onMouseEnter={(e) => {
+                      if (completeMood) e.currentTarget.style.backgroundColor = '#d66e5a'
+                    }}
+                    onMouseLeave={(e) => {
+                      if (completeMood) e.currentTarget.style.backgroundColor = '#e87e67'
+                    }}
+                  >
+                    BYE FOR NOW!
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* MY GARDEN Button - mobile only */}
-          <div className="complete-mobile-button md:hidden flex justify-center" style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
+          {/* MY GARDEN & BYE FOR NOW Buttons - mobile only */}
+          <div className="complete-mobile-button md:hidden flex justify-center" style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999, gap: '12px' }}>
             <button
               onClick={() => completeMood && navigate('/checkin/garden')}
               disabled={!completeMood}
@@ -677,7 +751,7 @@ export function CheckInFlow() {
               style={{
                 backgroundColor: '#e87e67',
                 color: 'white',
-                width: '180px',
+                width: '160px',
                 height: '56px',
                 borderRadius: '28px',
                 border: '2px solid white',
@@ -701,6 +775,43 @@ export function CheckInFlow() {
               }}
             >
               MY GARDEN
+            </button>
+            <button
+              onClick={() => {
+                if (completeMood) {
+                  logout()
+                  navigate('/child/login')
+                }
+              }}
+              disabled={!completeMood}
+              className="transition-all duration-200"
+              style={{
+                backgroundColor: '#e87e67',
+                color: 'white',
+                width: '160px',
+                height: '56px',
+                borderRadius: '28px',
+                border: '2px solid white',
+                cursor: completeMood ? 'pointer' : 'not-allowed',
+                fontSize: '16px',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)',
+                position: 'relative',
+                zIndex: 10001,
+                pointerEvents: 'auto',
+                opacity: completeMood ? 1 : 0.3
+              }}
+              onMouseEnter={(e) => {
+                if (completeMood) e.currentTarget.style.backgroundColor = '#d66e5a'
+              }}
+              onMouseLeave={(e) => {
+                if (completeMood) e.currentTarget.style.backgroundColor = '#e87e67'
+              }}
+            >
+              BYE FOR NOW!
             </button>
           </div>
 
@@ -835,11 +946,47 @@ export function CheckInFlow() {
 
         {currentStep === 'chart' && (
           <>
+            <style>{`
+              @keyframes progressBar {
+                from {
+                  width: 0%;
+                }
+                to {
+                  width: 100%;
+                }
+              }
+              .card-flip-container {
+                perspective: 1000px;
+                min-height: 200px;
+              }
+              .card-flip-inner {
+                position: relative;
+                width: 100%;
+                min-height: 200px;
+                transition: transform 0.6s;
+                transform-style: preserve-3d;
+              }
+              .card-flip-inner.flipped {
+                transform: rotateY(180deg);
+              }
+              .card-flip-front, .card-flip-back {
+                position: absolute;
+                width: 100%;
+                min-height: 200px;
+                backface-visibility: hidden;
+                -webkit-backface-visibility: hidden;
+                top: 0;
+                left: 0;
+              }
+              .card-flip-back {
+                transform: rotateY(180deg);
+              }
+            `}</style>
             <div className="bg-white min-h-screen relative chart-page-container" style={{ paddingTop: '140px', paddingBottom: '120px' }}>
               {/* Title - matching wellbeing page styling */}
               <div className="text-center chart-title-container" style={{ marginBottom: '0.5rem' }}>
                 <h1 className="text-gray-900 mb-2 chart-main-title" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-                  Low score?
+                  Nice job, Here's your Wellbeing wheel for today
                 </h1>
               </div>
 
@@ -857,157 +1004,120 @@ export function CheckInFlow() {
                     marginTop: '0',
                     textAlign: 'center'
                   }}>
-                    To feel better you could try...
+                    When your wheel is balanced, it's easier to feel your best. If one part scored lower, here are some things you could try to feel even better!
                   </p>
 
-                  {/* Desktop: 3 columns, Mobile: Horizontal scroll */}
-                  <div
-                    className="support-tips-container"
-                    onScroll={(e) => {
-                      const container = e.currentTarget
-                      const scrollLeft = container.scrollLeft
-                      const cardWidth = 280 + 24 // card width + gap
-                      const index = Math.round(scrollLeft / cardWidth)
-                      setActiveCardIndex(index)
-                    }}
-                    style={{
-                      display: 'flex',
-                      gap: '1.5rem',
-                      overflowX: 'auto',
-                      scrollSnapType: 'x mandatory',
-                      WebkitOverflowScrolling: 'touch',
-                      paddingBottom: '1rem'
-                    }}
-                  >
-                    {/* Card 1 */}
-                    <div
-                      style={{
-                        flex: '0 0 auto',
-                        width: 'calc(100% - 2rem)',
-                        minWidth: '280px',
-                        maxWidth: '280px',
-                        backgroundColor: 'white',
-                        borderRadius: '4px',
-                        padding: '1rem 1.5rem',
-                        border: '2px solid #e5e7eb',
-                        scrollSnapAlign: 'center',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-                        minHeight: 'auto'
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                        <div style={{
-                          backgroundColor: 'rgba(227, 141, 59, 0.2)',
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                          </svg>
-                        </div>
-                      </div>
-                      <p style={{
-                        margin: '0',
-                        color: '#374151',
-                        lineHeight: '1.5',
-                        textAlign: 'center',
-                        fontSize: '14px'
-                      }}>
-                        List out the things that make you feel good
-                      </p>
-                    </div>
+                  {/* Single cycling card */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    paddingBottom: '1rem'
+                  }}>
+                    {(() => {
+                      const tips = [
+                        {
+                          icon: (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                          ),
+                          text: 'List out the things that make you feel good'
+                        },
+                        {
+                          icon: (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                              <circle cx="9" cy="7" r="4"/>
+                              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                          ),
+                          text: 'Talk to a friend'
+                        },
+                        {
+                          icon: (
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                          ),
+                          text: 'Talk to your adults or teachers for more support'
+                        }
+                      ]
 
-                    {/* Card 2 */}
-                    <div
-                      style={{
-                        flex: '0 0 auto',
-                        width: 'calc(100% - 2rem)',
-                        minWidth: '280px',
-                        maxWidth: '280px',
-                        backgroundColor: 'white',
-                        borderRadius: '4px',
-                        padding: '1rem 1.5rem',
-                        border: '2px solid #e5e7eb',
-                        scrollSnapAlign: 'center',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-                        minHeight: 'auto'
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                        <div style={{
-                          backgroundColor: 'rgba(227, 141, 59, 0.2)',
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                            <circle cx="9" cy="7" r="4"/>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                          </svg>
-                        </div>
-                      </div>
-                      <p style={{
-                        margin: '0',
-                        color: '#374151',
-                        lineHeight: '1.5',
-                        textAlign: 'center',
-                        fontSize: '14px'
-                      }}>
-                        Talk to a friend
-                      </p>
-                    </div>
+                      const currentTip = tips[activeCardIndex]
 
-                    {/* Card 3 */}
-                    <div
-                      style={{
-                        flex: '0 0 auto',
-                        width: 'calc(100% - 2rem)',
-                        minWidth: '280px',
-                        maxWidth: '280px',
-                        backgroundColor: 'white',
-                        borderRadius: '4px',
-                        padding: '1rem 1.5rem',
-                        border: '2px solid #e5e7eb',
-                        scrollSnapAlign: 'center',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-                        minHeight: 'auto'
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                        <div style={{
-                          backgroundColor: 'rgba(227, 141, 59, 0.2)',
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                          </svg>
+                      return (
+                        <div
+                          style={{
+                            position: 'relative',
+                            backgroundColor: 'white',
+                            borderRadius: '4px',
+                            border: '2px solid #e5e7eb',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                            maxWidth: '600px',
+                            width: 'fit-content',
+                            opacity: cardFadeState === 'in' ? 1 : 0,
+                            transition: 'opacity 0.5s ease-in-out',
+                            overflow: 'hidden'
+                          }}
+                        >
+                          {/* Card content */}
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1rem',
+                            padding: '0.75rem 20px'
+                          }}>
+                            {/* Icon on left */}
+                            <div style={{
+                              backgroundColor: 'rgba(227, 141, 59, 0.2)',
+                              width: '40px',
+                              height: '40px',
+                              borderRadius: '50%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0
+                            }}>
+                              {currentTip.icon}
+                            </div>
+
+                            {/* Text on right */}
+                            <p style={{
+                              margin: '0',
+                              color: '#374151',
+                              lineHeight: '1.5',
+                              fontSize: '14px'
+                            }}>
+                              {currentTip.text}
+                            </p>
+                          </div>
+
+                          {/* Progress bar at bottom */}
+                          <div style={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '3px',
+                            backgroundColor: '#e5e7eb'
+                          }}>
+                            {cardFadeState === 'in' && (
+                              <div
+                                key={`progress-${activeCardIndex}`}
+                                style={{
+                                  height: '100%',
+                                  backgroundColor: '#e38d3b',
+                                  width: '0%',
+                                  animation: 'progressBar 5s linear forwards'
+                                }}
+                              />
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <p style={{
-                        margin: '0',
-                        color: '#374151',
-                        lineHeight: '1.5',
-                        textAlign: 'center',
-                        fontSize: '14px'
-                      }}>
-                        Talk to your adults or teachers for more support
-                      </p>
-                    </div>
+                      )
+                    })()}
                   </div>
 
                   {/* Mobile scroll indicator dots */}
@@ -1045,7 +1155,7 @@ export function CheckInFlow() {
                 <div className="chart-graph-container" style={{ marginBottom: '3rem', marginTop: '20px' }}>
                   <WellbeingRadialGraph
                     sections={completedData.wellbeing?.sections || []}
-                    size={250}
+                    size={360}
                     theoAnimation={theoAnimation}
                   />
                 </div>
@@ -1149,7 +1259,7 @@ export function CheckInFlow() {
                 {/* Title - matching other page styling */}
                 <div className="text-center talk-title-container" style={{ marginBottom: '3rem' }}>
                   <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-                    Do you want to talk to someone?
+                    How are you now? Do you want to talk to someone?
                   </h1>
                 </div>
 
@@ -1190,9 +1300,6 @@ export function CheckInFlow() {
                           }
                           return null
                         })()}
-                        <p className="text-lg capitalize">
-                          {completedData.mood.mood_level.replace('_', ' ')}
-                        </p>
                       </div>
                       {completedData.mood.notes && (
                         <p className="text-center text-gray-600 mt-3 italic" style={{ maxWidth: '500px', margin: '1rem auto' }}>
@@ -1322,35 +1429,36 @@ export function CheckInFlow() {
                     if (talkChoice === 'parent') {
                       return (
                         <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-                          Your parent will check in with you soon
+                          Well done! Your parent will check in with you soon
                         </h1>
                       )
                     } else if (talkChoice === 'teacher') {
                       return (
                         <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-                          Your teacher will check in with you soon
+                          Well done! Your teacher will check in with you soon
                         </h1>
                       )
                     } else {
                       return (
-                        <>
-                          <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-                            Your feelings are safe with us
-                          </h1>
-                          <p className="text-gray-600 mx-auto px-4" style={{
-                            fontSize: '16px',
-                            fontWeight: 400,
-                            lineHeight: '1.5',
-                            maxWidth: '800px',
-                            marginTop: '8px',
-                            textAlign: 'center'
-                          }}>
-                            Have a lift
-                          </p>
-                        </>
+                        <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
+                          Your feelings are safe with us
+                        </h1>
                       )
                     }
                   })()}
+                </div>
+
+                {/* Subtitle */}
+                <div className="text-center" style={{ marginBottom: '2rem' }}>
+                  <p className="text-gray-600 mx-auto px-4" style={{
+                    fontSize: '16px',
+                    fontWeight: 400,
+                    lineHeight: '1.5',
+                    maxWidth: '800px',
+                    textAlign: 'center'
+                  }}>
+                    Now for a little Lift gift for you!
+                  </p>
                 </div>
 
                 {/* Lift cards section */}
@@ -1381,52 +1489,139 @@ export function CheckInFlow() {
                         width: 'calc(100% - 2rem)',
                         minWidth: '280px',
                         maxWidth: '280px',
-                        backgroundColor: 'white',
-                        borderRadius: '4px',
-                        padding: '1rem 1.5rem',
-                        border: '2px solid #e5e7eb',
-                        scrollSnapAlign: 'center',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-                        minHeight: 'auto'
+                        scrollSnapAlign: 'center'
                       }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                      {!flippedCards[0] ? (
+                        // Front of card
                         <div style={{
-                          backgroundColor: 'rgba(227, 141, 59, 0.2)',
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
+                          backgroundColor: 'white',
+                          borderRadius: '4px',
+                          paddingTop: '34px',
+                          paddingBottom: '1.5rem',
+                          paddingLeft: '10px',
+                          paddingRight: '10px',
+                          border: '2px solid #e5e7eb',
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
                           display: 'flex',
+                          flexDirection: 'column',
                           alignItems: 'center',
-                          justifyContent: 'center'
+                          justifyContent: 'flex-start',
+                          height: '200px'
                         }}>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-                            <line x1="9" y1="9" x2="9.01" y2="9"/>
-                            <line x1="15" y1="9" x2="15.01" y2="9"/>
-                          </svg>
+                          <div style={{
+                            backgroundColor: 'rgba(227, 141, 59, 0.2)',
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '0.75rem'
+                          }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10"/>
+                              <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                              <line x1="9" y1="9" x2="9.01" y2="9"/>
+                              <line x1="15" y1="9" x2="15.01" y2="9"/>
+                            </svg>
+                          </div>
+                          <h3 style={{
+                            margin: '0 0 1rem 0',
+                            color: '#374151',
+                            textAlign: 'center',
+                            fontSize: '16px',
+                            fontWeight: '600'
+                          }}>
+                            Joke of the day
+                          </h3>
+                          <button
+                            onClick={() => {
+                              console.log('Joke card clicked!')
+                              const newFlipped = [...flippedCards]
+                              newFlipped[0] = true
+                              setFlippedCards(newFlipped)
+                              setCurrentTheoAnimation(theoFlyingAnimation)
+                            }}
+                            style={{
+                              backgroundColor: 'white',
+                              border: '2px solid #3a7ddc',
+                              color: '#3a7ddc',
+                              borderRadius: '28px',
+                              padding: '8px 24px',
+                              fontSize: '14px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = '#3a7ddc'
+                              e.currentTarget.style.color = 'white'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'white'
+                              e.currentTarget.style.color = '#3a7ddc'
+                            }}
+                          >
+                            VIEW
+                          </button>
                         </div>
-                      </div>
-                      <h3 style={{
-                        margin: '0 0 0.5rem 0',
-                        color: '#374151',
-                        textAlign: 'center',
-                        fontSize: '14px',
-                        fontWeight: '600'
-                      }}>
-                        Joke of the day
-                      </h3>
-                      <p style={{
-                        margin: '0',
-                        color: '#374151',
-                        lineHeight: '1.5',
-                        textAlign: 'center',
-                        fontSize: '14px'
-                      }}>
-                        Where do fish keep their money?<br />
-                        <strong>In a river bank</strong>
-                      </p>
+                      ) : (
+                        // Back of card
+                        <div
+                          onClick={() => {
+                            console.log('Joke card back clicked!')
+                            const newFlipped = [...flippedCards]
+                            newFlipped[0] = false
+                            setFlippedCards(newFlipped)
+                            setCurrentTheoAnimation(theoThumbsUpAnimation)
+                          }}
+                          style={{
+                            backgroundColor: 'white',
+                            borderRadius: '4px',
+                            paddingTop: '34px',
+                            paddingBottom: '1.5rem',
+                            paddingLeft: '10px',
+                            paddingRight: '10px',
+                            border: '2px solid #e5e7eb',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'flex-start',
+                            cursor: 'pointer',
+                            height: '200px'
+                          }}
+                        >
+                          <div style={{
+                            backgroundColor: 'rgba(227, 141, 59, 0.2)',
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '0.75rem'
+                          }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10"/>
+                              <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                              <line x1="9" y1="9" x2="9.01" y2="9"/>
+                              <line x1="15" y1="9" x2="15.01" y2="9"/>
+                            </svg>
+                          </div>
+                          <p style={{
+                            margin: '0',
+                            color: '#374151',
+                            lineHeight: '1.6',
+                            textAlign: 'center',
+                            fontSize: '14px'
+                          }}>
+                            Where do fish keep their money?<br /><br />
+                            <strong>In a river bank</strong>
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Riddle Card */}
@@ -1436,51 +1631,133 @@ export function CheckInFlow() {
                         width: 'calc(100% - 2rem)',
                         minWidth: '280px',
                         maxWidth: '280px',
-                        backgroundColor: 'white',
-                        borderRadius: '4px',
-                        padding: '1rem 1.5rem',
-                        border: '2px solid #e5e7eb',
-                        scrollSnapAlign: 'center',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-                        minHeight: 'auto'
+                        scrollSnapAlign: 'center'
                       }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                      {!flippedCards[1] ? (
                         <div style={{
-                          backgroundColor: 'rgba(227, 141, 59, 0.2)',
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
+                          backgroundColor: 'white',
+                          borderRadius: '4px',
+                          paddingTop: '34px',
+                          paddingBottom: '1.5rem',
+                          paddingLeft: '10px',
+                          paddingRight: '10px',
+                          border: '2px solid #e5e7eb',
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
                           display: 'flex',
+                          flexDirection: 'column',
                           alignItems: 'center',
-                          justifyContent: 'center'
+                          justifyContent: 'flex-start',
+                          height: '200px'
                         }}>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                            <line x1="12" y1="17" x2="12.01" y2="17"/>
-                          </svg>
+                          <div style={{
+                            backgroundColor: 'rgba(227, 141, 59, 0.2)',
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '0.75rem'
+                          }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10"/>
+                              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                              <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                          </div>
+                          <h3 style={{
+                            margin: '0 0 1rem 0',
+                            color: '#374151',
+                            textAlign: 'center',
+                            fontSize: '16px',
+                            fontWeight: '600'
+                          }}>
+                            Riddle of the day
+                          </h3>
+                          <button
+                            onClick={() => {
+                              const newFlipped = [...flippedCards]
+                              newFlipped[1] = true
+                              setFlippedCards(newFlipped)
+                              setCurrentTheoAnimation(theoPuzzleAnimation)
+                            }}
+                            style={{
+                              backgroundColor: 'white',
+                              border: '2px solid #3a7ddc',
+                              color: '#3a7ddc',
+                              borderRadius: '28px',
+                              padding: '8px 24px',
+                              fontSize: '14px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = '#3a7ddc'
+                              e.currentTarget.style.color = 'white'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'white'
+                              e.currentTarget.style.color = '#3a7ddc'
+                            }}
+                          >
+                            VIEW
+                          </button>
                         </div>
-                      </div>
-                      <h3 style={{
-                        margin: '0 0 0.5rem 0',
-                        color: '#374151',
-                        textAlign: 'center',
-                        fontSize: '14px',
-                        fontWeight: '600'
-                      }}>
-                        Riddle of the day
-                      </h3>
-                      <p style={{
-                        margin: '0',
-                        color: '#374151',
-                        lineHeight: '1.5',
-                        textAlign: 'center',
-                        fontSize: '14px'
-                      }}>
-                        What is the hardest key to turn?<br />
-                        <strong>A donkey</strong>
-                      </p>
+                      ) : (
+                        <div
+                          onClick={() => {
+                            const newFlipped = [...flippedCards]
+                            newFlipped[1] = false
+                            setFlippedCards(newFlipped)
+                            setCurrentTheoAnimation(theoThumbsUpAnimation)
+                          }}
+                          style={{
+                            backgroundColor: 'white',
+                            borderRadius: '4px',
+                            paddingTop: '34px',
+                            paddingBottom: '1.5rem',
+                            paddingLeft: '10px',
+                            paddingRight: '10px',
+                            border: '2px solid #e5e7eb',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'flex-start',
+                            cursor: 'pointer',
+                            height: '200px'
+                          }}
+                        >
+                          <div style={{
+                            backgroundColor: 'rgba(227, 141, 59, 0.2)',
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '0.75rem'
+                          }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10"/>
+                              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                              <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                          </div>
+                          <p style={{
+                            margin: '0',
+                            color: '#374151',
+                            lineHeight: '1.6',
+                            textAlign: 'center',
+                            fontSize: '14px'
+                          }}>
+                            What is the hardest key to turn?<br /><br />
+                            <strong>A donkey</strong>
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Fact Card */}
@@ -1490,50 +1767,133 @@ export function CheckInFlow() {
                         width: 'calc(100% - 2rem)',
                         minWidth: '280px',
                         maxWidth: '280px',
-                        backgroundColor: 'white',
-                        borderRadius: '4px',
-                        padding: '1rem 1.5rem',
-                        border: '2px solid #e5e7eb',
-                        scrollSnapAlign: 'center',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-                        minHeight: 'auto'
+                        scrollSnapAlign: 'center'
                       }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                      {!flippedCards[2] ? (
                         <div style={{
-                          backgroundColor: 'rgba(227, 141, 59, 0.2)',
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
+                          backgroundColor: 'white',
+                          borderRadius: '4px',
+                          paddingTop: '34px',
+                          paddingBottom: '1.5rem',
+                          paddingLeft: '10px',
+                          paddingRight: '10px',
+                          border: '2px solid #e5e7eb',
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
                           display: 'flex',
+                          flexDirection: 'column',
                           alignItems: 'center',
-                          justifyContent: 'center'
+                          justifyContent: 'flex-start',
+                          height: '200px'
                         }}>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="12" y1="16" x2="12" y2="12"/>
-                            <line x1="12" y1="8" x2="12.01" y2="8"/>
-                          </svg>
+                          <div style={{
+                            backgroundColor: 'rgba(227, 141, 59, 0.2)',
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '0.75rem'
+                          }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="16" x2="12" y2="12"/>
+                              <line x1="12" y1="8" x2="12.01" y2="8"/>
+                            </svg>
+                          </div>
+                          <h3 style={{
+                            margin: '0 0 1rem 0',
+                            color: '#374151',
+                            textAlign: 'center',
+                            fontSize: '16px',
+                            fontWeight: '600'
+                          }}>
+                            Fact of the day
+                          </h3>
+                          <button
+                            onClick={() => {
+                              const newFlipped = [...flippedCards]
+                              newFlipped[2] = true
+                              setFlippedCards(newFlipped)
+                              setCurrentTheoAnimation(theoRocketAnimation)
+                            }}
+                            style={{
+                              backgroundColor: 'white',
+                              border: '2px solid #3a7ddc',
+                              color: '#3a7ddc',
+                              borderRadius: '28px',
+                              padding: '8px 24px',
+                              fontSize: '14px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = '#3a7ddc'
+                              e.currentTarget.style.color = 'white'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'white'
+                              e.currentTarget.style.color = '#3a7ddc'
+                            }}
+                          >
+                            VIEW
+                          </button>
                         </div>
-                      </div>
-                      <h3 style={{
-                        margin: '0 0 0.5rem 0',
-                        color: '#374151',
-                        textAlign: 'center',
-                        fontSize: '14px',
-                        fontWeight: '600'
-                      }}>
-                        Fact of the day
-                      </h3>
-                      <p style={{
-                        margin: '0',
-                        color: '#374151',
-                        lineHeight: '1.5',
-                        textAlign: 'center',
-                        fontSize: '14px'
-                      }}>
-                        A crocodile cannot stick its tongue out
-                      </p>
+                      ) : (
+                        <div
+                          onClick={() => {
+                            const newFlipped = [...flippedCards]
+                            newFlipped[2] = false
+                            setFlippedCards(newFlipped)
+                            setCurrentTheoAnimation(theoThumbsUpAnimation)
+                          }}
+                          style={{
+                            backgroundColor: 'white',
+                            borderRadius: '4px',
+                            paddingTop: '34px',
+                            paddingBottom: '1.5rem',
+                            paddingLeft: '10px',
+                            paddingRight: '10px',
+                            border: '2px solid #e5e7eb',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'flex-start',
+                            cursor: 'pointer',
+                            height: '200px'
+                          }}
+                        >
+                          <div style={{
+                            backgroundColor: 'rgba(227, 141, 59, 0.2)',
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '0.75rem'
+                          }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="12" y1="16" x2="12" y2="12"/>
+                              <line x1="12" y1="8" x2="12.01" y2="8"/>
+                            </svg>
+                          </div>
+                          <p style={{
+                            margin: '0',
+                            color: '#374151',
+                            lineHeight: '1.6',
+                            textAlign: 'center',
+                            fontSize: '14px'
+                          }}>
+                            A crocodile can't stick out its tounge<br /><br />
+                            <strong>It's a fact</strong>
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1567,12 +1927,12 @@ export function CheckInFlow() {
                     }}></div>
                   </div>
 
-                  {/* Theo Thumbs Up Animation */}
-                  {theoThumbsUpAnimation && (
+                  {/* Theo Animation */}
+                  {currentTheoAnimation && (
                     <div className="theo-animation-mobile-hide" style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '2rem' }}>
                       <div style={{ width: '200px', height: '200px' }}>
                         <Lottie
-                          animationData={theoThumbsUpAnimation}
+                          animationData={currentTheoAnimation}
                           loop={true}
                           autoplay={true}
                           style={{ width: '100%', height: '100%' }}
@@ -1703,7 +2063,7 @@ export function CheckInFlow() {
                         e.currentTarget.style.backgroundColor = '#3a7ddc'
                       }}
                     >
-                      No one
+                      I'm ok
                     </button>
                   </div>
                 </div>

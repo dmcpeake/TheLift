@@ -71,7 +71,7 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
     { animation: BlushingShaded, level: 'very_happy', numeric: 5, color: '#95c5c8' },
     { animation: HappyShaded, level: 'happy', numeric: 4, color: '#caded0' },
     { animation: MehShaded, level: 'ok', numeric: 3, color: '#f8d678' },
-    { animation: SadTearShaded, level: 'sad', numeric: 2, color: '#e38d3b' },
+    { animation: SadTearShaded, level: 'sad', numeric: 2, color: '#edb07a' },
     { animation: CryingShaded, level: 'very_sad', numeric: 1, color: '#e38bac' }
   ]
 
@@ -174,7 +174,7 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
             {customTitle || (
               <>
                 <span className="hidden md:inline">How would you describe your mood?</span>
-                <span className="md:hidden">Select your mood</span>
+                <span className="md:hidden">How are you today?</span>
               </>
             )}
           </h1>
@@ -242,11 +242,9 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.fillOpacity = '1.0'
-                          setHoveredMood(mood.level)
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.fillOpacity = isSelected ? '1.0' : '0.8'
-                          setHoveredMood(null)
                         }}
                         onClick={() => handleMoodSelect(mood, index)}
                       />
@@ -271,8 +269,6 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
                         height="70"
                         className="cursor-pointer"
                         onClick={() => handleMoodSelect(mood, index)}
-                        onMouseEnter={() => setHoveredMood(mood.level)}
-                        onMouseLeave={() => setHoveredMood(null)}
                       >
                         <div style={{
                           width: '70px',
@@ -299,20 +295,17 @@ export function MoodMeter({ onComplete, showNextButton = false, onSelectionMade,
                 </svg>
               </div>
 
-              {/* Center text that doesn't rotate */}
+              {/* Center text/arrow that doesn't rotate */}
               <div
                 className="absolute inset-0 flex items-center justify-center"
                 style={{ pointerEvents: 'none' }}
               >
                 <div className="text-center transition-opacity duration-300">
-                  {hoveredMood ? (
-                    <span className="text-lg font-medium text-gray-700 capitalize">
-                      {hoveredMood.replace('_', ' ')}
-                    </span>
-                  ) : selectedMood ? (
-                    <span className="text-lg font-medium text-gray-800 capitalize">
-                      {selectedMood.mood_level.replace('_', ' ')}
-                    </span>
+                  {selectedMood ? (
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#9ea3ae' }}>
+                      <polyline points="12 5 12 19"></polyline>
+                      <polyline points="5 12 12 5 19 12"></polyline>
+                    </svg>
                   ) : (
                     <span className="text-base text-gray-500">
                       Choose
