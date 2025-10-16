@@ -901,34 +901,36 @@ export function CheckInHome() {
                 </button>
 
                 <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}></div>
+
+                <button
+                  onClick={() => navigate('/checkin/profile')}
+                  className="cursor-pointer transition-all hover:opacity-70 relative"
+                  style={{
+                    fontSize: '14px',
+                    color: '#1f2937',
+                    fontWeight: '500',
+                    background: 'none',
+                    border: 'none',
+                    padding: '8px'
+                  }}
+                  aria-label="My profile"
+                >
+                  My profile
+                  {location.pathname === '/checkin/profile' && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '-22px',
+                      left: 0,
+                      right: 0,
+                      height: '2px',
+                      backgroundColor: '#1f2937'
+                    }}></div>
+                  )}
+                </button>
+
+                <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}></div>
               </>
             )}
-
-            <button
-              onClick={() => navigate('/checkin/profile')}
-              className="cursor-pointer transition-all hover:opacity-70 relative"
-              style={{
-                fontSize: '14px',
-                color: '#1f2937',
-                fontWeight: '500',
-                background: 'none',
-                border: 'none',
-                padding: '8px'
-              }}
-              aria-label="My profile"
-            >
-              My profile
-              {location.pathname === '/checkin/profile' && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: '-22px',
-                  left: 0,
-                  right: 0,
-                  height: '2px',
-                  backgroundColor: '#1f2937'
-                }}></div>
-              )}
-            </button>
 
             <button
               onClick={() => navigate('/')}
@@ -1033,29 +1035,29 @@ export function CheckInHome() {
                   </button>
 
                   <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
+
+                  <button
+                    onClick={() => {
+                      navigate('/checkin/profile')
+                      setMobileMenuOpen(false)
+                    }}
+                    className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center"
+                    style={{
+                      fontSize: '14px',
+                      color: '#1f2937',
+                      fontWeight: '500',
+                      background: 'none',
+                      border: 'none',
+                      padding: '12px 16px',
+                      height: '40px'
+                    }}
+                  >
+                    My profile
+                  </button>
+
+                  <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
                 </>
               )}
-
-              <button
-                onClick={() => {
-                  navigate('/checkin/profile')
-                  setMobileMenuOpen(false)
-                }}
-                className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center"
-                style={{
-                  fontSize: '14px',
-                  color: '#1f2937',
-                  fontWeight: '500',
-                  background: 'none',
-                  border: 'none',
-                  padding: '12px 16px',
-                  height: '40px'
-                }}
-              >
-                My profile
-              </button>
-
-              <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
 
               <button
                 onClick={() => {

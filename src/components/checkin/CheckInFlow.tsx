@@ -677,11 +677,11 @@ export function CheckInFlow() {
                 </div>
 
                 {/* MY GARDEN Button - desktop only */}
-                <div className="complete-desktop-button hidden md:flex justify-center" style={{ marginBottom: '20px', marginTop: '-40px', position: 'relative', zIndex: 20, gap: '16px' }}>
+                <div className="complete-desktop-button hidden md:flex flex-col items-center" style={{ marginBottom: '20px', marginTop: '-40px', position: 'relative', zIndex: 20, gap: '22px' }}>
                   <button
                     onClick={() => completeMood && navigate('/checkin/garden')}
                     disabled={!completeMood}
-                    className="font-semibold text-lg transition-all duration-200"
+                    className="transition-all duration-200"
                     style={{
                       backgroundColor: '#e87e67',
                       color: 'white',
@@ -694,7 +694,9 @@ export function CheckInFlow() {
                       boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)',
                       position: 'relative',
                       zIndex: 20,
-                      opacity: completeMood ? 1 : 0.3
+                      opacity: completeMood ? 1 : 0.3,
+                      fontSize: '16px',
+                      fontWeight: '600'
                     }}
                     onMouseEnter={(e) => {
                       if (completeMood) e.currentTarget.style.backgroundColor = '#d66e5a'
@@ -713,26 +715,24 @@ export function CheckInFlow() {
                       }
                     }}
                     disabled={!completeMood}
-                    className="font-semibold text-lg transition-all duration-200"
+                    className="transition-all duration-200"
                     style={{
-                      backgroundColor: '#e87e67',
+                      background: 'none',
+                      border: 'none',
                       color: 'white',
-                      height: '60px',
-                      borderRadius: '30px',
-                      paddingLeft: '50px',
-                      paddingRight: '50px',
-                      border: '2px solid white',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      textDecoration: 'none',
                       cursor: completeMood ? 'pointer' : 'not-allowed',
-                      boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)',
-                      position: 'relative',
-                      zIndex: 20,
-                      opacity: completeMood ? 1 : 0.3
+                      padding: '4px 8px',
+                      opacity: completeMood ? 1 : 0.3,
+                      textShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
                     }}
                     onMouseEnter={(e) => {
-                      if (completeMood) e.currentTarget.style.backgroundColor = '#d66e5a'
+                      if (completeMood) e.currentTarget.style.opacity = '0.8'
                     }}
                     onMouseLeave={(e) => {
-                      if (completeMood) e.currentTarget.style.backgroundColor = '#e87e67'
+                      if (completeMood) e.currentTarget.style.opacity = '1'
                     }}
                   >
                     BYE FOR NOW!
@@ -743,7 +743,7 @@ export function CheckInFlow() {
           </div>
 
           {/* MY GARDEN & BYE FOR NOW Buttons - mobile only */}
-          <div className="complete-mobile-button md:hidden flex justify-center" style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999, gap: '12px' }}>
+          <div className="complete-mobile-button md:hidden flex flex-col items-center" style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999, gap: '18px' }}>
             <button
               onClick={() => completeMood && navigate('/checkin/garden')}
               disabled={!completeMood}
@@ -786,29 +786,22 @@ export function CheckInFlow() {
               disabled={!completeMood}
               className="transition-all duration-200"
               style={{
-                backgroundColor: '#e87e67',
+                background: 'none',
+                border: 'none',
                 color: 'white',
-                width: '160px',
-                height: '56px',
-                borderRadius: '28px',
-                border: '2px solid white',
-                cursor: completeMood ? 'pointer' : 'not-allowed',
                 fontSize: '16px',
                 fontWeight: '600',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)',
-                position: 'relative',
-                zIndex: 10001,
-                pointerEvents: 'auto',
-                opacity: completeMood ? 1 : 0.3
+                textDecoration: 'none',
+                cursor: completeMood ? 'pointer' : 'not-allowed',
+                padding: '4px 8px',
+                opacity: completeMood ? 1 : 0.3,
+                textShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
               }}
               onMouseEnter={(e) => {
-                if (completeMood) e.currentTarget.style.backgroundColor = '#d66e5a'
+                if (completeMood) e.currentTarget.style.opacity = '0.8'
               }}
               onMouseLeave={(e) => {
-                if (completeMood) e.currentTarget.style.backgroundColor = '#e87e67'
+                if (completeMood) e.currentTarget.style.opacity = '1'
               }}
             >
               BYE FOR NOW!

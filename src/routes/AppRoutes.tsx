@@ -60,6 +60,7 @@ import { CheckInFlow } from '../components/checkin/CheckInFlow'
 import { CheckInGarden } from '../components/checkin/CheckInGarden'
 import { SignIn } from '../components/checkin/SignIn'
 import { CheckInProfile } from '../components/checkin/CheckInProfile'
+import { Onboarding } from '../components/checkin/Onboarding'
 
 export function AppRoutes() {
   const { user } = React.useContext(AuthContext)
@@ -134,6 +135,7 @@ export function AppRoutes() {
 
         {/* Check-in Flow Routes - Public access for prototypes */}
         <Route path="/signin" element={<SignIn />} />
+        <Route path="/checkin/onboarding" element={<Onboarding />} />
         <Route path="/checkin/home" element={<CheckInHome />} />
         <Route path="/checkin/flow/:step" element={<CheckInFlow />} />
         <Route path="/checkin/garden" element={<CheckInGarden />} />

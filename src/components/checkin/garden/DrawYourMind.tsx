@@ -188,7 +188,6 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
         zIndex: 9999,
         backgroundColor: 'rgba(0, 0, 0, 0.8)'
       }}
-      onClick={onClose}
     >
       <div
         className="bg-white rounded-lg max-w-3xl w-full mx-4 relative"

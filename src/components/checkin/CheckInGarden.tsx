@@ -358,34 +358,6 @@ export function CheckInGarden() {
           {/* Desktop Navigation - hidden on mobile */}
           <div className="hidden md:flex fixed top-0 right-4 items-center gap-4" style={{ height: '80px', zIndex: 51 }}>
             <button
-              onClick={() => navigate('/checkin/garden')}
-              className="cursor-pointer transition-all hover:opacity-70 relative"
-              style={{
-                fontSize: '14px',
-                color: '#1f2937',
-                fontWeight: '500',
-                background: 'none',
-                border: 'none',
-                padding: '8px'
-              }}
-              aria-label="My garden"
-            >
-              My garden
-              {location.pathname === '/checkin/garden' && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: '-22px',
-                  left: 0,
-                  right: 0,
-                  height: '2px',
-                  backgroundColor: '#1f2937'
-                }}></div>
-              )}
-            </button>
-
-            <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}></div>
-
-            <button
               onClick={() => navigate('/checkin/home')}
               className="cursor-pointer transition-all hover:opacity-70 relative"
               style={{
@@ -414,7 +386,7 @@ export function CheckInGarden() {
             <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}></div>
 
             <button
-              onClick={() => navigate('/checkin/feel-good-list')}
+              onClick={() => navigate('/checkin/garden')}
               className="cursor-pointer transition-all hover:opacity-70 relative"
               style={{
                 fontSize: '14px',
@@ -424,10 +396,10 @@ export function CheckInGarden() {
                 border: 'none',
                 padding: '8px'
               }}
-              aria-label="Feel good list"
+              aria-label="My garden"
             >
-              Feel good list
-              {location.pathname === '/checkin/feel-good-list' && (
+              My garden
+              {location.pathname === '/checkin/garden' && (
                 <div style={{
                   position: 'absolute',
                   bottom: '-22px',
@@ -516,27 +488,6 @@ export function CheckInGarden() {
 
               <button
                 onClick={() => {
-                  navigate('/checkin/garden')
-                  setMobileMenuOpen(false)
-                }}
-                className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center"
-                style={{
-                  fontSize: '14px',
-                  color: '#1f2937',
-                  fontWeight: '500',
-                  background: 'none',
-                  border: 'none',
-                  padding: '12px 16px',
-                  height: '40px'
-                }}
-              >
-                My garden
-              </button>
-
-              <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
-
-              <button
-                onClick={() => {
                   navigate('/checkin/home')
                   setMobileMenuOpen(false)
                 }}
@@ -558,7 +509,7 @@ export function CheckInGarden() {
 
               <button
                 onClick={() => {
-                  navigate('/checkin/feel-good-list')
+                  navigate('/checkin/garden')
                   setMobileMenuOpen(false)
                 }}
                 className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center"
@@ -572,7 +523,7 @@ export function CheckInGarden() {
                   height: '40px'
                 }}
               >
-                Feel good list
+                My garden
               </button>
 
               <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>

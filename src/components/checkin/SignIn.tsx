@@ -30,7 +30,17 @@ export function SignIn() {
     e.preventDefault()
     if (isFormValid) {
       window.scrollTo(0, 0)
-      navigate('/checkin/home')
+
+      // Check if user has completed onboarding
+      const onboardingComplete = sessionStorage.getItem('onboardingComplete')
+
+      if (!onboardingComplete) {
+        // First time user - redirect to onboarding
+        navigate('/checkin/onboarding')
+      } else {
+        // Returning user - go to home
+        navigate('/checkin/home')
+      }
     }
   }
 

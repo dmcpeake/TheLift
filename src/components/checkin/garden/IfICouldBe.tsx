@@ -33,7 +33,6 @@ export function IfICouldBe({ onClose }: IfICouldBeProps) {
         zIndex: 9999,
         backgroundColor: 'rgba(0, 0, 0, 0.8)'
       }}
-      onClick={onClose}
     >
       <div
         className="bg-white rounded-lg max-w-2xl w-full mx-4 relative"
