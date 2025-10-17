@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
+import { useGamification } from '../../../contexts/GamificationContext'
 
 interface IfICouldBeProps {
   onClose: () => void
+  onPointsAwarded?: (points: number) => void
 }
 
-export function IfICouldBe({ onClose }: IfICouldBeProps) {
+export function IfICouldBe({ onClose, onPointsAwarded }: IfICouldBeProps) {
+  const { awardPoints } = useGamification()
   const [whatIWouldBe, setWhatIWouldBe] = useState(() => {
     const saved = sessionStorage.getItem('ifICouldBe')
     return saved ? JSON.parse(saved).whatIWouldBe : ''
@@ -15,6 +18,10 @@ export function IfICouldBe({ onClose }: IfICouldBeProps) {
     return saved ? JSON.parse(saved).whyReason : ''
   })
   const [isRecording, setIsRecording] = useState<'what' | 'why' | null>(null)
+  const [pointsAwarded, setPointsAwarded] = useState<boolean>(() => {
+    const saved = sessionStorage.getItem('ifICouldBePointsAwarded')
+    return saved === 'true'
+  })
 
   useEffect(() => {
     sessionStorage.setItem('ifICouldBe', JSON.stringify({ whatIWouldBe, whyReason }))
@@ -24,6 +31,18 @@ export function IfICouldBe({ onClose }: IfICouldBeProps) {
     // Voice capture functionality - placeholder for now
     setIsRecording(isRecording === field ? null : field)
     console.log(`Voice capture for ${field} field`)
+  }
+
+  const handleSave = () => {
+    // Check if at least one field is filled and points haven't been awarded yet
+    const hasContent = whatIWouldBe.trim().length > 0 || whyReason.trim().length > 0
+    if (hasContent && !pointsAwarded) {
+      awardPoints('Completed If I Could Be', 25)
+      sessionStorage.setItem('ifICouldBePointsAwarded', 'true')
+      setPointsAwarded(true)
+      onPointsAwarded?.(25)
+    }
+    onClose()
   }
 
   return (
@@ -139,7 +158,7 @@ export function IfICouldBe({ onClose }: IfICouldBeProps) {
             </button>
             <div style={{ width: '1px', height: '20px', backgroundColor: '#d1d5db' }}></div>
             <button
-              onClick={onClose}
+              onClick={handleSave}
               className="flex-1 font-medium transition-colors text-center"
               style={{ fontSize: '16px', color: '#2563eb' }}
               onMouseEnter={(e) => e.currentTarget.style.color = '#1d4ed8'}

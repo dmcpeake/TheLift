@@ -1,13 +1,16 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { X, RefreshCw, Eraser } from 'lucide-react'
+import { useGamification } from '../../../contexts/GamificationContext'
 
 interface DrawYourMindProps {
   onClose: () => void
+  onPointsAwarded?: (points: number) => void
 }
 
 type BrushType = 'pen' | 'marker' | 'highlighter' | 'eraser'
 
-export function DrawYourMind({ onClose }: DrawYourMindProps) {
+export function DrawYourMind({ onClose, onPointsAwarded }: DrawYourMindProps) {
+  const { awardPoints } = useGamification()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [context, setContext] = useState<CanvasRenderingContext2D | null>(null)
@@ -17,6 +20,10 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
   const [brushSize, setBrushSize] = useState(4)
   const [lastX, setLastX] = useState(0)
   const [lastY, setLastY] = useState(0)
+  const [pointsAwarded, setPointsAwarded] = useState<boolean>(() => {
+    const saved = sessionStorage.getItem('drawYourMindPointsAwarded')
+    return saved === 'true'
+  })
 
   const colors = [
     { name: 'Black', value: '#000000' },
@@ -179,6 +186,34 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
     if (!context || !canvasRef.current) return
     context.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
     saveCanvas()
+  }
+
+  const handleSave = () => {
+    // Check if canvas has any drawing and points haven't been awarded yet
+    if (canvasRef.current && !pointsAwarded) {
+      const canvas = canvasRef.current
+      const ctx = canvas.getContext('2d')
+      if (ctx) {
+        // Check if canvas is not blank by getting image data
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const hasDrawing = imageData.data.some((channel, index) => {
+          // Check alpha channel (every 4th value)
+          if ((index + 1) % 4 === 0) {
+            return channel !== 0
+          }
+          return false
+        })
+
+        if (hasDrawing) {
+          awardPoints('Completed Draw Your Mind', 25)
+          sessionStorage.setItem('drawYourMindPointsAwarded', 'true')
+          setPointsAwarded(true)
+          onPointsAwarded?.(25)
+        }
+      }
+    }
+    saveCanvas()
+    onClose()
   }
 
   return (
@@ -364,7 +399,7 @@ export function DrawYourMind({ onClose }: DrawYourMindProps) {
             </button>
             <div style={{ width: '1px', height: '20px', backgroundColor: '#d1d5db' }}></div>
             <button
-              onClick={onClose}
+              onClick={handleSave}
               className="flex-1 font-medium transition-colors text-center"
               style={{ fontSize: '16px', color: '#2563eb', padding: '0', height: '20px', lineHeight: '20px' }}
               onMouseEnter={(e) => e.currentTarget.style.color = '#1d4ed8'}

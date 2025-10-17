@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Menu, X, LogOut, Apple, Heart, Dribbble, Palette, Music, Calendar, CheckCircle, Pencil, Trash2, Plus } from 'lucide-react'
+import { Menu, X, LogOut, Apple, Heart, Dribbble, Palette, Music, Calendar, CheckCircle, Pencil, Trash2, Plus, Trophy } from 'lucide-react'
+import { useGamification } from '../../contexts/GamificationContext'
 
 type ModalType = 'add-feel-good' | 'edit-feel-good' | 'delete-feel-good' | 'edit-favorite' | null
 
 export function CheckInProfile() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { totalPoints, currentLevel, getProgressToNextLevel } = useGamification()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<'feel-good' | 'favorites'>('feel-good')
+  const [activeTab, setActiveTab] = useState<'feel-good' | 'favorites' | 'my-progress'>('feel-good')
   const [activeModal, setActiveModal] = useState<ModalType>(null)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editingValue, setEditingValue] = useState('')
@@ -365,6 +367,18 @@ export function CheckInProfile() {
           animation: butterflyWings 0.2s ease-in-out infinite;
         }
 
+        @keyframes rotateClockwise {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        .star-rotate {
+          animation: rotateClockwise 8s linear infinite;
+        }
+
         /* Mobile Optimizations */
         @media (max-width: 768px) {
           .leaf-group {
@@ -461,34 +475,6 @@ export function CheckInProfile() {
           {/* Desktop Navigation - hidden on mobile */}
           <div className="hidden md:flex fixed top-0 right-4 items-center gap-4" style={{ height: '80px', zIndex: 51 }}>
             <button
-              onClick={() => navigate('/checkin/home')}
-              className="cursor-pointer transition-all hover:opacity-70 relative"
-              style={{
-                fontSize: '14px',
-                color: '#1f2937',
-                fontWeight: '500',
-                background: 'none',
-                border: 'none',
-                padding: '8px'
-              }}
-              aria-label="Check in"
-            >
-              Check in
-              {location.pathname === '/checkin/home' && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: '-22px',
-                  left: 0,
-                  right: 0,
-                  height: '2px',
-                  backgroundColor: '#1f2937'
-                }}></div>
-              )}
-            </button>
-
-            <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}></div>
-
-            <button
               onClick={() => navigate('/checkin/garden')}
               className="cursor-pointer transition-all hover:opacity-70 relative"
               style={{
@@ -542,6 +528,56 @@ export function CheckInProfile() {
               )}
             </button>
 
+            {/* Trophy Icon with Level Badge */}
+            <div
+              style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginLeft: '-14px',
+                marginRight: '30px'
+              }}
+            >
+              <Trophy
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  color: '#FFA500',
+                  fill: '#FFA500',
+                  stroke: '#CC8400',
+                  strokeWidth: '1px'
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '-6px',
+                  right: '-6px',
+                  backgroundColor: '#147fe3',
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid white',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: '700',
+                    color: 'white',
+                    lineHeight: '1'
+                  }}
+                >
+                  {currentLevel}
+                </span>
+              </div>
+            </div>
+
             <button
               onClick={() => navigate('/')}
               className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
@@ -572,27 +608,6 @@ export function CheckInProfile() {
           {mobileMenuOpen && (
             <div className="md:hidden" style={{ paddingTop: '80px', paddingLeft: '20px', paddingRight: '20px' }}>
               <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '0 0 4px 0' }}></div>
-
-              <button
-                onClick={() => {
-                  navigate('/checkin/home')
-                  setMobileMenuOpen(false)
-                }}
-                className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center"
-                style={{
-                  fontSize: '14px',
-                  color: '#1f2937',
-                  fontWeight: '500',
-                  background: 'none',
-                  border: 'none',
-                  padding: '12px 16px',
-                  height: '40px'
-                }}
-              >
-                Check in
-              </button>
-
-              <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
 
               <button
                 onClick={() => {
@@ -715,7 +730,7 @@ export function CheckInProfile() {
             padding: '80px 20px'
           }}
         >
-          <div className="profile-content-inner max-w-md w-full">
+          <div className="profile-content-inner w-full" style={{ maxWidth: '548px' }}>
             {/* Container Card */}
             <div
               className="rounded-2xl"
@@ -776,6 +791,23 @@ export function CheckInProfile() {
                   }}
                 >
                   My favourites
+                </button>
+                <button
+                  onClick={() => setActiveTab('my-progress')}
+                  className="transition-all duration-200"
+                  style={{
+                    flex: 1,
+                    padding: '10px 16px',
+                    borderRadius: '50px',
+                    border: activeTab === 'my-progress' ? '2px solid #147fe3' : '2px solid transparent',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    backgroundColor: activeTab === 'my-progress' ? 'white' : 'transparent',
+                    color: activeTab === 'my-progress' ? '#147fe3' : '#6B7280'
+                  }}
+                >
+                  My progress
                 </button>
               </div>
 
@@ -842,6 +874,125 @@ export function CheckInProfile() {
                             </button>
                           </div>
                         ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* My Progress Tab Content */}
+                  {activeTab === 'my-progress' && (
+                    <div>
+                      {/* Total Points Display */}
+                      <div
+                        style={{
+                          textAlign: 'center'
+                        }}
+                      >
+                        <div style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937', marginBottom: '4px' }}>
+                          Total Points
+                        </div>
+                        <div style={{ fontSize: '32px', fontWeight: '700', color: '#1f2937' }}>
+                          {totalPoints}
+                        </div>
+                      </div>
+
+                      {/* Progress to Next Level */}
+                      <div style={{ marginBottom: '24px' }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '8px'
+                        }}>
+                          <span style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>
+                            Level {currentLevel}
+                          </span>
+                          <span style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>
+                            Level {currentLevel + 1}
+                          </span>
+                        </div>
+                        <div style={{
+                          width: '100%',
+                          height: '12px',
+                          backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                          borderRadius: '6px',
+                          overflow: 'hidden',
+                          position: 'relative'
+                        }}>
+                          <div style={{
+                            width: `${Math.min(100, getProgressToNextLevel().percentage)}%`,
+                            height: '100%',
+                            backgroundColor: '#F97316',
+                            borderRadius: '6px',
+                            transition: 'width 0.3s ease'
+                          }}></div>
+                        </div>
+                        <div style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          marginTop: '4px',
+                          textAlign: 'center'
+                        }}>
+                          {getProgressToNextLevel().current} / {getProgressToNextLevel().required} points
+                        </div>
+                      </div>
+
+                      {/* Stars Grid */}
+                      <div style={{ marginTop: '20px' }}>
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#1f2937',
+                          marginBottom: '12px',
+                          textAlign: 'center'
+                        }}>
+                          Your Journey to Level 20
+                        </div>
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(10, 1fr)',
+                          gap: '8px'
+                        }}>
+                          {Array.from({ length: 20 }, (_, i) => i + 1).map((level) => {
+                            const isCompleted = level <= currentLevel
+                            const isCurrent = level === currentLevel
+
+                            return (
+                              <div
+                                key={level}
+                                style={{
+                                  position: 'relative',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                <svg
+                                  className={isCompleted ? 'star-rotate' : ''}
+                                  width="28"
+                                  height="28"
+                                  viewBox="0 0 24 24"
+                                  fill={isCompleted ? '#F97316' : 'none'}
+                                  stroke="white"
+                                  strokeWidth="2"
+                                  style={{
+                                    filter: isCurrent ? 'drop-shadow(0 0 4px rgba(249, 115, 22, 0.6))' : 'none'
+                                  }}
+                                >
+                                  <polygon points="12,2 15,8.5 22,9.5 17,14.5 18,21.5 12,18 6,21.5 7,14.5 2,9.5 9,8.5" />
+                                </svg>
+                                <span style={{
+                                  fontSize: '9px',
+                                  fontWeight: isCurrent ? '700' : '500',
+                                  color: '#1f2937',
+                                  marginTop: '2px'
+                                }}>
+                                  {level}
+                                </span>
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
                     </div>
                   )}

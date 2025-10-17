@@ -8,6 +8,7 @@ import { WellbeingWheel } from '../prototypes/WellbeingWheel'
 import { ProgressHeader } from '../shared/ProgressHeader'
 import { WellbeingRadialGraph } from '../shared/WellbeingRadialGraph'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
+import { PointsToast } from '../shared/PointsToast'
 import Lottie from 'lottie-react'
 import BlushingShaded from '../../assets/animations/Blushing_Shaded.json'
 import HappyShaded from '../../assets/animations/Happy_Shaded.json'
@@ -15,6 +16,7 @@ import MehShaded from '../../assets/animations/Meh_Shaded.json'
 import SadTearShaded from '../../assets/animations/Sad_Tear_Shaded.json'
 import CryingShaded from '../../assets/animations/Crying_Shaded.json'
 import { AuthContext } from '../../utils/auth/context'
+import { useGamification } from '../../contexts/GamificationContext'
 
 type FlowStep = 'checkin' | 'mood' | 'emotions' | 'wellbeing' | 'chart' | 'talk' | 'garden' | 'complete'
 
@@ -30,10 +32,27 @@ export function CheckInFlow() {
   const { step } = useParams<{ step: string }>()
   const navigate = useNavigate()
   const { logout } = useContext(AuthContext)
+  const { awardPoints } = useGamification()
   const [completeMood, setCompleteMood] = useState<string | null>(null)
   const [completedData, setCompletedData] = useState<Record<string, any>>({})
   const [currentStepHasSelection, setCurrentStepHasSelection] = useState(false)
   const [emotionGridStep, setEmotionGridStep] = useState(1)
+
+  // Toast state
+  const [showToast, setShowToast] = useState(false)
+  const [toastPoints, setToastPoints] = useState(0)
+
+  // Track which steps have been awarded points (only award once per session)
+  // Use sessionStorage to persist across navigation
+  const [pointsAwarded, setPointsAwarded] = useState<Set<string>>(() => {
+    try {
+      const stored = sessionStorage.getItem('checkinPointsAwarded')
+      return stored ? new Set(JSON.parse(stored)) : new Set()
+    } catch (error) {
+      console.error('Error loading points awarded from sessionStorage:', error)
+      return new Set()
+    }
+  })
 
   // State to trigger completion in child components
   const [triggerEmotionCompletion, setTriggerEmotionCompletion] = useState(false)
@@ -54,6 +73,18 @@ export function CheckInFlow() {
 
   const currentStep = (step || 'mood') as FlowStep
   const currentStepIndex = steps.findIndex(s => s.id === currentStep)
+
+  // Persist pointsAwarded to sessionStorage whenever it changes
+  useEffect(() => {
+    sessionStorage.setItem('checkinPointsAwarded', JSON.stringify(Array.from(pointsAwarded)))
+  }, [pointsAwarded])
+
+  // Clear points tracking when completing the check-in
+  useEffect(() => {
+    if (currentStep === 'complete') {
+      sessionStorage.removeItem('checkinPointsAwarded')
+    }
+  }, [currentStep])
 
   // Load Theo animations
   useEffect(() => {
@@ -134,9 +165,42 @@ export function CheckInFlow() {
 
   // No auto-redirect - user must click DONE button
 
+  // Helper function to show points toast
+  const showPointsToast = (points: number) => {
+    setToastPoints(points)
+    setShowToast(true)
+  }
+
   const handleStepComplete = (stepId: string, data: any) => {
     // Store the completed data
     setCompletedData(prev => ({ ...prev, [stepId]: data }))
+
+    // Award points and show toast based on step (only if not already awarded)
+    const willShowToast = !pointsAwarded.has(stepId) && ['mood', 'wellbeing', 'emotions'].includes(stepId)
+
+    // Only hide existing toast if we're NOT about to show a new one
+    if (!willShowToast) {
+      setShowToast(false)
+    }
+
+    if (!pointsAwarded.has(stepId)) {
+      if (stepId === 'mood') {
+        awardPoints('Completed mood check-in', 50)
+        showPointsToast(50)
+        setPointsAwarded(prev => new Set(prev).add(stepId))
+      } else if (stepId === 'wellbeing') {
+        awardPoints('Completed wellbeing wheel', 100)
+        showPointsToast(100)
+        setPointsAwarded(prev => new Set(prev).add(stepId))
+      } else if (stepId === 'emotions') {
+        awardPoints('Completed emotions check-in', 50)
+        showPointsToast(50)
+        setPointsAwarded(prev => new Set(prev).add(stepId))
+      }
+    } else {
+      // If points already awarded, hide any existing toast
+      setShowToast(false)
+    }
 
     // Special handling for wellbeing completion
     if (stepId === 'wellbeing') {
@@ -2097,6 +2161,13 @@ export function CheckInFlow() {
         )}
 
       </div>
+
+      {/* Points Toast */}
+      <PointsToast
+        points={toastPoints}
+        show={showToast}
+        onComplete={() => setShowToast(false)}
+      />
     </>
   )
 }

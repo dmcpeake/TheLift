@@ -52,11 +52,11 @@ export function MarketingNavigation() {
         boxShadow: isScrolled ? '0 4px 8px rgba(0, 0, 0, 0.1)' : 'none'
       }}
     >
-      <div 
-        className="w-full py-5" 
-        style={{ 
-          paddingLeft: isMobile ? '20px' : '60px', 
-          paddingRight: isMobile ? '20px' : '60px' 
+      <div
+        className="w-full py-5"
+        style={{
+          paddingLeft: '20px',
+          paddingRight: '20px'
         }}
       >
         <div className="flex items-center justify-between">

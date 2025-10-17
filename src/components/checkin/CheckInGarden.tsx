@@ -1,20 +1,25 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Menu, X, LogOut } from 'lucide-react'
+import { Menu, X, LogOut, Trophy } from 'lucide-react'
 import Lottie from 'lottie-react'
 import { ThreeHappyThings } from './garden/ThreeHappyThings'
 import { ThreeGratefulThings } from './garden/ThreeGratefulThings'
 import { IfICouldBe } from './garden/IfICouldBe'
 import { DrawYourMind } from './garden/DrawYourMind'
+import { useGamification } from '../../contexts/GamificationContext'
+import { PointsToast } from '../shared/PointsToast'
 
 type ActivityType = 'happy' | 'grateful' | 'ifICouldBe' | 'draw' | null
 
 export function CheckInGarden() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { currentLevel } = useGamification()
   const [activeActivity, setActiveActivity] = useState<ActivityType>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [roseAnimation, setRoseAnimation] = useState(null)
+  const [showToast, setShowToast] = useState(false)
+  const [toastPoints, setToastPoints] = useState(0)
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -27,6 +32,11 @@ export function CheckInGarden() {
       .then(data => setRoseAnimation(data))
       .catch(error => console.error('Error loading rose animation:', error))
   }, [])
+
+  const showPointsToast = (points: number) => {
+    setToastPoints(points)
+    setShowToast(true)
+  }
 
   return (
     <>
@@ -358,34 +368,6 @@ export function CheckInGarden() {
           {/* Desktop Navigation - hidden on mobile */}
           <div className="hidden md:flex fixed top-0 right-4 items-center gap-4" style={{ height: '80px', zIndex: 51 }}>
             <button
-              onClick={() => navigate('/checkin/home')}
-              className="cursor-pointer transition-all hover:opacity-70 relative"
-              style={{
-                fontSize: '14px',
-                color: '#1f2937',
-                fontWeight: '500',
-                background: 'none',
-                border: 'none',
-                padding: '8px'
-              }}
-              aria-label="Check in"
-            >
-              Check in
-              {location.pathname === '/checkin/home' && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: '-22px',
-                  left: 0,
-                  right: 0,
-                  height: '2px',
-                  backgroundColor: '#1f2937'
-                }}></div>
-              )}
-            </button>
-
-            <div style={{ width: '1px', height: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)' }}></div>
-
-            <button
               onClick={() => navigate('/checkin/garden')}
               className="cursor-pointer transition-all hover:opacity-70 relative"
               style={{
@@ -439,6 +421,56 @@ export function CheckInGarden() {
               )}
             </button>
 
+            {/* Trophy Icon with Level Badge */}
+            <div
+              style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginLeft: '-14px',
+                marginRight: '30px'
+              }}
+            >
+              <Trophy
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  color: '#FFA500',
+                  fill: '#FFA500',
+                  stroke: '#CC8400',
+                  strokeWidth: '1px'
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '-6px',
+                  right: '-6px',
+                  backgroundColor: '#147fe3',
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid white',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: '700',
+                    color: 'white',
+                    lineHeight: '1'
+                  }}
+                >
+                  {currentLevel}
+                </span>
+              </div>
+            </div>
+
             <button
               onClick={() => navigate('/')}
               className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
@@ -449,24 +481,8 @@ export function CheckInGarden() {
             </button>
           </div>
 
-          {/* Mobile Hamburger Menu and Check In Button - shown only on mobile */}
+          {/* Mobile Hamburger Menu - shown only on mobile */}
           <div className="mobile-nav-buttons fixed top-0 right-4 z-50 flex items-center gap-2" style={{ height: '80px' }}>
-            <button
-              onClick={() => navigate('/checkin/home')}
-              className="h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
-              style={{
-                backgroundColor: 'white',
-                border: '2px solid #147fe3',
-                paddingLeft: '16px',
-                paddingRight: '16px',
-                fontSize: '14px',
-                fontWeight: '600',
-                color: '#147fe3'
-              }}
-              aria-label="Check In"
-            >
-              CHECK IN
-            </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
@@ -485,27 +501,6 @@ export function CheckInGarden() {
           {mobileMenuOpen && (
             <div className="md:hidden" style={{ paddingTop: '80px', paddingLeft: '20px', paddingRight: '20px' }}>
               <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '0 0 4px 0' }}></div>
-
-              <button
-                onClick={() => {
-                  navigate('/checkin/home')
-                  setMobileMenuOpen(false)
-                }}
-                className="w-full text-left transition-all hover:bg-white hover:bg-opacity-20 rounded flex items-center"
-                style={{
-                  fontSize: '14px',
-                  color: '#1f2937',
-                  fontWeight: '500',
-                  background: 'none',
-                  border: 'none',
-                  padding: '12px 16px',
-                  height: '40px'
-                }}
-              >
-                Check in
-              </button>
-
-              <div style={{ height: '1px', backgroundColor: 'rgba(0, 0, 0, 0.1)', margin: '4px 0' }}></div>
 
               <button
                 onClick={() => {
@@ -797,10 +792,17 @@ export function CheckInGarden() {
       )}
 
       {/* Activity Modals - rendered outside main container */}
-      {activeActivity === 'happy' && <ThreeHappyThings onClose={() => setActiveActivity(null)} />}
-      {activeActivity === 'grateful' && <ThreeGratefulThings onClose={() => setActiveActivity(null)} />}
-      {activeActivity === 'ifICouldBe' && <IfICouldBe onClose={() => setActiveActivity(null)} />}
-      {activeActivity === 'draw' && <DrawYourMind onClose={() => setActiveActivity(null)} />}
+      {activeActivity === 'happy' && <ThreeHappyThings onClose={() => setActiveActivity(null)} onPointsAwarded={showPointsToast} />}
+      {activeActivity === 'grateful' && <ThreeGratefulThings onClose={() => setActiveActivity(null)} onPointsAwarded={showPointsToast} />}
+      {activeActivity === 'ifICouldBe' && <IfICouldBe onClose={() => setActiveActivity(null)} onPointsAwarded={showPointsToast} />}
+      {activeActivity === 'draw' && <DrawYourMind onClose={() => setActiveActivity(null)} onPointsAwarded={showPointsToast} />}
+
+      {/* Points Toast */}
+      <PointsToast
+        points={toastPoints}
+        show={showToast}
+        onComplete={() => setShowToast(false)}
+      />
     </>
   )
 }

@@ -6,6 +6,7 @@ import { AuthContext } from './utils/auth/context'
 import { User, UserMode } from './utils/auth/types'
 import { fetchUserProfile, getNavigationPathForRole, getDefaultModeForRole } from './utils/auth/helpers'
 import { AppRoutes } from './routes/AppRoutes'
+import { GamificationProvider } from './contexts/GamificationContext'
 
 const supabase = getSupabaseClient()
 
@@ -161,7 +162,9 @@ function AppContent() {
 export default function App() {
   return (
     <Router>
-      <AppContent />
+      <GamificationProvider>
+        <AppContent />
+      </GamificationProvider>
     </Router>
   )
 }

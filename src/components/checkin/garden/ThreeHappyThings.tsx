@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
+import { useGamification } from '../../../contexts/GamificationContext'
 
 interface ThreeHappyThingsProps {
   onClose: () => void
+  onPointsAwarded?: (points: number) => void
 }
 
-export function ThreeHappyThings({ onClose }: ThreeHappyThingsProps) {
+export function ThreeHappyThings({ onClose, onPointsAwarded }: ThreeHappyThingsProps) {
+  const { awardPoints } = useGamification()
   const [responses, setResponses] = useState<string[]>(() => {
     const saved = sessionStorage.getItem('threeHappyThings')
     return saved ? JSON.parse(saved) : ['', '', '']
   })
   const [isRecording, setIsRecording] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+  const [pointsAwarded, setPointsAwarded] = useState<boolean>(() => {
+    const saved = sessionStorage.getItem('threeHappyThingsPointsAwarded')
+    return saved === 'true'
+  })
 
   useEffect(() => {
     sessionStorage.setItem('threeHappyThings', JSON.stringify(responses))
@@ -27,6 +34,18 @@ export function ThreeHappyThings({ onClose }: ThreeHappyThingsProps) {
     // Voice capture functionality - placeholder for now
     setIsRecording(isRecording === index ? null : index)
     console.log(`Voice capture for input ${index}`)
+  }
+
+  const handleSave = () => {
+    // Check if at least one response is filled and points haven't been awarded yet
+    const hasContent = responses.some(r => r.trim().length > 0)
+    if (hasContent && !pointsAwarded) {
+      awardPoints('Completed 3 Happy Things', 25)
+      sessionStorage.setItem('threeHappyThingsPointsAwarded', 'true')
+      setPointsAwarded(true)
+      onPointsAwarded?.(25)
+    }
+    onClose()
   }
 
   return (
@@ -104,7 +123,7 @@ export function ThreeHappyThings({ onClose }: ThreeHappyThingsProps) {
             </button>
             <div style={{ width: '1px', height: '20px', backgroundColor: '#d1d5db' }}></div>
             <button
-              onClick={onClose}
+              onClick={handleSave}
               className="flex-1 font-medium transition-colors text-center"
               style={{ fontSize: '16px', color: '#2563eb' }}
               onMouseEnter={(e) => e.currentTarget.style.color = '#1d4ed8'}

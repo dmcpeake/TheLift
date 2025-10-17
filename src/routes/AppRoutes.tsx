@@ -72,7 +72,7 @@ export function AppRoutes() {
   const isMarketingApp = ['/', '/about', '/how-it-works', '/pricing', '/contact', '/waitlist', '/legal', '/sitemap', '/status'].some(path =>
     location.pathname === path || location.pathname.startsWith('/legal')
   )
-  const isAuthApp = ['/login', '/admin/login'].includes(location.pathname)
+  const isAuthApp = ['/v2/login', '/admin/login'].includes(location.pathname)
   
   // Show navigation for demo mode - always show on admin/dashboard routes
   const showNavigation = !isChildApp && !isMarketingApp && !isAuthApp
@@ -96,7 +96,7 @@ export function AppRoutes() {
         <Route path="/sitemap" element={<Sitemap />} />
         
         {/* Auth Routes */}
-        <Route path="/login" element={<UnifiedLoginPage />} />
+        <Route path="/v2/login" element={<UnifiedLoginPage />} />
         
         {/* Practitioner/GroupContact Routes - Demo accessible */}
         <Route path="/dashboard" element={<PractitionerDashboard />} />

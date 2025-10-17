@@ -3,8 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
 import { ProgressHeader } from '../shared/ProgressHeader'
 import Lottie from 'lottie-react'
-import { Settings, SkipForward, Play, Pause, Users, Sparkles, Star, Plus, LogOut, X, Heart, Smile, Menu } from 'lucide-react'
+import { Settings, SkipForward, Play, Pause, Users, Sparkles, Star, Plus, LogOut, X, Heart, Smile, Menu, Trophy } from 'lucide-react'
 import { BreathingCircles } from '../breathing/BreathingCircles'
+import { useGamification } from '../../contexts/GamificationContext'
+import { PointsToast } from '../shared/PointsToast'
 import './checkin-mobile.css'
 
 // Force deployment refresh - button should show START
@@ -12,6 +14,7 @@ import './checkin-mobile.css'
 export function CheckInHome() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { awardPoints, currentLevel } = useGamification()
   const [roseAnimation, setRoseAnimation] = useState(null)
   const [showBreathing, setShowBreathing] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
@@ -25,6 +28,8 @@ export function CheckInHome() {
   const [breathingTitle, setBreathingTitle] = useState("Choose a breathing exercise")
   const [titleOpacity, setTitleOpacity] = useState(1)
   const [showGuide, setShowGuide] = useState(false)
+  const [showToast, setShowToast] = useState(false)
+  const [toastPoints, setToastPoints] = useState(0)
   const breathingStartRef = useRef<(() => void) | null>(null)
   const breathingPauseRef = useRef<(() => void) | null>(null)
   const breathingResumeRef = useRef<(() => void) | null>(null)
@@ -104,25 +109,53 @@ export function CheckInHome() {
   const [glimmerItems, setGlimmerItems] = useState<string[]>([])
   const [progressItems, setProgressItems] = useState<string[]>([])
 
+  const showPointsToast = (points: number) => {
+    setToastPoints(points)
+    setShowToast(true)
+  }
+
   const addItem = (text: string, type: 'grateful' | 'happiness' | 'kindAct' | 'glimmer' | 'progress') => {
     if (!text.trim()) return
 
+    let itemAdded = false
+
     switch (type) {
       case 'grateful':
-        if (gratefulItems.length < 3) setGratefulItems([...gratefulItems, text.trim()])
+        if (gratefulItems.length < 3) {
+          setGratefulItems([...gratefulItems, text.trim()])
+          itemAdded = true
+        }
         break
       case 'happiness':
-        if (happinessItems.length < 3) setHappinessItems([...happinessItems, text.trim()])
+        if (happinessItems.length < 3) {
+          setHappinessItems([...happinessItems, text.trim()])
+          itemAdded = true
+        }
         break
       case 'kindAct':
-        if (kindActItems.length < 3) setKindActItems([...kindActItems, text.trim()])
+        if (kindActItems.length < 3) {
+          setKindActItems([...kindActItems, text.trim()])
+          itemAdded = true
+        }
         break
       case 'glimmer':
-        if (glimmerItems.length < 3) setGlimmerItems([...glimmerItems, text.trim()])
+        if (glimmerItems.length < 3) {
+          setGlimmerItems([...glimmerItems, text.trim()])
+          itemAdded = true
+        }
         break
       case 'progress':
-        if (progressItems.length < 3) setProgressItems([...progressItems, text.trim()])
+        if (progressItems.length < 3) {
+          setProgressItems([...progressItems, text.trim()])
+          itemAdded = true
+        }
         break
+    }
+
+    // Award points if item was successfully added
+    if (itemAdded) {
+      awardPoints(`Added ${type} to garden`, 25)
+      showPointsToast(25)
     }
   }
 
@@ -1618,6 +1651,13 @@ export function CheckInHome() {
           </div>
         </div>
       )}
+
+      {/* Points Toast */}
+      <PointsToast
+        points={toastPoints}
+        show={showToast}
+        onComplete={() => setShowToast(false)}
+      />
     </div>
     </>
   )

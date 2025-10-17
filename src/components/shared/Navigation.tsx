@@ -56,10 +56,8 @@ export function Navigation() {
       {/* Logo and Brand - Left side */}
       <Link
         to={isAdmin ? "/admin" : "/dashboard"}
+        className="flex items-center gap-3"
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
           textDecoration: 'none'
         }}
       >
@@ -68,16 +66,7 @@ export function Navigation() {
           <circle cx="15" cy="15" r="4" fill="#147fe3"/>
           <circle cx="23" cy="7" r="4" fill="#147fe3"/>
         </svg>
-        <img
-          src="/TheLiftLogo.svg"
-          alt="The Lift"
-          style={{
-            height: '20px',
-            imageRendering: 'auto',
-            shapeRendering: 'geometricPrecision',
-            filter: 'brightness(0) saturate(100%) invert(11%) sepia(0%) saturate(7465%) hue-rotate(189deg) brightness(105%) contrast(86%)'
-          }}
-        />
+        <img src="/TheLiftLogo.svg" alt="The Lift" className="h-5" style={{ imageRendering: 'auto', shapeRendering: 'geometricPrecision', filter: 'brightness(0) saturate(100%) invert(11%) sepia(0%) saturate(7465%) hue-rotate(189deg) brightness(105%) contrast(86%)' }} />
       </Link>
 
       {/* Right side - User greeting and Sign Out Button */}
