@@ -20,6 +20,7 @@ import { StatusPage } from '../components/marketing/StatusPage'
 
 // Practitioner Components
 import { PractitionerDashboard } from '../components/practitioner/PractitionerDashboard'
+import { PractitionerDashboardV2 } from '../components/practitioner-v2/PractitionerDashboardV2'
 import { AddChild } from '../components/practitioner/AddChild'
 import { EditChild } from '../components/practitioner/EditChild'
 import { BulkImportChildren } from '../components/practitioner/BulkImportChildren'
@@ -99,6 +100,7 @@ export function AppRoutes() {
         
         {/* Practitioner/GroupContact Routes - Demo accessible */}
         <Route path="/dashboard" element={<PractitionerDashboard />} />
+        <Route path="/dashboard/v2" element={<PractitionerDashboardV2 />} />
         
         {/* Child management routes - Demo accessible */}
         <Route path="/children/add" element={<AddChild />} />

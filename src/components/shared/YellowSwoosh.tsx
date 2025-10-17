@@ -5,12 +5,14 @@ interface YellowSwooshProps {
   zIndex?: number
   /** Children to render inside the swoosh */
   children?: React.ReactNode
+  /** Position type - 'fixed' stays at viewport bottom, 'absolute' moves with content */
+  position?: 'fixed' | 'absolute'
 }
 
-export function YellowSwoosh({ zIndex = 999, children }: YellowSwooshProps) {
+export function YellowSwoosh({ zIndex = 999, children, position = 'fixed' }: YellowSwooshProps) {
   return (
     <div style={{
-      position: 'fixed',
+      position,
       bottom: '-35px',
       left: 0,
       right: 0,

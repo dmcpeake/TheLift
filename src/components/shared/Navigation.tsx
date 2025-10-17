@@ -20,100 +20,92 @@ export function Navigation() {
   const isGroupContact = user?.profile.role === 'GroupContact' || isDemo
   const isAdmin = user?.profile.role === 'Account'
 
+  // Get user name for greeting
+  const getUserName = () => {
+    if (user?.profile?.name) {
+      return user.profile.name
+    }
+    if (user?.email) {
+      return user.email.split('@')[0]
+    }
+    // Check sessionStorage for demo email
+    const storedEmail = sessionStorage.getItem('userEmail')
+    if (storedEmail) {
+      return storedEmail.split('@')[0]
+    }
+    return 'there'
+  }
+
   return (
-    <nav className="bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        {/* Logo and Brand */}
-        <div className="flex items-center">
-          <Link to={isAdmin ? "/admin" : "/dashboard"} className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-gray-900">The Lift</span>
-          </Link>
-        </div>
+    <nav
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        backgroundColor: '#ffffff',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        minHeight: '80px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 24px'
+      }}
+    >
+      {/* Logo and Brand - Left side */}
+      <Link
+        to={isAdmin ? "/admin" : "/dashboard"}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          textDecoration: 'none'
+        }}
+      >
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="7" cy="23" r="4" fill="#147fe3"/>
+          <circle cx="15" cy="15" r="4" fill="#147fe3"/>
+          <circle cx="23" cy="7" r="4" fill="#147fe3"/>
+        </svg>
+        <img
+          src="/TheLiftLogo.svg"
+          alt="The Lift"
+          style={{
+            height: '20px',
+            imageRendering: 'auto',
+            shapeRendering: 'geometricPrecision',
+            filter: 'brightness(0) saturate(100%) invert(11%) sepia(0%) saturate(7465%) hue-rotate(189deg) brightness(105%) contrast(86%)'
+          }}
+        />
+      </Link>
 
-        {/* Right side - Navigation and User Menu */}
-        <div className="flex items-center ml-auto">
-          
-          {/* Navigation Links for GroupContact */}
-          {isGroupContact && (
-            <div className="relative flex items-center">
-              <Link
-                to="/dashboard"
-                onClick={() => {
-                  if (currentMode !== 'practitioner') toggleMode()
-                }}
-                className="px-3 py-2 text-sm font-medium text-gray-900 transition-colors relative hover:text-gray-700"
-              >
-                My Children
-                {currentMode === 'practitioner' && (
-                  <div className="absolute bottom-[-16px] left-0 right-0 h-0.5 bg-gray-900"></div>
-                )}
-              </Link>
-              <div className="h-4 w-px bg-gray-300 mx-3"></div>
-              <Link
-                to="/dashboard"
-                onClick={() => {
-                  if (currentMode !== 'admin') toggleMode()
-                }}
-                className="px-3 py-2 text-sm font-medium text-gray-900 transition-colors relative hover:text-gray-700"
-              >
-                Group Admin
-                {currentMode === 'admin' && (
-                  <div className="absolute bottom-[-16px] left-0 right-0 h-0.5 bg-gray-900"></div>
-                )}
-              </Link>
-            </div>
-          )}
-
-          {/* Divider between navigation and account menu */}
-          {isGroupContact && (
-            <div className="h-4 w-px bg-gray-300 mx-3"></div>
-          )}
-
-          {/* Admin Links */}
-          {isAdmin && (
-            <>
-              <Link
-                to="/admin"
-                className="px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:text-gray-700"
-              >
-                Dashboard
-              </Link>
-              <div className="h-4 w-px bg-gray-300 mx-3"></div>
-              <Link
-                to="/admin/waitlist"
-                className="px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:text-gray-700"
-              >
-                Waitlist
-              </Link>
-              <div className="h-4 w-px bg-gray-300 mx-3"></div>
-            </>
-          )}
-
-          {/* Account Menu for all users */}
-          <div className="flex items-center">
-            <DropdownMenu open={isProfileOpen} onOpenChange={setIsProfileOpen}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center space-x-2 px-3 py-2">
-                  <span className="text-sm font-medium text-gray-900">My Account</span>
-                  <ChevronDown className="w-4 h-4 text-gray-400" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem asChild>
-                  <Link to="/profile" className="flex items-center space-x-2">
-                    <User className="w-4 h-4" />
-                    <span>Profile Settings</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/')} className="flex items-center space-x-2 text-red-600">
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign Out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
+      {/* Right side - User greeting and Sign Out Button */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <span style={{ fontSize: '14px', fontWeight: 500, color: '#1f2937' }}>
+          Hi {getUserName()}
+        </span>
+        <button
+          onClick={() => navigate('/')}
+          style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'white',
+            border: '2px solid #147fe3',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s',
+            boxShadow: '0 2px 8px rgba(20, 127, 227, 0.2)'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f7ff'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+          aria-label="Sign Out"
+        >
+          <LogOut style={{ height: '20px', width: '20px', color: '#147fe3' }} />
+        </button>
       </div>
     </nav>
   )

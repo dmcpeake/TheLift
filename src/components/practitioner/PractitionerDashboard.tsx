@@ -14,6 +14,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { BulkReassignDialog } from './BulkReassignDialog'
 import { BulkArchiveDialog } from './BulkArchiveDialog'
 import { PageLoader } from '../shared/LottieLoader'
+import { YellowSwoosh } from '../shared/YellowSwoosh'
 import {
   Users,
   UserPlus,
@@ -161,6 +162,22 @@ export function PractitionerDashboard() {
           name: 'Sophie Chen',
           lastCheckIn: '3 hours ago',
           status: 'fine',
+          practitioner: 'Demo Practitioner',
+          practitionerId: 'demo-pract-1'
+        },
+        {
+          id: 'demo-4',
+          name: 'Oliver Brown',
+          lastCheckIn: '4 hours ago',
+          status: 'fine',
+          practitioner: 'Demo Practitioner',
+          practitionerId: 'demo-pract-1'
+        },
+        {
+          id: 'demo-5',
+          name: 'Lily Davis',
+          lastCheckIn: '2 days ago',
+          status: 'needs_attention',
           practitioner: 'Demo Practitioner',
           practitionerId: 'demo-pract-1'
         }
@@ -679,28 +696,22 @@ export function PractitionerDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Breadcrumb Navigation */}
-        <Breadcrumb className="mb-6">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbPage>Dashboard</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
+    <>
+      <style>{`
+        .dashboard-white-bg {
+          background-color: #ffffff !important;
+        }
+        body {
+          background-color: #ffffff !important;
+        }
+      `}</style>
+      <div className="min-h-screen dashboard-white-bg" style={{ paddingTop: '80px', position: 'relative' }}>
+        <div className="max-w-7xl mx-auto p-6" style={{ paddingBottom: '120px' }}>
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                {isAdminMode ? 'Manage Users' : 'My Children'}
-              </h1>
-            </div>
-
-
-          </div>
+        <div className="mb-8" style={{ marginTop: '10px' }}>
+          <h1 className="text-3xl font-bold text-center" style={{ color: '#1f2937' }}>
+            My Children
+          </h1>
         </div>
 
         {error && (
@@ -711,80 +722,6 @@ export function PractitionerDashboard() {
             </AlertDescription>
           </Alert>
         )}
-
-        {/* Quick Actions Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  {isAdminMode ? (
-                    <>
-                      <p className="text-sm font-medium text-gray-600">Seats</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {stats?.usedSeats || 0}/{stats?.totalSeats || 0}
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-sm font-medium text-gray-600">Children</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {stats?.totalChildren || 0}
-                      </p>
-                    </>
-                  )}
-                </div>
-                <Users className="h-8 w-8 text-gray-400" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Need Attention</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {stats?.needsAttention || 0}
-                  </p>
-                </div>
-                <AlertTriangle className="h-8 w-8 text-gray-400" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Flagged</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {stats?.flaggedChildren || 0}
-                  </p>
-                </div>
-                <Shield className="h-8 w-8 text-gray-400" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    <Link to="/children/archived" className="hover:underline">
-                      Archived
-                    </Link>
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {stats?.archivedChildren || 0}
-                  </p>
-                </div>
-                <Archive className="h-8 w-8 text-gray-400" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         <div className="grid grid-cols-1 gap-6">
           {/* Practitioners Section - Admin Mode Only */}
@@ -832,164 +769,107 @@ export function PractitionerDashboard() {
           )}
 
           {/* Children Section - Both Modes */}
-          <Card>
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-bold">
-                  {isAdminMode ? 'All Children' : 'Assigned to me'}
-                </CardTitle>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to="/children/bulk-import">
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      Bulk Import
-                    </Link>
-                  </Button>
-                  <Button size="sm" asChild>
-                    <Link to="/children/add">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Child
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Search and Filters */}
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder={`Search children${isAdminMode ? '...' : '...'}`}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-32">
-                      <SelectValue placeholder="All Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="fine">Fine</SelectItem>
-                      <SelectItem value="needs_attention">Needs Attention</SelectItem>
-                      <SelectItem value="flagged">Flagged</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  {isAdminMode && (
-                    <Select value={practitionerFilter} onValueChange={setPractitionerFilter}>
-                      <SelectTrigger className="w-40">
-                        <SelectValue placeholder="All Practitioners" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Practitioners</SelectItem>
-                        {uniquePractitioners.map((practitioner) => (
-                          <SelectItem key={practitioner.id} value={practitioner.id}>
-                            {practitioner.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-              </div>
-
-              {/* Select all option */}
-              <div className="flex items-center gap-2">
-                <Checkbox 
-                  checked={isAllSelected}
-                  onCheckedChange={handleSelectAll}
-                />
-                <span className="text-sm text-gray-600">
-                  Select all on this page ({currentChildren.length})
-                </span>
-              </div>
-
-              {/* Bulk Actions */}
-              {selectedChildren.length > 0 && (
-                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-200">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={downloadCredentials}
-                    disabled={bulkActionLoading}
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download Credentials ({selectedChildren.length})
-                  </Button>
-                  {isAdminMode && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowReassignDialog(true)}
-                      disabled={bulkActionLoading}
-                    >
-                      <UserX className="h-4 w-4 mr-2" />
-                      Reassign ({selectedChildren.length})
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowArchiveDialog(true)}
-                    disabled={bulkActionLoading}
-                  >
-                    <Archive className="h-4 w-4 mr-2" />
-                    Archive ({selectedChildren.length})
-                  </Button>
-                </div>
-              )}
-
-              {/* Children List */}
-              <div className="border rounded-lg">
+          <div className="space-y-4">
+            {/* Children List */}
+            <div
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                border: '1px solid rgba(0, 0, 0, 0.1)',
+                borderRadius: '16px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+                overflow: 'hidden',
+                marginBottom: '100px'
+              }}
+            >
                 {currentChildren.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    {searchTerm || statusFilter !== 'all' || practitionerFilter !== 'all' 
-                      ? 'No children match your search criteria.' 
+                  <div className="text-center py-8" style={{ color: '#6b7280' }}>
+                    {searchTerm || statusFilter !== 'all' || practitionerFilter !== 'all'
+                      ? 'No children match your search criteria.'
                       : 'No children found.'
                     }
                   </div>
                 ) : (
-                  <div className="divide-y divide-gray-200">
+                  <div>
                     {currentChildren.map((child, index) => (
-                      <div 
-                        key={child.id} 
-                        className="flex items-center justify-between py-4 px-6 hover:bg-gray-50 transition-colors"
+                      <div
+                        key={child.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '20px 24px',
+                          borderBottom: index < currentChildren.length - 1 ? '1px solid rgba(0, 0, 0, 0.06)' : 'none',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
-                        <div className="flex items-center gap-3 flex-1">
-                          <Checkbox 
-                            checked={selectedChildren.includes(child.id)}
-                            onCheckedChange={() => handleSelectChild(child.id)}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                          <Link 
-                            to={`/children/${child.id}`}
-                            className="flex-1 flex items-center justify-between group"
+                        <Link to={`/children/${child.id}`} style={{ flex: 1, textDecoration: 'none' }}>
+                          <div style={{ fontWeight: 600, fontSize: '16px', color: '#1f2937', marginBottom: '4px' }}>
+                            {child.name}
+                          </div>
+                          <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                            Last check-in: {child.lastCheckIn}
+                          </div>
+                        </Link>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <button
+                            style={{
+                              backgroundColor: 'white',
+                              border: '2px solid #147fe3',
+                              color: '#147fe3',
+                              padding: '8px 24px',
+                              borderRadius: '999px',
+                              fontSize: '14px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                              boxShadow: '0 2px 8px rgba(20, 127, 227, 0.1)'
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              // Report button - no action for now
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = '#f0f7ff'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'white'
+                            }}
                           >
-                            <div>
-                              <div className="font-medium text-gray-900 group-hover:text-gray-700">{child.name}</div>
-                              <div className="text-sm text-gray-500">
-                                Last check-in: {child.lastCheckIn}
-                                {isAdminMode && child.practitioner && (
-                                  <span> • Practitioner: {child.practitioner}</span>
-                                )}
-                              </div>
-                            </div>
-                            <div>
-                              <Badge 
-                                variant={
-                                  child.status === 'fine' ? 'outline' :
-                                  child.status === 'needs_attention' ? 'secondary' : 'destructive'
-                                }
-                              >
-                                {child.status === 'fine' ? 'Fine' :
-                                 child.status === 'needs_attention' ? 'Needs Attention' : 'Flagged'}
-                              </Badge>
-                            </div>
-                          </Link>
+                            REPORT
+                          </button>
+                          <button
+                            style={{
+                              backgroundColor: '#147fe3',
+                              border: '2px solid #147fe3',
+                              color: 'white',
+                              padding: '8px 24px',
+                              borderRadius: '999px',
+                              fontSize: '14px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                              boxShadow: '0 2px 8px rgba(20, 127, 227, 0.2)'
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              // Extract first name and save to sessionStorage
+                              const firstName = child.name.split(' ')[0]
+                              sessionStorage.setItem('userName', firstName)
+                              window.location.href = '/checkin/onboarding'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = '#1166cc'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = '#147fe3'
+                            }}
+                          >
+                            CHECK IN
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -1033,19 +913,7 @@ export function PractitionerDashboard() {
                   </div>
                 </div>
               )}
-
-              {/* Selected items info */}
-              {selectedChildren.length > 0 && (
-                <div className="p-4 border-t border-gray-200 bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700">
-                      {selectedChildren.length} children selected
-                    </span>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          </div>
         </div>
 
         {/* Bulk Action Dialogs */}
@@ -1066,6 +934,12 @@ export function PractitionerDashboard() {
           loading={bulkActionLoading}
         />
       </div>
+
+      {/* Yellow swoosh footer - hidden on mobile */}
+      <div className="hidden md:block absolute bottom-0 left-0 right-0">
+        <YellowSwoosh position="absolute" />
+      </div>
     </div>
+    </>
   )
 }
