@@ -132,8 +132,10 @@ export function ChildSummaryAnalytics() {
   const [checkInHistory, setCheckInHistory] = useState<Record<string, CheckIn[]>>({})
   const [moodHistory, setMoodHistory] = useState<Record<string, any[]>>({})
   const [aiInsights, setAIInsights] = useState<Record<string, AIInsights>>({})
+  const [weeklyAIInsights, setWeeklyAIInsights] = useState<Record<string, AIInsights>>({}) // Key: `${childId}_${checkInId}`
   const [loading, setLoading] = useState(true)
   const [loadingInsights, setLoadingInsights] = useState<Record<string, boolean>>({})
+  const [loadingWeeklyInsights, setLoadingWeeklyInsights] = useState<Record<string, boolean>>({})
   const [aiLoadingProgress, setAILoadingProgress] = useState<Record<string, number>>({})
   const [selectedCheckInIds, setSelectedCheckInIds] = useState<Record<string, string>>({})
   // Removed aiAnalysisProgress to prevent excessive re-renders
@@ -724,6 +726,75 @@ export function ChildSummaryAnalytics() {
     }
   }
 
+  // Load AI insights for a specific week/check-in
+  const loadWeeklyAIInsights = async (childId: string, checkInId: string) => {
+    const weekKey = `${childId}_${checkInId}`
+
+    // Check if already loading or loaded
+    if (loadingWeeklyInsights[weekKey] || weeklyAIInsights[weekKey]) return
+
+    setLoadingWeeklyInsights(prev => ({ ...prev, [weekKey]: true }))
+
+    try {
+      // Use the correct Supabase URL and key
+      const supabaseUrl = `https://${projectId}.supabase.co`
+
+      // Call the AI analysis edge function for this specific week
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/analyze-qualitative-data-optimized`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${publicAnonKey}`
+          },
+          body: JSON.stringify({
+            childId,
+            checkInId, // Pass specific check-in ID to analyze just this week
+            dateRange: 'week',
+            analysisType: 'comprehensive'
+          })
+        }
+      )
+
+      if (response.ok) {
+        const data = await response.json()
+
+        // Parse the AI response into structured insights
+        const analysis = cleanupText(data.analysis || '')
+
+        const insights: AIInsights = {
+          summary: cleanupText(extractSection(analysis, 'EXECUTIVE SUMMARY') ||
+                    extractSection(analysis, 'Executive Summary') ||
+                    analysis.split('\n')[0] ||
+                    'Analysis in progress...'),
+          concerns: extractBulletPoints(analysis, 'RED FLAGS & EARLY WARNING SIGNS') ||
+                    extractBulletPoints(analysis, 'RED FLAGS') ||
+                    extractBulletPoints(analysis, 'IMMEDIATE ACTION REQUIRED') ||
+                    extractBulletPoints(analysis, 'Key Concerns'),
+          strengths: extractBulletPoints(analysis, 'STRENGTHS & PROTECTIVE FACTORS') ||
+                     extractBulletPoints(analysis, 'STRENGTHS') ||
+                     extractBulletPoints(analysis, 'Positive Indicators'),
+          recommendations: extractBulletPoints(analysis, 'SUPPORT RECOMMENDATIONS') ||
+                           extractBulletPoints(analysis, 'Recommendations') ||
+                           extractBulletPoints(analysis, 'IMMEDIATE ACTION REQUIRED'),
+          nephroticMonitoring: extractBulletPoints(analysis, 'NEPHROTIC SYNDROME MONITORING') ||
+                               extractBulletPoints(analysis, '⚠️ NEPHROTIC SYNDROME MONITORING'),
+          lastAnalyzed: new Date().toLocaleDateString()
+        }
+
+        setWeeklyAIInsights(prev => ({
+          ...prev,
+          [weekKey]: insights
+        }))
+      }
+    } catch (error) {
+      console.error('Error loading weekly AI insights:', error)
+    } finally {
+      setLoadingWeeklyInsights(prev => ({ ...prev, [weekKey]: false }))
+    }
+  }
+
   // Helper function to clean up text with underscores and fix capitalization
   const cleanupText = (text: string): string => {
     // Replace common patterns with underscores with proper text
@@ -1272,6 +1343,10 @@ export function ChildSummaryAnalytics() {
                                     ...prev,
                                     [child.id]: checkInId
                                   }))
+                                  // Trigger weekly AI analysis when a specific week is selected
+                                  if (checkInId) {
+                                    loadWeeklyAIInsights(child.id, checkInId)
+                                  }
                                 }}
                               />
                             ) : (
@@ -1425,25 +1500,39 @@ export function ChildSummaryAnalytics() {
                         <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
                           <Sparkles className="h-4 w-4 mr-2" />
                           Support Insights
+                          {selectedCheckInIds[child.id] && (
+                            <span className="ml-2 text-xs font-normal text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                              Week-specific analysis
+                            </span>
+                          )}
                         </h4>
 
                         <div className="relative">
                           {/* Minimum height container for content */}
                           <div className="min-h-[300px]">
-                            {/* Show skeleton loader when loading */}
-                            {loadingInsights[child.id] ? (
-                              <AIInsightsSkeleton />
-                            ) : (
+                            {/* Determine which insights to show: weekly or overall */}
+                            {(() => {
+                              const weekKey = selectedCheckInIds[child.id] ? `${child.id}_${selectedCheckInIds[child.id]}` : null
+                              const isLoadingWeekly = weekKey && loadingWeeklyInsights[weekKey]
+                              const isLoadingOverall = loadingInsights[child.id]
+                              const currentInsights = weekKey && weeklyAIInsights[weekKey] ? weeklyAIInsights[weekKey] : aiInsights[child.id]
+
+                              // Show skeleton loader when loading
+                              if (isLoadingWeekly || isLoadingOverall) {
+                                return <AIInsightsSkeleton />
+                              }
+
+                              return (
                             <div className="space-y-4">
                             {/* Summary */}
-                            {aiInsights[child.id] && (
+                            {currentInsights && (
                             <div className="bg-white p-4 rounded-lg border border-gray-200">
                               <h5 className="font-medium text-gray-900 mb-2 flex items-center">
                                 <Brain className="h-4 w-4 mr-2" />
                                 Wellbeing Overview
                               </h5>
                               {(() => {
-                                const summary = aiInsights[child.id].summary
+                                const summary = currentInsights.summary
                                 // Check if summary contains inline bullets (with various formats)
                                 if (summary.includes(' - ') || summary.includes('- ') || summary.match(/^-\s+/m)) {
                                   let bullets: string[] = []
@@ -1509,7 +1598,7 @@ export function ChildSummaryAnalytics() {
                             )}
 
                             {/* Nephrotic Syndrome Monitoring - Urgent Clinical Alert */}
-                            {aiInsights[child.id] && aiInsights[child.id].nephroticMonitoring && aiInsights[child.id].nephroticMonitoring!.length > 0 && (
+                            {currentInsights && currentInsights.nephroticMonitoring && currentInsights.nephroticMonitoring!.length > 0 && (
                               <div className="bg-red-50 p-4 rounded-lg border-2 border-red-500 shadow-lg">
                                 <h5 className="font-bold text-red-900 mb-3 flex items-center text-base">
                                   <AlertCircle className="h-5 w-5 mr-2 animate-pulse" />
@@ -1521,7 +1610,7 @@ export function ChildSummaryAnalytics() {
                                   </p>
                                 </div>
                                 <ul className="space-y-2">
-                                  {aiInsights[child.id].nephroticMonitoring!.map((item, idx) => (
+                                  {currentInsights.nephroticMonitoring!.map((item, idx) => (
                                     <li key={idx} className="text-sm text-red-900 flex items-start bg-white p-2 rounded border border-red-100">
                                       <span className="mr-2 font-bold text-red-600">•</span>
                                       <span className="font-medium">{item}</span>
@@ -1538,14 +1627,14 @@ export function ChildSummaryAnalytics() {
                             )}
 
                             {/* Concerns */}
-                            {aiInsights[child.id] && aiInsights[child.id].concerns && aiInsights[child.id].concerns!.length > 0 && (
+                            {currentInsights && currentInsights.concerns && currentInsights.concerns!.length > 0 && (
                               <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
                                 <h5 className="font-medium text-amber-900 mb-2 flex items-center">
                                   <AlertCircle className="h-4 w-4 mr-2" />
                                   Areas for Additional Support
                                 </h5>
                                 <ul className="space-y-1">
-                                  {aiInsights[child.id].concerns!.map((concern, idx) => (
+                                  {currentInsights.concerns!.map((concern, idx) => (
                                     <li key={idx} className="text-sm text-amber-800 flex items-start">
                                       <span className="mr-2">•</span>
                                       <span>{concern}</span>
@@ -1556,14 +1645,14 @@ export function ChildSummaryAnalytics() {
                             )}
 
                             {/* Strengths */}
-                            {aiInsights[child.id] && aiInsights[child.id].strengths && aiInsights[child.id].strengths!.length > 0 && (
+                            {currentInsights && currentInsights.strengths && currentInsights.strengths!.length > 0 && (
                               <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                                 <h5 className="font-medium text-green-900 mb-2 flex items-center">
                                   <Activity className="h-4 w-4 mr-2" />
                                   Positive Indicators
                                 </h5>
                                 <ul className="space-y-1">
-                                  {aiInsights[child.id].strengths!.map((strength, idx) => (
+                                  {currentInsights.strengths!.map((strength, idx) => (
                                     <li key={idx} className="text-sm text-green-800 flex items-start">
                                       <span className="mr-2">•</span>
                                       <span>{strength}</span>
@@ -1574,14 +1663,14 @@ export function ChildSummaryAnalytics() {
                             )}
 
                             {/* Recommendations */}
-                            {aiInsights[child.id] && aiInsights[child.id].recommendations && aiInsights[child.id].recommendations!.length > 0 && (
+                            {currentInsights && currentInsights.recommendations && currentInsights.recommendations!.length > 0 && (
                               <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                 <h5 className="font-medium text-blue-900 mb-2 flex items-center">
                                   <MessageSquare className="h-4 w-4 mr-2" />
                                   Recommendations
                                 </h5>
                                 <ul className="space-y-1">
-                                  {aiInsights[child.id].recommendations!.map((rec, idx) => (
+                                  {currentInsights.recommendations!.map((rec, idx) => (
                                     <li key={idx} className="text-sm text-blue-800 flex items-start">
                                       <span className="mr-2">•</span>
                                       <span>{rec}</span>
@@ -1591,13 +1680,14 @@ export function ChildSummaryAnalytics() {
                               </div>
                             )}
 
-                            {aiInsights[child.id] && (
+                            {currentInsights && (
                             <p className="text-xs text-gray-500 text-right">
-                              Last analyzed: {aiInsights[child.id].lastAnalyzed}
+                              Last analyzed: {currentInsights.lastAnalyzed}
                             </p>
                             )}
                             </div>
-                            )}
+                            )
+                            })()}
                           </div>
                         </div>
                       </div>

@@ -11,6 +11,7 @@ const corsHeaders = {
 interface AnalysisRequest {
   orgId?: string
   childId?: string
+  checkInId?: string  // Specific wellbeing wheel check-in ID for week-specific analysis
   dateRange?: 'week' | 'month' | 'all'
   analysisType: 'trends' | 'sentiment' | 'concerns' | 'comprehensive'
 }
@@ -40,7 +41,7 @@ serve(async (req) => {
     )
 
     const requestData: AnalysisRequest = await req.json()
-    const { orgId, childId, dateRange = 'week', analysisType = 'comprehensive' } = requestData
+    const { orgId, childId, checkInId, dateRange = 'week', analysisType = 'comprehensive' } = requestData
 
     // Get organization type if we have an orgId
     let orgType = 'school' // default
@@ -151,10 +152,30 @@ serve(async (req) => {
     const { data: moodData, error: moodError } = await moodQuery
     if (moodError) throw moodError
 
+    // If checkInId is provided, fetch wellbeing wheel data for that specific check-in
+    let wellbeingWheelData: any = null
+    if (checkInId) {
+      const { data: wheelSections, error: wheelError } = await supabaseClient
+        .from('wellbeing_wheel_sections')
+        .select('section_name, mood_numeric, text_response, completed_at')
+        .eq('wellbeing_wheel_id', checkInId)
+        .order('section_name', { ascending: true })
+
+      if (!wheelError && wheelSections) {
+        wellbeingWheelData = {
+          checkInId,
+          sections: wheelSections,
+          overallScore: wheelSections.length > 0
+            ? (wheelSections.reduce((acc: number, s: any) => acc + s.mood_numeric, 0) / wheelSections.length).toFixed(1)
+            : 'N/A'
+        }
+      }
+    }
+
     // OPTIMIZATION 2: Aggregate data before sending to Claude
     const aggregatedData: any = {
       summary: {
-        totalCheckIns: moodData?.length || 0,
+        totalCheckIns: wellbeingWheelData ? 1 : (moodData?.length || 0),
         dateRange,
         avgMood: moodData?.length
           ? (moodData.reduce((acc: number, m: any) => acc + m.mood_numeric, 0) / moodData.length).toFixed(1)
@@ -167,6 +188,12 @@ serve(async (req) => {
         .slice(0, 5) // Only top 5 explanations
         .map((e: any) => e.explanation_text),
       concerningPatterns: identifyConcerns(moodData || [])
+    }
+
+    // Add wellbeing wheel data if analyzing a specific check-in
+    if (wellbeingWheelData) {
+      aggregatedData.wellbeingWheel = wellbeingWheelData
+      aggregatedData.isWeeklyAnalysis = true
     }
 
     // OPTIMIZATION 3: For organization-wide analysis, group by child
