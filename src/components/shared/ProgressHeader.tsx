@@ -10,6 +10,7 @@ interface ProgressHeaderProps {
   emotionGridStep: number
   onNavigateToStep?: (stepId: string) => void
   onGuideClick?: () => void
+  theoAnimation?: any
 }
 
 const progressSegments = [
@@ -30,17 +31,24 @@ export function ProgressHeader({
   currentStepHasSelection,
   emotionGridStep,
   onNavigateToStep,
-  onGuideClick
+  onGuideClick,
+  theoAnimation: theoAnimationProp
 }: ProgressHeaderProps) {
-  const [theoAnimation, setTheoAnimation] = useState(null)
+  const [theoAnimationLocal, setTheoAnimationLocal] = useState(null)
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false)
 
+  // Use prop if provided, otherwise fetch locally (for backwards compatibility)
+  const theoAnimation = theoAnimationProp || theoAnimationLocal
+
   useEffect(() => {
-    fetch('/theo-waving.json')
-      .then(response => response.json())
-      .then(data => setTheoAnimation(data))
-      .catch(error => console.error('Error loading Theo animation:', error))
-  }, [])
+    // Only fetch if animation not provided as prop
+    if (!theoAnimationProp) {
+      fetch('/theo-waving.json')
+        .then(response => response.json())
+        .then(data => setTheoAnimationLocal(data))
+        .catch(error => console.error('Error loading Theo animation:', error))
+    }
+  }, [theoAnimationProp])
 
   const handleNavigateToStep = (stepId: string) => {
     if (onNavigateToStep) {

@@ -365,6 +365,7 @@ export function CheckInFlow() {
           currentStepHasSelection={currentStepHasSelection}
           emotionGridStep={emotionGridStep}
           onNavigateToStep={handleNavigateToStep}
+          theoAnimation={theoAnimation}
         />
 
         {/* Close button positioned at vertical center right */}
