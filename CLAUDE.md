@@ -249,6 +249,49 @@ All prompts use:
 - Smooth transition to actual content
 - Location: `src/components/shared/AIInsightsSkeleton.tsx`
 
+### Condition-Specific Monitoring
+
+**Nephrotic Syndrome Detection (Evelina Hospital - Aisha Patel)**
+
+The AI analysis system includes specialized monitoring for nephrotic syndrome, a relapsing-remitting kidney condition where early detection is clinically valuable.
+
+**Implementation**:
+- Enhanced [hospital.md](supabase/functions/analyze-qualitative-data-optimized/prompts/hospital.md) prompt with nephrotic syndrome detection guidelines
+- AI trained to recognize behavioral/emotional early warning signs that appear 24-48 hours before obvious physical symptoms
+- Aisha Patel's test data includes nephrotic-specific language and two documented flare-up periods (Week 2, Week 7)
+
+**Detection Criteria**:
+- **Behavioral indicators**: Fatigue, irritability, withdrawal, somatic complaints, anticipatory anxiety, difficulty concentrating
+- **Physical symptoms (child's language)**: "puffy eyes", "tummy feels big", "tummy hurts", worry about "wee test"
+- **Pattern recognition**: Clusters of 2+ indicators across wellbeing categories, declining Health + (Emotions OR Fun/Play OR Work/School)
+- **Relapse language**: "flare up", "happening again", "feeling sick again"
+
+**AI Output Format**:
+When nephrotic indicators detected, AI includes dedicated section:
+```markdown
+**⚠️ NEPHROTIC SYNDROME MONITORING**
+- Specific warning signs observed from child's responses
+- Wellbeing categories showing concerning patterns (scores + quotes)
+- Assessment: early warning signs vs. active episode
+- Recommendation: Prompt urine protein testing + nephrology contact
+- Child's awareness and coping strategies
+- Protective factors (family support, medical team trust)
+```
+
+**Clinical Value**:
+- **Early detection**: Catches episodes before major physical symptoms
+- **Child-centered**: Uses Aisha's own language and awareness
+- **Reduces emergency visits**: Proactive testing prevents crisis presentations
+- **Educational**: Helps child/family recognize episode patterns
+- **Scalable**: Framework extends to other chronic conditions (diabetes, asthma, etc.)
+
+**Test Data Updates**:
+- Week 1 (Jan 3): Pre-episode warnings - "feeling more tired", "tummy hurts a bit"
+- Week 2 (Jan 10): Major episode - "tummy feels really big and puffy", "so tired all the time", "worried about wee test"
+- Week 5 (Jan 31): Recovery - "medicine is helping keep the protein down"
+- Week 7 (Feb 14): Second episode - "eyes were puffy and tummy hurts", "worried it will get worse"
+- Week 9 (Feb 28): Management learning - "learning when i need to rest to avoid flare ups"
+
 ## Word Cloud Feature (PENDING)
 
 ### Frontend: Complete

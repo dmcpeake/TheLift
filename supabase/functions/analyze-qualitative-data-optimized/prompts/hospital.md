@@ -22,3 +22,37 @@ Understanding how medical experiences impact all areas of their wellbeing suppor
 - **Holistic Patterns**: How do medical procedures or hospitalization impact scores across multiple categories? What strengths in one area support challenges in another?
 
 Please use person-first language, recognize {child_name} as a whole person beyond their medical needs, and focus on their strengths, preferences, and individual ways of coping. Consider how their unique characteristics (including any neurodivergent traits) can be accommodated in their medical care. Where relevant, consider alignment with NHS England's SEND standards, the Children and Young People's Mental Health Green Paper recommendations, and local integrated care pathways.
+
+**SPECIAL CLINICAL MONITORING - Nephrotic Syndrome:**
+For children with nephrotic syndrome (relapsing-remitting kidney condition where kidneys leak protein, causing swelling, fatigue, and infection risk), monitor for early warning signs of potential episodes. Many behavioral and emotional indicators appear BEFORE obvious physical symptoms:
+
+**Behavioral & Emotional Red Flags (may precede physical symptoms):**
+- **Fatigue/low energy**: References to being "tired", "need more sleep", "no energy", "feeling flat", "just want to rest"
+- **Irritability/mood swings**: Sudden emotional changes, increased frustration, more crying than usual
+- **Withdrawal patterns**: Avoiding friends, becoming quieter, not wanting to play, less social interaction
+- **Somatic complaints**: Tummy aches, headaches, general "feeling unwell" without specific symptoms
+- **Anticipatory anxiety**: Worry about testing (especially urine/protein tests), medical appointments, missing school/friends
+- **Difficulty concentrating**: Daydreaming, disengagement from usual activities, trouble focusing
+
+**Physical Symptom Indicators (in child's own language):**
+- **Swelling/edema references**: "puffy eyes", "tummy feels big", "ankles swollen", "face looks puffy"
+- **Urination concerns**: Frequent toilet visits, worry about "protein in wee", mentions of urine testing
+- **Pain/discomfort**: Abdominal pain, tummy hurts, general malaise
+
+**Pattern Recognition for Episode Detection:**
+- **Cluster detection**: Two or more behavioral indicators appearing across different wellbeing categories simultaneously
+- **Score patterns**: Declining scores in Health category PLUS declines in (Emotions OR Fun/Play OR Work/School)
+- **Relapse language**: Child mentions "flare up", "episode", "happening again", "feeling sick again"
+- **Activity impact**: Missing school, unable to play, withdrawal from previously enjoyed activities
+
+**If nephrotic syndrome indicators are detected, you MUST include this dedicated section in your analysis:**
+
+**⚠️ NEPHROTIC SYNDROME MONITORING**
+- List the specific warning signs you observed from {child_name}'s responses
+- Note which wellbeing categories show concerning patterns (with specific scores and quotes)
+- Identify whether this appears to be early warning signs or active episode
+- Recommend prompt urine protein testing and contact with nephrology team
+- Acknowledge {child_name}'s own awareness and coping strategies with their condition
+- Note any protective factors (family support, medical team trust, self-advocacy)
+
+This early detection approach helps catch episodes 24-48 hours before major physical symptoms appear, reducing emergency presentations and supporting {child_name}'s ability to recognize and manage their condition.

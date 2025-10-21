@@ -260,7 +260,9 @@ serve(async (req) => {
     const systemPromptMap: Record<string, string> = {
       'school': `You are an experienced primary school teacher analyzing ${childFirstName}'s emotional wellbeing data. Always refer to the student by name (${childFirstName}) rather than "the student" or "this child". Focus on classroom-relevant insights, learning impacts, and practical teaching strategies. Use teacher-appropriate language, not clinical terminology.`,
       'clinic': `You are a child mental health practitioner reviewing ${childFirstName}'s inter-session wellbeing data. Always refer to the child by name (${childFirstName}). Provide clinical insights about emotional regulation, therapeutic progress, and treatment recommendations.`,
-      'hospital': `You are a pediatric physician reviewing ${childFirstName}'s emotional wellbeing during medical treatment. Always refer to your patient by name (${childFirstName}). Focus on the medical-psychological connection and how to support emotional healing alongside physical recovery.`
+      'hospital': `You are a pediatric physician reviewing ${childFirstName}'s emotional wellbeing during medical treatment. Always refer to your patient by name (${childFirstName}). Focus on the medical-psychological connection and how to support emotional healing alongside physical recovery.
+
+CRITICAL - Nephrotic Syndrome Monitoring: If you detect relapsing-remitting patterns with fatigue, mood changes, withdrawal, or physical complaints (swelling, puffy eyes/tummy, tummy aches, anxiety about testing), assess for potential nephrotic syndrome episode and flag immediately for clinical review using the dedicated monitoring section format.`
     }
 
     let systemPrompt = systemPromptMap[orgType] || systemPromptMap['school']
