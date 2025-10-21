@@ -15,23 +15,27 @@ export function PointsToast({ points, show, onComplete }: PointsToastProps) {
       setIsVisible(true)
       setIsFadingOut(false)
 
-      // Start fade out after 1.7 seconds (before the full 2 seconds)
+      // Start fade out after 3.7 seconds (before the full 4 seconds)
       const fadeOutTimer = setTimeout(() => {
         setIsFadingOut(true)
-      }, 1700)
+      }, 3700)
 
-      // Remove toast after 2 seconds
+      // Remove toast after 4 seconds
       const removeTimer = setTimeout(() => {
         setIsVisible(false)
         onComplete()
-      }, 2000)
+      }, 4000)
 
       return () => {
         clearTimeout(fadeOutTimer)
         clearTimeout(removeTimer)
       }
+    } else {
+      // When show becomes false externally, immediately hide the toast
+      setIsVisible(false)
+      setIsFadingOut(false)
     }
-  }, [show, onComplete])
+  }, [show]) // Removed onComplete from dependencies to prevent timer resets
 
   if (!isVisible) return null
 
@@ -76,12 +80,10 @@ export function PointsToast({ points, show, onComplete }: PointsToastProps) {
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 10000,
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          border: '2px solid #10B981',
+          backgroundColor: '#10B981',
           borderRadius: '4px',
           padding: '12px 24px',
+          width: '280px',
           height: '60px',
           maxHeight: '60px',
           boxShadow: '0 8px 32px rgba(16, 185, 129, 0.3)',
@@ -95,7 +97,7 @@ export function PointsToast({ points, show, onComplete }: PointsToastProps) {
           style={{
             fontSize: '16px',
             fontWeight: 700,
-            color: '#10B981',
+            color: 'white',
             textAlign: 'center',
             display: 'flex',
             alignItems: 'center',

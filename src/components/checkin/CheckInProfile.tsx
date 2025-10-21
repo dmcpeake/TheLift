@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Menu, X, LogOut, Apple, Heart, Dribbble, Palette, Music, Calendar, CheckCircle, Pencil, Trash2, Plus, Trophy } from 'lucide-react'
+import { Menu, X, LogOut, Apple, Heart, Dribbble, Palette, Music, Calendar, CheckCircle, Pencil, Trash2, Plus, Trophy, Gift } from 'lucide-react'
 import { useGamification } from '../../contexts/GamificationContext'
 
 type ModalType = 'add-feel-good' | 'edit-feel-good' | 'delete-feel-good' | 'edit-favorite' | null
@@ -16,6 +16,13 @@ export function CheckInProfile() {
   const [editingValue, setEditingValue] = useState('')
   const [editingFavoriteKey, setEditingFavoriteKey] = useState<string | null>(null)
   const [isRecording, setIsRecording] = useState(false)
+  const [hoveredGiftLevel, setHoveredGiftLevel] = useState<number | null>(null)
+
+  // Load rewards from sessionStorage
+  const [rewards, setRewards] = useState<Record<string, string>>(() => {
+    const saved = sessionStorage.getItem('currentChildRewards')
+    return saved ? JSON.parse(saved) : {}
+  })
 
   // State for lists - with sessionStorage persistence
   const [feelGoodList, setFeelGoodList] = useState<string[]>(() => {
@@ -955,6 +962,9 @@ export function CheckInProfile() {
                           {Array.from({ length: 20 }, (_, i) => i + 1).map((level) => {
                             const isCompleted = level <= currentLevel
                             const isCurrent = level === currentLevel
+                            const rewardKey = `level${level}`
+                            const hasReward = rewards[rewardKey]
+                            const showGift = hasReward
 
                             return (
                               <div
@@ -966,21 +976,75 @@ export function CheckInProfile() {
                                   alignItems: 'center',
                                   justifyContent: 'center'
                                 }}
+                                onMouseEnter={() => showGift && setHoveredGiftLevel(level)}
+                                onMouseLeave={() => setHoveredGiftLevel(null)}
+                                onClick={() => showGift && setHoveredGiftLevel(hoveredGiftLevel === level ? null : level)}
                               >
-                                <svg
-                                  className={isCompleted ? 'star-rotate' : ''}
-                                  width="28"
-                                  height="28"
-                                  viewBox="0 0 24 24"
-                                  fill={isCompleted ? '#F97316' : 'none'}
-                                  stroke="white"
-                                  strokeWidth="2"
-                                  style={{
-                                    filter: isCurrent ? 'drop-shadow(0 0 4px rgba(249, 115, 22, 0.6))' : 'none'
-                                  }}
-                                >
-                                  <polygon points="12,2 15,8.5 22,9.5 17,14.5 18,21.5 12,18 6,21.5 7,14.5 2,9.5 9,8.5" />
-                                </svg>
+                                {showGift ? (
+                                  <>
+                                    <Gift
+                                      width="28"
+                                      height="28"
+                                      style={{
+                                        color: '#F97316',
+                                        cursor: 'pointer'
+                                      }}
+                                    />
+                                    {/* Tooltip */}
+                                    {hoveredGiftLevel === level && (
+                                      <div
+                                        style={{
+                                          position: 'absolute',
+                                          bottom: '100%',
+                                          left: '50%',
+                                          transform: 'translateX(-50%)',
+                                          marginBottom: '8px',
+                                          backgroundColor: '#1f2937',
+                                          color: 'white',
+                                          padding: '8px 12px',
+                                          borderRadius: '6px',
+                                          fontSize: '12px',
+                                          whiteSpace: 'nowrap',
+                                          zIndex: 1000,
+                                          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                                          maxWidth: '200px',
+                                          width: 'max-content'
+                                        }}
+                                      >
+                                        {rewards[rewardKey]}
+                                        {/* Tooltip arrow */}
+                                        <div
+                                          style={{
+                                            position: 'absolute',
+                                            top: '100%',
+                                            left: '50%',
+                                            transform: 'translateX(-50%)',
+                                            width: 0,
+                                            height: 0,
+                                            borderLeft: '6px solid transparent',
+                                            borderRight: '6px solid transparent',
+                                            borderTop: '6px solid #1f2937'
+                                          }}
+                                        />
+                                      </div>
+                                    )}
+                                  </>
+                                ) : (
+                                  <svg
+                                    className={isCompleted ? 'star-rotate' : ''}
+                                    width="28"
+                                    height="28"
+                                    viewBox="0 0 24 24"
+                                    fill={isCompleted ? '#F97316' : 'none'}
+                                    stroke="white"
+                                    strokeWidth="2"
+                                    style={{
+                                      filter: isCurrent ? 'drop-shadow(0 0 4px rgba(249, 115, 22, 0.6))' : 'none'
+                                    }}
+                                  >
+                                    <polygon points="12,2 15,8.5 22,9.5 17,14.5 18,21.5 12,18 6,21.5 7,14.5 2,9.5 9,8.5" />
+                                  </svg>
+                                )}
                                 <span style={{
                                   fontSize: '9px',
                                   fontWeight: isCurrent ? '700' : '500',

@@ -28,7 +28,10 @@ import {
   Archive,
   UserX,
   MoreHorizontal,
-  Download
+  Download,
+  Gift,
+  Star,
+  Trash2
 } from 'lucide-react'
 
 interface DashboardStats {
@@ -49,11 +52,14 @@ interface Child {
   id: string
   name: string
   lastCheckIn: string
+  lastCheckInDate?: Date
+  level?: number
   status: 'fine' | 'needs_attention' | 'flagged'
   practitioner?: string
   practitionerId?: string
   username?: string
   accessPin?: string
+  rewards?: Record<string, string>
 }
 
 interface Practitioner {
@@ -117,11 +123,81 @@ export function PractitionerDashboard() {
   }
   const [showReassignDialog, setShowReassignDialog] = useState(false)
   const [showArchiveDialog, setShowArchiveDialog] = useState(false)
+  const [showRewardModal, setShowRewardModal] = useState(false)
+  const [selectedChildForReward, setSelectedChildForReward] = useState<Child | null>(null)
+  const [rewardText, setRewardText] = useState('')
+  const [rewardLevel, setRewardLevel] = useState<number>(1)
+  const [rewardModalTab, setRewardModalTab] = useState<'add-reward' | 'rewards-offered'>('add-reward')
   const itemsPerPage = 20
 
   const isGroupContact = user?.profile.role === 'GroupContact'
   const isAdminMode = isGroupContact && currentMode === 'admin'
   const isPractitionerMode = !isGroupContact || currentMode === 'practitioner'
+
+  // Helper function to format relative time
+  const formatRelativeTime = (dateString: string): string => {
+    const now = new Date()
+    const past = new Date(dateString)
+    const diffMs = now.getTime() - past.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 1) return '1min ago'
+    if (diffMins < 60) return `${diffMins}min ago`
+    if (diffHours < 24) return `${diffHours}hr ago`
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
+  }
+
+  // Helper function to open reward modal
+  const handleOpenRewardModal = (child: Child) => {
+    setSelectedChildForReward(child)
+    setRewardText('')
+    setRewardLevel(1)
+    setRewardModalTab('add-reward')
+    setShowRewardModal(true)
+  }
+
+  // Helper function to save rewards
+  const handleSaveRewards = () => {
+    if (!selectedChildForReward || !rewardText.trim()) return
+
+    const updatedChild = {
+      ...selectedChildForReward,
+      rewards: {
+        ...selectedChildForReward.rewards,
+        [`level${rewardLevel}`]: rewardText.trim()
+      }
+    }
+
+    setChildren(prev => prev.map(child =>
+      child.id === selectedChildForReward.id ? updatedChild : child
+    ))
+
+    // Update the selected child reference and clear fields for next reward
+    setSelectedChildForReward(updatedChild)
+    setRewardText('')
+    setRewardLevel(1)
+  }
+
+  // Helper function to delete a reward
+  const handleDeleteReward = (levelKey: string) => {
+    if (!selectedChildForReward) return
+
+    const updatedRewards = { ...selectedChildForReward.rewards }
+    delete updatedRewards[levelKey]
+
+    const updatedChild = {
+      ...selectedChildForReward,
+      rewards: updatedRewards
+    }
+
+    setChildren(prev => prev.map(child =>
+      child.id === selectedChildForReward.id ? updatedChild : child
+    ))
+
+    setSelectedChildForReward(updatedChild)
+  }
 
   useEffect(() => {
     fetchDashboardData()
@@ -145,6 +221,8 @@ export function PractitionerDashboard() {
           id: 'demo-1',
           name: 'Emma Thompson',
           lastCheckIn: '2 hours ago',
+          lastCheckInDate: new Date(Date.now() - 2 * 60 * 60 * 1000),
+          level: 7,
           status: 'fine',
           practitioner: 'Demo Practitioner',
           practitionerId: 'demo-pract-1'
@@ -153,6 +231,8 @@ export function PractitionerDashboard() {
           id: 'demo-2',
           name: 'James Wilson',
           lastCheckIn: '1 day ago',
+          lastCheckInDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
+          level: 3,
           status: 'needs_attention',
           practitioner: 'Demo Practitioner',
           practitionerId: 'demo-pract-1'
@@ -161,6 +241,8 @@ export function PractitionerDashboard() {
           id: 'demo-3',
           name: 'Sophie Chen',
           lastCheckIn: '3 hours ago',
+          lastCheckInDate: new Date(Date.now() - 3 * 60 * 60 * 1000),
+          level: 12,
           status: 'fine',
           practitioner: 'Demo Practitioner',
           practitionerId: 'demo-pract-1'
@@ -169,6 +251,8 @@ export function PractitionerDashboard() {
           id: 'demo-4',
           name: 'Oliver Brown',
           lastCheckIn: '4 hours ago',
+          lastCheckInDate: new Date(Date.now() - 4 * 60 * 60 * 1000),
+          level: 5,
           status: 'fine',
           practitioner: 'Demo Practitioner',
           practitionerId: 'demo-pract-1'
@@ -177,6 +261,8 @@ export function PractitionerDashboard() {
           id: 'demo-5',
           name: 'Lily Davis',
           lastCheckIn: '2 days ago',
+          lastCheckInDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+          level: 15,
           status: 'needs_attention',
           practitioner: 'Demo Practitioner',
           practitionerId: 'demo-pract-1'
@@ -806,14 +892,51 @@ export function PractitionerDashboard() {
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)'}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
-                        <Link to={`/children/${child.id}`} style={{ flex: 1, textDecoration: 'none' }}>
+                        <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 600, fontSize: '16px', color: '#1f2937', marginBottom: '4px' }}>
                             {child.name}
                           </div>
-                          <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                            Last check-in: {child.lastCheckIn}
+                          <div style={{ fontSize: '14px', color: '#6b7280', display: 'flex', alignItems: 'center' }}>
+                            <span style={{ width: '180px', flexShrink: 0 }}>
+                              Checked in: {child.lastCheckInDate ? formatRelativeTime(child.lastCheckInDate.toISOString()) : child.lastCheckIn}
+                            </span>
+                            {child.level !== undefined && (
+                              <>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '100px', flexShrink: 0 }}>
+                                  <Star
+                                    size={14}
+                                    style={{
+                                      color: '#F97316',
+                                      fill: '#F97316'
+                                    }}
+                                  />
+                                  <span>Level {child.level}</span>
+                                </div>
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    handleOpenRewardModal(child)
+                                  }}
+                                  style={{
+                                    color: '#147fe3',
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: 0,
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    fontWeight: 500,
+                                    textDecoration: 'underline'
+                                  }}
+                                  onMouseEnter={(e) => e.currentTarget.style.color = '#1166cc'}
+                                  onMouseLeave={(e) => e.currentTarget.style.color = '#147fe3'}
+                                >
+                                  Rewards
+                                </button>
+                              </>
+                            )}
                           </div>
-                        </Link>
+                        </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <button
                             style={{
@@ -859,6 +982,12 @@ export function PractitionerDashboard() {
                               // Extract first name and save to sessionStorage
                               const firstName = child.name.split(' ')[0]
                               sessionStorage.setItem('userName', firstName)
+                              // Save child's rewards to sessionStorage for profile page
+                              if (child.rewards) {
+                                sessionStorage.setItem('currentChildRewards', JSON.stringify(child.rewards))
+                              } else {
+                                sessionStorage.removeItem('currentChildRewards')
+                              }
                               window.location.href = '/checkin/onboarding'
                             }}
                             onMouseEnter={(e) => {
@@ -915,6 +1044,196 @@ export function PractitionerDashboard() {
               )}
           </div>
         </div>
+
+        {/* Reward Modal */}
+        {showRewardModal && selectedChildForReward && (
+          <div
+            className="fixed inset-0 flex items-center justify-center"
+            style={{
+              zIndex: 9999,
+              backgroundColor: 'rgba(0, 0, 0, 0.8)'
+            }}
+            onClick={() => setShowRewardModal(false)}
+          >
+            <div
+              className="bg-white rounded-lg max-w-2xl w-full mx-4 relative"
+              onClick={(e) => e.stopPropagation()}
+              style={{ height: '500px', display: 'flex', flexDirection: 'column', padding: '2rem' }}
+            >
+              {/* Tabs */}
+              <div style={{ marginBottom: '1.5rem', flexShrink: 0 }}>
+                <div style={{ display: 'flex', borderBottom: '2px solid #e5e7eb' }}>
+                  <button
+                    onClick={() => setRewardModalTab('add-reward')}
+                    style={{
+                      flex: 1,
+                      padding: '12px 16px',
+                      fontSize: '16px',
+                      fontWeight: 600,
+                      color: rewardModalTab === 'add-reward' ? '#147fe3' : '#6b7280',
+                      borderBottom: rewardModalTab === 'add-reward' ? '2px solid #147fe3' : '2px solid transparent',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      marginBottom: '-2px',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    Add reward
+                  </button>
+                  <button
+                    onClick={() => setRewardModalTab('rewards-offered')}
+                    style={{
+                      flex: 1,
+                      padding: '12px 16px',
+                      fontSize: '16px',
+                      fontWeight: 600,
+                      color: rewardModalTab === 'rewards-offered' ? '#147fe3' : '#6b7280',
+                      borderBottom: rewardModalTab === 'rewards-offered' ? '2px solid #147fe3' : '2px solid transparent',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      marginBottom: '-2px',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    Rewards offered ({selectedChildForReward.rewards ? Object.keys(selectedChildForReward.rewards).length : 0})
+                  </button>
+                </div>
+              </div>
+
+              {/* Tab Content - Scrollable Area */}
+              <div style={{ flex: 1, overflowY: 'auto', marginBottom: '1rem' }}>
+                {rewardModalTab === 'add-reward' ? (
+                  <div className="space-y-6">
+                    {/* Level Selector */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Level
+                      </label>
+                      <select
+                        value={rewardLevel}
+                        onChange={(e) => setRewardLevel(Number(e.target.value))}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        style={{ fontSize: '16px' }}
+                      >
+                        {Array.from({ length: 20 }, (_, i) => i + 1).map((level) => (
+                          <option key={level} value={level}>
+                            Level {level}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Reward Text */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Reward
+                      </label>
+                      <input
+                        type="text"
+                        value={rewardText}
+                        onChange={(e) => {
+                          if (e.target.value.length <= 50) {
+                            setRewardText(e.target.value)
+                          }
+                        }}
+                        placeholder="Enter reward text"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        maxLength={50}
+                        style={{ fontSize: '16px' }}
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        {rewardText.length}/50 characters
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ height: '100%' }}>
+                    {selectedChildForReward.rewards && Object.keys(selectedChildForReward.rewards).length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {Object.entries(selectedChildForReward.rewards).map(([levelKey, rewardText]) => (
+                          <div
+                            key={levelKey}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '16px',
+                              backgroundColor: '#f9fafb',
+                              borderRadius: '8px',
+                              border: '1px solid #e5e7eb'
+                            }}
+                          >
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px', fontWeight: 500 }}>
+                                {levelKey.replace('level', 'Level ')}
+                              </div>
+                              <div style={{ fontSize: '16px', color: '#1f2937' }}>
+                                {rewardText}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handleDeleteReward(levelKey)}
+                              style={{
+                                padding: '8px',
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: '#ef4444',
+                                transition: 'color 0.2s'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.color = '#dc2626'}
+                              onMouseLeave={(e) => e.currentTarget.style.color = '#ef4444'}
+                            >
+                              <Trash2 size={20} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '40px 20px', color: '#6b7280', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <p>No rewards have been added yet.</p>
+                        <p style={{ fontSize: '14px', marginTop: '8px' }}>
+                          Switch to "Add reward" tab to create rewards.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Action Footer */}
+              <div style={{ paddingTop: '1rem', borderTop: '1px solid #e5e7eb', flexShrink: 0 }}>
+                <div className="flex items-center">
+                  <button
+                    onClick={() => setShowRewardModal(false)}
+                    className="flex-1 font-medium transition-colors text-center"
+                    style={{ fontSize: '16px', color: '#2563eb' }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = '#1d4ed8'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = '#2563eb'}
+                  >
+                    CLOSE
+                  </button>
+                  {rewardModalTab === 'add-reward' && (
+                    <>
+                      <div style={{ width: '1px', height: '20px', backgroundColor: '#d1d5db' }}></div>
+                      <button
+                        onClick={handleSaveRewards}
+                        className="flex-1 font-medium transition-colors text-center"
+                        style={{ fontSize: '16px', color: '#2563eb' }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#1d4ed8'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = '#2563eb'}
+                      >
+                        SAVE
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Bulk Action Dialogs */}
         <BulkReassignDialog

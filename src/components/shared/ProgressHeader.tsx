@@ -134,7 +134,7 @@ export function ProgressHeader({
             const isActive = (() => {
               if (currentStep === 'mood') return index === 0
               if (currentStep === 'wellbeing') return index <= 1
-              if (currentStep === 'emotions' || currentStep === 'chart' || currentStep === 'talk' || currentStep === 'complete') return true
+              if (currentStep === 'emotions' || currentStep === 'chart' || currentStep === 'talk' || currentStep === 'lift' || currentStep === 'garden' || currentStep === 'complete') return true
               return false
             })()
 
@@ -180,7 +180,7 @@ export function ProgressHeader({
             const isActive = (() => {
               if (currentStep === 'mood') return index === 0
               if (currentStep === 'wellbeing') return index <= 1
-              if (currentStep === 'emotions' || currentStep === 'chart' || currentStep === 'talk' || currentStep === 'complete') return true
+              if (currentStep === 'emotions' || currentStep === 'chart' || currentStep === 'talk' || currentStep === 'lift' || currentStep === 'garden' || currentStep === 'complete') return true
               return false
             })()
 
@@ -208,7 +208,7 @@ export function ProgressHeader({
             const isActive = (() => {
               if (currentStep === 'mood') return index === 0
               if (currentStep === 'wellbeing') return index <= 1
-              if (currentStep === 'emotions' || currentStep === 'chart' || currentStep === 'talk' || currentStep === 'complete') return true
+              if (currentStep === 'emotions' || currentStep === 'chart' || currentStep === 'talk' || currentStep === 'lift' || currentStep === 'garden' || currentStep === 'complete') return true
               return false
             })()
 

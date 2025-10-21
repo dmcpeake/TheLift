@@ -49,7 +49,7 @@ export function TechniqueSelector({
 
   return (
     <>
-      {/* Settings Button - Top Right */}
+      {/* Settings Button - Top Right  */}
       <button
         onClick={onToggle}
         className="breathing-settings-button"
@@ -88,8 +88,7 @@ export function TechniqueSelector({
             zIndex: 1000,
             display: 'flex',
             flexDirection: 'column',
-            gap: '12px',
-            maxWidth: '320px'
+            gap: '12px'
           }}
         >
             {BREATHING_TECHNIQUES.filter(t => t.id !== 'test').map(technique => {
@@ -109,7 +108,7 @@ export function TechniqueSelector({
                     cursor: 'pointer',
                     textAlign: 'left',
                     transition: 'all 0.2s ease',
-                    width: '280px',
+                    width: '320px',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
                   }}
                   onMouseEnter={e => {
@@ -126,7 +125,7 @@ export function TechniqueSelector({
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ flex: 1 }}>
+                    <div style={{ minWidth: '216px' }}>
                       <h3 style={{
                         fontSize: '1rem',
                         fontWeight: '600',
@@ -139,9 +138,7 @@ export function TechniqueSelector({
                         fontSize: '0.875rem',
                         color: '#6b7280',
                         lineHeight: '1.4',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
+                        whiteSpace: 'nowrap'
                       }}>
                         {technique.description}
                       </p>

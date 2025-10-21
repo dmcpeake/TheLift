@@ -15,6 +15,7 @@ export function CheckInHome() {
   const navigate = useNavigate()
   const location = useLocation()
   const { awardPoints, currentLevel } = useGamification()
+  const [userName, setUserName] = useState<string>('')
   const [roseAnimation, setRoseAnimation] = useState(null)
   const [showBreathing, setShowBreathing] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
@@ -33,6 +34,14 @@ export function CheckInHome() {
   const breathingStartRef = useRef<(() => void) | null>(null)
   const breathingPauseRef = useRef<(() => void) | null>(null)
   const breathingResumeRef = useRef<(() => void) | null>(null)
+
+  // Load user name from sessionStorage
+  useEffect(() => {
+    const storedUserName = sessionStorage.getItem('userName')
+    if (storedUserName) {
+      setUserName(storedUserName)
+    }
+  }, [])
 
   // Update title when technique selector visibility changes
   useEffect(() => {
@@ -965,6 +974,70 @@ export function CheckInHome() {
               </>
             )}
 
+            {/* User Greeting */}
+            {userName && (
+              <span
+                style={{
+                  fontSize: '14px',
+                  color: '#1f2937',
+                  fontWeight: '500',
+                  marginRight: '10px'
+                }}
+              >
+                Hi {userName}!
+              </span>
+            )}
+
+            {/* Trophy Icon with Level Badge */}
+            <div
+              style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginLeft: '-14px',
+                marginRight: '30px'
+              }}
+            >
+              <Trophy
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  color: '#FFA500',
+                  fill: '#FFA500',
+                  stroke: '#CC8400',
+                  strokeWidth: '1px'
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '-6px',
+                  right: '-6px',
+                  backgroundColor: '#147fe3',
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid white',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: '700',
+                    color: 'white',
+                    lineHeight: '1'
+                  }}
+                >
+                  {currentLevel}
+                </span>
+              </div>
+            </div>
+
             <button
               onClick={() => navigate('/')}
               className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
@@ -1178,7 +1251,7 @@ export function CheckInHome() {
                   Ready for your check in?
                 </h1>
                 <p className="text-lg text-gray-900 max-w-lg mx-auto" style={{ fontWeight: 500 }}>
-                  Take a moment to explore your feelings.
+                  Let's explore what's come up for you today?
                 </p>
               </div>
 

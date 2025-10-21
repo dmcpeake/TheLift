@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, TreePine, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, TreePine, X, Plus, Sparkles, MessageCircle, Compass, List, User } from 'lucide-react'
 import { BreathingCircles } from '../breathing/BreathingCircles'
 import { MoodMeter } from '../prototypes/MoodMeter'
 import { EmotionGrid } from '../prototypes/EmotionGrid'
@@ -18,7 +18,7 @@ import CryingShaded from '../../assets/animations/Crying_Shaded.json'
 import { AuthContext } from '../../utils/auth/context'
 import { useGamification } from '../../contexts/GamificationContext'
 
-type FlowStep = 'checkin' | 'mood' | 'emotions' | 'wellbeing' | 'chart' | 'talk' | 'garden' | 'complete'
+type FlowStep = 'checkin' | 'mood' | 'emotions' | 'wellbeing' | 'chart' | 'talk' | 'lift' | 'garden' | 'complete'
 
 const steps = [
   { id: 'mood', name: 'My emotions', number: 1 },
@@ -71,8 +71,50 @@ export function CheckInFlow() {
   const [theoRocketAnimation, setTheoRocketAnimation] = useState<any>(null)
   const [currentTheoAnimation, setCurrentTheoAnimation] = useState<any>(null)
 
+  // Accordion state for chart page
+  const [openAccordion, setOpenAccordion] = useState<'high' | 'ok' | 'low' | null>(null)
+
+  // Random content indices for lift page
+  const [selectedJokeIndex, setSelectedJokeIndex] = useState(0)
+  const [selectedRiddleIndex, setSelectedRiddleIndex] = useState(0)
+  const [selectedFactIndex, setSelectedFactIndex] = useState(0)
+
   const currentStep = (step || 'mood') as FlowStep
   const currentStepIndex = steps.findIndex(s => s.id === currentStep)
+
+  // Content arrays for lift page
+  const jokes = [
+    { question: "Where do fish keep their money?", answer: "In a river bank" },
+    { question: "What do you call a bear with no teeth?", answer: "A gummy bear" },
+    { question: "Why did the cookie go to the doctor?", answer: "It felt crumbly" },
+    { question: "What do you call a sleeping dinosaur?", answer: "A dino-snore" },
+    { question: "Why did the banana go to the doctor?", answer: "It wasn't peeling well" }
+  ]
+
+  const riddles = [
+    { question: "What is the hardest key to turn?", answer: "A donkey" },
+    { question: "What has hands but can't clap?", answer: "A clock" },
+    { question: "What gets wetter the more it dries?", answer: "A towel" },
+    { question: "What has legs but can't walk?", answer: "A table" },
+    { question: "What has a face but no eyes?", answer: "A clock" }
+  ]
+
+  const facts = [
+    { text: "A crocodile can't stick out its tongue" },
+    { text: "Butterflies can taste with their feet" },
+    { text: "A snail can sleep for three years" },
+    { text: "Penguins can't walk backwards" },
+    { text: "Sharks have been around longer than trees" }
+  ]
+
+  // Randomly select content when lift page loads
+  useEffect(() => {
+    if (currentStep === 'lift') {
+      setSelectedJokeIndex(Math.floor(Math.random() * jokes.length))
+      setSelectedRiddleIndex(Math.floor(Math.random() * riddles.length))
+      setSelectedFactIndex(Math.floor(Math.random() * facts.length))
+    }
+  }, [currentStep])
 
   // Persist pointsAwarded to sessionStorage whenever it changes
   useEffect(() => {
@@ -148,10 +190,6 @@ export function CheckInFlow() {
     // Scroll to top when step changes
     window.scrollTo(0, 0)
 
-    // Check if current step has completed data
-    const hasCompletedData = completedData[currentStep] && !completedData[currentStep].skipped
-    setCurrentStepHasSelection(hasCompletedData)
-
     // Reset emotion grid step to 1 when navigating back to emotions
     if (currentStep === 'emotions') {
       setEmotionGridStep(1)
@@ -161,7 +199,38 @@ export function CheckInFlow() {
     setTriggerEmotionCompletion(false)
     setTriggerMoodCompletion(false)
     setTriggerWellbeingCompletion(false)
+  }, [currentStep])
+
+  // Separate useEffect to update selection state when completedData changes
+  React.useEffect(() => {
+    // Check if current step has completed data
+    const hasCompletedData = completedData[currentStep] && !completedData[currentStep].skipped
+    setCurrentStepHasSelection(hasCompletedData)
   }, [currentStep, completedData])
+
+  // Set default open accordion when on chart page
+  useEffect(() => {
+    if (currentStep === 'chart' && completedData.wellbeing?.sections) {
+      const sections = completedData.wellbeing.sections
+      const hasHigh = sections.some((s: any) => s.mood_numeric === 5 || s.mood_numeric === 4)
+      const hasOk = sections.some((s: any) => s.mood_numeric === 3)
+      const hasLow = sections.some((s: any) => s.mood_numeric === 2 || s.mood_numeric === 1)
+
+      // Always open the accordion that has topics (default to High if available)
+      if (hasHigh) {
+        setOpenAccordion('high')
+      } else if (hasOk) {
+        setOpenAccordion('ok')
+      } else if (hasLow) {
+        setOpenAccordion('low')
+      }
+    }
+  }, [currentStep, completedData.wellbeing?.sections])
+
+  // Toggle accordion function
+  const toggleAccordion = (section: 'high' | 'ok' | 'low') => {
+    setOpenAccordion(openAccordion === section ? null : section)
+  }
 
   // No auto-redirect - user must click DONE button
 
@@ -231,9 +300,14 @@ export function CheckInFlow() {
       return
     }
 
-    // Special handling for talk completion
+    // Special handling for talk completion - go to lift page
     if (stepId === 'talk') {
-      // Navigate to complete step
+      navigate('/checkin/flow/lift')
+      return
+    }
+
+    // Special handling for lift completion - go to complete
+    if (stepId === 'lift') {
       navigate('/checkin/flow/complete')
       return
     }
@@ -250,6 +324,9 @@ export function CheckInFlow() {
   }
 
   const handleNavigateToStep = (stepId: string) => {
+    // Dismiss toast when manually navigating
+    setShowToast(false)
+
     // Check if the step we're navigating to has completed data
     const hasCompletedData = completedData[stepId] && !completedData[stepId].skipped
     setCurrentStepHasSelection(hasCompletedData) // Set selection state based on completed data
@@ -1043,178 +1120,528 @@ export function CheckInFlow() {
               {/* Title - matching wellbeing page styling */}
               <div className="text-center chart-title-container" style={{ marginBottom: '0.5rem' }}>
                 <h1 className="text-gray-900 mb-2 chart-main-title" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-                  Nice job, Here's your Wellbeing wheel for today
+                  You scored
                 </h1>
               </div>
 
               <div className="chart-page-content flex flex-col items-center p-8"
                    style={{ paddingTop: '0' }}>
 
-                {/* Support Tips Section */}
-                <div className="support-tips-section" style={{ width: '100%', maxWidth: '900px', marginBottom: '20px' }}>
-                  <p className="chart-support-title text-gray-600 mx-auto px-4" style={{
-                    fontSize: '16px',
-                    fontWeight: 400,
-                    lineHeight: '1.5',
-                    maxWidth: '800px',
-                    marginBottom: '1.5rem',
-                    marginTop: '0',
-                    textAlign: 'center'
-                  }}>
-                    When your wheel is balanced, it's easier to feel your best. If one part scored lower, here are some things you could try to feel even better!
-                  </p>
+                {/* Accordion Section */}
+                <div className="accordion-section" style={{ width: '100%', maxWidth: '800px', marginBottom: '20px' }}>
+                  {(() => {
+                    // Categorize wellbeing sections by mood_numeric
+                    const sections = completedData.wellbeing?.sections || []
+                    const highSections = sections.filter((s: any) => s.mood_numeric === 5 || s.mood_numeric === 4)
+                    const okSections = sections.filter((s: any) => s.mood_numeric === 3)
+                    const lowSections = sections.filter((s: any) => s.mood_numeric === 2 || s.mood_numeric === 1)
 
-                  {/* Single cycling card */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    paddingBottom: '1rem'
-                  }}>
-                    {(() => {
-                      const tips = [
-                        {
-                          icon: (
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                          ),
-                          text: 'List out the things that make you feel good'
-                        },
-                        {
-                          icon: (
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                              <circle cx="9" cy="7" r="4"/>
-                              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                            </svg>
-                          ),
-                          text: 'Talk to a friend'
-                        },
-                        {
-                          icon: (
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e38d3b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                            </svg>
-                          ),
-                          text: 'Talk to your adults or teachers for more support'
-                        }
-                      ]
+                    // Count how many sections have topics
+                    const sectionsWithTopics = [
+                      highSections.length > 0,
+                      okSections.length > 0,
+                      lowSections.length > 0
+                    ].filter(Boolean).length
 
-                      const currentTip = tips[activeCardIndex]
+                    // Only show toggle buttons if 2+ sections have topics
+                    const showToggleButtons = sectionsWithTopics >= 2
 
-                      return (
-                        <div
-                          style={{
-                            position: 'relative',
-                            backgroundColor: 'white',
-                            borderRadius: '4px',
-                            border: '2px solid #e5e7eb',
-                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-                            maxWidth: '600px',
-                            width: 'fit-content',
-                            opacity: cardFadeState === 'in' ? 1 : 0,
-                            transition: 'opacity 0.5s ease-in-out',
-                            overflow: 'hidden'
-                          }}
-                        >
-                          {/* Card content */}
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {/* High Accordion */}
+                        {highSections.length > 0 && (
                           <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '1rem',
-                            padding: '0.75rem 20px'
+                            backgroundColor: 'white',
+                            borderRadius: '8px',
+                            border: '2px solid #e5e7eb',
+                            overflow: 'hidden'
                           }}>
-                            {/* Icon on left */}
+                            {/* Header */}
                             <div style={{
-                              backgroundColor: 'rgba(227, 141, 59, 0.2)',
-                              width: '40px',
-                              height: '40px',
-                              borderRadius: '50%',
                               display: 'flex',
                               alignItems: 'center',
-                              justifyContent: 'center',
-                              flexShrink: 0
-                            }}>
-                              {currentTip.icon}
+                              justifyContent: 'space-between',
+                              padding: '1rem 1.5rem',
+                              cursor: showToggleButtons ? 'pointer' : 'default'
+                            }}
+                            onClick={() => showToggleButtons && toggleAccordion('high')}
+                            >
+                              <h3 style={{
+                                margin: 0,
+                                fontSize: '18px',
+                                fontWeight: '600',
+                                color: '#1f2937'
+                              }}>
+                                High
+                              </h3>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                <span style={{ fontWeight: '400', color: '#6b7280', fontSize: '18px' }}>
+                                  {highSections.length}/7
+                                </span>
+                                {/* Toggle button - only if 2+ sections have topics */}
+                                {showToggleButtons && (
+                                  <button
+                                    style={{
+                                      width: '32px',
+                                      height: '32px',
+                                      borderRadius: '50%',
+                                      backgroundColor: '#3a7ddc',
+                                      border: 'none',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      cursor: 'pointer',
+                                      flexShrink: 0
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      toggleAccordion('high')
+                                    }}
+                                  >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                      {openAccordion === 'high' ? (
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                      ) : (
+                                        <>
+                                          <line x1="12" y1="5" x2="12" y2="19" />
+                                          <line x1="5" y1="12" x2="19" y2="12" />
+                                        </>
+                                      )}
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
                             </div>
 
-                            {/* Text on right */}
-                            <p style={{
-                              margin: '0',
-                              color: '#374151',
-                              lineHeight: '1.5',
-                              fontSize: '14px'
-                            }}>
-                              {currentTip.text}
-                            </p>
-                          </div>
-
-                          {/* Progress bar at bottom */}
-                          <div style={{
-                            position: 'absolute',
-                            bottom: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '3px',
-                            backgroundColor: '#e5e7eb'
-                          }}>
-                            {cardFadeState === 'in' && (
-                              <div
-                                key={`progress-${activeCardIndex}`}
-                                style={{
-                                  height: '100%',
-                                  backgroundColor: '#e38d3b',
-                                  width: '0%',
-                                  animation: 'progressBar 5s linear forwards'
-                                }}
-                              />
+                            {/* Expanded Content */}
+                            {openAccordion === 'high' && (
+                              <div>
+                                {/* Divider */}
+                                <div style={{ borderTop: '1px solid #e5e7eb', margin: '0 1.5rem' }} />
+                                <div style={{ padding: '1.5rem' }}>
+                                  {/* Topics pills */}
+                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+                                    {highSections.map((section: any, idx: number) => {
+                                      console.log('High section data:', section)
+                                      return (
+                                        <React.Fragment key={idx}>
+                                          <span
+                                            style={{
+                                              backgroundColor: '#f3f4f6',
+                                              color: '#374151',
+                                              padding: '8px 16px',
+                                              borderRadius: '20px',
+                                              fontSize: '14px',
+                                              fontWeight: '500',
+                                              display: 'inline-block'
+                                            }}
+                                          >
+                                            {section.name || section.section_name || 'Unknown'}
+                                          </span>
+                                          {idx < highSections.length - 1 && (
+                                            <span style={{ color: '#9ca3af', fontSize: '14px' }}>,</span>
+                                          )}
+                                        </React.Fragment>
+                                      )
+                                    })}
+                                  </div>
+                                  {/* Subheading */}
+                                  <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '1rem' }}>
+                                    Things you could do...
+                                  </h3>
+                                  {/* Action items as cards */}
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    <div
+                                      style={{
+                                        padding: '16px',
+                                        fontSize: '14px',
+                                        color: '#374151',
+                                        cursor: 'pointer',
+                                        backgroundColor: 'white',
+                                        borderRadius: '8px',
+                                        border: '1px solid #e5e7eb',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px'
+                                      }}
+                                    >
+                                      <div style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '50%',
+                                        backgroundColor: '#ffedd5',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                      }}>
+                                        <Plus size={18} style={{ color: '#f97316' }} />
+                                      </div>
+                                      <span>Add to your feel good list</span>
+                                    </div>
+                                    <div
+                                      style={{
+                                        padding: '16px',
+                                        fontSize: '14px',
+                                        color: '#374151',
+                                        cursor: 'pointer',
+                                        backgroundColor: 'white',
+                                        borderRadius: '8px',
+                                        border: '1px solid #e5e7eb',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px'
+                                      }}
+                                    >
+                                      <div style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '50%',
+                                        backgroundColor: '#ffedd5',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                      }}>
+                                        <Sparkles size={18} style={{ color: '#f97316' }} />
+                                      </div>
+                                      <span>Spread the joy</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
                             )}
                           </div>
-                        </div>
-                      )
-                    })()}
-                  </div>
+                        )}
 
-                  {/* Mobile scroll indicator dots */}
-                  <div className="mobile-dots" style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    marginTop: '1rem'
-                  }}>
-                    <div style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: activeCardIndex === 0 ? '#3a7ddc' : '#d1d5db',
-                      transition: 'background-color 0.3s ease'
-                    }}></div>
-                    <div style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: activeCardIndex === 1 ? '#3a7ddc' : '#d1d5db',
-                      transition: 'background-color 0.3s ease'
-                    }}></div>
-                    <div style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: activeCardIndex === 2 ? '#3a7ddc' : '#d1d5db',
-                      transition: 'background-color 0.3s ease'
-                    }}></div>
-                  </div>
-                </div>
+                        {/* Ok Accordion */}
+                        {okSections.length > 0 && (
+                          <div style={{
+                            backgroundColor: 'white',
+                            borderRadius: '8px',
+                            border: '2px solid #e5e7eb',
+                            overflow: 'hidden'
+                          }}>
+                            {/* Header */}
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '1rem 1.5rem',
+                              cursor: showToggleButtons ? 'pointer' : 'default'
+                            }}
+                            onClick={() => showToggleButtons && toggleAccordion('ok')}
+                            >
+                              <h3 style={{
+                                margin: 0,
+                                fontSize: '18px',
+                                fontWeight: '600',
+                                color: '#1f2937'
+                              }}>
+                                Ok
+                              </h3>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                <span style={{ fontWeight: '400', color: '#6b7280', fontSize: '18px' }}>
+                                  {okSections.length}/7
+                                </span>
+                                {/* Toggle button - only if 2+ sections */}
+                                {showToggleButtons && (
+                                  <button
+                                    style={{
+                                      width: '32px',
+                                      height: '32px',
+                                      borderRadius: '50%',
+                                      backgroundColor: '#3a7ddc',
+                                      border: 'none',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      cursor: 'pointer',
+                                      flexShrink: 0
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      toggleAccordion('ok')
+                                    }}
+                                  >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                      {openAccordion === 'ok' ? (
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                      ) : (
+                                        <>
+                                          <line x1="12" y1="5" x2="12" y2="19" />
+                                          <line x1="5" y1="12" x2="19" y2="12" />
+                                        </>
+                                      )}
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
 
-                {/* Radial Graph - Hidden on mobile, shown below cards on desktop */}
-                <div className="chart-graph-container" style={{ marginBottom: '3rem', marginTop: '20px' }}>
-                  <WellbeingRadialGraph
-                    sections={completedData.wellbeing?.sections || []}
-                    size={360}
-                    theoAnimation={theoAnimation}
-                  />
+                            {/* Expanded Content */}
+                            {openAccordion === 'ok' && (
+                              <div>
+                                {/* Divider */}
+                                <div style={{ borderTop: '1px solid #e5e7eb', margin: '0 1.5rem' }} />
+                                <div style={{ padding: '1.5rem' }}>
+                                  {/* Topics pills */}
+                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+                                    {okSections.map((section: any, idx: number) => (
+                                      <React.Fragment key={idx}>
+                                        <span
+                                          style={{
+                                            backgroundColor: '#f3f4f6',
+                                            color: '#374151',
+                                            padding: '8px 16px',
+                                            borderRadius: '20px',
+                                            fontSize: '14px',
+                                            fontWeight: '500',
+                                            display: 'inline-block'
+                                          }}
+                                        >
+                                          {section.name || section.section_name || 'Unknown'}
+                                        </span>
+                                        {idx < okSections.length - 1 && (
+                                          <span style={{ color: '#9ca3af', fontSize: '14px' }}>,</span>
+                                        )}
+                                      </React.Fragment>
+                                    ))}
+                                  </div>
+                                  {/* Subheading */}
+                                  <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '1rem' }}>
+                                    Things you could do...
+                                  </h3>
+                                  {/* Action items as cards */}
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    <div
+                                      style={{
+                                        padding: '16px',
+                                        fontSize: '14px',
+                                        color: '#374151',
+                                        cursor: 'pointer',
+                                        backgroundColor: 'white',
+                                        borderRadius: '8px',
+                                        border: '1px solid #e5e7eb',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px'
+                                      }}
+                                    >
+                                      <div style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '50%',
+                                        backgroundColor: '#ffedd5',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                      }}>
+                                        <MessageCircle size={18} style={{ color: '#f97316' }} />
+                                      </div>
+                                      <span>Tell your friends and family</span>
+                                    </div>
+                                    <div
+                                      style={{
+                                        padding: '16px',
+                                        fontSize: '14px',
+                                        color: '#374151',
+                                        cursor: 'pointer',
+                                        backgroundColor: 'white',
+                                        borderRadius: '8px',
+                                        border: '1px solid #e5e7eb',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px'
+                                      }}
+                                    >
+                                      <div style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '50%',
+                                        backgroundColor: '#ffedd5',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                      }}>
+                                        <Compass size={18} style={{ color: '#f97316' }} />
+                                      </div>
+                                      <span>Explore it in garden</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Low Accordion */}
+                        {lowSections.length > 0 && (
+                          <div style={{
+                            backgroundColor: 'white',
+                            borderRadius: '8px',
+                            border: '2px solid #e5e7eb',
+                            overflow: 'hidden'
+                          }}>
+                            {/* Header */}
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '1rem 1.5rem',
+                              cursor: showToggleButtons ? 'pointer' : 'default'
+                            }}
+                            onClick={() => showToggleButtons && toggleAccordion('low')}
+                            >
+                              <h3 style={{
+                                margin: 0,
+                                fontSize: '18px',
+                                fontWeight: '600',
+                                color: '#1f2937'
+                              }}>
+                                Low
+                              </h3>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                <span style={{ fontWeight: '400', color: '#6b7280', fontSize: '18px' }}>
+                                  {lowSections.length}/7
+                                </span>
+                                {/* Toggle button - only if 2+ sections */}
+                                {showToggleButtons && (
+                                  <button
+                                    style={{
+                                      width: '32px',
+                                      height: '32px',
+                                      borderRadius: '50%',
+                                      backgroundColor: '#3a7ddc',
+                                      border: 'none',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      cursor: 'pointer',
+                                      flexShrink: 0
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      toggleAccordion('low')
+                                    }}
+                                  >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                      {openAccordion === 'low' ? (
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                      ) : (
+                                        <>
+                                          <line x1="12" y1="5" x2="12" y2="19" />
+                                          <line x1="5" y1="12" x2="19" y2="12" />
+                                        </>
+                                      )}
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Expanded Content */}
+                            {openAccordion === 'low' && (
+                              <div>
+                                {/* Divider */}
+                                <div style={{ borderTop: '1px solid #e5e7eb', margin: '0 1.5rem' }} />
+                                <div style={{ padding: '1.5rem' }}>
+                                  {/* Topics pills */}
+                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+                                    {lowSections.map((section: any, idx: number) => (
+                                      <React.Fragment key={idx}>
+                                        <span
+                                          style={{
+                                            backgroundColor: '#f3f4f6',
+                                            color: '#374151',
+                                            padding: '8px 16px',
+                                            borderRadius: '20px',
+                                            fontSize: '14px',
+                                            fontWeight: '500',
+                                            display: 'inline-block'
+                                          }}
+                                        >
+                                          {section.name || section.section_name || 'Unknown'}
+                                        </span>
+                                        {idx < lowSections.length - 1 && (
+                                          <span style={{ color: '#9ca3af', fontSize: '14px' }}>,</span>
+                                        )}
+                                      </React.Fragment>
+                                    ))}
+                                  </div>
+                                  {/* Subheading */}
+                                  <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '1rem' }}>
+                                    Things you could do...
+                                  </h3>
+                                  {/* Action items as cards */}
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    <div
+                                      style={{
+                                        padding: '16px',
+                                        fontSize: '14px',
+                                        color: '#374151',
+                                        cursor: 'pointer',
+                                        backgroundColor: 'white',
+                                        borderRadius: '8px',
+                                        border: '1px solid #e5e7eb',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px'
+                                      }}
+                                    >
+                                      <div style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '50%',
+                                        backgroundColor: '#ffedd5',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                      }}>
+                                        <List size={18} style={{ color: '#f97316' }} />
+                                      </div>
+                                      <span>Do something from feel good list</span>
+                                    </div>
+                                    <div
+                                      style={{
+                                        padding: '16px',
+                                        fontSize: '14px',
+                                        color: '#374151',
+                                        cursor: 'pointer',
+                                        backgroundColor: 'white',
+                                        borderRadius: '8px',
+                                        border: '1px solid #e5e7eb',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px'
+                                      }}
+                                    >
+                                      <div style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '50%',
+                                        backgroundColor: '#ffedd5',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                      }}>
+                                        <User size={18} style={{ color: '#f97316' }} />
+                                      </div>
+                                      <span>Tell teacher</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })()}
                 </div>
               </div>
 
@@ -1305,217 +1732,197 @@ export function CheckInFlow() {
         {currentStep === 'talk' && (
           <div className="talk-page-container bg-white min-h-screen" style={{ paddingTop: '140px', paddingBottom: '120px' }}>
             <div className="talk-content-wrapper mx-auto px-6" style={{ maxWidth: '800px' }}>
-              {/* Main Content - fades out */}
-              <div
-                className="talk-main-content transition-opacity duration-500"
-                style={{
-                  opacity: completedData.talk ? 0 : 1,
-                  display: completedData.talk ? 'none' : 'block'
-                }}
-              >
-                {/* Title - matching other page styling */}
-                <div className="text-center talk-title-container" style={{ marginBottom: '3rem' }}>
+              {/* Main Content */}
+              <div className="talk-main-content">
+                {/* Title */}
+                <div className="text-center talk-title-container" style={{ marginBottom: '1rem' }}>
                   <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-                    How are you now? Do you want to talk to someone?
+                    How are you now?
                   </h1>
                 </div>
 
-                {/* Summary Content - not in cards */}
-                <div className="space-y-10">
-                  {/* Mood Section */}
-                  {completedData.mood && (
-                    <div>
-                      <hr className="border-t border-gray-200 mb-6" />
-                      <h2 className="text-center text-gray-700 mb-4" style={{ fontSize: '18px', fontWeight: 600 }}>
-                        Your mood
-                      </h2>
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        {(() => {
-                          // Get the mood animation based on mood level
-                          const getMoodAnimation = () => {
-                            switch (completedData.mood.mood_level) {
-                              case 'very_happy': return BlushingShaded
-                              case 'happy': return HappyShaded
-                              case 'ok': return MehShaded
-                              case 'sad': return SadTearShaded
-                              case 'very_sad': return CryingShaded
-                              default: return null
-                            }
-                          }
-                          const animation = getMoodAnimation()
-                          if (animation) {
-                            return (
-                              <div style={{ width: '60px', height: '60px' }}>
-                                <Lottie
-                                  animationData={animation}
-                                  loop={true}
-                                  autoplay={true}
-                                  style={{ width: '100%', height: '100%' }}
-                                />
-                              </div>
-                            )
-                          }
-                          return null
-                        })()}
-                      </div>
-                      {completedData.mood.notes && (
-                        <p className="text-center text-gray-600 mt-3 italic" style={{ maxWidth: '500px', margin: '1rem auto' }}>
-                          "{completedData.mood.notes}"
-                        </p>
+                {/* Subtitle */}
+                <div className="text-center" style={{ marginBottom: '3rem' }}>
+                  <p className="text-gray-600" style={{ fontSize: '18px', fontWeight: 400 }}>
+                    Do you want to talk to someone?
+                  </p>
+                </div>
+
+                {/* Talk Options - 3 buttons in a vertical list */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', maxWidth: '280px', margin: '0 auto' }}>
+                  <button
+                    onClick={() => {
+                      setCompletedData(prev => ({ ...prev, talk: { choice: 'parent' } }))
+                    }}
+                    style={{
+                      width: '280px',
+                      height: '56px',
+                      borderRadius: '28px',
+                      backgroundColor: 'white',
+                      border: '2px solid #3a7ddc',
+                      color: '#3a7ddc',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      paddingLeft: '1.5rem',
+                      paddingRight: '0.75rem',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <span>A parent</span>
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      backgroundColor: completedData.talk?.choice === 'parent' ? '#3a7ddc' : 'white',
+                      border: completedData.talk?.choice === 'parent' ? 'none' : '2px solid #3a7ddc',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {completedData.talk?.choice === 'parent' && (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
                       )}
-                      <div className="mt-6"></div>
                     </div>
-                  )}
+                  </button>
 
-                  {/* Emotions Section */}
-                  {completedData.emotions?.selected_emotions && completedData.emotions.selected_emotions.length > 0 && (
-                    <div>
-                      <hr className="border-t border-gray-200 mb-6" />
-                      <h2 className="text-center text-gray-700 mb-4" style={{ fontSize: '18px', fontWeight: 600 }}>
-                        Your emotions
-                      </h2>
-                      <div className="flex flex-wrap justify-center gap-3">
-                        {completedData.emotions.selected_emotions.map((emotion: string, index: number) => {
-                          // Find the emoji for this emotion
-                          const emotionsData = {
-                            'red': [
-                              ['🤬 Enraged', '😣 Stressed', '😲 Shocked'],
-                              ['😤 Fuming', '😠 Angry', '😰 Restless'],
-                              ['🤢 Repulsed', '😟 Worried', '😬 Uneasy']
-                            ],
-                            'yellow': [
-                              ['😮 Surprised', '🥳 Festive', '🤩 Ecstatic'],
-                              ['⚡ Energized', '😊 Optimistic', '😃 Excited'],
-                              ['🙂 Pleasant', '🤞 Hopeful', '🥰 Blissful']
-                            ],
-                            'blue': [
-                              ['🤮 Disgusted', '😞 Down', '😐 Apathetic'],
-                              ['😩 Miserable', '🥺 Lonely', '😪 Tired'],
-                              ['😭 Despair', '😔 Desolate', '🪫 Drained']
-                            ],
-                            'green': [
-                              ['😮‍💨 At ease', '🙂 Content', '🫶 Fulfilled'],
-                              ['😌 Relaxed', '💤 Restful', '⚖️ Balanced'],
-                              ['🥱 Sleepy', '🕊️ Tranquil', '🧘 Serene']
-                            ]
-                          }
-
-                          let emotionWithEmoji = emotion
-                          let quadrantColor = 'gray'
-
-                          // Find which quadrant this emotion belongs to
-                          Object.entries(emotionsData).forEach(([quadrant, quadrantEmotions]) => {
-                            quadrantEmotions.forEach(row => {
-                              row.forEach(emotionStr => {
-                                const label = emotionStr.split(' ').slice(1).join(' ')
-                                if (label === emotion) {
-                                  emotionWithEmoji = emotionStr
-                                  quadrantColor = quadrant
-                                }
-                              })
-                            })
-                          })
-
-                          const [emoji, ...labelParts] = emotionWithEmoji.split(' ')
-
-                          // Get background color based on quadrant
-                          const getQuadrantColors = (quadrant: string) => {
-                            switch (quadrant) {
-                              case 'red':
-                                return { bg: '#f7e9ee', border: '#d78fab' }
-                              case 'yellow':
-                                return { bg: '#f7e9db', border: '#d7914c' }
-                              case 'blue':
-                                return { bg: '#ecf3f4', border: '#9fc4c7' }
-                              case 'green':
-                                return { bg: '#f5f8f6', border: '#ceddd1' }
-                              default:
-                                return { bg: '#f9f9f9', border: '#e5e7eb' }
-                            }
-                          }
-
-                          const colors = getQuadrantColors(quadrantColor)
-
-                          return (
-                            <div
-                              key={index}
-                              className="flex flex-col items-center justify-center gap-1"
-                              style={{
-                                width: '80px',
-                                height: '80px',
-                                padding: '8px',
-                                backgroundColor: colors.bg,
-                                border: `2px solid ${colors.border}`,
-                                color: '#374151',
-                                borderRadius: '4px',
-                                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                              }}
-                            >
-                              <span className="text-xl">{emoji}</span>
-                              <span className="text-xs font-medium text-center" style={{ lineHeight: '1.1' }}>
-                                {labelParts.join(' ')}
-                              </span>
-                            </div>
-                          )
-                        })}
-                      </div>
-                      {completedData.emotions?.emotion_story && (
-                        <p className="text-center text-gray-600 mt-3 italic" style={{ maxWidth: '500px', margin: '1rem auto' }}>
-                          "{completedData.emotions.emotion_story}"
-                        </p>
+                  <button
+                    onClick={() => {
+                      setCompletedData(prev => ({ ...prev, talk: { choice: 'teacher' } }))
+                    }}
+                    style={{
+                      width: '280px',
+                      height: '56px',
+                      borderRadius: '28px',
+                      backgroundColor: 'white',
+                      border: '2px solid #3a7ddc',
+                      color: '#3a7ddc',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      paddingLeft: '1.5rem',
+                      paddingRight: '0.75rem',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <span>A teacher</span>
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      backgroundColor: completedData.talk?.choice === 'teacher' ? '#3a7ddc' : 'white',
+                      border: completedData.talk?.choice === 'teacher' ? 'none' : '2px solid #3a7ddc',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {completedData.talk?.choice === 'teacher' && (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
                       )}
-                      <hr className="border-t border-gray-200 mt-6 mb-6" />
                     </div>
-                  )}
+                  </button>
 
+                  <button
+                    onClick={() => {
+                      setCompletedData(prev => ({ ...prev, talk: { choice: 'none' } }))
+                    }}
+                    style={{
+                      width: '280px',
+                      height: '56px',
+                      borderRadius: '28px',
+                      backgroundColor: 'white',
+                      border: '2px solid #3a7ddc',
+                      color: '#3a7ddc',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      paddingLeft: '1.5rem',
+                      paddingRight: '0.75rem',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <span>I'm ok</span>
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      backgroundColor: completedData.talk?.choice === 'none' ? '#3a7ddc' : 'white',
+                      border: completedData.talk?.choice === 'none' ? 'none' : '2px solid #3a7ddc',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {completedData.talk?.choice === 'none' && (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                      )}
+                    </div>
+                  </button>
                 </div>
               </div>
 
-              {/* Message - fades in after button click */}
-              <div
-                className="talk-message transition-opacity duration-500"
-                style={{
-                  opacity: completedData.talk ? 1 : 0,
-                  display: completedData.talk ? 'block' : 'none'
-                }}
-              >
-                {/* Title and Subtitle - matching wellbeing page styling */}
-                <div className="text-center" style={{ marginBottom: '2rem' }}>
-                  {(() => {
-                    const talkChoice = completedData.talk?.choice
-                    if (talkChoice === 'parent') {
-                      return (
-                        <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-                          Well done! Your parent will check in with you soon
-                        </h1>
-                      )
-                    } else if (talkChoice === 'teacher') {
-                      return (
-                        <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-                          Well done! Your teacher will check in with you soon
-                        </h1>
-                      )
-                    } else {
-                      return (
-                        <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
-                          Your feelings are safe with us
-                        </h1>
-                      )
-                    }
-                  })()}
-                </div>
+              {/* Yellow swoosh footer - hidden on mobile */}
+              <div className="hidden md:block absolute bottom-0 left-0 right-0">
+                <YellowSwoosh />
+              </div>
 
-                {/* Subtitle */}
+              {/* NEXT Button - show when selection is made, positioned above yellow swoosh on desktop, at bottom on mobile */}
+              {completedData.talk && (
+                <div
+                  className="fixed left-1/2 transform -translate-x-1/2 text-center"
+                  style={{ zIndex: 1100, bottom: '32px' }}
+                >
+                  <button
+                    onClick={() => handleStepComplete('talk', completedData.talk)}
+                    className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                    style={{
+                      backgroundColor: '#3a7ddc',
+                      color: 'white',
+                      width: '140px',
+                      height: '56px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '28px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#2e6bc7'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#3a7ddc'
+                    }}
+                  >
+                    NEXT
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {currentStep === 'lift' && (
+          <div className="lift-page-container bg-white min-h-screen" style={{ paddingTop: '140px', paddingBottom: '120px' }}>
+            <div className="lift-content-wrapper mx-auto px-6" style={{ maxWidth: '800px' }}>
+              <div className="lift-main-content">
+                {/* Title */}
                 <div className="text-center" style={{ marginBottom: '2rem' }}>
-                  <p className="text-gray-600 mx-auto px-4" style={{
-                    fontSize: '16px',
-                    fontWeight: 400,
-                    lineHeight: '1.5',
-                    maxWidth: '800px',
-                    textAlign: 'center'
-                  }}>
+                  <h1 className="text-gray-900 mb-2" style={{ fontSize: '30px', fontWeight: 600, letterSpacing: '0.02em' }}>
                     Now for a little Lift gift for you!
-                  </p>
+                  </h1>
                 </div>
 
                 {/* Lift cards section */}
@@ -1674,8 +2081,8 @@ export function CheckInFlow() {
                             textAlign: 'center',
                             fontSize: '14px'
                           }}>
-                            Where do fish keep their money?<br /><br />
-                            <strong>In a river bank</strong>
+                            {jokes[selectedJokeIndex].question}<br /><br />
+                            <strong>{jokes[selectedJokeIndex].answer}</strong>
                           </p>
                         </div>
                       )}
@@ -1810,8 +2217,8 @@ export function CheckInFlow() {
                             textAlign: 'center',
                             fontSize: '14px'
                           }}>
-                            What is the hardest key to turn?<br /><br />
-                            <strong>A donkey</strong>
+                            {riddles[selectedRiddleIndex].question}<br /><br />
+                            <strong>{riddles[selectedRiddleIndex].answer}</strong>
                           </p>
                         </div>
                       )}
@@ -1946,7 +2353,7 @@ export function CheckInFlow() {
                             textAlign: 'center',
                             fontSize: '14px'
                           }}>
-                            A crocodile can't stick out its tounge<br /><br />
+                            {facts[selectedFactIndex].text}<br /><br />
                             <strong>It's a fact</strong>
                           </p>
                         </div>
@@ -2033,129 +2440,39 @@ export function CheckInFlow() {
                 `}</style>
               </div>
 
-              {/* Yellow swoosh footer */}
+              {/* Yellow swoosh footer - hidden on mobile */}
               <div className="hidden md:block absolute bottom-0 left-0 right-0">
                 <YellowSwoosh />
               </div>
 
-              {/* Action Buttons - positioned above yellow swoosh - show when no selection */}
-              {!completedData.talk && (
-                <div
-                  className="talk-buttons transition-opacity duration-500 fixed left-1/2 transform -translate-x-1/2"
+              {/* NEXT Button - positioned above yellow swoosh on desktop, at bottom on mobile */}
+              <div
+                className="fixed left-1/2 transform -translate-x-1/2 text-center"
+                style={{ zIndex: 1100, bottom: '32px' }}
+              >
+                <button
+                  onClick={() => handleStepComplete('lift', {})}
+                  className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                   style={{
-                    zIndex: 1100,
-                    bottom: '32px'
+                    backgroundColor: '#3a7ddc',
+                    color: 'white',
+                    width: '140px',
+                    height: '56px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '28px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#2e6bc7'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#3a7ddc'
                   }}
                 >
-                  <div className="talk-buttons-container flex justify-center gap-4">
-                    <button
-                      onClick={() => {
-                        setCompletedData(prev => ({ ...prev, talk: { choice: 'parent' } }))
-                      }}
-                      className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                      style={{
-                        backgroundColor: '#3a7ddc',
-                        color: 'white',
-                        width: '100px',
-                        height: '56px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '28px'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#2e6bc7'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#3a7ddc'
-                      }}
-                    >
-                      A parent
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setCompletedData(prev => ({ ...prev, talk: { choice: 'teacher' } }))
-                      }}
-                      className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                      style={{
-                        backgroundColor: '#3a7ddc',
-                        color: 'white',
-                        width: '100px',
-                        height: '56px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '28px'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#2e6bc7'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#3a7ddc'
-                      }}
-                    >
-                      A teacher
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setCompletedData(prev => ({ ...prev, talk: { choice: 'none' } }))
-                      }}
-                      className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                      style={{
-                        backgroundColor: '#3a7ddc',
-                        color: 'white',
-                        width: '100px',
-                        height: '56px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '28px'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#2e6bc7'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#3a7ddc'
-                      }}
-                    >
-                      I'm ok
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* NEXT Button - show when selection is made */}
-              {completedData.talk && (
-                <div
-                  className="fixed left-1/2 transform -translate-x-1/2"
-                  style={{ zIndex: 1100, bottom: '32px' }}
-                >
-                  <button
-                    onClick={() => navigate('/checkin/flow/complete')}
-                    className="text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                    style={{
-                      backgroundColor: '#3a7ddc',
-                      color: 'white',
-                      width: '140px',
-                      height: '56px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: '28px'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#2e6bc7'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#3a7ddc'
-                    }}
-                  >
-                    NEXT
-                  </button>
-                </div>
-              )}
+                  NEXT
+                </button>
+              </div>
             </div>
           </div>
         )}

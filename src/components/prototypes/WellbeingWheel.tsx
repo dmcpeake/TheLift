@@ -39,9 +39,9 @@ interface WellbeingWheelProps {
 
 export function WellbeingWheel({ onComplete, showNextButton = false, onSelectionMade, hideDebugInfo = false, triggerCompletion = false, initialData, onPartialSave }: WellbeingWheelProps = {}) {
   const navigate = useNavigate()
-  const [showIntro, setShowIntro] = useState(true)
+  const [showIntro, setShowIntro] = useState(false)
   const [sections, setSections] = useState<Record<string, SectionData>>({})
-  const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(-1)
   const [finalData, setFinalData] = useState<WheelData | null>(null)
   const [startTime] = useState(Date.now())
   const [showingTextInput, setShowingTextInput] = useState<string | null>(null)
@@ -702,7 +702,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
               }
             }}
           >
-            {currentSection ? currentSection.name : 'How do you feel about these areas of your life?'}
+            {currentSection ? currentSection.name : 'How do you feel about different parts of your day?'}
           </h1>
           {/* Speaker icon - only visible on mobile */}
           {currentSection && (
@@ -749,11 +749,17 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
             </button>
           )}
         </div>
-        {currentSection && (
+        {currentSection ? (
           <p
             className="wellbeing-subtext text-gray-600 mx-auto px-4"
             style={{ fontSize: '16px', fontWeight: 400, lineHeight: '1.5', maxWidth: '800px', marginTop: '0' }}
             dangerouslySetInnerHTML={{ __html: getTopicSubtext(currentSection.id) }}
+          />
+        ) : (
+          <p
+            className="wellbeing-subtext text-gray-600 mx-auto px-4"
+            style={{ fontSize: '16px', fontWeight: 400, lineHeight: '1.5', maxWidth: '800px', marginTop: '0' }}
+            dangerouslySetInnerHTML={{ __html: 'Select a topic to get started.<br>&nbsp;' }}
           />
         )}
       </div>
@@ -1347,6 +1353,94 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
       {!finalData && (
         <div className="fixed bottom-0 left-0 right-0 p-8 flex justify-center items-center" style={{ zIndex: 1000, gap: '20px' }}>
 
+          {/* NEXT Button - Shows on default view to select first topic - ONLY if not all completed */}
+          {currentSectionIndex === -1 && Object.keys(sections).length < wheelSections.length && (
+            <button
+              onClick={() => {
+                setCurrentSectionIndex(0)
+                scrollToActiveCard(0)
+              }}
+              style={{
+                width: '140px',
+                height: '56px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '28px',
+                backgroundColor: '#3a7ddc',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s ease',
+                color: 'white',
+                fontSize: '16px',
+                fontWeight: '600'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
+              aria-label="Start with first topic"
+            >
+              NEXT
+            </button>
+          )}
+
+          {/* NEXT Button - Shows when current topic has a mood selected but not all sections complete */}
+          {(() => {
+            const allSectionsCompleted = Object.keys(sections).length === wheelSections.length
+            const currentTopicHasMood = currentSection && sections[currentSection.id]?.mood_level
+            const isOnATopic = currentSectionIndex >= 0
+
+            if (!allSectionsCompleted && isOnATopic && currentTopicHasMood) {
+              return (
+                <button
+                  key={`next-topic-${buttonAnimationKey}`}
+                  onClick={() => {
+                    // Find first incomplete section from the beginning
+                    let targetIndex = -1
+                    for (let i = 0; i < wheelSections.length; i++) {
+                      if (!sections[wheelSections[i].id]) {
+                        targetIndex = i
+                        break
+                      }
+                    }
+
+                    if (targetIndex >= 0) {
+                      setCurrentSectionIndex(targetIndex)
+                      setRotationOffset(0)
+                      setTimeout(() => scrollToActiveCard(targetIndex), 100)
+                    }
+                  }}
+                  style={{
+                    width: '140px',
+                    height: '56px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '28px',
+                    backgroundColor: '#3a7ddc',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.3s ease',
+                    color: 'white',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    animation: 'circleExpand 0.4s ease-out'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2e6bc7'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3a7ddc'}
+                  aria-label="Go to next topic"
+                >
+                  <span style={{ animation: 'textFadeIn 0.4s ease-out' }}>
+                    NEXT
+                  </span>
+                </button>
+              )
+            }
+
+            return null
+          })()}
+
           {/* NEXT Button - Only visible when ALL sections are completed */}
           {(() => {
             const allSectionsCompleted = Object.keys(sections).length === wheelSections.length
@@ -1389,94 +1483,7 @@ export function WellbeingWheel({ onComplete, showNextButton = false, onSelection
             return null
           })()}
 
-          {/* Right Arrow Button - Acts like old SAVE button to advance to next topic */}
-          {Object.keys(sections).length < wheelSections.length && (
-            <button
-              onClick={() => {
-                const currentSection = wheelSections[currentSectionIndex]
-                const isCurrentSectionCompleted = sections[currentSection?.id]?.mood_level
 
-                // Current section must be completed to advance
-                if (!isCurrentSectionCompleted) {
-                  return // Do nothing if current section not completed
-                }
-
-                // Mark as saved and find next unrated section
-                setHasSavedCurrentSection(true)
-
-                // Find next unrated section
-                let targetIndex = -1
-
-                // First, try to find an unrated section starting from the next index
-                for (let i = currentSectionIndex + 1; i < wheelSections.length; i++) {
-                  if (!sections[wheelSections[i].id]) {
-                    targetIndex = i
-                    break
-                  }
-                }
-
-                // If no unrated section found after current, check from the beginning
-                if (targetIndex === -1) {
-                  for (let i = 0; i < currentSectionIndex; i++) {
-                    if (!sections[wheelSections[i].id]) {
-                      targetIndex = i
-                      break
-                    }
-                  }
-                }
-
-                if (targetIndex !== -1) {
-                  // Advance to next unrated section
-                  setCurrentSectionIndex(targetIndex)
-                  setRotationOffset(0)
-                  setHasSavedCurrentSection(false) // Reset saved status for new section
-                  setTimeout(() => scrollToActiveCard(targetIndex), 100)
-                }
-              }}
-              style={{
-                backgroundColor: sections[wheelSections[currentSectionIndex]?.id]?.mood_level ? '#3a7ddc' : 'white',
-                border: '2px solid #3a7ddc',
-                borderRadius: '50%',
-                cursor: sections[wheelSections[currentSectionIndex]?.id]?.mood_level ? 'pointer' : 'not-allowed',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '56px',
-                height: '56px',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                transition: 'all 0.3s ease',
-                opacity: sections[wheelSections[currentSectionIndex]?.id]?.mood_level ? 1 : 0.5
-              }}
-              onMouseEnter={(e) => {
-                if (sections[wheelSections[currentSectionIndex]?.id]?.mood_level) {
-                  e.currentTarget.style.backgroundColor = '#2e6bc7'
-                } else {
-                  e.currentTarget.style.backgroundColor = '#f8fafc'
-                  e.currentTarget.style.borderColor = '#2e6bc7'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (sections[wheelSections[currentSectionIndex]?.id]?.mood_level) {
-                  e.currentTarget.style.backgroundColor = '#3a7ddc'
-                } else {
-                  e.currentTarget.style.backgroundColor = 'white'
-                  e.currentTarget.style.borderColor = '#3a7ddc'
-                }
-              }}
-              disabled={!sections[wheelSections[currentSectionIndex]?.id]?.mood_level}
-              aria-label="Continue to next topic"
-            >
-              {sections[wheelSections[currentSectionIndex]?.id]?.mood_level ? (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'white' }}>
-                  <polyline points="20,6 9,17 4,12"></polyline>
-                </svg>
-              ) : (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#3a7ddc' }}>
-                  <polyline points="20,6 9,17 4,12"></polyline>
-                </svg>
-              )}
-            </button>
-          )}
         </div>
       )}
 
