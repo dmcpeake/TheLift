@@ -17,6 +17,7 @@ export function CheckInProfile() {
   const [editingFavoriteKey, setEditingFavoriteKey] = useState<string | null>(null)
   const [isRecording, setIsRecording] = useState(false)
   const [hoveredGiftLevel, setHoveredGiftLevel] = useState<number | null>(null)
+  const [userName, setUserName] = useState<string>('')
 
   // Load rewards from sessionStorage
   const [rewards, setRewards] = useState<Record<string, string>>(() => {
@@ -45,6 +46,23 @@ export function CheckInProfile() {
       thingThisYear: 'Going to Portugal'
     }
   })
+
+  // Load user name from sessionStorage
+  useEffect(() => {
+    const storedUserName = sessionStorage.getItem('userName')
+    if (storedUserName) {
+      setUserName(storedUserName)
+    }
+  }, [])
+
+  // Check URL parameter for tab
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const tabParam = params.get('tab')
+    if (tabParam === 'my-progress') {
+      setActiveTab('my-progress')
+    }
+  }, [location])
 
   // Save feelGoodList to sessionStorage whenever it changes
   useEffect(() => {
@@ -756,7 +774,7 @@ export function CheckInProfile() {
             >
               {/* Title */}
               <h1 className="profile-title text-4xl font-bold text-gray-900 mb-6 text-center">
-                Hi Alex!
+                Hi {userName || 'Alex'}!
               </h1>
 
               {/* Pill Tab Navigation */}

@@ -77,58 +77,62 @@ export function ProgressHeader({
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: 'white', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', height: '80px', borderRadius: '0' }}>
-      {/* Theo Avatar in top left */}
-      {theoAnimation && (
-        <>
-          <button
-            onClick={handleGuideClick}
-            className="cursor-pointer transition-all hover:opacity-80"
-            style={{
-              position: 'absolute',
-              left: '16px',
-              top: '10px',
-              width: '60px',
-              height: '60px',
-              zIndex: 51,
-              backgroundColor: 'rgba(232, 126, 103, 0.1)',
-              borderRadius: '50%',
-              border: 'none',
-              padding: '0',
-              boxSizing: 'border-box'
-            }}
-            aria-label="Open guide"
-          >
-            <Lottie
-              animationData={theoAnimation}
-              loop={true}
-              autoplay={true}
-              style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
-            />
-          </button>
+      {/* Theo Avatar in top left - Always render button */}
+      <button
+        onClick={handleGuideClick}
+        className="cursor-pointer transition-all hover:opacity-80"
+        style={{
+          position: 'absolute',
+          left: '16px',
+          top: '10px',
+          width: '60px',
+          height: '60px',
+          zIndex: 51,
+          backgroundColor: 'rgba(232, 126, 103, 0.1)',
+          borderRadius: '50%',
+          border: 'none',
+          padding: '0',
+          boxSizing: 'border-box',
+          opacity: theoAnimation ? 1 : 0,
+          transition: 'opacity 0.2s ease-in-out'
+        }}
+        aria-label="Open guide"
+        disabled={!theoAnimation}
+      >
+        {theoAnimation && (
+          <Lottie
+            animationData={theoAnimation}
+            loop={true}
+            autoplay={true}
+            style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
+          />
+        )}
+      </button>
 
-          {/* "My guide" text - hidden on mobile */}
-          <button
-            onClick={handleGuideClick}
-            className="hidden md:block cursor-pointer transition-all hover:opacity-80"
-            style={{
-              position: 'absolute',
-              left: '86px', // 16px (circle left) + 60px (circle width) + 10px (gap)
-              top: '50%',
-              transform: 'translateY(-50%)',
-              zIndex: 51,
-              fontSize: '14px',
-              color: '#3a7ddc',
-              fontWeight: '500',
-              background: 'none',
-              border: 'none',
-              padding: '8px'
-            }}
-            aria-label="Open guide"
-          >
-            My guide
-          </button>
-        </>
-      )}
+      {/* "My guide" text - hidden on mobile - Always render button */}
+      <button
+        onClick={handleGuideClick}
+        className="hidden md:block cursor-pointer transition-all hover:opacity-80"
+        style={{
+          position: 'absolute',
+          left: '86px', // 16px (circle left) + 60px (circle width) + 10px (gap)
+          top: '50%',
+          transform: 'translateY(-50%)',
+          zIndex: 51,
+          fontSize: '14px',
+          color: '#3a7ddc',
+          fontWeight: '500',
+          background: 'none',
+          border: 'none',
+          padding: '8px',
+          opacity: theoAnimation ? 1 : 0,
+          transition: 'opacity 0.2s ease-in-out'
+        }}
+        aria-label="Open guide"
+        disabled={!theoAnimation}
+      >
+        My guide
+      </button>
 
       <div className="mx-auto px-6" style={{ maxWidth: '300px', height: '80px', position: 'relative' }}>
 

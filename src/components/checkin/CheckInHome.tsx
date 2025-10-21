@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { YellowSwoosh } from '../shared/YellowSwoosh'
 import { ProgressHeader } from '../shared/ProgressHeader'
 import Lottie from 'lottie-react'
-import { Settings, SkipForward, Play, Pause, Users, Sparkles, Star, Plus, LogOut, X, Heart, Smile, Menu, Trophy } from 'lucide-react'
+import { Settings, SkipForward, Play, Pause, Users, Sparkles, Star, Plus, LogOut, X, Heart, Smile, Menu, Trophy, Gift } from 'lucide-react'
 import { BreathingCircles } from '../breathing/BreathingCircles'
 import { useGamification } from '../../contexts/GamificationContext'
 import { PointsToast } from '../shared/PointsToast'
@@ -14,7 +14,7 @@ import './checkin-mobile.css'
 export function CheckInHome() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { awardPoints, currentLevel } = useGamification()
+  const { awardPoints, currentLevel, totalPoints, getProgressToNextLevel } = useGamification()
   const [userName, setUserName] = useState<string>('')
   const [roseAnimation, setRoseAnimation] = useState(null)
   const [showBreathing, setShowBreathing] = useState(false)
@@ -31,9 +31,17 @@ export function CheckInHome() {
   const [showGuide, setShowGuide] = useState(false)
   const [showToast, setShowToast] = useState(false)
   const [toastPoints, setToastPoints] = useState(0)
+  const [showProgressPanel, setShowProgressPanel] = useState(false)
+  const [hoveredGiftLevel, setHoveredGiftLevel] = useState<number | null>(null)
   const breathingStartRef = useRef<(() => void) | null>(null)
   const breathingPauseRef = useRef<(() => void) | null>(null)
   const breathingResumeRef = useRef<(() => void) | null>(null)
+
+  // Load rewards from sessionStorage
+  const [rewards, setRewards] = useState<Record<string, string>>(() => {
+    const saved = sessionStorage.getItem('currentChildRewards')
+    return saved ? JSON.parse(saved) : {}
+  })
 
   // Load user name from sessionStorage
   useEffect(() => {
@@ -974,18 +982,24 @@ export function CheckInHome() {
               </>
             )}
 
-            {/* User Greeting */}
+            {/* User Greeting - clickable to toggle progress panel */}
             {userName && (
-              <span
+              <button
+                onClick={() => setShowProgressPanel(!showProgressPanel)}
+                className="cursor-pointer transition-all hover:opacity-70"
                 style={{
                   fontSize: '14px',
                   color: '#1f2937',
                   fontWeight: '500',
+                  background: 'none',
+                  border: 'none',
+                  padding: '8px',
                   marginRight: '10px'
                 }}
+                aria-label="View my progress"
               >
                 Hi {userName}!
-              </span>
+              </button>
             )}
 
             {/* Trophy Icon with Level Badge */}
@@ -1240,43 +1254,269 @@ export function CheckInHome() {
                 backdropFilter: 'blur(16px)',
                 border: '1px solid rgba(255, 255, 255, 0.3)',
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                padding: '22px 52px',
+                padding: '22px 22px',
                 position: 'relative',
                 zIndex: 10
               }}
             >
-              {/* Header */}
-              <div className="mb-8 welcome-header" style={{ marginTop: '20px', marginBottom: '20px' }}>
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                  Ready for your check in?
-                </h1>
-                <p className="text-lg text-gray-900 max-w-lg mx-auto" style={{ fontWeight: 500 }}>
-                  Let's explore what's come up for you today?
-                </p>
-              </div>
+              {!showProgressPanel ? (
+                <>
+                  {/* Progress Bar */}
+                  <div style={{ marginBottom: '16px', marginTop: '20px', paddingLeft: '20px', paddingRight: '20px' }}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '8px'
+                    }}>
+                      <span style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>
+                        Level {currentLevel}
+                      </span>
+                      <span style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>
+                        Level {currentLevel + 1}
+                      </span>
+                    </div>
+                    <div style={{
+                      width: '100%',
+                      height: '12px',
+                      backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                      borderRadius: '6px',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}>
+                      <div style={{
+                        width: `${Math.min(100, getProgressToNextLevel().percentage)}%`,
+                        height: '100%',
+                        backgroundColor: '#F97316',
+                        borderRadius: '6px',
+                        transition: 'width 0.3s ease'
+                      }}></div>
+                    </div>
+                    <div style={{
+                      fontSize: '12px',
+                      color: '#6B7280',
+                      marginTop: '4px',
+                      textAlign: 'center'
+                    }}>
+                      {getProgressToNextLevel().current} / {getProgressToNextLevel().required} points
+                    </div>
+                  </div>
 
-              {/* Start Button - desktop only */}
-              <div className="flex justify-center desktop-start-button" style={{ marginBottom: '20px' }}>
-                <button
-                  onClick={handleStartClick}
-                  className="font-semibold text-lg transition-all duration-200"
-                  style={{
-                    backgroundColor: '#e87e67',
-                    color: 'white',
-                    height: '60px',
-                    borderRadius: '30px',
-                    paddingLeft: '50px',
-                    paddingRight: '50px',
-                    border: '2px solid white',
-                    cursor: 'pointer',
-                    boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
-                >
-                  START
-                </button>
-              </div>
+                  {/* Dashed Line Divider */}
+                  <div style={{
+                    borderBottom: '2px dashed rgba(0, 0, 0, 0.2)',
+                    marginBottom: '24px',
+                    marginLeft: '20px',
+                    marginRight: '20px'
+                  }}></div>
+
+                  {/* Header */}
+                  <div className="mb-8 welcome-header" style={{ marginTop: '0px', marginBottom: '20px' }}>
+                    <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                      Ready for your check in?
+                    </h1>
+                    <p className="text-lg text-gray-900 max-w-lg mx-auto" style={{ fontWeight: 500 }}>
+                      Let's explore what's come up for you today?
+                    </p>
+                  </div>
+
+                  {/* Start Button - desktop only */}
+                  <div className="flex justify-center desktop-start-button" style={{ marginBottom: '20px' }}>
+                    <button
+                      onClick={handleStartClick}
+                      className="font-semibold text-lg transition-all duration-200"
+                      style={{
+                        backgroundColor: '#e87e67',
+                        color: 'white',
+                        height: '60px',
+                        borderRadius: '30px',
+                        paddingLeft: '50px',
+                        paddingRight: '50px',
+                        border: '2px solid white',
+                        cursor: 'pointer',
+                        boxShadow: '0 5px 40px rgba(0, 0, 0, 0.25)'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d66e5a'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#e87e67'}
+                    >
+                      START
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div style={{ padding: '20px' }}>
+                  {/* My Progress Content */}
+                  <h1 className="text-4xl font-bold text-gray-900 mb-6 text-center">
+                    My Progress
+                  </h1>
+
+                  {/* Total Points Display */}
+                  <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937', marginBottom: '4px' }}>
+                      Total Points
+                    </div>
+                    <div style={{ fontSize: '32px', fontWeight: '700', color: '#1f2937' }}>
+                      {totalPoints}
+                    </div>
+                  </div>
+
+                  {/* Progress to Next Level */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '8px'
+                    }}>
+                      <span style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>
+                        Level {currentLevel}
+                      </span>
+                      <span style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>
+                        Level {currentLevel + 1}
+                      </span>
+                    </div>
+                    <div style={{
+                      width: '100%',
+                      height: '12px',
+                      backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                      borderRadius: '6px',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}>
+                      <div style={{
+                        width: `${Math.min(100, getProgressToNextLevel().percentage)}%`,
+                        height: '100%',
+                        backgroundColor: '#F97316',
+                        borderRadius: '6px',
+                        transition: 'width 0.3s ease'
+                      }}></div>
+                    </div>
+                    <div style={{
+                      fontSize: '12px',
+                      color: '#6B7280',
+                      marginTop: '4px',
+                      textAlign: 'center'
+                    }}>
+                      {getProgressToNextLevel().current} / {getProgressToNextLevel().required} points
+                    </div>
+                  </div>
+
+                  {/* Stars Grid */}
+                  <div style={{ marginTop: '20px' }}>
+                    <div style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1f2937',
+                      marginBottom: '12px',
+                      textAlign: 'center'
+                    }}>
+                      Your Journey to Level 20
+                    </div>
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(10, 1fr)',
+                      gap: '8px'
+                    }}>
+                      {Array.from({ length: 20 }, (_, i) => i + 1).map((level) => {
+                        const isCompleted = level <= currentLevel
+                        const isCurrent = level === currentLevel
+                        const rewardKey = `level${level}`
+                        const hasReward = rewards[rewardKey]
+                        const showGift = hasReward
+
+                        return (
+                          <div
+                            key={level}
+                            style={{
+                              position: 'relative',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                            onMouseEnter={() => showGift && setHoveredGiftLevel(level)}
+                            onMouseLeave={() => setHoveredGiftLevel(null)}
+                            onClick={() => showGift && setHoveredGiftLevel(hoveredGiftLevel === level ? null : level)}
+                          >
+                            {showGift ? (
+                              <>
+                                <Gift
+                                  width="28"
+                                  height="28"
+                                  style={{
+                                    color: '#F97316',
+                                    cursor: 'pointer'
+                                  }}
+                                />
+                                {/* Tooltip */}
+                                {hoveredGiftLevel === level && (
+                                  <div
+                                    style={{
+                                      position: 'absolute',
+                                      bottom: '100%',
+                                      left: '50%',
+                                      transform: 'translateX(-50%)',
+                                      marginBottom: '8px',
+                                      backgroundColor: '#1f2937',
+                                      color: 'white',
+                                      padding: '8px 12px',
+                                      borderRadius: '6px',
+                                      fontSize: '12px',
+                                      whiteSpace: 'nowrap',
+                                      zIndex: 1000,
+                                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                                      maxWidth: '200px',
+                                      width: 'max-content'
+                                    }}
+                                  >
+                                    {rewards[rewardKey]}
+                                    {/* Tooltip arrow */}
+                                    <div
+                                      style={{
+                                        position: 'absolute',
+                                        top: '100%',
+                                        left: '50%',
+                                        transform: 'translateX(-50%)',
+                                        width: 0,
+                                        height: 0,
+                                        borderLeft: '6px solid transparent',
+                                        borderRight: '6px solid transparent',
+                                        borderTop: '6px solid #1f2937'
+                                      }}
+                                    />
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <svg
+                                width="28"
+                                height="28"
+                                viewBox="0 0 24 24"
+                                fill={isCompleted ? '#F97316' : 'none'}
+                                stroke="white"
+                                strokeWidth="2"
+                                style={{
+                                  filter: isCurrent ? 'drop-shadow(0 0 4px rgba(249, 115, 22, 0.6))' : 'none'
+                                }}
+                              >
+                                <polygon points="12,2 15,8.5 22,9.5 17,14.5 18,21.5 12,18 6,21.5 7,14.5 2,9.5 9,8.5" />
+                              </svg>
+                            )}
+                            <span style={{
+                              fontSize: '9px',
+                              fontWeight: isCurrent ? '700' : '500',
+                              color: '#1f2937',
+                              marginTop: '2px'
+                            }}>
+                              {level}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>

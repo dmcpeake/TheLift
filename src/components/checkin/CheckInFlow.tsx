@@ -354,34 +354,6 @@ export function CheckInFlow() {
     }
   }
 
-  // Progress bar component
-  const ProgressBar = () => {
-    return (
-      <>
-        {/* Progress header */}
-        <ProgressHeader
-          currentStep={currentStep}
-          completedData={completedData}
-          currentStepHasSelection={currentStepHasSelection}
-          emotionGridStep={emotionGridStep}
-          onNavigateToStep={handleNavigateToStep}
-          theoAnimation={theoAnimation}
-        />
-
-        {/* Close button positioned at vertical center right */}
-        <div className="fixed top-0 right-4 z-50 flex items-center" style={{ height: '80px' }}>
-          <button
-            onClick={() => navigate('/checkin/home')}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#1066c2] transition-colors shadow-lg"
-            style={{ backgroundColor: '#3a7ddc' }}
-          >
-            <X className="h-5 w-5 text-white" />
-          </button>
-        </div>
-      </>
-    )
-  }
-
   // Completion page
   if (currentStep === 'complete') {
     return (
@@ -1025,7 +997,30 @@ export function CheckInFlow() {
       `}</style>
 
       {/* Progress bar shows on all steps except garden */}
-      {currentStep !== 'garden' && <ProgressBar />}
+      {currentStep !== 'garden' && (
+        <>
+          {/* Progress header */}
+          <ProgressHeader
+            currentStep={currentStep}
+            completedData={completedData}
+            currentStepHasSelection={currentStepHasSelection}
+            emotionGridStep={emotionGridStep}
+            onNavigateToStep={handleNavigateToStep}
+            theoAnimation={theoAnimation}
+          />
+
+          {/* Close button positioned at vertical center right */}
+          <div className="fixed top-0 right-4 z-50 flex items-center" style={{ height: '80px' }}>
+            <button
+              onClick={() => navigate('/checkin/home')}
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#1066c2] transition-colors shadow-lg"
+              style={{ backgroundColor: '#3a7ddc' }}
+            >
+              <X className="h-5 w-5 text-white" />
+            </button>
+          </div>
+        </>
+      )}
 
       <div className="min-h-screen">
         {currentStep === 'mood' && (
