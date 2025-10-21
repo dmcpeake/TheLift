@@ -441,7 +441,7 @@ export function ChildSummaryAnalytics() {
       childIds.forEach(childId => {
         childWheelMap[childId] = wellbeingWheelData
           .filter(w => w.child_id === childId)
-          .slice(0, 10)
+          .slice(0, 15) // Increased from 10 to 15 to capture all 12 weeks
       })
 
       // Collect all wheel IDs we need sections for (batch optimization)
@@ -578,7 +578,7 @@ export function ChildSummaryAnalytics() {
       .select('id, child_id, session_id, completed_at, overall_score, started_at')
       .eq('child_id', childId)
       .order('completed_at', { ascending: false })
-      .limit(10)
+      .limit(15) // Increased from 10 to 15 to capture all 12 weeks of demo data
 
     if (wellbeingError) {
       console.error('Error loading wellbeing wheel data:', wellbeingError)
