@@ -50,7 +50,7 @@ export function WellbeingWheelHeatmap({ checkIns, selectedCheckInId, onCheckInSe
   const sortedCheckIns = [...checkIns]
     .filter(c => c.wellbeing_sections && c.wellbeing_sections.length > 0)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 10) // Show last 10 check-ins
+    .slice(0, 15) // Increased from 10 to 15 to show all 12 weeks of demo data
     .reverse() // Display oldest to newest (left to right)
 
   const handleColumnClick = (checkInId: string) => {

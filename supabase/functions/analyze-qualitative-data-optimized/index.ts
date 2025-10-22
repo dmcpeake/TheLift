@@ -255,33 +255,131 @@ serve(async (req) => {
     console.log(`Organization type: ${orgType}`)
     console.log(`Child name: ${childFirstName}`)
 
-    let promptTemplate = ''
+    // Inlined prompts (no external file dependencies)
+    const TEACHER_PROMPT = `You're {child_name}'s teacher looking at their Wellbeing Wheel check-ins from The Lift platform. You see them every day in class and want to understand their wellbeing journey across 7 key categories: Friends, Work/School, Health, Family, Fun & Play, Safety, and Emotions.
+
+Each check-in shows {child_name}'s self-reported scores (1-4 scale) and their own words about how they're experiencing each category over time.
+
+Looking at {child_name}'s wellbeing wheel data, help me understand:
+
+**How is {child_name} experiencing their wellbeing across different areas of life?**
+What patterns do you notice across the 7 categories (Friends, Work/School, Health, Family, Fun & Play, Safety, Emotions)? Which areas are consistently strong? Which areas show challenges or declining trends? How do these different areas connect and influence each other?
+
+**How can I best support {child_name}'s learning needs based on their wellbeing categories?**
+Looking at their Work/School category scores and comments, what patterns emerge? How do other categories (Family, Friends, Health, Emotions) impact their ability to engage with learning? What adjustments or approaches might help them based on what they're telling us across all 7 areas?
+
+**What person-centered support does {child_name} need?**
+- Based on their Safety and Emotions categories, what classroom environment adjustments might help them feel more secure?
+- What do their Friends category responses tell us about social support needs?
+- How can their Family and Health categories inform our whole-child approach?
+- Which positive patterns in their Fun & Play responses show us what brings them joy and engagement?
+- What classroom modifications or reasonable adjustments might benefit them (in line with the Equality Act 2010)?
+- How can I collaborate with parents/carers and our SENCO, using insights from all 7 categories?
+- If {child_name} has an EHCP or is receiving SEN Support, how do their wellbeing wheel patterns align with their outcomes?
+
+**What are {child_name}'s strengths and successful strategies?**
+Which wellbeing categories consistently score well? What does {child_name} say in their own words about what's working? What natural abilities, interests, or coping strategies emerge from their responses? How can I build on these strengths to support areas showing lower scores?
+
+Please focus on strengths-based, person-centered approaches that respect {child_name}'s individual needs. Reference specific wellbeing categories (Friends, Work/School, Health, Family, Fun & Play, Safety, Emotions) in your analysis to show how different areas of their life connect and inform support strategies.`
+
+    const CLINIC_PROMPT = `Review {child_name}'s Wellbeing Wheel check-ins to understand their emotional and psychological wellbeing from a therapeutic perspective. The Wellbeing Wheel tracks 7 key life areas (Friends, Work/School, Health, Family, Fun & Play, Safety, Emotions) with both quantitative scores (1-4 scale) and {child_name}'s own words about their experiences over time.
+
+This between-session data provides valuable insights into their daily experiences, therapeutic progress, and how different areas of their life interconnect.
+
+**Person-Centered Clinical Focus:**
+1. Patterns across all 7 wellbeing categories and how they interact
+2. Emotional regulation as reflected in the Emotions category and its relationship to other areas
+3. Social-emotional development visible in Friends, Family, and Safety categories
+4. Areas showing consistent strength or declining patterns
+5. {child_name}'s own narrative through their text responses
+6. Protective factors and natural support systems emerging from their responses
+7. Collaborative treatment approaches that build on their strengths across all categories
+
+**Strengths-Based Assessment Across Wellbeing Categories:**
+- **Emotions**: What emotional regulation skills is {child_name} developing? How are they expressing their inner experience?
+- **Friends**: What social connection patterns emerge? Which relationships support their wellbeing?
+- **Family**: How do family dynamics influence their overall wellbeing? What family strengths can we build on?
+- **Safety**: How secure does {child_name} feel? What environmental factors support their sense of safety?
+- **Work/School**: How is their engagement with learning and achievement? How do other categories impact this?
+- **Health**: What physical wellbeing patterns appear? How does health interconnect with emotional wellbeing?
+- **Fun & Play**: What brings {child_name} joy? How are they maintaining activities that support resilience?
+- **Cross-Category Patterns**: How do scores and responses in one area predict or influence others? What holistic patterns emerge?
+
+Please use person-first language, focus on {child_name}'s individual strengths and needs, and consider how their unique neurodiversity or personal characteristics can be supported rather than changed. Frame recommendations in terms of additional support and skill-building rather than deficit correction. Consider alignment with UK SEND frameworks, CAMHS pathways, and the SEND Code of Practice where relevant to {child_name}'s support needs.`
+
+    const HOSPITAL_PROMPT = `Review {child_name}'s Wellbeing Wheel check-ins within the context of their medical care and treatment. The Wellbeing Wheel tracks 7 key life areas (Friends, Work/School, Health, Family, Fun & Play, Safety, Emotions) with both quantitative scores (1-4 scale) and {child_name}'s own words about their experiences over time.
+
+Understanding how medical experiences impact all areas of their wellbeing supports holistic, child-centered healthcare.
+
+**Integrated Care Approach Across Wellbeing Categories:**
+1. How {child_name}'s Health category scores and comments reflect their medical journey
+2. How medical experiences influence their Emotions and Safety categories
+3. Social impact visible in Friends and Family categories during treatment
+4. Maintaining normalcy through Work/School and Fun & Play despite medical challenges
+5. Emotional resilience and coping strengths developing across all categories
+6. Family support patterns emerging from their responses
+7. Cross-category connections (e.g., how Health impacts Friends, or Safety influences Emotions)
+
+**Child-Centered Medical Considerations by Category:**
+- **Health**: How is {child_name} experiencing and describing their physical wellbeing? What language do they use?
+- **Emotions**: How are they processing the emotional aspects of medical treatment? What coping strategies emerge?
+- **Safety**: Do they feel secure in the medical environment? What would help them feel safer?
+- **Family**: How is family support showing up in their responses? What family strengths can we build on?
+- **Friends**: How is medical care impacting their social connections? How can we support peer relationships?
+- **Work/School**: Are they maintaining engagement with learning? What educational support do they need?
+- **Fun & Play**: What activities bring joy despite medical challenges? How can we protect this vital area?
+- **Holistic Patterns**: How do medical procedures or hospitalization impact scores across multiple categories? What strengths in one area support challenges in another?
+
+Please use person-first language, recognize {child_name} as a whole person beyond their medical needs, and focus on their strengths, preferences, and individual ways of coping. Consider how their unique characteristics (including any neurodivergent traits) can be accommodated in their medical care. Where relevant, consider alignment with NHS England's SEND standards, the Children and Young People's Mental Health Green Paper recommendations, and local integrated care pathways.
+
+**SPECIAL CLINICAL MONITORING - Nephrotic Syndrome:**
+For children with nephrotic syndrome (relapsing-remitting kidney condition where kidneys leak protein, causing swelling, fatigue, and infection risk), monitor for early warning signs of potential episodes. Many behavioral and emotional indicators appear BEFORE obvious physical symptoms:
+
+**Behavioral & Emotional Red Flags (may precede physical symptoms):**
+- **Fatigue/low energy**: References to being "tired", "need more sleep", "no energy", "feeling flat", "just want to rest"
+- **Irritability/mood swings**: Sudden emotional changes, increased frustration, more crying than usual
+- **Withdrawal patterns**: Avoiding friends, becoming quieter, not wanting to play, less social interaction
+- **Somatic complaints**: Tummy aches, headaches, general "feeling unwell" without specific symptoms
+- **Anticipatory anxiety**: Worry about testing (especially urine/protein tests), medical appointments, missing school/friends
+- **Difficulty concentrating**: Daydreaming, disengagement from usual activities, trouble focusing
+
+**Physical Symptom Indicators (in child's own language):**
+- **Swelling/edema references**: "puffy eyes", "tummy feels big", "ankles swollen", "face looks puffy"
+- **Urination concerns**: Frequent toilet visits, worry about "protein in wee", mentions of urine testing
+- **Pain/discomfort**: Abdominal pain, tummy hurts, general malaise
+
+**Pattern Recognition for Episode Detection:**
+- **Cluster detection**: Two or more behavioral indicators appearing across different wellbeing categories simultaneously
+- **Score patterns**: Declining scores in Health category PLUS declines in (Emotions OR Fun/Play OR Work/School)
+- **Relapse language**: Child mentions "flare up", "episode", "happening again", "feeling sick again"
+- **Activity impact**: Missing school, unable to play, withdrawal from previously enjoyed activities
+
+**If nephrotic syndrome indicators are detected, you MUST include this dedicated section in your analysis:**
+
+**⚠️ NEPHROTIC SYNDROME MONITORING**
+- List the specific warning signs you observed from {child_name}'s responses
+- Note which wellbeing categories show concerning patterns (with specific scores and quotes)
+- Identify whether this appears to be early warning signs or active episode
+- Recommend prompt urine protein testing and contact with nephrology team
+- Acknowledge {child_name}'s own awareness and coping strategies with their condition
+- Note any protective factors (family support, medical team trust, self-advocacy)
+
+This early detection approach helps catch episodes 24-48 hours before major physical symptoms appear, reducing emergency presentations and supporting {child_name}'s ability to recognize and manage their condition.`
+
     const promptMap: Record<string, string> = {
-      'school': 'teacher',
-      'clinic': 'clinic',
-      'hospital': 'hospital'
+      'school': TEACHER_PROMPT,
+      'clinic': CLINIC_PROMPT,
+      'hospital': HOSPITAL_PROMPT
     }
 
-    const promptFileName = promptMap[orgType] || 'teacher'
-    console.log(`Using prompt file: ${promptFileName}.md`)
+    let promptTemplate = promptMap[orgType] || TEACHER_PROMPT
+    console.log(`Using ${orgType} prompt template`)
 
-    try {
-      // Read the appropriate prompt file
-      const decoder = new TextDecoder('utf-8')
-      const promptPath = new URL(`./prompts/${promptFileName}.md`, import.meta.url)
-      const promptFile = await Deno.readFile(promptPath)
-      promptTemplate = decoder.decode(promptFile)
-
-      // Replace placeholders with actual child name
-      promptTemplate = promptTemplate
-        .replace(/\{child_name\}/g, childFirstName)
-        .replace(/\[CHILD'S FIRST NAME\]/g, childFirstName)
-        .replace(/\[CHILD'S NAME\]/g, childFirstName)
-    } catch (error) {
-      console.error('Error loading prompt template:', error)
-      // Fallback to generic prompt
-      promptTemplate = `Analyze this child's wellbeing data and provide insights about their emotional state and support needs.`
-    }
+    // Replace placeholders with actual child name
+    promptTemplate = promptTemplate
+      .replace(/\{child_name\}/g, childFirstName)
+      .replace(/\[CHILD'S FIRST NAME\]/g, childFirstName)
+      .replace(/\[CHILD'S NAME\]/g, childFirstName)
 
     // OPTIMIZATION 4: Role-specific system prompt
     const systemPromptMap: Record<string, string> = {
@@ -356,7 +454,7 @@ IMPORTANT INSTRUCTIONS:
         },
         debug: {
           orgType,
-          promptFile: promptFileName,
+          promptType: orgType === 'hospital' ? 'HOSPITAL_PROMPT' : orgType === 'clinic-private' ? 'CLINIC_PROMPT' : 'TEACHER_PROMPT',
           childName: childFirstName,
           systemPromptType: orgType,
           timestamp: new Date().toISOString()
