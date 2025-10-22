@@ -366,23 +366,23 @@ For children with nephrotic syndrome (relapsing-remitting kidney condition where
 
 This early detection approach helps catch episodes 24-48 hours before major physical symptoms appear, reducing emergency presentations and supporting {child_name}'s ability to recognize and manage their condition.`
 
+    // Check if this is Aisha Patel BEFORE building prompt (need to do this earlier)
+    const isAishaPatel = childFirstName === 'Aisha'
+
     const promptMap: Record<string, string> = {
       'school': TEACHER_PROMPT,
       'clinic': CLINIC_PROMPT,
-      'hospital': HOSPITAL_PROMPT
+      'hospital': isAishaPatel ? HOSPITAL_PROMPT : HOSPITAL_PROMPT.split('**SPECIAL CLINICAL MONITORING')[0] // Only include nephrotic monitoring for Aisha
     }
 
     let promptTemplate = promptMap[orgType] || TEACHER_PROMPT
-    console.log(`Using ${orgType} prompt template`)
+    console.log(`Using ${orgType} prompt template, isAishaPatel: ${isAishaPatel}`)
 
     // Replace placeholders with actual child name
     promptTemplate = promptTemplate
       .replace(/\{child_name\}/g, childFirstName)
       .replace(/\[CHILD'S FIRST NAME\]/g, childFirstName)
       .replace(/\[CHILD'S NAME\]/g, childFirstName)
-
-    // Check if this is Aisha Patel (nephrotic syndrome patient)
-    const isAishaPatel = childFirstName === 'Aisha'
 
     // OPTIMIZATION 4: Role-specific system prompt
     const systemPromptMap: Record<string, string> = {
@@ -410,10 +410,10 @@ IMPORTANT INSTRUCTIONS:
    **RED FLAGS & EARLY WARNING SIGNS**
    **STRENGTHS & PROTECTIVE FACTORS**
    **SUPPORT RECOMMENDATIONS**
-   ${isAishaPatel ? '**⚠️ NEPHROTIC SYNDROME MONITORING** (if indicators detected)' : ''}
+   ${isAishaPatel ? '**⚠️ NEPHROTIC SYNDROME MONITORING** (ONLY include if you find actual warning signs in her responses)' : ''}
 3. Use bullet points (- ) for lists within each section
 4. Write as if you're speaking directly about ${childFirstName}, not "the student" or "this child"
-5. ${isAishaPatel ? `For ${childFirstName}: She has nephrotic syndrome. If you detect ANY nephrotic syndrome warning signs (fatigue, mood changes, withdrawal, swelling mentions, tummy/puffy complaints, anxiety about testing), you MUST include the dedicated nephrotic monitoring section with specific quotes and scores from their responses.` : ''}`
+5. ${isAishaPatel ? `CRITICAL for ${childFirstName}: She has nephrotic syndrome. Review her responses for ACTUAL warning signs (puffy tummy/eyes, extreme fatigue, flare-up mentions, wee test anxiety). If you find these in her text responses, include the **⚠️ NEPHROTIC SYNDROME MONITORING** section with specific quotes. If you do NOT find warning signs, DO NOT include this section at all.` : ''}`
 
     // Call Claude API with sufficient tokens for structured response
     const message = await anthropic.messages.create({
