@@ -381,13 +381,16 @@ This early detection approach helps catch episodes 24-48 hours before major phys
       .replace(/\[CHILD'S FIRST NAME\]/g, childFirstName)
       .replace(/\[CHILD'S NAME\]/g, childFirstName)
 
+    // Check if this is Aisha Patel (nephrotic syndrome patient)
+    const isAishaPatel = childFirstName === 'Aisha'
+
     // OPTIMIZATION 4: Role-specific system prompt
     const systemPromptMap: Record<string, string> = {
       'school': `You are an experienced primary school teacher analyzing ${childFirstName}'s emotional wellbeing data. Always refer to the student by name (${childFirstName}) rather than "the student" or "this child". Focus on classroom-relevant insights, learning impacts, and practical teaching strategies. Use teacher-appropriate language, not clinical terminology.`,
       'clinic': `You are a child mental health practitioner reviewing ${childFirstName}'s inter-session wellbeing data. Always refer to the child by name (${childFirstName}). Provide clinical insights about emotional regulation, therapeutic progress, and treatment recommendations.`,
-      'hospital': `You are a pediatric physician reviewing ${childFirstName}'s emotional wellbeing during medical treatment. Always refer to your patient by name (${childFirstName}). Focus on the medical-psychological connection and how to support emotional healing alongside physical recovery.
+      'hospital': `You are a pediatric physician reviewing ${childFirstName}'s emotional wellbeing during medical treatment. Always refer to your patient by name (${childFirstName}). Focus on the medical-psychological connection and how to support emotional healing alongside physical recovery.${isAishaPatel ? `
 
-CRITICAL - Nephrotic Syndrome Monitoring: If you detect relapsing-remitting patterns with fatigue, mood changes, withdrawal, or physical complaints (swelling, puffy eyes/tummy, tummy aches, anxiety about testing), assess for potential nephrotic syndrome episode and flag immediately for clinical review using the dedicated monitoring section format.`
+CRITICAL - Nephrotic Syndrome Monitoring: ${childFirstName} has nephrotic syndrome (relapsing-remitting kidney condition). If you detect relapsing-remitting patterns with fatigue, mood changes, withdrawal, or physical complaints (swelling, puffy eyes/tummy, tummy aches, anxiety about testing), assess for potential nephrotic syndrome episode and flag immediately for clinical review using the dedicated monitoring section format.` : ''}`
     }
 
     let systemPrompt = systemPromptMap[orgType] || systemPromptMap['school']
@@ -407,10 +410,10 @@ IMPORTANT INSTRUCTIONS:
    **RED FLAGS & EARLY WARNING SIGNS**
    **STRENGTHS & PROTECTIVE FACTORS**
    **SUPPORT RECOMMENDATIONS**
-   ${orgType === 'hospital' ? '**⚠️ NEPHROTIC SYNDROME MONITORING** (if indicators detected)' : ''}
+   ${isAishaPatel ? '**⚠️ NEPHROTIC SYNDROME MONITORING** (if indicators detected)' : ''}
 3. Use bullet points (- ) for lists within each section
 4. Write as if you're speaking directly about ${childFirstName}, not "the student" or "this child"
-5. ${orgType === 'hospital' ? 'For hospital patients: If you detect ANY nephrotic syndrome warning signs (fatigue, mood changes, withdrawal, swelling mentions, tummy complaints, anxiety about testing), you MUST include the dedicated nephrotic monitoring section with specific quotes and scores from their responses.' : ''}`
+5. ${isAishaPatel ? `For ${childFirstName}: She has nephrotic syndrome. If you detect ANY nephrotic syndrome warning signs (fatigue, mood changes, withdrawal, swelling mentions, tummy/puffy complaints, anxiety about testing), you MUST include the dedicated nephrotic monitoring section with specific quotes and scores from their responses.` : ''}`
 
     // Call Claude API with sufficient tokens for structured response
     const message = await anthropic.messages.create({

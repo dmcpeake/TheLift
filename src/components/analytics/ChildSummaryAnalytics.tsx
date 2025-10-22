@@ -703,8 +703,18 @@ export function ChildSummaryAnalytics() {
           recommendations: extractBulletPoints(analysis, 'SUPPORT RECOMMENDATIONS') ||
                            extractBulletPoints(analysis, 'Recommendations') ||
                            extractBulletPoints(analysis, 'IMMEDIATE ACTION REQUIRED'),
-          nephroticMonitoring: extractBulletPoints(analysis, 'NEPHROTIC SYNDROME MONITORING') ||
-                               extractBulletPoints(analysis, '⚠️ NEPHROTIC SYNDROME MONITORING'),
+          nephroticMonitoring: (() => {
+            const extracted = extractBulletPoints(analysis, 'NEPHROTIC SYNDROME MONITORING') ||
+                             extractBulletPoints(analysis, '⚠️ NEPHROTIC SYNDROME MONITORING')
+            // Filter out "no indicators" messages - only return if actual warnings detected
+            if (!extracted || extracted.length === 0) return undefined
+            const hasActualWarnings = extracted.some(item =>
+              !item.toLowerCase().includes('no clear indicators') &&
+              !item.toLowerCase().includes('no indicators') &&
+              !item.toLowerCase().includes('do not raise immediate concerns')
+            )
+            return hasActualWarnings ? extracted : undefined
+          })(),
           lastAnalyzed: new Date().toLocaleDateString()
         }
 
@@ -778,8 +788,18 @@ export function ChildSummaryAnalytics() {
           recommendations: extractBulletPoints(analysis, 'SUPPORT RECOMMENDATIONS') ||
                            extractBulletPoints(analysis, 'Recommendations') ||
                            extractBulletPoints(analysis, 'IMMEDIATE ACTION REQUIRED'),
-          nephroticMonitoring: extractBulletPoints(analysis, 'NEPHROTIC SYNDROME MONITORING') ||
-                               extractBulletPoints(analysis, '⚠️ NEPHROTIC SYNDROME MONITORING'),
+          nephroticMonitoring: (() => {
+            const extracted = extractBulletPoints(analysis, 'NEPHROTIC SYNDROME MONITORING') ||
+                             extractBulletPoints(analysis, '⚠️ NEPHROTIC SYNDROME MONITORING')
+            // Filter out "no indicators" messages - only return if actual warnings detected
+            if (!extracted || extracted.length === 0) return undefined
+            const hasActualWarnings = extracted.some(item =>
+              !item.toLowerCase().includes('no clear indicators') &&
+              !item.toLowerCase().includes('no indicators') &&
+              !item.toLowerCase().includes('do not raise immediate concerns')
+            )
+            return hasActualWarnings ? extracted : undefined
+          })(),
           lastAnalyzed: new Date().toLocaleDateString()
         }
 
@@ -1524,6 +1544,35 @@ export function ChildSummaryAnalytics() {
 
                               return (
                             <div className="space-y-4">
+                            {/* Nephrotic Syndrome Monitoring - URGENT - Show FIRST if detected */}
+                            {currentInsights && currentInsights.nephroticMonitoring && currentInsights.nephroticMonitoring!.length > 0 && (
+                              <div className="bg-red-50 p-4 rounded-lg border-2 border-red-500 shadow-lg">
+                                <h5 className="font-bold text-red-900 mb-3 flex items-center text-base">
+                                  <AlertCircle className="h-5 w-5 mr-2 animate-pulse" />
+                                  ⚠️ NEPHROTIC SYNDROME MONITORING
+                                </h5>
+                                <div className="bg-white p-3 rounded border border-red-200 mb-3">
+                                  <p className="text-xs font-semibold text-red-800 mb-1">
+                                    🩺 CLINICAL ALERT - Early warning signs detected
+                                  </p>
+                                </div>
+                                <ul className="space-y-2">
+                                  {currentInsights.nephroticMonitoring!.map((item, idx) => (
+                                    <li key={idx} className="text-sm text-red-900 flex items-start bg-white p-2 rounded border border-red-100">
+                                      <span className="mr-2 font-bold text-red-600">•</span>
+                                      <span className="font-medium">{item}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                                <div className="mt-3 pt-3 border-t border-red-200">
+                                  <p className="text-xs font-semibold text-red-800 flex items-center">
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    Action Required: Prompt urine protein testing + nephrology team contact
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+
                             {/* Summary */}
                             {currentInsights && (
                             <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -1595,35 +1644,6 @@ export function ChildSummaryAnalytics() {
                                 return <p className="text-sm text-gray-700">{summary}</p>
                               })()}
                             </div>
-                            )}
-
-                            {/* Nephrotic Syndrome Monitoring - Urgent Clinical Alert */}
-                            {currentInsights && currentInsights.nephroticMonitoring && currentInsights.nephroticMonitoring!.length > 0 && (
-                              <div className="bg-red-50 p-4 rounded-lg border-2 border-red-500 shadow-lg">
-                                <h5 className="font-bold text-red-900 mb-3 flex items-center text-base">
-                                  <AlertCircle className="h-5 w-5 mr-2 animate-pulse" />
-                                  ⚠️ NEPHROTIC SYNDROME MONITORING
-                                </h5>
-                                <div className="bg-white p-3 rounded border border-red-200 mb-3">
-                                  <p className="text-xs font-semibold text-red-800 mb-1">
-                                    🩺 CLINICAL ALERT - Early warning signs detected
-                                  </p>
-                                </div>
-                                <ul className="space-y-2">
-                                  {currentInsights.nephroticMonitoring!.map((item, idx) => (
-                                    <li key={idx} className="text-sm text-red-900 flex items-start bg-white p-2 rounded border border-red-100">
-                                      <span className="mr-2 font-bold text-red-600">•</span>
-                                      <span className="font-medium">{item}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                                <div className="mt-3 pt-3 border-t border-red-200">
-                                  <p className="text-xs font-semibold text-red-800 flex items-center">
-                                    <Clock className="h-3 w-3 mr-1" />
-                                    Action Required: Prompt urine protein testing + nephrology team contact
-                                  </p>
-                                </div>
-                              </div>
                             )}
 
                             {/* Concerns */}

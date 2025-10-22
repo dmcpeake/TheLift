@@ -256,9 +256,11 @@ All prompts use:
 The AI analysis system includes specialized monitoring for nephrotic syndrome, a relapsing-remitting kidney condition where early detection is clinically valuable.
 
 **Implementation**:
-- Enhanced [hospital.md](supabase/functions/analyze-qualitative-data-optimized/prompts/hospital.md) prompt with nephrotic syndrome detection guidelines
+- Edge function checks if child is Aisha Patel (`childFirstName === 'Aisha'`) before activating nephrotic monitoring
+- HOSPITAL_PROMPT includes nephrotic syndrome detection guidelines (inlined in index.ts)
 - AI trained to recognize behavioral/emotional early warning signs that appear 24-48 hours before obvious physical symptoms
 - Aisha Patel's test data includes nephrotic-specific language and two documented flare-up periods (Week 2, Week 7)
+- **IMPORTANT**: Nephrotic monitoring is ONLY active for Aisha - not Emma Thompson (trauma recovery) or Sophia Chen (general hospital patient)
 
 **Detection Criteria**:
 - **Behavioral indicators**: Fatigue, irritability, withdrawal, somatic complaints, anticipatory anxiety, difficulty concentrating
