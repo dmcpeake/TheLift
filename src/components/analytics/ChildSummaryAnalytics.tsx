@@ -706,14 +706,18 @@ export function ChildSummaryAnalytics() {
           nephroticMonitoring: (() => {
             const extracted = extractBulletPoints(analysis, 'NEPHROTIC SYNDROME MONITORING') ||
                              extractBulletPoints(analysis, '⚠️ NEPHROTIC SYNDROME MONITORING')
-            // Filter out "no indicators" messages - only return if actual warnings detected
+
+            // Filter out "no indicators" messages - check the FIRST bullet for negative language
             if (!extracted || extracted.length === 0) return undefined
-            const hasActualWarnings = extracted.some(item =>
-              !item.toLowerCase().includes('no clear indicators') &&
-              !item.toLowerCase().includes('no indicators') &&
-              !item.toLowerCase().includes('do not raise immediate concerns')
-            )
-            return hasActualWarnings ? extracted : undefined
+
+            const firstBullet = extracted[0].toLowerCase()
+            const isNegative = firstBullet.includes('no clear indicators') ||
+                              firstBullet.includes('no indicators') ||
+                              firstBullet.includes('do not raise immediate concerns') ||
+                              firstBullet.includes('there are no clear indicators') ||
+                              firstBullet.includes('no evidence of')
+
+            return isNegative ? undefined : extracted
           })(),
           lastAnalyzed: new Date().toLocaleDateString()
         }
@@ -795,20 +799,22 @@ export function ChildSummaryAnalytics() {
             console.log('🔍 DEBUG - Nephrotic Monitoring (Weekly):', {
               extracted,
               extractedLength: extracted?.length,
-              rawAnalysis: analysis.substring(0, 500)
+              firstBullet: extracted?.[0]
             })
 
-            // Filter out "no indicators" messages - only return if actual warnings detected
+            // Filter out "no indicators" messages - check the FIRST bullet for negative language
             if (!extracted || extracted.length === 0) return undefined
-            const hasActualWarnings = extracted.some(item =>
-              !item.toLowerCase().includes('no clear indicators') &&
-              !item.toLowerCase().includes('no indicators') &&
-              !item.toLowerCase().includes('do not raise immediate concerns')
-            )
 
-            console.log('🔍 DEBUG - Has actual warnings?', hasActualWarnings, extracted)
+            const firstBullet = extracted[0].toLowerCase()
+            const isNegative = firstBullet.includes('no clear indicators') ||
+                              firstBullet.includes('no indicators') ||
+                              firstBullet.includes('do not raise immediate concerns') ||
+                              firstBullet.includes('there are no clear indicators') ||
+                              firstBullet.includes('no evidence of')
 
-            return hasActualWarnings ? extracted : undefined
+            console.log('🔍 DEBUG - First bullet negative?', isNegative, extracted[0])
+
+            return isNegative ? undefined : extracted
           })(),
           lastAnalyzed: new Date().toLocaleDateString()
         }
