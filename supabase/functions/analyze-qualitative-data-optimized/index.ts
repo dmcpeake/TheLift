@@ -354,15 +354,21 @@ For children with nephrotic syndrome (relapsing-remitting kidney condition where
 - **Relapse language**: Child mentions "flare up", "episode", "happening again", "feeling sick again"
 - **Activity impact**: Missing school, unable to play, withdrawal from previously enjoyed activities
 
-**If nephrotic syndrome indicators are detected, you MUST include this dedicated section in your analysis:**
+**CRITICAL INSTRUCTION - Only include nephrotic monitoring section if actual warning signs found:**
+
+1. **First, carefully review {child_name}'s text responses** for the behavioral, emotional, and physical indicators listed above
+2. **If you find 2+ actual warning signs** in their responses (quotes mentioning fatigue, puffy tummy/eyes, flare-ups, etc.), include this section:
 
 **⚠️ NEPHROTIC SYNDROME MONITORING**
-- List the specific warning signs you observed from {child_name}'s responses
+- **FIRST BULLET MUST BE**: "Warning signs detected: [brief summary of what you found in {child_name}'s responses]"
+- List the specific quotes and warning signs from {child_name}'s actual responses
 - Note which wellbeing categories show concerning patterns (with specific scores and quotes)
 - Identify whether this appears to be early warning signs or active episode
 - Recommend prompt urine protein testing and contact with nephrology team
 - Acknowledge {child_name}'s own awareness and coping strategies with their condition
 - Note any protective factors (family support, medical team trust, self-advocacy)
+
+3. **If NO warning signs found** in {child_name}'s actual text responses, **DO NOT include the ⚠️ NEPHROTIC SYNDROME MONITORING section at all**. Do not include a generic symptom checklist.
 
 This early detection approach helps catch episodes 24-48 hours before major physical symptoms appear, reducing emergency presentations and supporting {child_name}'s ability to recognize and manage their condition.`
 
@@ -410,10 +416,10 @@ IMPORTANT INSTRUCTIONS:
    **RED FLAGS & EARLY WARNING SIGNS**
    **STRENGTHS & PROTECTIVE FACTORS**
    **SUPPORT RECOMMENDATIONS**
-   ${isAishaPatel ? '**⚠️ NEPHROTIC SYNDROME MONITORING** (ONLY include if you find actual warning signs in her responses)' : ''}
+   ${isAishaPatel ? '**⚠️ NEPHROTIC SYNDROME MONITORING** (ONLY if actual warning signs found - see instruction #5 below)' : ''}
 3. Use bullet points (- ) for lists within each section
 4. Write as if you're speaking directly about ${childFirstName}, not "the student" or "this child"
-5. ${isAishaPatel ? `CRITICAL for ${childFirstName}: She has nephrotic syndrome. Review her responses for ACTUAL warning signs (puffy tummy/eyes, extreme fatigue, flare-up mentions, wee test anxiety). If you find these in her text responses, include the **⚠️ NEPHROTIC SYNDROME MONITORING** section with specific quotes. If you do NOT find warning signs, DO NOT include this section at all.` : ''}`
+5. ${isAishaPatel ? `CRITICAL INSTRUCTION for ${childFirstName}: She has nephrotic syndrome. You MUST carefully review her actual text responses first. If you find 2+ actual warning signs (quotes containing: puffy tummy/eyes, extreme fatigue, flare-up/episode mentions, wee/urine test anxiety, feeling unwell), then include the **⚠️ NEPHROTIC SYNDROME MONITORING** section starting with "Warning signs detected: [summary]". If you do NOT find these warning signs in her actual responses, COMPLETELY OMIT the nephrotic section - do NOT include a generic symptom checklist.` : ''}`
 
     // Call Claude API with sufficient tokens for structured response
     const message = await anthropic.messages.create({

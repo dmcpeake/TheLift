@@ -711,8 +711,18 @@ export function ChildSummaryAnalytics() {
             if (!extracted || extracted.length === 0) return undefined
 
             const firstBullet = extracted[0].toLowerCase()
+
+            // If it explicitly says "warning signs detected", always show it
+            if (firstBullet.includes('warning signs detected')) {
+              return extracted
+            }
+
+            // Otherwise check for negative phrases
             const isNegative = firstBullet.includes('no clear indicators') ||
                               firstBullet.includes('no indicators') ||
+                              firstBullet.includes('no nephrotic') ||
+                              firstBullet.includes('no warning signs') ||
+                              firstBullet.includes('were not detected') ||
                               firstBullet.includes('do not contain') ||
                               firstBullet.includes('does not contain') ||
                               firstBullet.includes('do not raise immediate concerns') ||
@@ -809,8 +819,19 @@ export function ChildSummaryAnalytics() {
             if (!extracted || extracted.length === 0) return undefined
 
             const firstBullet = extracted[0].toLowerCase()
+
+            // If it explicitly says "warning signs detected", always show it
+            if (firstBullet.includes('warning signs detected')) {
+              console.log('✅ WARNING SIGNS DETECTED - Showing nephrotic card')
+              return extracted
+            }
+
+            // Otherwise check for negative phrases
             const isNegative = firstBullet.includes('no clear indicators') ||
                               firstBullet.includes('no indicators') ||
+                              firstBullet.includes('no nephrotic') ||
+                              firstBullet.includes('no warning signs') ||
+                              firstBullet.includes('were not detected') ||
                               firstBullet.includes('do not contain') ||
                               firstBullet.includes('does not contain') ||
                               firstBullet.includes('do not raise immediate concerns') ||

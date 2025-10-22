@@ -272,13 +272,16 @@ The AI analysis system includes specialized monitoring for nephrotic syndrome, a
 When nephrotic indicators detected, AI includes dedicated section:
 ```markdown
 **⚠️ NEPHROTIC SYNDROME MONITORING**
-- Specific warning signs observed from child's responses
+- **FIRST BULLET**: "Warning signs detected: [summary]" (required format for UI filtering)
+- Specific warning signs observed from child's responses (with quotes)
 - Wellbeing categories showing concerning patterns (scores + quotes)
 - Assessment: early warning signs vs. active episode
 - Recommendation: Prompt urine protein testing + nephrology contact
 - Child's awareness and coping strategies
 - Protective factors (family support, medical team trust)
 ```
+
+**CRITICAL**: AI must start section with "Warning signs detected:" for proper UI filtering. If NO warning signs found in child's responses, AI must COMPLETELY OMIT the nephrotic section (not include generic checklist).
 
 **Clinical Value**:
 - **Early detection**: Catches episodes before major physical symptoms
