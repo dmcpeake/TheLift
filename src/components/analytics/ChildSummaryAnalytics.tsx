@@ -791,6 +791,13 @@ export function ChildSummaryAnalytics() {
           nephroticMonitoring: (() => {
             const extracted = extractBulletPoints(analysis, 'NEPHROTIC SYNDROME MONITORING') ||
                              extractBulletPoints(analysis, '⚠️ NEPHROTIC SYNDROME MONITORING')
+
+            console.log('🔍 DEBUG - Nephrotic Monitoring (Weekly):', {
+              extracted,
+              extractedLength: extracted?.length,
+              rawAnalysis: analysis.substring(0, 500)
+            })
+
             // Filter out "no indicators" messages - only return if actual warnings detected
             if (!extracted || extracted.length === 0) return undefined
             const hasActualWarnings = extracted.some(item =>
@@ -798,6 +805,9 @@ export function ChildSummaryAnalytics() {
               !item.toLowerCase().includes('no indicators') &&
               !item.toLowerCase().includes('do not raise immediate concerns')
             )
+
+            console.log('🔍 DEBUG - Has actual warnings?', hasActualWarnings, extracted)
+
             return hasActualWarnings ? extracted : undefined
           })(),
           lastAnalyzed: new Date().toLocaleDateString()
