@@ -712,16 +712,12 @@ export function ChildSummaryAnalytics() {
 
             const firstBullet = extracted[0].toLowerCase()
 
-            // If it explicitly says "warning signs detected", always show it
-            if (firstBullet.includes('warning signs detected')) {
-              return extracted
-            }
-
-            // Otherwise check for negative phrases
-            const isNegative = firstBullet.includes('no clear indicators') ||
+            // Check for negative phrases FIRST (including "[NO WARNING SIGNS DETECTED]")
+            const isNegative = firstBullet.includes('[no warning signs') ||
+                              firstBullet.includes('no warning signs detected') ||
+                              firstBullet.includes('no clear indicators') ||
                               firstBullet.includes('no indicators') ||
                               firstBullet.includes('no nephrotic') ||
-                              firstBullet.includes('no warning signs') ||
                               firstBullet.includes('were not detected') ||
                               firstBullet.includes('do not contain') ||
                               firstBullet.includes('does not contain') ||
@@ -730,7 +726,18 @@ export function ChildSummaryAnalytics() {
                               firstBullet.includes('no evidence of') ||
                               firstBullet.includes('not suggest')
 
-            return isNegative ? undefined : extracted
+            if (isNegative) {
+              return undefined
+            }
+
+            // If it explicitly says "warning signs detected:" (with colon or quotes), always show it
+            if (firstBullet.includes('warning signs detected:') ||
+                (firstBullet.includes('warning signs detected') && firstBullet.includes('"'))) {
+              return extracted
+            }
+
+            // If we got here, it's ambiguous - don't show it
+            return undefined
           })(),
           lastAnalyzed: new Date().toLocaleDateString()
         }
@@ -820,17 +827,12 @@ export function ChildSummaryAnalytics() {
 
             const firstBullet = extracted[0].toLowerCase()
 
-            // If it explicitly says "warning signs detected", always show it
-            if (firstBullet.includes('warning signs detected')) {
-              console.log('✅ WARNING SIGNS DETECTED - Showing nephrotic card')
-              return extracted
-            }
-
-            // Otherwise check for negative phrases
-            const isNegative = firstBullet.includes('no clear indicators') ||
+            // Check for negative phrases FIRST (including "[NO WARNING SIGNS DETECTED]")
+            const isNegative = firstBullet.includes('[no warning signs') ||
+                              firstBullet.includes('no warning signs detected') ||
+                              firstBullet.includes('no clear indicators') ||
                               firstBullet.includes('no indicators') ||
                               firstBullet.includes('no nephrotic') ||
-                              firstBullet.includes('no warning signs') ||
                               firstBullet.includes('were not detected') ||
                               firstBullet.includes('do not contain') ||
                               firstBullet.includes('does not contain') ||
@@ -839,9 +841,21 @@ export function ChildSummaryAnalytics() {
                               firstBullet.includes('no evidence of') ||
                               firstBullet.includes('not suggest')
 
-            console.log('🔍 DEBUG - First bullet negative?', isNegative, extracted[0])
+            if (isNegative) {
+              console.log('🔍 DEBUG - First bullet negative?', true, extracted[0])
+              return undefined
+            }
 
-            return isNegative ? undefined : extracted
+            // If it explicitly says "warning signs detected:" (with colon or quotes), always show it
+            if (firstBullet.includes('warning signs detected:') ||
+                (firstBullet.includes('warning signs detected') && firstBullet.includes('"'))) {
+              console.log('✅ WARNING SIGNS DETECTED - Showing nephrotic card')
+              return extracted
+            }
+
+            // If we got here, it's ambiguous - don't show it
+            console.log('⚠️ AMBIGUOUS - No clear positive or negative indicator, hiding card')
+            return undefined
           })(),
           lastAnalyzed: new Date().toLocaleDateString()
         }
