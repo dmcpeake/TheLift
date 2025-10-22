@@ -407,13 +407,15 @@ IMPORTANT INSTRUCTIONS:
    **RED FLAGS & EARLY WARNING SIGNS**
    **STRENGTHS & PROTECTIVE FACTORS**
    **SUPPORT RECOMMENDATIONS**
+   ${orgType === 'hospital' ? '**⚠️ NEPHROTIC SYNDROME MONITORING** (if indicators detected)' : ''}
 3. Use bullet points (- ) for lists within each section
-4. Write as if you're speaking directly about ${childFirstName}, not "the student" or "this child"`
+4. Write as if you're speaking directly about ${childFirstName}, not "the student" or "this child"
+5. ${orgType === 'hospital' ? 'For hospital patients: If you detect ANY nephrotic syndrome warning signs (fatigue, mood changes, withdrawal, swelling mentions, tummy complaints, anxiety about testing), you MUST include the dedicated nephrotic monitoring section with specific quotes and scores from their responses.' : ''}`
 
     // Call Claude API with sufficient tokens for structured response
     const message = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307', // Use Haiku for cost efficiency
-      max_tokens: 1000, // Increased for complete structured response
+      max_tokens: 2500, // Sufficient for complete structured response with all sections including nephrotic monitoring
       temperature: 0.7,
       system: systemPrompt,
       messages: [
