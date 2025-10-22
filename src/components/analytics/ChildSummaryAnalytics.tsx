@@ -713,9 +713,12 @@ export function ChildSummaryAnalytics() {
             const firstBullet = extracted[0].toLowerCase()
             const isNegative = firstBullet.includes('no clear indicators') ||
                               firstBullet.includes('no indicators') ||
+                              firstBullet.includes('do not contain') ||
+                              firstBullet.includes('does not contain') ||
                               firstBullet.includes('do not raise immediate concerns') ||
                               firstBullet.includes('there are no clear indicators') ||
-                              firstBullet.includes('no evidence of')
+                              firstBullet.includes('no evidence of') ||
+                              firstBullet.includes('not suggest')
 
             return isNegative ? undefined : extracted
           })(),
@@ -808,9 +811,12 @@ export function ChildSummaryAnalytics() {
             const firstBullet = extracted[0].toLowerCase()
             const isNegative = firstBullet.includes('no clear indicators') ||
                               firstBullet.includes('no indicators') ||
+                              firstBullet.includes('do not contain') ||
+                              firstBullet.includes('does not contain') ||
                               firstBullet.includes('do not raise immediate concerns') ||
                               firstBullet.includes('there are no clear indicators') ||
-                              firstBullet.includes('no evidence of')
+                              firstBullet.includes('no evidence of') ||
+                              firstBullet.includes('not suggest')
 
             console.log('🔍 DEBUG - First bullet negative?', isNegative, extracted[0])
 
