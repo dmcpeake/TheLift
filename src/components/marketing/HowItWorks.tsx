@@ -445,10 +445,6 @@ export function HowItWorks() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-gray-600" />
-                    <span className="text-gray-700">ISO 27001 certified infrastructure</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-gray-600" />
                     <span className="text-gray-700">GDPR compliant data processing</span>
                   </div>
                   <div className="flex items-center gap-3">

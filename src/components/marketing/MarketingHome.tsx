@@ -1052,18 +1052,6 @@ export function MarketingHome() {
                     <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
                       <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
-                    <span className="text-gray-700" style={{ fontSize: '20px' }}>ISO 27001 certified infrastructure</span>
-                  </div>
-                  {/* Dashed Divider */}
-                  <div style={{ 
-                    width: '100%', 
-                    height: '1px',
-                    backgroundImage: 'repeating-linear-gradient(to right, #cccccc 0, #cccccc 4px, transparent 4px, transparent 8px)'
-                  }}></div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: '#da836d' }}>
-                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
-                    </div>
                     <span className="text-gray-700" style={{ fontSize: '20px' }}>GDPR compliant data processing</span>
                   </div>
                   {/* Dashed Divider */}
